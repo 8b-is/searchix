@@ -8,7 +8,12 @@ in
       ];
     }
   )
-}: {
+}:
+{
+  css = pkgs.fetchurl {
+    inherit (sources.simple-css) url sha256;
+  };
+
   searchix = pkgs.buildGoApplication {
     pname = "searchix";
     version = "0.1";

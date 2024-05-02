@@ -1,6 +1,9 @@
 default:
 	@just --list --justfile {{ justfile() }} --unsorted
 
+prepare:
+	ln -sf $(nix-build --no-out-link -A css) frontend/static/style.css
+
 checkformat:
 	gofmt -d .
 	goimports -d .
@@ -15,5 +18,5 @@ fix:
 precommit:
 	nix-build -A pre-commit-check
 
-dev:
+dev: prepare
 	wgo run ./serve/ --live

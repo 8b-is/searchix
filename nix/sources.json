@@ -34,5 +34,18 @@
         "type": "tarball",
         "url": "https://github.com/NixOS/nixpkgs/archive/58a1abdbae3217ca6b702f03d3b35125d88a2994.tar.gz",
         "url_template": "https://github.com/<owner>/<repo>/archive/<rev>.tar.gz"
+    },
+    "simple-css": {
+        "branch": "main",
+        "description": "Mostly-reasonable HTML Styles.",
+        "homepage": "",
+        "owner": "kevquirk",
+        "repo": "simple.css",
+        "rev": "89787585fc44e6023f2b5e6f78a3e3ca8c60b10a",
+        "sha256": "1q35vvq932x3r02zycr2plfkzd8x5plzlwk71cl6gxpwvq26jhbx",
+        "type": "file",
+        "url": "https://raw.githubusercontent.com/kevquirk/simple.css/v2.3.0/simple.css",
+        "url_template": "https://raw.githubusercontent.com/<owner>/<repo>/v<version>/simple.css",
+        "version": "2.3.0"
     }
 }

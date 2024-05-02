@@ -29,6 +29,7 @@ pkgs.mkShell {
   ];
   shellHook = ''
     ${searchix.pre-commit-check.shellHook}
+    css=${searchix.css}/
   '';
   buildInputs = searchix.pre-commit-check.enabledPackages;
 }
