@@ -20,6 +20,7 @@ pkgs.mkShell {
   packages = with pkgs; [
     goEnv
 
+    wgo
     gomod2nix
     niv
     nixpkgs-lint

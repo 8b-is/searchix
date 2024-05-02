@@ -1,3 +1,33 @@
 schema = 3
 
 [mod]
+  [mod."github.com/ardanlabs/conf/v3"]
+    version = "v3.1.7"
+    hash = "sha256-7H53l0JN5Q6hkAgBivVQ8lFd03oNmP1IG8ihzLKm2CQ="
+  [mod."github.com/crewjam/csp"]
+    version = "v0.0.2"
+    hash = "sha256-4vlGmDdQjPiXmueCV51fJH/hRcG8eqhCi9TENCXjzfA="
+  [mod."github.com/getsentry/sentry-go"]
+    version = "v0.27.0"
+    hash = "sha256-PTkTzVNogqFA/5rc6INLY6RxK5uR1AoJFOO+pOPdE7Q="
+  [mod."github.com/google/go-cmp"]
+    version = "v0.6.0"
+    hash = "sha256-qgra5jze4iPGP0JSTVeY5qV5AvEnEu39LYAuUCIkMtg="
+  [mod."github.com/osdevisnot/sorvor"]
+    version = "v0.4.4"
+    hash = "sha256-BhyO7bvwxIdEV+c6Eo1uqahhcgsHiS8nJpg2aT8t+8s="
+  [mod."github.com/pelletier/go-toml/v2"]
+    version = "v2.2.1"
+    hash = "sha256-gmQ4CTz/MI97D3pYqU7mpxqo8gBTDccQ1Cp0lAMmJUc="
+  [mod."github.com/pkg/errors"]
+    version = "v0.9.1"
+    hash = "sha256-mNfQtcrQmu3sNg/7IwiieKWOgFQOVVe2yXgKBpe/wZw="
+  [mod."github.com/shengyanli1982/law"]
+    version = "v0.1.15"
+    hash = "sha256-Z5G3PtR7V0d04MN+kBge33Pv6VDjJryx+N7JGJkzfLQ="
+  [mod."golang.org/x/sys"]
+    version = "v0.19.0"
+    hash = "sha256-cmuL31TYLJmDm/fDnI2Sn0wB88cpdOHV1+urorsJWx4="
+  [mod."golang.org/x/text"]
+    version = "v0.14.0"
+    hash = "sha256-yh3B0tom1RfzQBf1RNmfdNWF1PtiqxV41jW1GVS6JAg="

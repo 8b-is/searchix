@@ -15,6 +15,7 @@
 !/README.md
 !/LICENSE
 !/justfile
+!/config.toml
 
 !/nix
 !*.nix
@@ -24,6 +25,10 @@
 !/go.mod
 !/gomod2nix.toml
 !*.go
+
+!*.tmpl
+!*.js
+!/frontend
 
 # ...even if they are in subdirectories
 !*/

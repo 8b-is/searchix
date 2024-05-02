@@ -1,0 +1,23 @@
+base_url = "https://searchix.alanpearce.eu"
+
+[content-security-policy]
+default-src = [
+  "'none'",
+]
+image-src = [
+  "'self'",
+  "http://gc.zgo.at",
+]
+script-src = [
+  "'self'",
+  "http://gc.zgo.at",
+]
+style-src = [
+  "'unsafe-inline'",
+]
+require-trusted-types-for = [
+  "'script'",
+]
+
+[headers]
+x-content-type-options = "nosniff"

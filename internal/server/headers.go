@@ -1,0 +1,17 @@
+package server
+
+import (
+	"net/http"
+	cfg "searchix/internal/config"
+)
+
+func AddHeadersMiddleware(next http.Handler, config *cfg.Config) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		for h, v := range config.Headers {
+			w.Header().Add(h, v)
+		}
+		w.Header().Add("Content-Security-Policy", config.CSP.String())
+
+		next.ServeHTTP(w, r)
+	})
+}
