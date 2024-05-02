@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"html/template"
 	"io"
 	"log"
@@ -87,7 +88,8 @@ func New(runtimeConfig *Config) (*Server, error) {
 		Repanic: true,
 	})
 
-	tpl := template.Must(template.ParseGlob(path.Join("frontend", "templates", "*.tmpl")))
+	templatePaths := path.Join("frontend", "templates", "*.tmpl")
+	tpl := template.Must(template.ParseGlob(templatePaths))
 
 	top := http.NewServeMux()
 	mux := http.NewServeMux()
@@ -108,8 +110,24 @@ func New(runtimeConfig *Config) (*Server, error) {
 		applyDevModeOverrides(config)
 		liveReload := livereload.New()
 		liveReload.Start()
-		mux.Handle("/livereload", liveReload)
-		// liveReload.Reload()
+		top.Handle("/livereload", liveReload)
+		fw, err := NewFileWatcher()
+		if err != nil {
+			return nil, errors.WithMessage(err, "could not create file watcher")
+		}
+		err = fw.AddRecursive("frontend")
+		if err != nil {
+			return nil, errors.WithMessage(err, "could not add directory to file watcher")
+		}
+		go fw.Start(func() {
+			t, err := template.ParseGlob(path.Join("frontend", "templates", "*.tmpl"))
+			if err != nil {
+				slog.Error(fmt.Sprintf("could not parse template: %v", err))
+			} else {
+				tpl = t
+				liveReload.Reload()
+			}
+		})
 	}
 
 	var logWriter io.Writer

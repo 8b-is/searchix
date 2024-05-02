@@ -7,6 +7,9 @@ schema = 3
   [mod."github.com/crewjam/csp"]
     version = "v0.0.2"
     hash = "sha256-4vlGmDdQjPiXmueCV51fJH/hRcG8eqhCi9TENCXjzfA="
+  [mod."github.com/fsnotify/fsnotify"]
+    version = "v1.7.0"
+    hash = "sha256-MdT2rQyQHspPJcx6n9ozkLbsktIOJutOqDuKpNAtoZY="
   [mod."github.com/getsentry/sentry-go"]
     version = "v0.27.0"
     hash = "sha256-PTkTzVNogqFA/5rc6INLY6RxK5uR1AoJFOO+pOPdE7Q="

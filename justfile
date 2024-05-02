@@ -16,4 +16,4 @@ precommit:
 	nix-build -A pre-commit-check
 
 dev:
-	wgo run ./serve/
+	wgo run ./serve/ --live
