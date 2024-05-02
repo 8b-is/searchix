@@ -1,0 +1,23 @@
+---
+# yamllint disable-line rule:line-length
+# yaml-language-server: $schema=https://golangci-lint.run/jsonschema/golangci.jsonschema.json
+linters:
+    fast: false
+    enable:
+        - gocritic
+        - godox
+        - gosec
+        - grouper
+        - lll
+        - nilerr
+        - nilnil
+        - nlreturn
+        - noctx
+        - nosprintfhostport
+        - paralleltest
+        - prealloc
+        - reassign
+        - revive
+        - sloglint
+        - unconvert
+        - wrapcheck
