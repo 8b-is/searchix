@@ -1,0 +1,7 @@
+form {
+  display: flex;
+}
+
+input[type="search"] {
+  width: 100%;
+}

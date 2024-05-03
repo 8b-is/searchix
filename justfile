@@ -2,7 +2,7 @@ default:
 	@just --list --justfile {{ justfile() }} --unsorted
 
 prepare:
-	ln -sf $(nix-build --no-out-link -A css) frontend/static/style.css
+	ln -sf $(nix-build --no-out-link -A css) frontend/static/base.css
 
 checkformat:
 	gofmt -d .

@@ -1,12 +1,24 @@
 <!doctype html>
 <html lang="en-GB">
   <head>
-    <meta charset="UTF-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Searchix</title>
-    <link href="/static/style.css" rel="stylesheet"/>
+    <link href="/static/base.css" rel="stylesheet" />
+    <link href="/static/style.css" rel="stylesheet" />
   </head>
   <body>
-    <h1>Searchix</h1>
+    <header>
+      <h1>Searchix</h1>
+      <p>Search Nix Packages and options from NixOS, Darwin and Home-Manager</p>
+    </header>
+    <main>
+      <label for="query">Search </label>
+      <form>
+        <input id="query" name="query" type="search" value="" />
+        <button>Search</button>
+      </form>
+    </main>
     {{ .LiveReload }}
   </body>
 </html>

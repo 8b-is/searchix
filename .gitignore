@@ -22,3 +22,4 @@ go.work
 /.env
 /.envrc
 /.pre-commit-config.yaml
+/frontend/static/base.css
