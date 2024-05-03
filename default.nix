@@ -14,6 +14,10 @@ in
     inherit (sources.simple-css) url sha256;
   };
 
+  nixos-options = import (./. + "/importers/nixos-options.nix") {
+    inherit pkgs;
+  };
+
   searchix = pkgs.buildGoApplication {
     pname = "searchix";
     version = "0.1";
