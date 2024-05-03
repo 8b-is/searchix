@@ -1,34 +1,24 @@
-# Allowlisting gitignore template for GO projects prevents us
-# from adding various unwanted local files, such as generated
-# files, developer configurations or IDE-specific files etc.
-#
-# Recommended: Go.AllowList.gitignore
+### https://raw.github.com/github/gitignore/4488915eec0b3a45b5c63ead28f286819c0917de/Go.gitignore
 
-# Ignore everything
-*
+# Binaries for programs and plugins
+/*
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+!*.*
+!/**/
 
-# But not these files...
-!/.gitignore
-!/.editorconfig
-!/.envrc.sample
+# Test binary, built with `go test -c`
+*.test
 
-!/README.md
-!/LICENSE
-!/justfile
-!/config.toml
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
 
-!/nix
-!*.nix
+# Go workspace file
+go.work
 
-!/.golangci.yaml
-!/go.sum
-!/go.mod
-!/gomod2nix.toml
-!*.go
-
-!*.tmpl
-!*.js
-!/frontend
-
-# ...even if they are in subdirectories
-!*/
+/.env
+/.envrc
+/.pre-commit-config.yaml
