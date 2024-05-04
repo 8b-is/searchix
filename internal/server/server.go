@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
@@ -11,7 +12,9 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"path/filepath"
 	"slices"
+	"strings"
 	"time"
 
 	cfg "searchix/internal/config"
@@ -54,12 +57,63 @@ const jsSnippet = template.HTML(livereload.JsSnippet) // #nosec G203
 
 type TemplateData struct {
 	LiveReload template.HTML
-	Data       map[string]interface{}
+	Query      string
+}
+
+type OptionResultData struct {
+	TemplateData
+	Query   string
+	Results map[string]Option
+}
+
+type TemplateCollection struct {
+	Pages  map[string]*template.Template
+	Blocks map[string]*template.Template
 }
 
 func applyDevModeOverrides(config *cfg.Config) {
 	config.CSP.ScriptSrc = slices.Insert(config.CSP.ScriptSrc, 0, "'unsafe-inline'")
 	config.CSP.ConnectSrc = slices.Insert(config.CSP.ConnectSrc, 0, "'self'")
+}
+
+const dummyTemplate = `{{ block "results" . }}{{ end }}`
+
+func loadTemplates() (*TemplateCollection, error) {
+	templateDir := path.Join("frontend", "templates")
+	templates := &TemplateCollection{
+		Pages:  make(map[string]*template.Template),
+		Blocks: make(map[string]*template.Template),
+	}
+	indexText, err := os.ReadFile(path.Join(templateDir, "index.gotmpl"))
+	if err != nil {
+		return nil, errors.WithMessage(err, "could not read index template")
+	}
+	index, err := template.New("index").Parse(string(indexText))
+	if err != nil {
+		return nil, errors.WithMessage(err, "could not parse index template")
+	}
+	templates.Pages["index"] = index
+	templates.Blocks = make(map[string]*template.Template)
+
+	templatePaths, err := filepath.Glob(path.Join(templateDir, "blocks", "*.gotmpl"))
+	if err != nil {
+		return nil, errors.WithMessage(err, "could not glob block templates")
+	}
+	for _, fullname := range templatePaths {
+		name, _ := strings.CutSuffix(path.Base(fullname), ".gotmpl")
+		content, err := os.ReadFile(fullname)
+		if err != nil {
+			return nil, errors.WithMessagef(err, "could not read template file %s", fullname)
+		}
+		tpl, err := template.New(name).Parse(string(content))
+		if err != nil {
+			return nil, errors.WithMessagef(err, "could not parse template file %s", fullname)
+		}
+		templates.Blocks[name] = template.Must(template.Must(tpl.Clone()).New("index").Parse(dummyTemplate))
+		templates.Pages[name] = template.Must(template.Must(tpl.Clone()).New("index").Parse(string(indexText)))
+	}
+
+	return templates, nil
 }
 
 func New(runtimeConfig *Config) (*Server, error) {
@@ -88,18 +142,48 @@ func New(runtimeConfig *Config) (*Server, error) {
 		Repanic: true,
 	})
 
-	templatePaths := path.Join("frontend", "templates", "*.gotmpl")
-	tpl := template.Must(template.ParseGlob(templatePaths))
+	templates, err := loadTemplates()
+	if err != nil {
+		log.Panicf("could not load templates: %v", err)
+	}
 
 	top := http.NewServeMux()
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", func(w http.ResponseWriter, _ *http.Request) {
-		tdata := TemplateData{
-			LiveReload: jsSnippet,
-			Data:       make(map[string]interface{}),
-		}
-		err := tpl.Execute(w, tdata)
+	indexData := TemplateData{
+		LiveReload: jsSnippet,
+	}
+	mux.HandleFunc("/{$}", func(w http.ResponseWriter, _ *http.Request) {
+		err := templates.Pages["index"].Execute(w, indexData)
 		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	})
+
+	nixosOptions := make(map[string]Option)
+	jsonFile, err := os.ReadFile(path.Join("data", "test.json"))
+	if err != nil {
+		slog.Error(fmt.Sprintf("error reading json file: %v", err))
+	}
+	err = json.Unmarshal(jsonFile, &nixosOptions)
+	if err != nil {
+		slog.Error(fmt.Sprintf("error parsing json file: %v", err))
+	}
+	mux.HandleFunc("/options/results", func(w http.ResponseWriter, r *http.Request) {
+		tdata := OptionResultData{
+			TemplateData: indexData,
+			Query:        r.URL.Query().Get("query"),
+			Results:      nixosOptions,
+		}
+		var err error
+		if r.Header.Get("Fetch") == "true" {
+			slog.Debug("rendering template", "block", true)
+			err = templates.Blocks["options"].ExecuteTemplate(w, "index", tdata)
+		} else {
+			slog.Debug("rendering template", "block", false)
+			err = templates.Pages["options"].ExecuteTemplate(w, "index", tdata)
+		}
+		if err != nil {
+			slog.Error(fmt.Sprintf("template error: %v", err))
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
@@ -115,18 +199,16 @@ func New(runtimeConfig *Config) (*Server, error) {
 		if err != nil {
 			return nil, errors.WithMessage(err, "could not create file watcher")
 		}
-		err = fw.AddRecursive("frontend")
+		err = fw.AddRecursive(path.Join("frontend", "templates"))
 		if err != nil {
 			return nil, errors.WithMessage(err, "could not add directory to file watcher")
 		}
 		go fw.Start(func() {
-			t, err := template.ParseGlob(path.Join("frontend", "templates", "*.tmpl"))
+			templates, err = loadTemplates()
 			if err != nil {
-				slog.Error(fmt.Sprintf("could not parse template: %v", err))
-			} else {
-				tpl = t
-				liveReload.Reload()
+				slog.Error(fmt.Sprintf("could not reload templates: %v", err))
 			}
+			liveReload.Reload()
 		})
 	}
 

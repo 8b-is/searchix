@@ -8,6 +8,7 @@ image-src = [
   "http://gc.zgo.at",
 ]
 script-src = [
+  "'self'",
   "http://gc.zgo.at",
 ]
 require-trusted-types-for = [

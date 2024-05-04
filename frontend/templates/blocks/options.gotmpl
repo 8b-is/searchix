@@ -1,0 +1,13 @@
+{{ define "results" }}
+  {{ range $opt, $data := .Results }}
+  <details>
+    <summary>
+      {{ $opt }}
+    </summary>
+    <p>
+      {{ $data.Description }}
+    </p>
+  </details>
+  {{ end }}
+</div>
+{{ end }}

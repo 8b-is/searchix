@@ -54,7 +54,7 @@ in
       editorconfig-checker.enable = true;
       prettier = {
         enable = true;
-        types_or = [ "plain-text" "yaml" "gotmpl" ];
+        types_or = [ "plain-text" "yaml" "gotmpl" "javascript" ];
         settings = {
           plugins = with pkgs.nodePackages; [
             "${prettier-plugin-go-template}/lib/node_modules/prettier-plugin-go-template/lib/index.js"
