@@ -1,5 +1,6 @@
 form {
   display: flex;
+  column-gap: 1ex;
 }
 
 input[type="search"] {
