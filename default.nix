@@ -5,6 +5,7 @@ in
     import sources.nixpkgs {
       overlays = [
         (import "${sources.gomod2nix}/overlay.nix")
+        (import ./nix/overlays/default.nix)
       ];
     }
   )
@@ -33,12 +34,18 @@ in
       golangci-lint.enable = true;
       staticcheck.enable = true;
 
-      statix.enable = true;
+      statix = {
+        enable = true;
+        settings.ignore = [ "nix/*" ];
+      };
       deadnix = {
         enable = true;
-        excludes = [ "./nix" ];
+        excludes = [ "nix/.*" ];
       };
-      nixpkgs-fmt.enable = true;
+      nixpkgs-fmt = {
+        enable = true;
+        excludes = [ "nix/.*" ];
+      };
 
       convco.enable = true;
 
@@ -47,9 +54,11 @@ in
       editorconfig-checker.enable = true;
       prettier = {
         enable = true;
-        types_or = [ "plain-text" "yaml" ];
+        types_or = [ "plain-text" "yaml" "gotmpl" ];
         settings = {
-          check = true;
+          plugins = with pkgs.nodePackages; [
+            "${prettier-plugin-go-template}/lib/node_modules/prettier-plugin-go-template/lib/index.js"
+          ];
         };
       };
 

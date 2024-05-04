@@ -11,14 +11,19 @@
     <header>
       <h1>Searchix</h1>
       <p>Search Nix Packages and options from NixOS, Darwin and Home-Manager</p>
+      <nav>
+        <a href="/">Home</a>
+      </nav>
     </header>
     <main>
       <label for="query">Search </label>
-      <form>
-        <input id="query" name="query" type="search" value="" />
+      <form id="search" action="/options/results">
+        <input id="query" name="query" type="search" value="{{ .Query }}" />
         <button>Search</button>
       </form>
+      <div id="results">{{ block "results" . }}{{ end }}</div>
     </main>
+    <script src="/static/search.js" defer></script>
     {{ .LiveReload }}
   </body>
 </html>

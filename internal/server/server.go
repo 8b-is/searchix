@@ -88,7 +88,7 @@ func New(runtimeConfig *Config) (*Server, error) {
 		Repanic: true,
 	})
 
-	templatePaths := path.Join("frontend", "templates", "*.tmpl")
+	templatePaths := path.Join("frontend", "templates", "*.gotmpl")
 	tpl := template.Must(template.ParseGlob(templatePaths))
 
 	top := http.NewServeMux()
