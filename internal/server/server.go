@@ -199,7 +199,7 @@ func New(runtimeConfig *Config) (*Server, error) {
 		if err != nil {
 			return nil, errors.WithMessage(err, "could not create file watcher")
 		}
-		err = fw.AddRecursive(path.Join("frontend", "templates"))
+		err = fw.AddRecursive(path.Join("frontend"))
 		if err != nil {
 			return nil, errors.WithMessage(err, "could not add directory to file watcher")
 		}
