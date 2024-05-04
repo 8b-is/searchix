@@ -5,3 +5,17 @@ form {
 input[type="search"] {
   width: 100%;
 }
+
+dt::after {
+  content: ": ";
+}
+
+dd {
+  margin-inline-start: 1rem;
+}
+
+dl {
+  display: grid;
+  grid-template-rows: 100%;
+  grid-template-columns: max-content 1fr;
+}

@@ -1,13 +1,36 @@
 {{ define "results" }}
-  {{ range $opt, $data := .Results }}
-  <details>
-    <summary>
-      {{ $opt }}
-    </summary>
-    <p>
-      {{ $data.Description }}
-    </p>
-  </details>
-  {{ end }}
-</div>
+  {{- range $opt, $data := .Results }}
+    <details>
+      <summary>
+        {{ $opt }}
+      </summary>
+      <p>
+        {{ $data.Description }}
+      </p>
+      <dl>
+        {{- with $data.Type }}
+          <dt>Type</dt>
+          <dd>{{ . }}</dd>
+        {{- end }}
+        {{- with $data.Default }}
+          <dt>Default</dt>
+          <dd><code>{{ .Text }}</code></dd>
+        {{- end }}
+        {{- with $data.Example }}
+          {{- if .Text }}
+            <dt>Example</dt>
+            <dd><code>{{ .Text }}</code></dd>
+          {{- end }}
+        {{- end }}
+        {{- with $data.Declarations }}
+          <dt>Declared</dt>
+          {{- range . }}
+            <dd>
+              <a href="file://{{ . }}">{{ . }}</a>
+            </dd>
+          {{- end }}
+        {{- end }}
+      </dl>
+    </details>
+  {{- end }}
 {{ end }}

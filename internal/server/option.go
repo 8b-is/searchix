@@ -1,8 +1,8 @@
 package server
 
 type NixValue struct {
-	Kind  string `json:"_type"`
-	Value string `json:"text"`
+	Type string `json:"_type"`
+	Text string `json:"text"`
 }
 
 type Option struct {
@@ -11,5 +11,5 @@ type Option struct {
 	Description  string
 	Example      NixValue
 	ReadOnly     bool
-	Kind         string `json:"type"`
+	Type         string `json:"type"`
 }
