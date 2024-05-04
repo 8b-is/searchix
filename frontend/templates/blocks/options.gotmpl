@@ -1,6 +1,6 @@
 {{ define "results" }}
   {{- range $opt, $data := .Results }}
-    <details>
+    <details id="{{ $opt }}">
       <summary>
         {{ $opt }}
       </summary>
