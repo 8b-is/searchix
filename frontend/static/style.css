@@ -16,6 +16,6 @@ dd {
 
 dl {
   display: grid;
-  grid-template-rows: 100%;
+  grid-template-rows: 1fr;
   grid-template-columns: max-content 1fr;
 }
