@@ -1,4 +1,5 @@
 :root {
+  --standard-border-radius: 0;
   --preformatted: var(--code);
 }
 form {
