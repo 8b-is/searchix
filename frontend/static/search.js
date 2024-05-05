@@ -8,7 +8,7 @@ let state = history.state || {
 let escapePolicy = null;
 if (window.trustedTypes && trustedTypes.createPolicy) {
   escapePolicy = trustedTypes.createPolicy("fetch", {
-    createHTML: (string, sink) => string,
+    createHTML: (string) => string,
   });
 }
 
