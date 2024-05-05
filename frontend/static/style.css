@@ -1,5 +1,7 @@
 :root {
   --standard-border-radius: 0;
+  --text: black;
+  --text-light: #212121;
   --preformatted: var(--code);
 }
 form {
