@@ -10,16 +10,20 @@
       <dl>
         {{- with .Type }}
           <dt>Type</dt>
-          <dd>{{ . }}</dd>
+          <dd><code>{{ . }}</code></dd>
         {{- end }}
         {{- with .Default }}
           <dt>Default</dt>
-          <dd><code>{{ .Text }}</code></dd>
+          <dd>
+            <pre><code>{{ .Text }}</code></pre>
+          </dd>
         {{- end }}
         {{- with .Example }}
           {{- if .Text }}
             <dt>Example</dt>
-            <dd><code>{{ .Text }}</code></dd>
+            <dd>
+              <pre><code>{{ .Text }}</code></pre>
+            </dd>
           {{- end }}
         {{- end }}
         {{- with .RelatedPackages.HTML }}
