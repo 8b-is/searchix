@@ -44,7 +44,7 @@ func (watcher FileWatcher) AddRecursive(from string) error {
 	return errors.WithMessage(err, "error walking directory tree")
 }
 
-func (watcher FileWatcher) Start(callback func()) {
+func (watcher FileWatcher) Start(callback func(string)) {
 	for {
 		select {
 		case event := <-watcher.Events:
@@ -61,7 +61,7 @@ func (watcher FileWatcher) Start(callback func()) {
 				}
 			}
 			if event.Has(fsnotify.Rename) || event.Has(fsnotify.Write) {
-				callback()
+				callback(event.Name)
 				time.Sleep(500 * time.Millisecond)
 			}
 		case err := <-watcher.Errors:

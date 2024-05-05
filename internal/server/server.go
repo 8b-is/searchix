@@ -203,10 +203,13 @@ func New(runtimeConfig *Config) (*Server, error) {
 		if err != nil {
 			return nil, errors.WithMessage(err, "could not add directory to file watcher")
 		}
-		go fw.Start(func() {
-			templates, err = loadTemplates()
-			if err != nil {
-				slog.Error(fmt.Sprintf("could not reload templates: %v", err))
+		go fw.Start(func(filename string) {
+			slog.Debug(fmt.Sprintf("got filename %s", filename))
+			if path.Ext(filename) == ".gotmpl" {
+				templates, err = loadTemplates()
+				if err != nil {
+					slog.Error(fmt.Sprintf("could not reload templates: %v", err))
+				}
 			}
 			liveReload.Reload()
 		})
