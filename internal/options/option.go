@@ -6,6 +6,7 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/extension"
 )
 
 type NixValue struct {
@@ -17,9 +18,13 @@ type HTML struct {
 	HTML string
 }
 
+var md = goldmark.New(
+	goldmark.WithExtensions(extension.NewLinkify()),
+)
+
 func (html *HTML) UnmarshalText(text []byte) error {
 	var out strings.Builder
-	err := goldmark.Convert(text, &out)
+	err := md.Convert(text, &out)
 	if err != nil {
 		return errors.WithMessage(err, "failed to convert markdown to HTML")
 	}
