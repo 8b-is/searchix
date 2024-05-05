@@ -47,9 +47,14 @@ func (html *HTML) UnmarshalJSON(raw []byte) error {
 	return nil
 }
 
+type Link struct {
+	Name string
+	URL  string `json:"url"`
+}
+
 type NixOption struct {
 	Option          string
-	Declarations    []string
+	Declarations    []Link
 	Default         NixValue
 	Description     HTML
 	Example         NixValue

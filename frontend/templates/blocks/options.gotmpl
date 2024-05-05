@@ -34,7 +34,7 @@
           <dt>Declared</dt>
           {{- range . }}
             <dd>
-              <a href="file://{{ . }}">{{ . }}</a>
+              <a href="{{ .URL }}">{{ .Name }}</a>
             </dd>
           {{- end }}
         {{- end }}
