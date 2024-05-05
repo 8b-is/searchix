@@ -16,6 +16,8 @@ in
   };
 
   nixos-options = import (./. + "/importers/nixos-options.nix") { };
+  darwin-options = (import <darwin/release.nix> { }).options;
+  home-manager-options = (import <home-manager> { }).docs.json;
 
   searchix = pkgs.buildGoApplication {
     pname = "searchix";
