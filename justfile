@@ -5,7 +5,7 @@ prepare:
 	ln -sf $(nix-build --no-out-link -A css) frontend/static/base.css
 
 update-nixos-options:
-	ln -sf $(nix-build --no-out-link -A nixos-options)/share/doc/nixos/options.json data/nixos-options.json
+	wgo run -exit ./process --input $(nix-build --no-out-link -A nixos-options)/share/doc/nixos/options.json --output data/nixos-options.json
 
 checkformat:
 	gofmt -d .

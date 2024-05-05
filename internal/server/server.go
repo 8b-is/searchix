@@ -18,6 +18,7 @@ import (
 	"time"
 
 	cfg "searchix/internal/config"
+	"searchix/internal/options"
 
 	"github.com/getsentry/sentry-go"
 	sentryhttp "github.com/getsentry/sentry-go/http"
@@ -63,54 +64,62 @@ type TemplateData struct {
 type OptionResultData struct {
 	TemplateData
 	Query   string
-	Results map[string]Option
+	Results options.NixOptions
 }
 
-type TemplateCollection struct {
-	Pages  map[string]*template.Template
-	Blocks map[string]*template.Template
-}
+type TemplateCollection map[string]*template.Template
 
 func applyDevModeOverrides(config *cfg.Config) {
 	config.CSP.ScriptSrc = slices.Insert(config.CSP.ScriptSrc, 0, "'unsafe-inline'")
 	config.CSP.ConnectSrc = slices.Insert(config.CSP.ConnectSrc, 0, "'self'")
 }
 
-const dummyTemplate = `{{ block "results" . }}{{ end }}`
+var templateFuncs = template.FuncMap{
+	"HTML": func(input string) template.HTML {
+		return template.HTML(input) // #nosec G203
+	},
+}
 
-func loadTemplates() (*TemplateCollection, error) {
+func loadTemplate(filename string) (*template.Template, error) {
+	text, err := os.ReadFile(filename)
+	if err != nil {
+		return nil, errors.WithMessage(err, "could not read template")
+	}
+	name, _ := strings.CutSuffix(path.Base(filename), ".gotmpl")
+	tpl := template.New(name)
+	tpl.Funcs(templateFuncs)
+	_, err = tpl.Parse(string(text))
+	if err != nil {
+		return nil, errors.WithMessage(err, "could not parse template")
+	}
+
+	return tpl, nil
+}
+
+func loadTemplates() (TemplateCollection, error) {
 	templateDir := path.Join("frontend", "templates")
-	templates := &TemplateCollection{
-		Pages:  make(map[string]*template.Template),
-		Blocks: make(map[string]*template.Template),
-	}
-	indexText, err := os.ReadFile(path.Join(templateDir, "index.gotmpl"))
+	templates := make(TemplateCollection, 0)
+
+	index, err := loadTemplate(path.Join(templateDir, "index.gotmpl"))
 	if err != nil {
-		return nil, errors.WithMessage(err, "could not read index template")
+		return nil, err
 	}
-	index, err := template.New("index").Parse(string(indexText))
-	if err != nil {
-		return nil, errors.WithMessage(err, "could not parse index template")
-	}
-	templates.Pages["index"] = index
-	templates.Blocks = make(map[string]*template.Template)
+	templates["index"] = index
 
 	templatePaths, err := filepath.Glob(path.Join(templateDir, "blocks", "*.gotmpl"))
 	if err != nil {
 		return nil, errors.WithMessage(err, "could not glob block templates")
 	}
 	for _, fullname := range templatePaths {
-		name, _ := strings.CutSuffix(path.Base(fullname), ".gotmpl")
-		content, err := os.ReadFile(fullname)
+		tpl, err := loadTemplate(fullname)
 		if err != nil {
-			return nil, errors.WithMessagef(err, "could not read template file %s", fullname)
+			return nil, err
 		}
-		tpl, err := template.New(name).Parse(string(content))
+		_, err = tpl.AddParseTree("index", index.Tree)
 		if err != nil {
-			return nil, errors.WithMessagef(err, "could not parse template file %s", fullname)
+			return nil, errors.WithMessage(err, "could not add index template")
 		}
-		templates.Blocks[name] = template.Must(template.Must(tpl.Clone()).New("index").Parse(dummyTemplate))
-		templates.Pages[name] = template.Must(template.Must(tpl.Clone()).New("index").Parse(string(indexText)))
+		templates[tpl.Name()] = tpl
 	}
 
 	return templates, nil
@@ -153,13 +162,13 @@ func New(runtimeConfig *Config) (*Server, error) {
 		LiveReload: jsSnippet,
 	}
 	mux.HandleFunc("/{$}", func(w http.ResponseWriter, _ *http.Request) {
-		err := templates.Pages["index"].Execute(w, indexData)
+		err := templates["index"].Execute(w, indexData)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
 
-	nixosOptions := make(map[string]Option)
+	var nixosOptions = options.NixOptions{}
 	jsonFile, err := os.ReadFile(path.Join("data", "test.json"))
 	if err != nil {
 		slog.Error(fmt.Sprintf("error reading json file: %v", err))
@@ -176,11 +185,10 @@ func New(runtimeConfig *Config) (*Server, error) {
 		}
 		var err error
 		if r.Header.Get("Fetch") == "true" {
-			slog.Debug("rendering template", "block", true)
-			err = templates.Blocks["options"].ExecuteTemplate(w, "index", tdata)
+			w.Header().Add("Content-Type", "text/html; charset=utf-8")
+			err = templates["options"].ExecuteTemplate(w, "results", tdata)
 		} else {
-			slog.Debug("rendering template", "block", false)
-			err = templates.Pages["options"].ExecuteTemplate(w, "index", tdata)
+			err = templates["options"].ExecuteTemplate(w, "index", tdata)
 		}
 		if err != nil {
 			slog.Error(fmt.Sprintf("template error: %v", err))

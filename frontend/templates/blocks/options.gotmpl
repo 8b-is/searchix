@@ -1,28 +1,32 @@
 {{ define "results" }}
-  {{- range $opt, $data := .Results }}
-    <details id="{{ $opt }}">
+  {{- range .Results }}
+    <details id="{{ .Option }}">
       <summary>
-        {{ $opt }}
+        {{ .Option }}
       </summary>
       <p>
-        {{ $data.Description }}
+        {{ HTML .Description.HTML }}
       </p>
       <dl>
-        {{- with $data.Type }}
+        {{- with .Type }}
           <dt>Type</dt>
           <dd>{{ . }}</dd>
         {{- end }}
-        {{- with $data.Default }}
+        {{- with .Default }}
           <dt>Default</dt>
           <dd><code>{{ .Text }}</code></dd>
         {{- end }}
-        {{- with $data.Example }}
+        {{- with .Example }}
           {{- if .Text }}
             <dt>Example</dt>
             <dd><code>{{ .Text }}</code></dd>
           {{- end }}
         {{- end }}
-        {{- with $data.Declarations }}
+        {{- with .RelatedPackages.HTML }}
+          <dt>Related Packages</dt>
+          <dd>{{ . }}</dd>
+        {{- end }}
+        {{- with .Declarations }}
           <dt>Declared</dt>
           {{- range . }}
             <dd>
