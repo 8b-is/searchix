@@ -5,7 +5,7 @@
         {{ .Option }}
       </summary>
       <p>
-        {{ HTML .Description.HTML }}
+        {{ markdown .Description }}
       </p>
       <dl>
         {{- with .Type }}
@@ -15,18 +15,26 @@
         {{- with .Default }}
           <dt>Default</dt>
           <dd>
-            <pre><code>{{ .Text }}</code></pre>
+            {{- if .Markdown }}
+              {{ .Markdown }}
+            {{- else }}
+              <pre><code>{{ .Text }}</code></pre>
+            {{- end }}
           </dd>
         {{- end }}
         {{- with .Example }}
-          {{- if .Text }}
+          {{- if or .Text .Markdown }}
             <dt>Example</dt>
             <dd>
-              <pre><code>{{ .Text }}</code></pre>
+              {{- if .Markdown }}
+                {{ .Markdown }}
+              {{- else }}
+                <pre><code>{{ .Text }}</code></pre>
+              {{- end }}
             </dd>
           {{- end }}
         {{- end }}
-        {{- with .RelatedPackages.HTML }}
+        {{- with .RelatedPackages }}
           <dt>Related Packages</dt>
           <dd>{{ . }}</dd>
         {{- end }}

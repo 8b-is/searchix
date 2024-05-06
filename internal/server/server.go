@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"html"
 	"html/template"
 	"io"
 	"log"
@@ -25,6 +26,8 @@ import (
 	"github.com/osdevisnot/sorvor/pkg/livereload"
 	"github.com/pkg/errors"
 	"github.com/shengyanli1982/law"
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/extension"
 )
 
 var config *cfg.Config
@@ -74,9 +77,20 @@ func applyDevModeOverrides(config *cfg.Config) {
 	config.CSP.ConnectSrc = slices.Insert(config.CSP.ConnectSrc, 0, "'self'")
 }
 
+var md = goldmark.New(
+	goldmark.WithExtensions(extension.NewLinkify()),
+)
 var templateFuncs = template.FuncMap{
-	"HTML": func(input string) template.HTML {
-		return template.HTML(input) // #nosec G203
+	"markdown": func(input options.Markdown) template.HTML {
+		var out strings.Builder
+		err := md.Convert([]byte(input), &out)
+		if err != nil {
+			slog.Warn(fmt.Sprintf("markdown conversion failed: %v", err))
+
+			return template.HTML(html.EscapeString(err.Error())) // #nosec G203 -- duh?
+		}
+
+		return template.HTML(out.String()) // #nosec G203
 	},
 }
 
@@ -177,6 +191,7 @@ func New(runtimeConfig *Config) (*Server, error) {
 	if err != nil {
 		slog.Error(fmt.Sprintf("error parsing json file: %v", err))
 	}
+
 	mux.HandleFunc("/options/results", func(w http.ResponseWriter, r *http.Request) {
 		tdata := OptionResultData{
 			TemplateData: indexData,

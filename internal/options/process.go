@@ -3,12 +3,34 @@ package options
 import (
 	"encoding/json"
 	"io"
+	"log/slog"
 	"os"
 
 	"github.com/bcicen/jstream"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 )
+
+type nixValueJSON struct {
+	Type string `mapstructure:"_type"`
+	Text string
+}
+
+type linkJSON struct {
+	Name string
+	URL  string `json:"url"`
+}
+
+type nixOptionJSON struct {
+	Declarations    []linkJSON
+	Default         nixValueJSON
+	Description     string
+	Example         nixValueJSON
+	Loc             []string
+	ReadOnly        bool
+	RelatedPackages string
+	Type            string
+}
 
 func ValueTypeToString(valueType jstream.ValueType) string {
 	switch valueType {
@@ -31,6 +53,27 @@ func ValueTypeToString(valueType jstream.ValueType) string {
 	return "very strange"
 }
 
+func convertNixValue(nj nixValueJSON) *NixValue {
+	switch nj.Type {
+	case "", "literalExpression":
+		if nj.Text == "" {
+			return nil
+		}
+
+		return &NixValue{
+			Text: nj.Text,
+		}
+	case "literalMD":
+		return &NixValue{
+			Markdown: Markdown(nj.Text),
+		}
+	default:
+		slog.Warn("got unexpected NixValue type", "type", nj.Type, "text", nj.Text)
+
+		return nil
+	}
+}
+
 func Process(inpath string, outpath string) error {
 	infile, err := os.Open(inpath)
 	if err != nil {
@@ -46,10 +89,11 @@ func Process(inpath string, outpath string) error {
 	}
 
 	dec := jstream.NewDecoder(infile, 1).EmitKV()
-	var opt NixOption
+	var optJSON nixOptionJSON
 	ms, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 		ErrorUnused: true,
-		Result:      &opt,
+		ZeroFields:  true,
+		Result:      &optJSON,
 		Squash:      true,
 		DecodeHook:  mapstructure.TextUnmarshallerHookFunc(),
 	})
@@ -69,15 +113,27 @@ func Process(inpath string, outpath string) error {
 			return errors.Errorf("unexpected object type %s", ValueTypeToString(mv.ValueType))
 		}
 		kv := mv.Value.(jstream.KV)
-		if kv.Key == "_module.args" {
-			continue
-		}
 		x := kv.Value.(map[string]interface{})
-		x["option"] = kv.Key
 
-		err = ms.Decode(x)
+		err = ms.Decode(x) // stores in optJSON
 		if err != nil {
 			return errors.WithMessagef(err, "failed to decode option %#v", x)
+		}
+
+		var decs = make([]Link, len(optJSON.Declarations))
+		for i, d := range optJSON.Declarations {
+			decs[i] = Link(d)
+		}
+
+		opt := NixOption{
+			Option:          kv.Key,
+			Declarations:    decs,
+			Default:         convertNixValue(optJSON.Default),
+			Description:     Markdown(optJSON.Description),
+			Example:         convertNixValue(optJSON.Example),
+			RelatedPackages: Markdown(optJSON.RelatedPackages),
+			Loc:             optJSON.Loc,
+			Type:            optJSON.Type,
 		}
 
 		b, err := json.MarshalIndent(opt, "", "  ")
@@ -95,9 +151,11 @@ func Process(inpath string, outpath string) error {
 		}
 	}
 
-	_, err = outfile.Seek(-2, io.SeekCurrent)
-	if err != nil {
-		return errors.WithMessage(err, "could not write to output")
+	if outpath != "/dev/stdout" {
+		_, err = outfile.Seek(-2, io.SeekCurrent)
+		if err != nil {
+			return errors.WithMessage(err, "could not write to output")
+		}
 	}
 
 	_, err = outfile.WriteString("]\n")
