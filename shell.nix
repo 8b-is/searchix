@@ -21,6 +21,7 @@ pkgs.mkShell {
   packages = with pkgs; [
     goEnv
 
+    brotli
     wgo
     gomod2nix
     niv

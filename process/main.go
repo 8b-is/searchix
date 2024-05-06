@@ -4,6 +4,8 @@ import (
 	"log"
 	"log/slog"
 	"os"
+	"strings"
+
 	"searchix/internal/options"
 
 	"github.com/ardanlabs/conf/v3"
@@ -11,8 +13,11 @@ import (
 )
 
 type Config struct {
-	Input  string `conf:"short:i,required,help:NixOS options file (json)"`
-	Output string `conf:"short:o,default:/dev/stdout"`
+	Input        string `conf:"short:i,required,help:NixOS options file (json)"`
+	Output       string `conf:"short:o,default:/dev/stdout"`
+	Revision     string `conf:"short:r,flag:revision,default:master"`
+	RevisionFile string `conf:"short:f,flag:revision-file"`
+	Channel      string `conf:"short:c,flag:channel,default:nixpkgs"`
 }
 
 func main() {
@@ -29,8 +34,15 @@ func main() {
 		}
 		log.Fatalf("parsing command line: %v", err)
 	}
+	if config.RevisionFile != "" {
+		f, err := os.ReadFile(config.RevisionFile)
+		if err != nil {
+			log.Fatalf("Error reading revision file %s: %v", config.RevisionFile, err)
+		}
+		config.Revision = strings.TrimSpace(string(f))
+	}
 
-	err = options.Process(config.Input, config.Output)
+	err = options.Process(config.Input, config.Output, config.Channel, config.Revision)
 	if err != nil {
 		log.Fatalf("Error processing file: %v", err)
 	}

@@ -2,9 +2,12 @@ package options
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log/slog"
+	"net/url"
 	"os"
+	"reflect"
 
 	"github.com/bcicen/jstream"
 	"github.com/mitchellh/mapstructure"
@@ -53,6 +56,30 @@ func ValueTypeToString(valueType jstream.ValueType) string {
 	return "very strange"
 }
 
+func makeGitHubFileURL(userRepo string, ref string, subPath string) string {
+	url, _ := url.JoinPath("https://github.com/", userRepo, "blob", ref, subPath)
+
+	return url
+}
+
+// make configurable?
+var channelRepoMap = map[string]string{
+	"nixpkgs":      "NixOS/nixpkgs",
+	"nix-darwin":   "LnL7/nix-darwin",
+	"home-manager": "nix-community/home-manager",
+}
+
+func MakeChannelLink(channel string, ref string, subPath string) (*Link, error) {
+	if channelRepoMap[channel] == "" {
+		return nil, fmt.Errorf("don't know what repository relates to channel <%s>", channel)
+	}
+
+	return &Link{
+		Name: fmt.Sprintf("<%s/%s>", channel, subPath),
+		URL:  makeGitHubFileURL(channelRepoMap[channel], ref, subPath),
+	}, nil
+}
+
 func convertNixValue(nj nixValueJSON) *NixValue {
 	switch nj.Type {
 	case "", "literalExpression":
@@ -74,7 +101,7 @@ func convertNixValue(nj nixValueJSON) *NixValue {
 	}
 }
 
-func Process(inpath string, outpath string) error {
+func Process(inpath string, outpath string, channel string, revision string) error {
 	infile, err := os.Open(inpath)
 	if err != nil {
 		return errors.WithMessagef(err, "failed to open input file %s", inpath)
@@ -114,6 +141,30 @@ func Process(inpath string, outpath string) error {
 		}
 		kv := mv.Value.(jstream.KV)
 		x := kv.Value.(map[string]interface{})
+
+		var decls []*Link
+		for _, decl := range x["declarations"].([]interface{}) {
+			switch decl := reflect.ValueOf(decl); decl.Kind() {
+			case reflect.String:
+				s := decl.String()
+				link, err := MakeChannelLink(channel, revision, s)
+				if err != nil {
+					return errors.WithMessagef(err,
+						"could not make a channel link for channel %s, revision %s and subpath %s",
+						channel, revision, s,
+					)
+				}
+				decls = append(decls, link)
+			case reflect.Map:
+				decls = append(decls, decl.Convert(reflect.TypeFor[Link]()).Interface().(*Link))
+			default:
+				println("kind", decl.Kind().String())
+				panic("unexpected object type")
+			}
+		}
+		if len(decls) > 0 {
+			x["declarations"] = decls
+		}
 
 		err = ms.Decode(x) // stores in optJSON
 		if err != nil {
@@ -158,7 +209,7 @@ func Process(inpath string, outpath string) error {
 		}
 	}
 
-	_, err = outfile.WriteString("]\n")
+	_, err = outfile.WriteString("\n]\n")
 	if err != nil {
 		return errors.WithMessage(err, "could not write to output")
 	}
