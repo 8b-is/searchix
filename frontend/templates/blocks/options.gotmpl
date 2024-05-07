@@ -1,8 +1,8 @@
-{{- template "results" .Results -}}
+{{- template "results" . -}}
 {{- define "results" }}
-  <div id="results">
-    {{- with . }}
-      {{- range .Results }}
+  {{- if gt .Results.Total 0 }}
+    <section id="results">
+      {{- range .Results.Results }}
         <details id="{{ .Option }}">
           <summary>
             {{ .Option }}
@@ -53,9 +53,20 @@
             {{- end }}
           </dl>
         </details>
-      {{- else }}
-        Nothing found
       {{- end }}
-    {{- end }}
-  </div>
+      <footer>
+        <nav id="pagination">
+          {{- with .Prev }}
+            <a class="button" href="{{ . }}" rel="prev">Prev</a>
+          {{- end }}
+          {{- with .Next }}
+            <a class="button" href="{{ . }}" rel="next">Next</a>
+          {{- end }}
+        </nav>
+        <span> {{ .Results.Total }} results </span>
+      </footer>
+    </section>
+  {{- else }}
+    Nothing found
+  {{- end }}
 {{- end }}

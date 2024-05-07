@@ -15,7 +15,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const maxResults = 10
+const ResultsPerPage = 20
 
 type Result[T options.NixOption] struct {
 	*bleve.SearchResult
@@ -93,9 +93,14 @@ func New[T options.NixOption](kind string) (*Index[T], error) {
 	}, nil
 }
 
-func (index *Index[T]) Search(ctx context.Context, keyword string) (*Result[T], error) {
+func (index *Index[T]) Search(ctx context.Context, keyword string, from uint64) (*Result[T], error) {
 	query := bleve.NewMatchQuery(keyword)
 	search := bleve.NewSearchRequest(query)
+	search.Size = ResultsPerPage
+
+	if from != 0 {
+		search.From = int(from)
+	}
 
 	bleveResult, err := index.index.SearchInContext(ctx, search)
 	select {
@@ -106,13 +111,10 @@ func (index *Index[T]) Search(ctx context.Context, keyword string) (*Result[T], 
 			return nil, errors.WithMessage(err, "failed to execute search query")
 		}
 
-		results := make([]T, min(maxResults, bleveResult.Total))
+		results := make([]T, min(ResultsPerPage, bleveResult.Total))
 		for i, result := range bleveResult.Hits {
 			doc, _ := index.docs.Load(result.ID)
 			results[i] = doc.(T)
-			if i > maxResults {
-				break
-			}
 		}
 
 		return &Result[T]{

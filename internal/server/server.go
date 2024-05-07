@@ -9,9 +9,11 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"slices"
+	"strconv"
 	"time"
 
 	cfg "searchix/internal/config"
@@ -63,8 +65,11 @@ type TemplateData struct {
 
 type ResultData[T options.NixOption] struct {
 	TemplateData
-	Query   string
-	Results *search.Result[T]
+	Query          string
+	ResultsPerPage int
+	Results        *search.Result[T]
+	Prev           string
+	Next           string
 }
 
 func applyDevModeOverrides(config *cfg.Config) {
@@ -158,7 +163,16 @@ func New(runtimeConfig *Config) (*Server, error) {
 
 			return
 		}
-		results, err := index[source].Search(ctx, r.URL.Query().Get("query"))
+		qs := r.URL.Query().Get("query")
+		pg := r.URL.Query().Get("page")
+		var page uint64 = 1
+		if pg != "" {
+			page, err = strconv.ParseUint(pg, 10, 64)
+			if err != nil || page == 0 {
+				http.Error(w, "Bad query string", http.StatusBadRequest)
+			}
+		}
+		results, err := index[source].Search(ctx, qs, (page-1)*search.ResultsPerPage)
 		if err != nil {
 			if err == context.DeadlineExceeded {
 				http.Error(w, "Search timed out", http.StatusInternalServerError)
@@ -173,9 +187,42 @@ func New(runtimeConfig *Config) (*Server, error) {
 				LiveReload: jsSnippet,
 				Source:     source,
 			},
-			Query:   r.URL.Query().Get("query"),
-			Results: results,
+			ResultsPerPage: search.ResultsPerPage,
+			Query:          qs,
+			Results:        results,
 		}
+
+		hits := uint64(len(results.Hits))
+		if results.Total > hits {
+			q, err := url.ParseQuery(r.URL.RawQuery)
+			if err != nil {
+				http.Error(w, "Query string error", http.StatusBadRequest)
+
+				return
+			}
+
+			if page*search.ResultsPerPage > results.Total {
+				http.Error(w, "Not found", http.StatusNotFound)
+
+				return
+			}
+
+			if page*search.ResultsPerPage < results.Total {
+				q.Set("page", strconv.FormatUint(page+1, 10))
+				tdata.Next = "results?" + q.Encode()
+			}
+
+			if page > 1 {
+				p := page - 1
+				if p == 1 {
+					q.Del("page")
+				} else {
+					q.Set("page", strconv.FormatUint(p, 10))
+				}
+				tdata.Prev = "results?" + q.Encode()
+			}
+		}
+
 		if r.Header.Get("Fetch") == "true" {
 			w.Header().Add("Content-Type", "text/html; charset=utf-8")
 			err = templates["options"].ExecuteTemplate(w, "options.gotmpl", tdata)

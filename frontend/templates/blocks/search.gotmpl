@@ -9,7 +9,7 @@
       <button>Search</button>
     </fieldset>
   </form>
-  {{- with .Results }}
+  {{- if .Results }}
     {{ block "results" . }}{{ end }}
   {{- end }}
 {{- end }}

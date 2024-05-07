@@ -1,12 +1,14 @@
 const search = document.getElementById("search");
 let results = document.getElementById("results");
+let pagination = document.getElementById("pagination");
 
 const range = new Range();
 range.setStartAfter(search);
 range.setEndAfter(search.parentNode.lastChild);
 
 let state = history.state || {
-  url: new URL(location).toJSON(),
+  url: new URL(location).toString(),
+  fragment: range.cloneContents().innerHTML || "",
   opened: [],
 };
 
@@ -35,43 +37,68 @@ function addToggleEventListeners(results) {
     details.addEventListener("toggle", detailsToggled, { passive: true }),
   );
 }
-search.addEventListener("submit", function (ev) {
-  const url = new URL(this.action);
-  url.search = new URLSearchParams(new FormData(this)).toString();
+
+function paginationLinkClicked(ev) {
+  const url = new URL(ev.target.href);
+  getResults(url);
+  ev.preventDefault();
+}
+
+function addPaginationEventListeners() {
+  pagination.addEventListener("click", paginationLinkClicked);
+}
+
+function renderFragmentHTML(html) {
+  const fragment = range.createContextualFragment(
+    escapePolicy !== null ? escapePolicy.createHTML(html) : html,
+  );
+  results = fragment.querySelector("#results");
+  pagination = fragment.querySelector("#pagination");
+  range.deleteContents();
+  range.insertNode(fragment);
+  addToggleEventListeners(results);
+  addPaginationEventListeners(pagination);
+}
+
+function getResults(url) {
   fetch(url, {
     headers: {
       fetch: "true",
     },
   })
     .then(async function (res) {
-      state.url = url.toJSON();
-      state.opened = [];
       if (res.ok) {
-        history.pushState(state, null, url);
         return res.text();
       } else {
         throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`);
       }
     })
     .then(function (html) {
-      const fragment = range.createContextualFragment(
-        escapePolicy !== null ? escapePolicy.createHTML(html) : html,
-      );
-      const results = fragment.firstElementChild;
-      range.deleteContents();
-      range.insertNode(results);
-      addToggleEventListeners(results);
+      state.url = url.toJSON();
+      state.opened = [];
+      state.fragment = html;
+      history.pushState(state, null, url);
+      return renderFragmentHTML(html);
     })
     .catch(function (error) {
       range.deleteContents();
       range.insertNode(new Text(error.message));
       console.error("fetch failed", error);
     });
+}
+
+search.addEventListener("submit", function (ev) {
+  const url = new URL(this.action);
+  url.search = new URLSearchParams(new FormData(this)).toString();
+  getResults(url);
   ev.preventDefault();
 });
 
 if (results !== null) {
   addToggleEventListeners(results);
+}
+if (pagination !== null) {
+  addPaginationEventListeners(pagination);
 }
 
 if (state.opened.length > 0) {
@@ -83,8 +110,13 @@ if (state.opened.length > 0) {
 }
 
 addEventListener("popstate", function (ev) {
-  if (ev.state == null || ev.state.url.pathname.startsWith("/search/")) {
-    range.deleteContents();
-    search.reset();
+  if (ev.state != null) {
+    url = new URL(ev.state.url);
+    if (!url.pathname.endsWith("/search") && ev.state.fragment !== null) {
+      renderFragmentHTML(ev.state.fragment);
+      return;
+    }
   }
+  range.deleteContents();
+  search.reset();
 });

@@ -41,13 +41,20 @@ body > header {
 }
 
 form {
-  margin-top: 1.5rem;
+  margin: 1.5rem 0;
 }
 
 fieldset {
   display: flex;
   column-gap: 1ex;
   border: none;
+  padding: unset;
+  margin: unset;
+}
+
+section {
+  border-top: none;
+  margin: unset;
   padding: unset;
 }
 
@@ -82,4 +89,18 @@ pre {
 
 pre:has(> code) {
   background: var(--bg);
+}
+
+section {
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    a[rel="next"] {
+      margin-left: auto;
+    }
+  }
+  footer {
+    text-align: center;
+  }
 }
