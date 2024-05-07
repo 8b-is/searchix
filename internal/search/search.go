@@ -17,15 +17,17 @@ import (
 
 const maxResults = 10
 
-var index bleve.Index
-var docs sync.Map
-
 type Result[T options.NixOption] struct {
 	*bleve.SearchResult
 	Results []T
 }
 
-func Index() error {
+type Index[T options.NixOption] struct {
+	index bleve.Index
+	docs  *sync.Map
+}
+
+func New[T options.NixOption](kind string) (*Index[T], error) {
 	bleve.SetLog(log.Default())
 	textFieldMapping := bleve.NewTextFieldMapping()
 	nameMapping := bleve.NewTextFieldMapping()
@@ -41,18 +43,19 @@ func Index() error {
 	indexMapping.AddDocumentMapping("option", optionMapping)
 
 	var err error
-	index, err = bleve.NewMemOnly(indexMapping)
+	index, err := bleve.NewMemOnly(indexMapping)
 	// index, err = bleve.New(path.Join(cfg.DataPath, const indexFilename = "index.bleve"), indexMapping)
 
 	if err != nil {
-		return errors.WithMessage(err, "error opening index")
+		return nil, errors.WithMessage(err, "error opening index")
 	}
 	batch := index.NewBatch()
-	_ = batch
 
-	jsonFile, err := os.Open(path.Join("data", "processed", "darwin-options.json"))
+	var docs sync.Map
+
+	jsonFile, err := os.Open(path.Join("data", "processed", kind+".json"))
 	if err != nil {
-		return errors.WithMessage(err, "error opening json file")
+		return nil, errors.WithMessage(err, "error opening json file")
 	}
 
 	dec := jstream.NewDecoder(jsonFile, 1)
@@ -63,35 +66,38 @@ func Index() error {
 		Result:      &opt,
 	})
 	if err != nil {
-		return errors.WithMessage(err, "could not create struct decoder")
+		return nil, errors.WithMessage(err, "could not create struct decoder")
 	}
 	for mv := range dec.Stream() {
 		err := ms.Decode(mv.Value) // stores in opt
 
 		if err != nil {
-			return errors.WithMessagef(err, "could not decode object into option, object: %#v", mv.Value)
+			return nil, errors.WithMessagef(err, "could not decode object into option, object: %#v", mv.Value)
 		}
 
 		docs.Store(opt.Option, opt)
 
 		err = batch.Index(opt.Option, opt)
 		if err != nil {
-			return errors.WithMessagef(err, "could not index option %s", opt.Option)
+			return nil, errors.WithMessagef(err, "could not index option %s", opt.Option)
 		}
 	}
 	err = index.Batch(batch)
 	if err != nil {
-		return errors.WithMessage(err, "failed to run batch index operation")
+		return nil, errors.WithMessage(err, "failed to run batch index operation")
 	}
 
-	return nil
+	return &Index[T]{
+		index,
+		&docs,
+	}, nil
 }
 
-func Search[T options.NixOption](ctx context.Context, keyword string) (*Result[T], error) {
+func (index *Index[T]) Search(ctx context.Context, keyword string) (*Result[T], error) {
 	query := bleve.NewMatchQuery(keyword)
 	search := bleve.NewSearchRequest(query)
 
-	bleveResult, err := index.SearchInContext(ctx, search)
+	bleveResult, err := index.index.SearchInContext(ctx, search)
 	select {
 	case <-ctx.Done():
 		return nil, ctx.Err()
@@ -102,7 +108,7 @@ func Search[T options.NixOption](ctx context.Context, keyword string) (*Result[T
 
 		results := make([]T, min(maxResults, bleveResult.Total))
 		for i, result := range bleveResult.Hits {
-			doc, _ := docs.Load(result.ID)
+			doc, _ := index.docs.Load(result.ID)
 			results[i] = doc.(T)
 			if i > maxResults {
 				break
@@ -114,10 +120,4 @@ func Search[T options.NixOption](ctx context.Context, keyword string) (*Result[T
 			results,
 		}, nil
 	}
-}
-
-func Load(name string) any {
-	doc, _ := docs.Load(name)
-
-	return doc
 }

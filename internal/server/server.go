@@ -72,10 +72,23 @@ func applyDevModeOverrides(config *cfg.Config) {
 	config.CSP.ConnectSrc = slices.Insert(config.CSP.ConnectSrc, 0, "'self'")
 }
 
+var index = map[string]*search.Index[options.NixOption]{}
+
+var sourceFileName = map[string]string{
+	"darwin":       "darwin-options",
+	"home-manager": "home-manager-options",
+	"nixos":        "nixos-options-nixos-unstable",
+}
+
 func init() {
-	err := search.Index()
-	if err != nil {
-		log.Fatalf("could not build search index, error: %#v", err)
+	var err error
+
+	for source, filename := range sourceFileName {
+		index[source], err = search.New(filename)
+		if err != nil {
+			log.Fatalf("could not build search index, error: %#v", err)
+		}
+
 	}
 }
 
@@ -122,19 +135,19 @@ func New(runtimeConfig *Config) (*Server, error) {
 		}
 	})
 
-	mux.HandleFunc("/search/{source}", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/options/{source}/search", func(w http.ResponseWriter, r *http.Request) {
 		source := r.PathValue("source")
-		switch source {
-		case "nixos", "darwin", "home-manager":
-			err := templates["search"].Execute(w, TemplateData{
-				LiveReload: jsSnippet,
-				Source:     source,
-			})
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-			}
-		default:
+		if index[source] == nil {
 			http.Error(w, "Unknown source", http.StatusNotFound)
+
+			return
+		}
+		err := templates["search"].Execute(w, TemplateData{
+			LiveReload: jsSnippet,
+			Source:     source,
+		})
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})
 
@@ -143,7 +156,12 @@ func New(runtimeConfig *Config) (*Server, error) {
 		source := r.PathValue("source")
 		ctx, cancel := context.WithTimeoutCause(r.Context(), timeout, errors.New("timeout"))
 		defer cancel()
-		results, err := search.Search(ctx, r.URL.Query().Get("query"))
+		if index[source] == nil {
+			http.Error(w, "Unknown source", http.StatusNotFound)
+
+			return
+		}
+		results, err := index[source].Search(ctx, r.URL.Query().Get("query"))
 		if err != nil {
 			if err == context.DeadlineExceeded {
 				http.Error(w, "Search timed out", http.StatusInternalServerError)
