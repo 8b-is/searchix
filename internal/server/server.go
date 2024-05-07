@@ -183,7 +183,7 @@ func New(runtimeConfig *Config) (*Server, error) {
 	})
 
 	var nixosOptions = options.NixOptions{}
-	jsonFile, err := os.ReadFile(path.Join("data", "test.json"))
+	jsonFile, err := os.ReadFile(path.Join(config.DataPath, "test.json"))
 	if err != nil {
 		slog.Error(fmt.Sprintf("error reading json file: %v", err))
 	}

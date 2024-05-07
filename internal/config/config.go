@@ -24,9 +24,10 @@ func (u *URL) UnmarshalText(text []byte) (err error) {
 }
 
 type Config struct {
-	BaseURL URL  `toml:"base_url"`
-	CSP     *CSP `toml:"content-security-policy"`
-	Headers map[string]string
+	BaseURL  URL    `toml:"base_url"`
+	DataPath string `toml:"data_path"`
+	CSP      *CSP   `toml:"content-security-policy"`
+	Headers  map[string]string
 }
 
 func GetConfig() (*Config, error) {

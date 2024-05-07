@@ -1,4 +1,5 @@
 base_url = "https://searchix.alanpearce.eu"
+data_path = "./data"
 
 [content-security-policy]
 default-src = [
