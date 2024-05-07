@@ -1,0 +1,17 @@
+{{- template "main" . }}
+{{- template "js" . }}
+
+{{- define "main" }}
+  <label for="query">Search</label>
+  <form id="search" action="/options/results">
+    <input id="query" name="query" type="search" value="{{ .Query }}" />
+    <button>Search</button>
+  </form>
+  {{- with .Results }}
+    {{ block "results" . }}{{ end }}
+  {{- end }}
+{{- end }}
+
+{{- define "js" }}
+  <script src="/static/search.js" defer></script>
+{{- end }}

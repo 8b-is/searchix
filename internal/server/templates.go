@@ -34,14 +34,20 @@ var templateFuncs = template.FuncMap{
 	},
 }
 
-func loadTemplate(filenames ...string) (*template.Template, error) {
-	tpl := template.New(path.Base(filenames[0]))
+func loadTemplate(layoutFile string, filename string) (*template.Template, error) {
+	tpl := template.New("index.gotmpl")
 
 	tpl.Funcs(templateFuncs)
-
-	_, err := tpl.ParseFiles(filenames...)
+	_, err := tpl.ParseFiles(layoutFile)
 	if err != nil {
-		return nil, errors.WithMessage(err, "could not parse template")
+		return nil, errors.WithMessage(err, "could not parse layout template")
+	}
+
+	if filename != "" {
+		_, err = tpl.ParseGlob(filename)
+		if err != nil {
+			return nil, errors.WithMessage(err, "could not parse template")
+		}
 	}
 
 	return tpl, nil
@@ -53,21 +59,23 @@ func loadTemplates() (TemplateCollection, error) {
 
 	layoutFile := path.Join(templateDir, "index.gotmpl")
 
-	index, err := loadTemplate(layoutFile)
+	index, err := loadTemplate(layoutFile, "")
 	if err != nil {
 		return nil, err
 	}
 	templates["index"] = index
 
-	templatePaths, err := filepath.Glob(path.Join(templateDir, "blocks", "*.gotmpl"))
+	glob := path.Join(templateDir, "blocks", "*.gotmpl")
+	templatePaths, err := filepath.Glob(glob)
 	if err != nil {
 		return nil, errors.WithMessage(err, "could not glob block templates")
 	}
 	for _, fullname := range templatePaths {
-		tpl, err := loadTemplate(fullname, layoutFile)
+		tpl, err := loadTemplate(layoutFile, glob)
 		if err != nil {
 			return nil, err
 		}
+
 		name, _ := strings.CutSuffix(path.Base(fullname), ".gotmpl")
 		templates[name] = tpl
 	}

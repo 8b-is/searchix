@@ -57,6 +57,7 @@ const jsSnippet = template.HTML(livereload.JsSnippet) // #nosec G203
 type TemplateData struct {
 	LiveReload template.HTML
 	Query      string
+	Results    bool
 }
 
 type ResultData[T options.NixOption] struct {
@@ -120,6 +121,14 @@ func New(runtimeConfig *Config) (*Server, error) {
 		}
 	})
 
+	mux.HandleFunc("/search/{source}", func(w http.ResponseWriter, r *http.Request) {
+		log.Println(r.PathValue("source"))
+		err := templates["search"].Execute(w, indexData)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+	})
+
 	timeout := 1 * time.Second
 	mux.HandleFunc("/options/results", func(w http.ResponseWriter, r *http.Request) {
 		ctx, cancel := context.WithTimeoutCause(r.Context(), timeout, errors.New("timeout"))
@@ -141,7 +150,7 @@ func New(runtimeConfig *Config) (*Server, error) {
 		}
 		if r.Header.Get("Fetch") == "true" {
 			w.Header().Add("Content-Type", "text/html; charset=utf-8")
-			err = templates["options"].Execute(w, tdata)
+			err = templates["options"].ExecuteTemplate(w, "options.gotmpl", tdata)
 		} else {
 			err = templates["options"].ExecuteTemplate(w, "index.gotmpl", tdata)
 		}

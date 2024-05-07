@@ -1,59 +1,61 @@
-{{ template "results" . }}
-{{ define "results" }}
-  {{- with .Results }}
-    {{- range .Results }}
-      <details id="{{ .Option }}">
-        <summary>
-          {{ .Option }}
-        </summary>
-        <p>
-          {{ markdown .Description }}
-        </p>
-        <dl>
-          {{- with .Type }}
-            <dt>Type</dt>
-            <dd><code>{{ . }}</code></dd>
-          {{- end }}
-          {{- with .Default }}
-            {{- if or .Text .Markdown }}
-              <dt>Default</dt>
-              <dd>
-                {{- if .Markdown }}
-                  {{ markdown .Markdown }}
-                {{- else }}
-                  <pre><code>{{ .Text }}</code></pre>
-                {{- end }}
-              </dd>
+{{- template "results" .Results -}}
+{{- define "results" }}
+  <div id="results">
+    {{- with . }}
+      {{- range .Results }}
+        <details id="{{ .Option }}">
+          <summary>
+            {{ .Option }}
+          </summary>
+          <p>
+            {{ markdown .Description }}
+          </p>
+          <dl>
+            {{- with .Type }}
+              <dt>Type</dt>
+              <dd><code>{{ . }}</code></dd>
             {{- end }}
-          {{- end }}
-          {{- with .Example }}
-            {{- if or .Text .Markdown }}
-              <dt>Example</dt>
-              <dd>
-                {{- if .Markdown }}
-                  {{ markdown .Markdown }}
-                {{- else }}
-                  <pre><code>{{ .Text }}</code></pre>
-                {{- end }}
-              </dd>
+            {{- with .Default }}
+              {{- if or .Text .Markdown }}
+                <dt>Default</dt>
+                <dd>
+                  {{- if .Markdown }}
+                    {{ markdown .Markdown }}
+                  {{- else }}
+                    <pre><code>{{ .Text }}</code></pre>
+                  {{- end }}
+                </dd>
+              {{- end }}
             {{- end }}
-          {{- end }}
-          {{- with .RelatedPackages }}
-            <dt>Related Packages</dt>
-            <dd>{{ . }}</dd>
-          {{- end }}
-          {{- with .Declarations }}
-            <dt>Declared</dt>
-            {{- range . }}
-              <dd>
-                <a href="{{ .URL }}">{{ .Name }}</a>
-              </dd>
+            {{- with .Example }}
+              {{- if or .Text .Markdown }}
+                <dt>Example</dt>
+                <dd>
+                  {{- if .Markdown }}
+                    {{ markdown .Markdown }}
+                  {{- else }}
+                    <pre><code>{{ .Text }}</code></pre>
+                  {{- end }}
+                </dd>
+              {{- end }}
             {{- end }}
-          {{- end }}
-        </dl>
-      </details>
-    {{- else }}
-      Nothing found
+            {{- with .RelatedPackages }}
+              <dt>Related Packages</dt>
+              <dd>{{ . }}</dd>
+            {{- end }}
+            {{- with .Declarations }}
+              <dt>Declared</dt>
+              {{- range . }}
+                <dd>
+                  <a href="{{ .URL }}">{{ .Name }}</a>
+                </dd>
+              {{- end }}
+            {{- end }}
+          </dl>
+        </details>
+      {{- else }}
+        Nothing found
+      {{- end }}
     {{- end }}
-  {{- end }}
-{{ end }}
+  </div>
+{{- end }}

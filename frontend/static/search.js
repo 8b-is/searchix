@@ -1,5 +1,10 @@
 const search = document.getElementById("search");
-const results = document.getElementById("results");
+let results = document.getElementById("results");
+
+const range = new Range();
+range.setStartAfter(search);
+range.setEndAfter(search.parentNode.lastChild);
+
 let state = history.state || {
   url: new URL(location).toJSON(),
   opened: [],
@@ -24,7 +29,7 @@ function detailsToggled(ev) {
   state.url = nextURL.toJSON();
   history.replaceState(state, "", nextURL);
 }
-function addToggleEventListeners() {
+function addToggleEventListeners(results) {
   results.querySelectorAll("details").forEach((details) =>
     // toggle event doesn't bubble :(
     details.addEventListener("toggle", detailsToggled, { passive: true }),
@@ -49,18 +54,25 @@ search.addEventListener("submit", function (ev) {
       }
     })
     .then(function (html) {
-      results.innerHTML =
-        escapePolicy !== null ? escapePolicy.createHTML(html) : html;
-      addToggleEventListeners();
+      const fragment = range.createContextualFragment(
+        escapePolicy !== null ? escapePolicy.createHTML(html) : html,
+      );
+      const results = fragment.firstElementChild;
+      range.deleteContents();
+      range.insertNode(results);
+      addToggleEventListeners(results);
     })
     .catch(function (error) {
-      results.innerText = error.message;
+      range.deleteContents();
+      range.insertNode(new Text(error.message));
       console.error("fetch failed", error);
     });
   ev.preventDefault();
 });
 
-addToggleEventListeners();
+if (results !== null) {
+  addToggleEventListeners(results);
+}
 
 if (state.opened.length > 0) {
   state.opened.forEach((id) =>
@@ -71,7 +83,8 @@ if (state.opened.length > 0) {
 }
 
 addEventListener("popstate", function (ev) {
-  if (ev.state == null || ev.state.url.pathname == "/") {
-    results.replaceChildren();
+  if (ev.state == null || ev.state.url.pathname.startsWith("/search/")) {
+    range.deleteContents();
+    search.reset();
   }
 });
