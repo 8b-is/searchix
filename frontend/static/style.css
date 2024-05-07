@@ -21,6 +21,10 @@ dd {
   margin-inline-start: 1rem;
 }
 
+dd > p {
+  margin: unset;
+}
+
 dl {
   display: grid;
   align-items: baseline;

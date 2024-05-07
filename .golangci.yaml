@@ -21,3 +21,16 @@ linters:
         - sloglint
         - unconvert
         - wrapcheck
+linters-settings:
+    wrapcheck:
+        ignoreSigs:
+            - .Errorf(
+            - errors.New(
+            - errors.Unwrap(
+            - errors.Join(
+            - .Wrap(
+            - .Wrapf(
+            - .WithMessage(
+            - .WithMessagef(
+            - .WithStack(
+            - (context.Context).Err(

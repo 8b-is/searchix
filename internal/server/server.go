@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"io"
@@ -17,6 +16,7 @@ import (
 
 	cfg "searchix/internal/config"
 	"searchix/internal/options"
+	"searchix/internal/search"
 
 	"github.com/getsentry/sentry-go"
 	sentryhttp "github.com/getsentry/sentry-go/http"
@@ -59,15 +59,22 @@ type TemplateData struct {
 	Query      string
 }
 
-type OptionResultData struct {
+type ResultData[T options.NixOption] struct {
 	TemplateData
 	Query   string
-	Results options.NixOptions
+	Results *search.Result[T]
 }
 
 func applyDevModeOverrides(config *cfg.Config) {
 	config.CSP.ScriptSrc = slices.Insert(config.CSP.ScriptSrc, 0, "'unsafe-inline'")
 	config.CSP.ConnectSrc = slices.Insert(config.CSP.ConnectSrc, 0, "'self'")
+}
+
+func init() {
+	err := search.Index()
+	if err != nil {
+		log.Fatalf("could not build search index, error: %#v", err)
+	}
 }
 
 func New(runtimeConfig *Config) (*Server, error) {
@@ -113,23 +120,25 @@ func New(runtimeConfig *Config) (*Server, error) {
 		}
 	})
 
-	var nixosOptions = options.NixOptions{}
-	jsonFile, err := os.ReadFile(path.Join(config.DataPath, "test.json"))
-	if err != nil {
-		slog.Error(fmt.Sprintf("error reading json file: %v", err))
-	}
-	err = json.Unmarshal(jsonFile, &nixosOptions)
-	if err != nil {
-		slog.Error(fmt.Sprintf("error parsing json file: %v", err))
-	}
-
+	timeout := 1 * time.Second
 	mux.HandleFunc("/options/results", func(w http.ResponseWriter, r *http.Request) {
-		tdata := OptionResultData{
+		ctx, cancel := context.WithTimeoutCause(r.Context(), timeout, errors.New("timeout"))
+		defer cancel()
+		results, err := search.Search(ctx, r.URL.Query().Get("query"))
+		if err != nil {
+			if err == context.DeadlineExceeded {
+				http.Error(w, "Search timed out", http.StatusInternalServerError)
+
+				return
+			}
+			slog.Error("search error", "error", err)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		tdata := ResultData[options.NixOption]{
 			TemplateData: indexData,
 			Query:        r.URL.Query().Get("query"),
-			Results:      nixosOptions,
+			Results:      results,
 		}
-		var err error
 		if r.Header.Get("Fetch") == "true" {
 			w.Header().Add("Content-Type", "text/html; charset=utf-8")
 			err = templates["options"].Execute(w, tdata)
@@ -137,7 +146,7 @@ func New(runtimeConfig *Config) (*Server, error) {
 			err = templates["options"].ExecuteTemplate(w, "index.gotmpl", tdata)
 		}
 		if err != nil {
-			slog.Error(fmt.Sprintf("template error: %v", err))
+			slog.Error("template error", "template", "options", "error", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 	})

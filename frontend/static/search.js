@@ -38,14 +38,14 @@ search.addEventListener("submit", function (ev) {
       fetch: "true",
     },
   })
-    .then(function (res) {
+    .then(async function (res) {
       state.url = url.toJSON();
       state.opened = [];
-      history.pushState(state, null, url);
       if (res.ok) {
+        history.pushState(state, null, url);
         return res.text();
       } else {
-        throw new Error(res.statusText);
+        throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`);
       }
     })
     .then(function (html) {
@@ -54,6 +54,7 @@ search.addEventListener("submit", function (ev) {
       addToggleEventListeners();
     })
     .catch(function (error) {
+      results.innerText = error.message;
       console.error("fetch failed", error);
     });
   ev.preventDefault();
