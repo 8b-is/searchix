@@ -3,10 +3,52 @@
   --text: black;
   --text-light: #212121;
   --preformatted: var(--code);
+  --min-width: 60rem;
 }
+
+body {
+  grid-template-columns: 1fr min(var(--min-width), 90%) 1fr;
+}
+
+body > header {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  padding: unset;
+  & > :only-child {
+    margin-block-start: 0;
+  }
+  & > nav {
+    width: min(var(--min-width), 90%);
+    display: flex;
+    padding: 0.5rem 0;
+
+    a {
+      margin-bottom: unset;
+    }
+
+    & h1 {
+      margin: unset;
+      font-size: unset;
+      line-height: 2;
+      & > a {
+        margin-left: unset;
+        padding-left: unset;
+        border: 1px transparent;
+      }
+    }
+  }
+}
+
 form {
+  margin-top: 1.5rem;
+}
+
+fieldset {
   display: flex;
   column-gap: 1ex;
+  border: none;
+  padding: unset;
 }
 
 input[type="search"] {
