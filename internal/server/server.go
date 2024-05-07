@@ -80,15 +80,12 @@ var sourceFileName = map[string]string{
 	"nixos":        "nixos-options-nixos-unstable",
 }
 
-func init() {
+func makeIndex(source string, filename string) {
 	var err error
-
-	for source, filename := range sourceFileName {
-		index[source], err = search.New(filename)
-		if err != nil {
-			log.Fatalf("could not build search index, error: %#v", err)
-		}
-
+	log.Printf("loading %s index", source)
+	index[source], err = search.New(filename)
+	if err != nil {
+		log.Fatalf("could not build search index, error: %#v", err)
 	}
 }
 
@@ -192,6 +189,12 @@ func New(runtimeConfig *Config) (*Server, error) {
 	})
 
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("frontend/static"))))
+
+	go func() {
+		for source, filename := range sourceFileName {
+			makeIndex(source, filename)
+		}
+	}()
 
 	if runtimeConfig.LiveReload {
 		applyDevModeOverrides(config)
