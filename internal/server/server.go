@@ -107,7 +107,7 @@ func New(runtimeConfig *Config) (*Server, error) {
 		LiveReload: jsSnippet,
 	}
 	mux.HandleFunc("/{$}", func(w http.ResponseWriter, _ *http.Request) {
-		err := templates["index"].Execute(w, indexData)
+		err := templates["index"].ExecuteTemplate(w, "index.gotmpl", indexData)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
@@ -132,9 +132,9 @@ func New(runtimeConfig *Config) (*Server, error) {
 		var err error
 		if r.Header.Get("Fetch") == "true" {
 			w.Header().Add("Content-Type", "text/html; charset=utf-8")
-			err = templates["options"].ExecuteTemplate(w, "results", tdata)
+			err = templates["options"].Execute(w, tdata)
 		} else {
-			err = templates["options"].ExecuteTemplate(w, "index", tdata)
+			err = templates["options"].ExecuteTemplate(w, "index.gotmpl", tdata)
 		}
 		if err != nil {
 			slog.Error(fmt.Sprintf("template error: %v", err))

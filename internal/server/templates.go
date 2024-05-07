@@ -5,7 +5,6 @@ import (
 	"html"
 	"html/template"
 	"log/slog"
-	"os"
 	"path"
 	"path/filepath"
 	"searchix/internal/options"
@@ -35,15 +34,12 @@ var templateFuncs = template.FuncMap{
 	},
 }
 
-func loadTemplate(filename string) (*template.Template, error) {
-	text, err := os.ReadFile(filename)
-	if err != nil {
-		return nil, errors.WithMessage(err, "could not read template")
-	}
-	name, _ := strings.CutSuffix(path.Base(filename), ".gotmpl")
-	tpl := template.New(name)
+func loadTemplate(filenames ...string) (*template.Template, error) {
+	tpl := template.New(path.Base(filenames[0]))
+
 	tpl.Funcs(templateFuncs)
-	_, err = tpl.Parse(string(text))
+
+	_, err := tpl.ParseFiles(filenames...)
 	if err != nil {
 		return nil, errors.WithMessage(err, "could not parse template")
 	}
@@ -55,7 +51,9 @@ func loadTemplates() (TemplateCollection, error) {
 	templateDir := path.Join("frontend", "templates")
 	templates := make(TemplateCollection, 0)
 
-	index, err := loadTemplate(path.Join(templateDir, "index.gotmpl"))
+	layoutFile := path.Join(templateDir, "index.gotmpl")
+
+	index, err := loadTemplate(layoutFile)
 	if err != nil {
 		return nil, err
 	}
@@ -66,15 +64,12 @@ func loadTemplates() (TemplateCollection, error) {
 		return nil, errors.WithMessage(err, "could not glob block templates")
 	}
 	for _, fullname := range templatePaths {
-		tpl, err := loadTemplate(fullname)
+		tpl, err := loadTemplate(fullname, layoutFile)
 		if err != nil {
 			return nil, err
 		}
-		_, err = tpl.AddParseTree("index", index.Tree)
-		if err != nil {
-			return nil, errors.WithMessage(err, "could not add index template")
-		}
-		templates[tpl.Name()] = tpl
+		name, _ := strings.CutSuffix(path.Base(fullname), ".gotmpl")
+		templates[name] = tpl
 	}
 
 	return templates, nil
