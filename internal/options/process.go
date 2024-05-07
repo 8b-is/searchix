@@ -156,7 +156,12 @@ func Process(inpath string, outpath string, channel string, revision string) err
 				}
 				decls = append(decls, link)
 			case reflect.Map:
-				decls = append(decls, decl.Convert(reflect.TypeFor[Link]()).Interface().(*Link))
+				v := decl.Interface().(map[string]interface{})
+				link := Link{
+					Name: v["name"].(string),
+					URL:  v["url"].(string),
+				}
+				decls = append(decls, &link)
 			default:
 				println("kind", decl.Kind().String())
 				panic("unexpected object type")
