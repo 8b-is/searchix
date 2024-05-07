@@ -57,4 +57,4 @@ precommit:
 	nix-build -A pre-commit-check
 
 dev: prepare
-	wgo run ./serve/ --live
+	watchexec wgo run -exit ./serve/ --live
