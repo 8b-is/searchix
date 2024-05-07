@@ -2,10 +2,12 @@
 {{- template "js" . }}
 
 {{- define "main" }}
-  <label for="query">Search</label>
-  <form id="search" action="/options/results">
-    <input id="query" name="query" type="search" value="{{ .Query }}" />
-    <button>Search</button>
+  <form id="search" action="/options/{{ .Source }}/results">
+    <label for="query">{{ sourceName .Source }} option search</label>
+    <fieldset>
+      <input id="query" name="query" type="search" value="{{ .Query }}" />
+      <button>Search</button>
+    </fieldset>
   </form>
   {{- with .Results }}
     {{ block "results" . }}{{ end }}

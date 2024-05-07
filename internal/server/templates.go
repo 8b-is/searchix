@@ -32,6 +32,18 @@ var templateFuncs = template.FuncMap{
 
 		return template.HTML(out.String()) // #nosec G203
 	},
+	"sourceName": func(input string) string {
+		switch input {
+		case "nixos":
+			return "NixOS"
+		case "darwin":
+			return "Darwin"
+		case "home-manager":
+			return "Home Manager"
+		}
+
+		return input
+	},
 }
 
 func loadTemplate(layoutFile string, filename string) (*template.Template, error) {

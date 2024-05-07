@@ -56,6 +56,7 @@ const jsSnippet = template.HTML(livereload.JsSnippet) // #nosec G203
 
 type TemplateData struct {
 	LiveReload template.HTML
+	Source     string
 	Query      string
 	Results    bool
 }
@@ -122,15 +123,24 @@ func New(runtimeConfig *Config) (*Server, error) {
 	})
 
 	mux.HandleFunc("/search/{source}", func(w http.ResponseWriter, r *http.Request) {
-		log.Println(r.PathValue("source"))
-		err := templates["search"].Execute(w, indexData)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+		source := r.PathValue("source")
+		switch source {
+		case "nixos", "darwin", "home-manager":
+			err := templates["search"].Execute(w, TemplateData{
+				LiveReload: jsSnippet,
+				Source:     source,
+			})
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+		default:
+			http.Error(w, "Unknown source", http.StatusNotFound)
 		}
 	})
 
 	timeout := 1 * time.Second
-	mux.HandleFunc("/options/results", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/options/{source}/results", func(w http.ResponseWriter, r *http.Request) {
+		source := r.PathValue("source")
 		ctx, cancel := context.WithTimeoutCause(r.Context(), timeout, errors.New("timeout"))
 		defer cancel()
 		results, err := search.Search(ctx, r.URL.Query().Get("query"))
@@ -144,9 +154,12 @@ func New(runtimeConfig *Config) (*Server, error) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 		tdata := ResultData[options.NixOption]{
-			TemplateData: indexData,
-			Query:        r.URL.Query().Get("query"),
-			Results:      results,
+			TemplateData: TemplateData{
+				LiveReload: jsSnippet,
+				Source:     source,
+			},
+			Query:   r.URL.Query().Get("query"),
+			Results: results,
 		}
 		if r.Header.Get("Fetch") == "true" {
 			w.Header().Add("Content-Type", "text/html; charset=utf-8")
