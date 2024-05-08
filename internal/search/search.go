@@ -15,6 +15,7 @@ import (
 	"github.com/blevesearch/bleve/v2/analysis/token/camelcase"
 	"github.com/blevesearch/bleve/v2/analysis/tokenizer/letter"
 	"github.com/blevesearch/bleve/v2/document"
+	"github.com/blevesearch/bleve/v2/search"
 	index "github.com/blevesearch/bleve_index_api"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
@@ -22,9 +23,14 @@ import (
 
 const ResultsPerPage = 20
 
+type DocumentMatch[T options.NixOption] struct {
+	search.DocumentMatch
+	Data T
+}
+
 type Result[T options.NixOption] struct {
 	*bleve.SearchResult
-	Results []T
+	Hits []DocumentMatch[T]
 }
 
 type Index[T options.NixOption] struct {
@@ -158,14 +164,14 @@ func (index *Index[T]) Search(ctx context.Context, keyword string, from uint64) 
 			return nil, errors.WithMessage(err, "failed to execute search query")
 		}
 
-		results := make([]T, min(ResultsPerPage, bleveResult.Total))
+		results := make([]DocumentMatch[T], min(ResultsPerPage, bleveResult.Total))
 		var buf bytes.Buffer
 		for i, result := range bleveResult.Hits {
 			_, err = buf.WriteString(result.Fields["data"].(string))
 			if err != nil {
 				return nil, errors.WithMessage(err, "error fetching result data")
 			}
-			err = gob.NewDecoder(&buf).Decode(&results[i])
+			err = gob.NewDecoder(&buf).Decode(&results[i].Data)
 			if err != nil {
 				return nil, errors.WithMessagef(err, "error decoding gob data: %s", buf.String())
 			}
@@ -173,8 +179,8 @@ func (index *Index[T]) Search(ctx context.Context, keyword string, from uint64) 
 		}
 
 		return &Result[T]{
-			bleveResult,
-			results,
+			SearchResult: bleveResult,
+			Hits:         results,
 		}, nil
 	}
 }

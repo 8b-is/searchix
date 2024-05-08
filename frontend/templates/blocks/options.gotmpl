@@ -2,57 +2,59 @@
 {{- define "results" }}
   {{- if gt .Results.Total 0 }}
     <section id="results">
-      {{- range .Results.Results }}
-        <details id="{{ .Option }}">
-          <summary>
-            {{ .Option }}
-          </summary>
-          <p>
-            {{ markdown .Description }}
-          </p>
-          <dl>
-            {{- with .Type }}
-              <dt>Type</dt>
-              <dd><code>{{ . }}</code></dd>
-            {{- end }}
-            {{- with .Default }}
-              {{- if or .Text .Markdown }}
-                <dt>Default</dt>
-                <dd>
-                  {{- if .Markdown }}
-                    {{ markdown .Markdown }}
-                  {{- else }}
-                    <pre><code>{{ .Text }}</code></pre>
-                  {{- end }}
-                </dd>
+      {{- range .Results.Hits }}
+        {{- with .Data }}
+          <details id="{{ .Option }}">
+            <summary>
+              {{ .Option }}
+            </summary>
+            <p>
+              {{ markdown .Description }}
+            </p>
+            <dl>
+              {{- with .Type }}
+                <dt>Type</dt>
+                <dd><code>{{ . }}</code></dd>
               {{- end }}
-            {{- end }}
-            {{- with .Example }}
-              {{- if or .Text .Markdown }}
-                <dt>Example</dt>
-                <dd>
-                  {{- if .Markdown }}
-                    {{ markdown .Markdown }}
-                  {{- else }}
-                    <pre><code>{{ .Text }}</code></pre>
-                  {{- end }}
-                </dd>
+              {{- with .Default }}
+                {{- if or .Text .Markdown }}
+                  <dt>Default</dt>
+                  <dd>
+                    {{- if .Markdown }}
+                      {{ markdown .Markdown }}
+                    {{- else }}
+                      <pre><code>{{ .Text }}</code></pre>
+                    {{- end }}
+                  </dd>
+                {{- end }}
               {{- end }}
-            {{- end }}
-            {{- with .RelatedPackages }}
-              <dt>Related Packages</dt>
-              <dd>{{ . }}</dd>
-            {{- end }}
-            {{- with .Declarations }}
-              <dt>Declared</dt>
-              {{- range . }}
-                <dd>
-                  <a href="{{ .URL }}">{{ .Name }}</a>
-                </dd>
+              {{- with .Example }}
+                {{- if or .Text .Markdown }}
+                  <dt>Example</dt>
+                  <dd>
+                    {{- if .Markdown }}
+                      {{ markdown .Markdown }}
+                    {{- else }}
+                      <pre><code>{{ .Text }}</code></pre>
+                    {{- end }}
+                  </dd>
+                {{- end }}
               {{- end }}
-            {{- end }}
-          </dl>
-        </details>
+              {{- with .RelatedPackages }}
+                <dt>Related Packages</dt>
+                <dd>{{ . }}</dd>
+              {{- end }}
+              {{- with .Declarations }}
+                <dt>Declared</dt>
+                {{- range . }}
+                  <dd>
+                    <a href="{{ .URL }}">{{ .Name }}</a>
+                  </dd>
+                {{- end }}
+              {{- end }}
+            </dl>
+          </details>
+        {{- end }}
       {{- end }}
       <footer>
         <nav id="pagination">
