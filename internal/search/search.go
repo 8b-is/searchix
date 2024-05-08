@@ -11,6 +11,9 @@ import (
 
 	"github.com/bcicen/jstream"
 	"github.com/blevesearch/bleve/v2"
+	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
+	"github.com/blevesearch/bleve/v2/analysis/token/camelcase"
+	"github.com/blevesearch/bleve/v2/analysis/tokenizer/letter"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 )
@@ -28,21 +31,44 @@ type Index[T options.NixOption] struct {
 }
 
 func New[T options.NixOption](kind string) (*Index[T], error) {
+	var err error
 	bleve.SetLog(log.Default())
+
+	indexMapping := bleve.NewIndexMapping()
+
 	textFieldMapping := bleve.NewTextFieldMapping()
+	descriptionFieldMapping := bleve.NewTextFieldMapping()
+	descriptionFieldMapping.Analyzer = "web"
+
+	err = indexMapping.AddCustomAnalyzer("option_name", map[string]interface{}{
+		"type":      custom.Name,
+		"tokenizer": letter.Name,
+		"token_filters": []string{
+			camelcase.Name,
+		},
+	})
+	if err != nil {
+		return nil, errors.WithMessage(err, "could not add custom analyser")
+	}
 	nameMapping := bleve.NewTextFieldMapping()
-	// something special for tokenisation?
-	// nameMapping.
+	nameMapping.Analyzer = "option_name"
+	nameMapping.IncludeTermVectors = true
+	nixValueMapping := bleve.NewDocumentStaticMapping()
+	nixValueMapping.AddFieldMappingsAt("Text", textFieldMapping)
+	nixValueMapping.AddFieldMappingsAt("Markdown", textFieldMapping)
+
 	optionMapping := bleve.NewDocumentStaticMapping()
 
 	optionMapping.AddFieldMappingsAt("Option", nameMapping)
+	optionMapping.AddFieldMappingsAt("Loc", bleve.NewKeywordFieldMapping())
 	optionMapping.AddFieldMappingsAt("RelatedPackages", textFieldMapping)
 	optionMapping.AddFieldMappingsAt("Description", textFieldMapping)
 
-	indexMapping := bleve.NewIndexMapping()
+	optionMapping.AddSubDocumentMapping("Default", nixValueMapping)
+	optionMapping.AddSubDocumentMapping("Example", nixValueMapping)
+
 	indexMapping.AddDocumentMapping("option", optionMapping)
 
-	var err error
 	index, err := bleve.NewMemOnly(indexMapping)
 	// index, err = bleve.New(path.Join(cfg.DataPath, const indexFilename = "index.bleve"), indexMapping)
 
@@ -96,6 +122,7 @@ func New[T options.NixOption](kind string) (*Index[T], error) {
 
 func (index *Index[T]) Search(ctx context.Context, keyword string, from uint64) (*Result[T], error) {
 	query := bleve.NewMatchQuery(keyword)
+	query.Analyzer = "option_name"
 	search := bleve.NewSearchRequest(query)
 	search.Size = ResultsPerPage
 
