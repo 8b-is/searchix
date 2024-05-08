@@ -87,8 +87,9 @@ var sourceFileName = map[string]string{
 
 func makeIndex(source string, filename string) {
 	var err error
-	log.Printf("loading %s index", source)
+	slog.Info("loading index", "index", source)
 	index[source], err = search.New(filename)
+	slog.Info("loaded index", "index", source)
 	if err != nil {
 		log.Fatalf("could not build search index, error: %#v", err)
 	}
