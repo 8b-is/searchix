@@ -26,9 +26,9 @@ type linkJSON struct {
 
 type nixOptionJSON struct {
 	Declarations    []linkJSON
-	Default         nixValueJSON
+	Default         *nixValueJSON
 	Description     string
-	Example         nixValueJSON
+	Example         *nixValueJSON
 	Loc             []string
 	ReadOnly        bool
 	RelatedPackages string
@@ -80,13 +80,12 @@ func MakeChannelLink(channel string, ref string, subPath string) (*Link, error) 
 	}, nil
 }
 
-func convertNixValue(nj nixValueJSON) *NixValue {
+func convertNixValue(nj *nixValueJSON) *NixValue {
+	if nj == nil {
+		return nil
+	}
 	switch nj.Type {
 	case "", "literalExpression":
-		if nj.Text == "" {
-			return nil
-		}
-
 		return &NixValue{
 			Text: nj.Text,
 		}
@@ -144,6 +143,8 @@ func Process(inpath string, outpath string, channel string, revision string) err
 
 		var decls []*Link
 		for _, decl := range x["declarations"].([]interface{}) {
+			optJSON = nixOptionJSON{}
+
 			switch decl := reflect.ValueOf(decl); decl.Kind() {
 			case reflect.String:
 				s := decl.String()
