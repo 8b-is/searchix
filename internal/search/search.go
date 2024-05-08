@@ -69,6 +69,7 @@ func New[T options.NixOption](kind string) (*Index[T], error) {
 		return nil, errors.WithMessage(err, "could not create struct decoder")
 	}
 	for mv := range dec.Stream() {
+		opt = options.NixOption{}
 		err := ms.Decode(mv.Value) // stores in opt
 
 		if err != nil {
