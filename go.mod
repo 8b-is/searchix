@@ -6,6 +6,7 @@ require (
 	github.com/ardanlabs/conf/v3 v3.1.7
 	github.com/bcicen/jstream v1.0.1
 	github.com/blevesearch/bleve/v2 v2.4.0
+	github.com/blevesearch/bleve_index_api v1.1.6
 	github.com/crewjam/csp v0.0.2
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/getsentry/sentry-go v0.27.0
@@ -20,7 +21,6 @@ require (
 require (
 	github.com/RoaringBitmap/roaring v1.9.3 // indirect
 	github.com/bits-and-blooms/bitset v1.13.0 // indirect
-	github.com/blevesearch/bleve_index_api v1.1.6 // indirect
 	github.com/blevesearch/geo v0.1.20 // indirect
 	github.com/blevesearch/go-faiss v1.0.15 // indirect
 	github.com/blevesearch/go-porterstemmer v1.0.3 // indirect

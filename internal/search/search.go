@@ -1,12 +1,12 @@
 package search
 
 import (
+	"bytes"
 	"context"
+	"encoding/gob"
 	"log"
 	"os"
 	"path"
-	"sync"
-
 	"searchix/internal/options"
 
 	"github.com/bcicen/jstream"
@@ -14,6 +14,8 @@ import (
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
 	"github.com/blevesearch/bleve/v2/analysis/token/camelcase"
 	"github.com/blevesearch/bleve/v2/analysis/tokenizer/letter"
+	"github.com/blevesearch/bleve/v2/document"
+	index "github.com/blevesearch/bleve_index_api"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 )
@@ -27,7 +29,6 @@ type Result[T options.NixOption] struct {
 
 type Index[T options.NixOption] struct {
 	index bleve.Index
-	docs  *sync.Map
 }
 
 func New[T options.NixOption](kind string) (*Index[T], error) {
@@ -37,7 +38,10 @@ func New[T options.NixOption](kind string) (*Index[T], error) {
 	indexMapping := bleve.NewIndexMapping()
 
 	textFieldMapping := bleve.NewTextFieldMapping()
+	textFieldMapping.Store = false
+
 	descriptionFieldMapping := bleve.NewTextFieldMapping()
+	descriptionFieldMapping.Store = false
 	descriptionFieldMapping.Analyzer = "web"
 
 	err = indexMapping.AddCustomAnalyzer("option_name", map[string]interface{}{
@@ -53,6 +57,8 @@ func New[T options.NixOption](kind string) (*Index[T], error) {
 	nameMapping := bleve.NewTextFieldMapping()
 	nameMapping.Analyzer = "option_name"
 	nameMapping.IncludeTermVectors = true
+	nameMapping.Store = false
+
 	nixValueMapping := bleve.NewDocumentStaticMapping()
 	nixValueMapping.AddFieldMappingsAt("Text", textFieldMapping)
 	nixValueMapping.AddFieldMappingsAt("Markdown", textFieldMapping)
@@ -69,15 +75,13 @@ func New[T options.NixOption](kind string) (*Index[T], error) {
 
 	indexMapping.AddDocumentMapping("option", optionMapping)
 
-	index, err := bleve.NewMemOnly(indexMapping)
+	idx, err := bleve.NewMemOnly(indexMapping)
 	// index, err = bleve.New(path.Join(cfg.DataPath, const indexFilename = "index.bleve"), indexMapping)
 
 	if err != nil {
 		return nil, errors.WithMessage(err, "error opening index")
 	}
-	batch := index.NewBatch()
-
-	var docs sync.Map
+	batch := idx.NewBatch()
 
 	jsonFile, err := os.Open(path.Join("data", "processed", kind+".json"))
 	if err != nil {
@@ -96,27 +100,40 @@ func New[T options.NixOption](kind string) (*Index[T], error) {
 	}
 	for mv := range dec.Stream() {
 		opt = options.NixOption{}
-		err := ms.Decode(mv.Value) // stores in opt
-
+		orig := mv.Value.(map[string]interface{})
+		err := ms.Decode(orig) // stores in opt
 		if err != nil {
-			return nil, errors.WithMessagef(err, "could not decode object into option, object: %#v", mv.Value)
+			return nil, errors.WithMessagef(err, "could not decode value: %+v", orig)
 		}
 
-		docs.Store(opt.Option, opt)
+		doc := document.NewDocument(opt.Option)
+		err = indexMapping.MapDocument(doc, opt)
+		if err != nil {
+			return nil, errors.WithMessagef(err, "could not map document for option: %s", opt.Option)
+		}
 
-		err = batch.Index(opt.Option, opt)
+		var data bytes.Buffer
+		enc := gob.NewEncoder(&data)
+		err = enc.Encode(opt)
+		if err != nil {
+			return nil, errors.WithMessage(err, "could not store option in search index")
+		}
+		field := document.NewTextFieldWithIndexingOptions("data", nil, data.Bytes(), index.StoreField)
+		newDoc := doc.AddField(field)
+
+		err = batch.IndexAdvanced(newDoc)
+
 		if err != nil {
 			return nil, errors.WithMessagef(err, "could not index option %s", opt.Option)
 		}
 	}
-	err = index.Batch(batch)
+	err = idx.Batch(batch)
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to run batch index operation")
 	}
 
 	return &Index[T]{
-		index,
-		&docs,
+		idx,
 	}, nil
 }
 
@@ -125,6 +142,8 @@ func (index *Index[T]) Search(ctx context.Context, keyword string, from uint64) 
 	query.Analyzer = "option_name"
 	search := bleve.NewSearchRequest(query)
 	search.Size = ResultsPerPage
+	search.Fields = []string{"data"}
+	search.Explain = true
 
 	if from != 0 {
 		search.From = int(from)
@@ -141,8 +160,13 @@ func (index *Index[T]) Search(ctx context.Context, keyword string, from uint64) 
 
 		results := make([]T, min(ResultsPerPage, bleveResult.Total))
 		for i, result := range bleveResult.Hits {
-			doc, _ := index.docs.Load(result.ID)
-			results[i] = doc.(T)
+			data := result.Fields["data"]
+			byt := bytes.NewBuffer([]byte(data.(string)))
+			dec := gob.NewDecoder(byt)
+			err := dec.Decode(&results[i])
+			if err != nil {
+				return nil, errors.WithMessagef(err, "error decoding gob data: %s", byt.String())
+			}
 		}
 
 		return &Result[T]{
