@@ -44,7 +44,7 @@ function paginationLinkClicked(ev) {
   ev.preventDefault();
 }
 
-function addPaginationEventListeners() {
+function addPaginationEventListeners(pagination) {
   pagination.addEventListener("click", paginationLinkClicked);
 }
 
