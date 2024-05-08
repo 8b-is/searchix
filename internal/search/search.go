@@ -159,14 +159,17 @@ func (index *Index[T]) Search(ctx context.Context, keyword string, from uint64) 
 		}
 
 		results := make([]T, min(ResultsPerPage, bleveResult.Total))
+		var buf bytes.Buffer
 		for i, result := range bleveResult.Hits {
-			data := result.Fields["data"]
-			byt := bytes.NewBuffer([]byte(data.(string)))
-			dec := gob.NewDecoder(byt)
-			err := dec.Decode(&results[i])
+			_, err = buf.WriteString(result.Fields["data"].(string))
 			if err != nil {
-				return nil, errors.WithMessagef(err, "error decoding gob data: %s", byt.String())
+				return nil, errors.WithMessage(err, "error fetching result data")
 			}
+			err = gob.NewDecoder(&buf).Decode(&results[i])
+			if err != nil {
+				return nil, errors.WithMessagef(err, "error decoding gob data: %s", buf.String())
+			}
+			buf.Reset()
 		}
 
 		return &Result[T]{
