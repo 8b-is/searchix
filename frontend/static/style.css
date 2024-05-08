@@ -79,7 +79,7 @@ dl {
   align-items: baseline;
   grid-row-gap: 1ch;
   grid-template-rows: 1fr;
-  grid-template-columns: max-content 1fr;
+  grid-template-columns: max-content minmax(90%, 1fr);
 }
 
 pre {
