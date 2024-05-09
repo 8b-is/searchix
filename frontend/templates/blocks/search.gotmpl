@@ -3,7 +3,7 @@
 
 {{- define "main" }}
   <form id="search" action="results">
-    <label for="query">{{ sourceName .Source }} option search</label>
+    <label for="query">{{ .Source.Name }} option search</label>
     <fieldset>
       <input id="query" name="query" type="search" value="{{ .Query }}" />
       <button>Search</button>

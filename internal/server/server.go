@@ -17,6 +17,7 @@ import (
 	"time"
 
 	cfg "searchix/internal/config"
+	"searchix/internal/importer"
 	"searchix/internal/options"
 	"searchix/internal/search"
 
@@ -62,7 +63,7 @@ const jsSnippet = template.HTML(livereload.JsSnippet) // #nosec G203
 
 type TemplateData struct {
 	LiveReload   template.HTML
-	Source       string
+	Source       importer.Source
 	Query        string
 	Results      bool
 	SourceResult *bleve.SearchResult
@@ -134,26 +135,28 @@ func New(runtimeConfig *Config) (*Server, error) {
 
 	const getSourceTimeout = 1 * time.Second
 	mux.HandleFunc("/options/{source}/search", func(w http.ResponseWriter, r *http.Request) {
-		source := r.PathValue("source")
-		ctx, cancel := context.WithTimeout(context.Background(), getSourceTimeout)
+		sourceKey := r.PathValue("source")
+
+		source := config.Sources[sourceKey]
+		if source == nil {
+			http.Error(w, "Source not found", http.StatusNotFound)
+
+			return
+		}
+
+		ctx, cancel := context.WithTimeout(r.Context(), getSourceTimeout)
 		defer cancel()
 
-		sourceResult, err := index.GetSource(ctx, source)
+		sourceResult, err := index.GetSource(ctx, sourceKey)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 
 			return
 		}
 
-		if sourceResult.Total == 0 {
-			http.Error(w, "Unknown source", http.StatusNotFound)
-
-			return
-		}
-
 		err = templates["search"].Execute(w, TemplateData{
 			LiveReload:   jsSnippet,
-			Source:       source,
+			Source:       *source,
 			SourceResult: sourceResult,
 		})
 		if err != nil {
@@ -165,14 +168,16 @@ func New(runtimeConfig *Config) (*Server, error) {
 
 	timeout := 1 * time.Second
 	mux.HandleFunc("/options/{source}/results", func(w http.ResponseWriter, r *http.Request) {
-		source := r.PathValue("source")
+		sourceKey := r.PathValue("source")
 		ctx, cancel := context.WithTimeoutCause(r.Context(), timeout, errors.New("timeout"))
 		defer cancel()
-		if index == nil {
+		source := config.Sources[sourceKey]
+		if source == nil {
 			http.Error(w, "Unknown source", http.StatusNotFound)
 
 			return
 		}
+
 		qs := r.URL.Query().Get("query")
 		pg := r.URL.Query().Get("page")
 		var page uint64 = 1
@@ -182,7 +187,7 @@ func New(runtimeConfig *Config) (*Server, error) {
 				http.Error(w, "Bad query string", http.StatusBadRequest)
 			}
 		}
-		results, err := index.Search(ctx, source, qs, (page-1)*search.ResultsPerPage)
+		results, err := index.Search(ctx, sourceKey, qs, (page-1)*search.ResultsPerPage)
 		if err != nil {
 			if err == context.DeadlineExceeded {
 				http.Error(w, "Search timed out", http.StatusInternalServerError)
@@ -192,10 +197,11 @@ func New(runtimeConfig *Config) (*Server, error) {
 			slog.Error("search error", "error", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
+
 		tdata := ResultData[options.NixOption]{
 			TemplateData: TemplateData{
 				LiveReload: jsSnippet,
-				Source:     source,
+				Source:     *source,
 			},
 			ResultsPerPage: search.ResultsPerPage,
 			Query:          qs,

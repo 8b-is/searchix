@@ -30,7 +30,7 @@ type Config struct {
 	DataPath string `toml:"data-path"`
 	CSP      CSP    `toml:"content-security-policy"`
 	Headers  map[string]string
-	Sources  map[string]importer.Source
+	Sources  map[string]*importer.Source
 }
 
 var defaultConfig = Config{
@@ -41,7 +41,7 @@ var defaultConfig = Config{
 	Headers: map[string]string{
 		"x-content-type-options": "nosniff",
 	},
-	Sources: map[string]importer.Source{
+	Sources: map[string]*importer.Source{
 		"nixos": {
 			Name:          "NixOS",
 			Enable:        true,
@@ -114,7 +114,7 @@ func GetConfig(filename string) (*Config, error) {
 		}
 	}
 
-	maps.DeleteFunc(config.Sources, func(_ string, v importer.Source) bool {
+	maps.DeleteFunc(config.Sources, func(_ string, v *importer.Source) bool {
 		return !v.Enable
 	})
 
