@@ -15,7 +15,7 @@ import (
 
 type NixpkgsChannelImporter struct {
 	DataPath  string
-	Source    Source
+	Source    *Source
 	Logger    *slog.Logger
 	indexPath string
 }

@@ -17,7 +17,7 @@ import (
 
 type ChannelImporter struct {
 	DataPath   string
-	Source     Source
+	Source     *Source
 	SourceFile string
 	Logger     *slog.Logger
 	indexPath  string
