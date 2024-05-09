@@ -31,22 +31,16 @@ import (
 
 var config *cfg.Config
 
-var (
-	CommitSHA string
-	ShortSHA  string
-)
-
 type Config struct {
-	Production    bool       `conf:"default:false"`
-	InDevServer   bool       `conf:"default:false"`
+	Environment   string     `conf:"default:development"`
 	LiveReload    bool       `conf:"default:false,flag:live"`
-	Root          string     `conf:"default:website"`
 	ListenAddress string     `conf:"default:localhost"`
 	Port          string     `conf:"default:3000,short:p"`
 	BaseURL       cfg.URL    `conf:"default:http://localhost:3000,short:b"`
 	ConfigFile    string     `conf:"short:c"`
 	LogLevel      slog.Level `conf:"default:INFO"`
 	IndexPath     string     `conf:"default:data/index.bleve"`
+	SentryDSN     string
 }
 
 type HTTPError struct {
@@ -98,16 +92,11 @@ func New(runtimeConfig *Config) (*Server, error) {
 		log.Fatalf("could not open search index, error: %#v", err)
 	}
 
-	env := "development"
-	if runtimeConfig.Production {
-		env = "production"
-	}
 	err = sentry.Init(sentry.ClientOptions{
 		EnableTracing:    true,
 		TracesSampleRate: 1.0,
-		Dsn:              os.Getenv("SENTRY_DSN"),
-		Release:          CommitSHA,
-		Environment:      env,
+		Dsn:              runtimeConfig.SentryDSN,
+		Environment:      runtimeConfig.Environment,
 	})
 	if err != nil {
 		return nil, errors.WithMessage(err, "could not set up sentry")
@@ -284,7 +273,7 @@ func New(runtimeConfig *Config) (*Server, error) {
 	}
 
 	var logWriter io.Writer
-	if runtimeConfig.Production {
+	if runtimeConfig.Environment == "production" {
 		logWriter = law.NewWriteAsyncer(os.Stdout, nil)
 	} else {
 		logWriter = os.Stdout

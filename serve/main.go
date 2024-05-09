@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
-	"net/url"
 	"os"
 	"os/signal"
 	"sync"
@@ -13,11 +12,6 @@ import (
 
 	"github.com/ardanlabs/conf/v3"
 	"github.com/pkg/errors"
-)
-
-var (
-	CommitSHA string
-	ShortSHA  string
 )
 
 func main() {
@@ -56,10 +50,6 @@ func main() {
 		defer wg.Done()
 		sErr <- sv.Start()
 	}()
-	if !runtimeConfig.InDevServer {
-		url, _ := url.Parse("http://" + sv.Addr)
-		log.Printf("server listening on %s", url.String())
-	}
 
 	err = <-sErr
 	if err != nil {
