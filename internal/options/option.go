@@ -13,7 +13,7 @@ type Link struct {
 }
 
 type NixOption struct {
-	Option string
+	Name   string
 	Source string
 
 	Declarations    []Link

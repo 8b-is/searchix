@@ -122,7 +122,7 @@ func NewIndexer(indexPath string, force bool) (*WriteIndex, error) {
 
 	optionMapping := bleve.NewDocumentStaticMapping()
 
-	optionMapping.AddFieldMappingsAt("Option", keywordFieldMapping)
+	optionMapping.AddFieldMappingsAt("Name", keywordFieldMapping)
 	optionMapping.AddFieldMappingsAt("Source", keywordFieldMapping)
 	optionMapping.AddFieldMappingsAt("Loc", locFieldMapping)
 	optionMapping.AddFieldMappingsAt("RelatedPackages", textFieldMapping)
@@ -165,10 +165,10 @@ func (i *WriteIndex) ImportOptions(
 			default:
 			}
 
-			doc := document.NewDocument(opt.Source + "/" + opt.Option)
+			doc := document.NewDocument(opt.Source + "/" + opt.Name)
 			err = i.indexMapping.MapDocument(doc, opt)
 			if err != nil {
-				errs <- errors.WithMessagef(err, "could not map document for option: %s", opt.Option)
+				errs <- errors.WithMessagef(err, "could not map document for option: %s", opt.Name)
 
 				continue
 			}
@@ -184,11 +184,11 @@ func (i *WriteIndex) ImportOptions(
 			field := document.NewTextFieldWithIndexingOptions("_data", nil, data.Bytes(), index.StoreField)
 			newDoc := doc.AddField(field)
 
-			// slog.Debug("adding option to index", "name", opt.Option)
+			// slog.Debug("adding option to index", "name", opt.Name)
 			err = batch.IndexAdvanced(newDoc)
 
 			if err != nil {
-				errs <- errors.WithMessagef(err, "could not index option %s", opt.Option)
+				errs <- errors.WithMessagef(err, "could not index option %s", opt.Name)
 
 				continue
 			}

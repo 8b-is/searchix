@@ -4,9 +4,9 @@
     <section id="results">
       {{- range .Results.Hits }}
         {{- with .Data }}
-          <details id="{{ .Option }}">
+          <details id="{{ .Name }}">
             <summary>
-              {{ .Option }}
+              {{ .Name }}
             </summary>
             <p>
               {{ markdown .Description }}

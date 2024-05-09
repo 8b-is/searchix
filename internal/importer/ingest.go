@@ -220,7 +220,7 @@ func (i *OptionIngester) Process(ctx context.Context) (<-chan *options.NixOption
 
 			// slog.Debug("sending option", "name", kv.Key)
 			results <- &options.NixOption{
-				Option:          kv.Key,
+				Name:            kv.Key,
 				Source:          strings.ToLower(i.source.Name),
 				Declarations:    decs,
 				Default:         convertNixValue(i.optJSON.Default),
