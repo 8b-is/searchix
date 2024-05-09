@@ -11,7 +11,6 @@ import (
 	"searchix/internal/config"
 	"searchix/internal/importer"
 	"searchix/internal/search"
-	"slices"
 	"strings"
 	"time"
 )
@@ -27,11 +26,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	enabledSources := slices.DeleteFunc(cfg.Sources, func(s importer.Source) bool {
-		return !s.Enable
-	})
-
-	if len(enabledSources) == 0 {
+	if len(cfg.Sources) == 0 {
 		slog.Info("No sources enabled")
 
 		return
@@ -47,8 +42,8 @@ func main() {
 
 	var imp importer.Importer
 	var hadErrors bool
-	for _, source := range enabledSources {
-		logger := slog.With("name", source.Name, "importer", source.Type.String())
+	for name, source := range cfg.Sources {
+		logger := slog.With("name", name, "importer", source.Type.String())
 		logger.Debug("starting importer")
 
 		switch source.Type {

@@ -7,6 +7,7 @@ import (
 	"os"
 	"searchix/internal/file"
 	"searchix/internal/importer"
+	"time"
 
 	"github.com/pelletier/go-toml/v2"
 	"github.com/pkg/errors"
@@ -42,18 +43,51 @@ var defaultConfig = Config{
 		"x-content-type-options": "nosniff",
 	},
 	Sources: map[string]importer.Source{
-		"nixos": importer.Source{
-			Name:       "NixOS",
-			Enable:     true,
-			Type:       importer.Channel,
-			Channel:    "nixos-unstable",
-			ImportPath: "nixos/release.nix",
-			Attribute:  "options",
-			OutputPath: "share/doc/nixos/options.json",
+		"nixos": {
+			Name:          "NixOS",
+			Enable:        true,
+			Type:          importer.Channel,
+			Channel:       "nixpkgs",
+			ImportPath:    "nixos/release.nix",
+			Attribute:     "options",
+			OutputPath:    "share/doc/nixos/options.json",
+			FetchTimeout:  5 * time.Minute,
+			ImportTimeout: 15 * time.Minute,
 			Repo: importer.Repository{
 				Type:  "github",
 				Owner: "NixOS",
 				Repo:  "nixpkgs",
+			},
+		},
+		"darwin": {
+			Name:          "darwin",
+			Enable:        false,
+			Type:          importer.Channel,
+			Channel:       "nix-darwin",
+			ImportPath:    "release.nix",
+			Attribute:     "options",
+			OutputPath:    "share/doc/darwin/options.json",
+			FetchTimeout:  5 * time.Minute,
+			ImportTimeout: 15 * time.Minute,
+			Repo: importer.Repository{
+				Type:  "github",
+				Owner: "LnL7",
+				Repo:  "nix-darwin",
+			},
+		},
+		"home-manager": {
+			Name:          "home-manager",
+			Enable:        false,
+			Type:          importer.Channel,
+			ImportPath:    "default.nix",
+			Attribute:     "docs.json",
+			OutputPath:    "share/doc/home-manager/options.json",
+			FetchTimeout:  5 * time.Minute,
+			ImportTimeout: 15 * time.Minute,
+			Repo: importer.Repository{
+				Type:  "github",
+				Owner: "nix-community",
+				Repo:  "home-manager",
 			},
 		},
 	},

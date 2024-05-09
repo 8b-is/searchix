@@ -1,38 +1,9 @@
 [sources.nixos]
-  name = "NixOS"
   enable = true
-  type = "channel"
   channel = "nixos-unstable"
-  import-path = "nixos/release.nix"
-  attribute = "options"
-  output-path = "share/doc/nixos/options.json"
-  [sources.repo]
-    type = "github"
-    owner = "NixOS"
-    repo = "nixpkgs"
 
 [sources.darwin]
-  name = "darwin"
   enable = true
-  type = "channel"
-  channel = "darwin"
-  import-path = "release.nix"
-  attribute = "options"
-  output-path = "share/doc/darwin/options.json"
-  [sources.repo]
-    type = "github"
-    owner = "LnL7"
-    repo = "nix-darwin"
 
 [sources.home-manager]
-  name = "home-manager"
   enable = true
-  type = "channel"
-  channel = "home-manager"
-  import-path = "default.nix"
-  attribute = "docs.json"
-  output-path = "share/doc/home-manager/options.json"
-  [sources.repo]
-    type = "github"
-    owner = "nix-community"
-    repo = "home-manager"
