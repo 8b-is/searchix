@@ -17,12 +17,11 @@ import (
 	"github.com/ardanlabs/conf/v3"
 )
 
-const timeout = 30 * time.Minute
-
 type Config struct {
-	ConfigFile string     `conf:"short:c"`
-	LogLevel   slog.Level `conf:"default:INFO"`
-	Replace    bool       `conf:"default:false,help:whether to remove existing database, if exists"`
+	ConfigFile string        `conf:"short:c"`
+	LogLevel   slog.Level    `conf:"default:INFO"`
+	Timeout    time.Duration `conf:"default:30m,help:maximum time to wait for all fetchers and importers combined"`
+	Replace    bool          `conf:"default:false,help:whether to remove existing database, if exists"`
 }
 
 func main() {
@@ -56,7 +55,7 @@ func main() {
 		log.Fatalf("Failed to create indexer: %v", err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), runtimeConfig.Timeout)
 	defer cancel()
 
 	var imp importer.Importer
