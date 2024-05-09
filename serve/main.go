@@ -20,12 +20,6 @@ var (
 )
 
 func main() {
-	if os.Getenv("DEBUG") != "" {
-		slog.SetLogLoggerLevel(slog.LevelDebug)
-	}
-	log.SetFlags(log.LstdFlags | log.Lmsgprefix)
-	log.SetPrefix("searchix: ")
-
 	runtimeConfig := server.Config{}
 	help, err := conf.Parse("", &runtimeConfig)
 	if err != nil {
@@ -35,6 +29,9 @@ func main() {
 		}
 		log.Panicf("parsing runtime configuration: %v", err)
 	}
+	slog.SetLogLoggerLevel(runtimeConfig.LogLevel)
+	log.SetFlags(log.LstdFlags | log.Lmsgprefix)
+	log.SetPrefix("searchix: ")
 
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, os.Interrupt)

@@ -36,14 +36,15 @@ var (
 )
 
 type Config struct {
-	Production    bool    `conf:"default:false"`
-	InDevServer   bool    `conf:"default:false"`
-	LiveReload    bool    `conf:"default:false,flag:live"`
-	Root          string  `conf:"default:website"`
-	ListenAddress string  `conf:"default:localhost"`
-	Port          string  `conf:"default:3000,short:p"`
-	BaseURL       cfg.URL `conf:"default:http://localhost:3000,short:b"`
-	ConfigFile    string  `conf:"short:c"`
+	Production    bool       `conf:"default:false"`
+	InDevServer   bool       `conf:"default:false"`
+	LiveReload    bool       `conf:"default:false,flag:live"`
+	Root          string     `conf:"default:website"`
+	ListenAddress string     `conf:"default:localhost"`
+	Port          string     `conf:"default:3000,short:p"`
+	BaseURL       cfg.URL    `conf:"default:http://localhost:3000,short:b"`
+	ConfigFile    string     `conf:"short:c"`
+	LogLevel      slog.Level `conf:"default:INFO"`
 }
 
 type HTTPError struct {

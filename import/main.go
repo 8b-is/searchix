@@ -20,7 +20,8 @@ import (
 const timeout = 30 * time.Minute
 
 type Config struct {
-	ConfigFile string `conf:"short:c"`
+	ConfigFile string     `conf:"short:c"`
+	LogLevel   slog.Level `conf:"default:INFO"`
 }
 
 func main() {
@@ -36,6 +37,7 @@ func main() {
 		}
 		log.Panicf("parsing runtime configuration: %v", err)
 	}
+	slog.SetLogLoggerLevel(runtimeConfig.LogLevel)
 
 	cfg, err := config.GetConfig(runtimeConfig.ConfigFile)
 	if err != nil {
