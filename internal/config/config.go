@@ -27,7 +27,7 @@ func (u *URL) UnmarshalText(text []byte) (err error) {
 }
 
 type Config struct {
-	DataPath string `toml:"data_path"`
+	DataPath string `toml:"data-path"`
 	CSP      CSP    `toml:"content-security-policy"`
 	Headers  map[string]string
 	Sources  map[string]importer.Source
