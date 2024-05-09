@@ -21,4 +21,4 @@ precommit:
 	nix-build -A pre-commit-check
 
 dev:
-	watchexec wgo run -exit ./serve/ --live
+	watchexec wgo run -exit ./serve/ --live --config-file config.toml
