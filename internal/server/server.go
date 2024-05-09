@@ -63,6 +63,7 @@ const jsSnippet = template.HTML(livereload.JsSnippet) // #nosec G203
 
 type TemplateData struct {
 	LiveReload   template.HTML
+	Sources      map[string]*importer.Source
 	Source       importer.Source
 	Query        string
 	Results      bool
@@ -125,6 +126,7 @@ func New(runtimeConfig *Config) (*Server, error) {
 	mux := http.NewServeMux()
 	indexData := TemplateData{
 		LiveReload: jsSnippet,
+		Sources:    config.Sources,
 	}
 	mux.HandleFunc("/{$}", func(w http.ResponseWriter, _ *http.Request) {
 		err := templates["index"].ExecuteTemplate(w, "index.gotmpl", indexData)

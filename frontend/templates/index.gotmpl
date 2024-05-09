@@ -11,9 +11,9 @@
     <header>
       <nav>
         <h1><a href="/">Searchix</a></h1>
-        <a href="/options/nixos/search">NixOS</a>
-        <a href="/options/darwin/search">Darwin</a>
-        <a href="/options/home-manager/search">Home Manager</a>
+        {{- range $key, $value := .Sources }}
+          <a href="/options/{{ $key }}/search">{{ $value.Name }}</a>
+        {{- end }}
       </nav>
     </header>
     <main>
