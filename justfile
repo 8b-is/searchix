@@ -22,3 +22,6 @@ precommit:
 
 dev:
 	watchexec wgo run -exit ./serve/ --live --config-file config.toml
+
+reindex:
+	wgo run -exit ./import/ --replace --config-file config.toml
