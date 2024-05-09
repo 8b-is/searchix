@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
+	"net/url"
 	"os"
 	"os/signal"
 	"sync"
@@ -56,7 +57,8 @@ func main() {
 		sErr <- sv.Start()
 	}()
 	if !runtimeConfig.InDevServer {
-		log.Printf("server listening on %s", sv.Addr)
+		url, _ := url.Parse("http://" + sv.Addr)
+		log.Printf("server listening on %s", url.String())
 	}
 
 	err = <-sErr
