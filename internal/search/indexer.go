@@ -6,7 +6,9 @@ import (
 	"encoding/gob"
 	"log"
 	"log/slog"
+	"os"
 	"path"
+	"searchix/internal/file"
 	"searchix/internal/options"
 
 	"github.com/blevesearch/bleve/v2"
@@ -27,11 +29,25 @@ type WriteIndex struct {
 	indexMapping *mapping.IndexMappingImpl
 }
 
-func NewIndexer(dir string) (*WriteIndex, error) {
+func NewIndexer(dir string, force bool) (*WriteIndex, error) {
 	var err error
 	bleve.SetLog(log.Default())
 
 	indexPath := path.Join(dir, indexFilename)
+
+	exists, err := file.Exists(indexPath)
+	if err != nil {
+		return nil, errors.WithMessagef(err, "could not check if index exists at path %s", indexPath)
+	}
+	if exists {
+		if !force {
+			return nil, errors.Errorf("index file %s already exists (use --force to replace)", indexPath)
+		}
+		err := os.RemoveAll(indexPath)
+		if err != nil {
+			return nil, errors.WithMessagef(err, "could not remove index file %s", indexPath)
+		}
+	}
 
 	indexMapping := bleve.NewIndexMapping()
 	indexMapping.StoreDynamic = false

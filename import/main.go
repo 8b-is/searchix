@@ -22,6 +22,7 @@ const timeout = 30 * time.Minute
 type Config struct {
 	ConfigFile string     `conf:"short:c"`
 	LogLevel   slog.Level `conf:"default:INFO"`
+	Replace    bool       `conf:"default:false,help:whether to remove existing database, if exists"`
 }
 
 func main() {
@@ -50,7 +51,7 @@ func main() {
 		return
 	}
 
-	indexer, err := search.NewIndexer(cfg.DataPath)
+	indexer, err := search.NewIndexer(cfg.DataPath, runtimeConfig.Replace)
 	if err != nil {
 		log.Fatalf("Failed to create indexer: %v", err)
 	}
@@ -93,7 +94,7 @@ func main() {
 		}
 		logger.Info("importer fetch succeeded", "updated", updated)
 
-		if updated {
+		if updated || runtimeConfig.Replace {
 			hadWarnings, err := imp.Import(ctx, indexer)
 
 			if err != nil {
