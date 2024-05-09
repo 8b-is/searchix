@@ -2,9 +2,11 @@ package config
 
 import (
 	"log/slog"
+	"maps"
 	"net/url"
 	"os"
 	"searchix/internal/file"
+	"searchix/internal/importer"
 
 	"github.com/pelletier/go-toml/v2"
 	"github.com/pkg/errors"
@@ -28,6 +30,7 @@ type Config struct {
 	DataPath string `toml:"data_path"`
 	CSP      CSP    `toml:"content-security-policy"`
 	Headers  map[string]string
+	Sources  map[string]importer.Source
 }
 
 var defaultConfig = Config{
@@ -37,6 +40,22 @@ var defaultConfig = Config{
 	},
 	Headers: map[string]string{
 		"x-content-type-options": "nosniff",
+	},
+	Sources: map[string]importer.Source{
+		"nixos": importer.Source{
+			Name:       "NixOS",
+			Enable:     true,
+			Type:       importer.Channel,
+			Channel:    "nixos-unstable",
+			ImportPath: "nixos/release.nix",
+			Attribute:  "options",
+			OutputPath: "share/doc/nixos/options.json",
+			Repo: importer.Repository{
+				Type:  "github",
+				Owner: "NixOS",
+				Repo:  "nixpkgs",
+			},
+		},
 	},
 }
 
@@ -60,6 +79,9 @@ func GetConfig() (*Config, error) {
 			return nil, errors.Wrap(err, "config error")
 		}
 	}
+	maps.DeleteFunc(config.Sources, func(_ string, v importer.Source) bool {
+		return !v.Enable
+	})
 
 	return &config, nil
 }

@@ -115,6 +115,9 @@ schema = 3
   [mod."github.com/shengyanli1982/law"]
     version = "v0.1.15"
     hash = "sha256-Z5G3PtR7V0d04MN+kBge33Pv6VDjJryx+N7JGJkzfLQ="
+  [mod."github.com/stoewer/go-strcase"]
+    version = "v1.3.0"
+    hash = "sha256-X0ilcefeqVQ44B9WT6euCMcigs7oLFypOQaGI33kGr8="
   [mod."github.com/yuin/goldmark"]
     version = "v1.7.1"
     hash = "sha256-3EUgwoZRRs2jNBWSbB0DGNmfBvx7CeAgEwyUdaRaeR4="

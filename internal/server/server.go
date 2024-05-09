@@ -20,6 +20,7 @@ import (
 	"searchix/internal/options"
 	"searchix/internal/search"
 
+	"github.com/blevesearch/bleve/v2"
 	"github.com/getsentry/sentry-go"
 	sentryhttp "github.com/getsentry/sentry-go/http"
 	"github.com/osdevisnot/sorvor/pkg/livereload"
@@ -57,17 +58,18 @@ type Server struct {
 const jsSnippet = template.HTML(livereload.JsSnippet) // #nosec G203
 
 type TemplateData struct {
-	LiveReload template.HTML
-	Source     string
-	Query      string
-	Results    bool
+	LiveReload   template.HTML
+	Source       string
+	Query        string
+	Results      bool
+	SourceResult *bleve.SearchResult
 }
 
 type ResultData[T options.NixOption] struct {
 	TemplateData
 	Query          string
 	ResultsPerPage int
-	Results        *search.Result[T]
+	Results        *search.Result
 	Prev           string
 	Next           string
 }
@@ -77,29 +79,18 @@ func applyDevModeOverrides(config *cfg.Config) {
 	config.CSP.ConnectSrc = slices.Insert(config.CSP.ConnectSrc, 0, "'self'")
 }
 
-var index = map[string]*search.Index[options.NixOption]{}
-
-var sourceFileName = map[string]string{
-	"darwin":       "darwin-options",
-	"home-manager": "home-manager-options",
-	"nixos":        "nixos-options-nixos-unstable",
-}
-
-func makeIndex(source string, filename string) {
-	var err error
-	slog.Info("loading index", "index", source)
-	index[source], err = search.New(filename)
-	slog.Info("loaded index", "index", source)
-	if err != nil {
-		log.Fatalf("could not build search index, error: %#v", err)
-	}
-}
-
 func New(runtimeConfig *Config) (*Server, error) {
 	var err error
 	config, err = cfg.GetConfig()
 	if err != nil {
 		return nil, errors.WithMessage(err, "error parsing configuration file")
+	}
+
+	slog.Debug("loading index")
+	index, err := search.Open(config.DataPath)
+	slog.Debug("loaded index")
+	if err != nil {
+		log.Fatalf("could not open search index, error: %#v", err)
 	}
 
 	env := "development"
@@ -138,19 +129,34 @@ func New(runtimeConfig *Config) (*Server, error) {
 		}
 	})
 
+	const getSourceTimeout = 1 * time.Second
 	mux.HandleFunc("/options/{source}/search", func(w http.ResponseWriter, r *http.Request) {
 		source := r.PathValue("source")
-		if index[source] == nil {
+		ctx, cancel := context.WithTimeout(context.Background(), getSourceTimeout)
+		defer cancel()
+
+		sourceResult, err := index.GetSource(ctx, source)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+
+			return
+		}
+
+		if sourceResult.Total == 0 {
 			http.Error(w, "Unknown source", http.StatusNotFound)
 
 			return
 		}
-		err := templates["search"].Execute(w, TemplateData{
-			LiveReload: jsSnippet,
-			Source:     source,
+
+		err = templates["search"].Execute(w, TemplateData{
+			LiveReload:   jsSnippet,
+			Source:       source,
+			SourceResult: sourceResult,
 		})
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+
+			return
 		}
 	})
 
@@ -159,7 +165,7 @@ func New(runtimeConfig *Config) (*Server, error) {
 		source := r.PathValue("source")
 		ctx, cancel := context.WithTimeoutCause(r.Context(), timeout, errors.New("timeout"))
 		defer cancel()
-		if index[source] == nil {
+		if index == nil {
 			http.Error(w, "Unknown source", http.StatusNotFound)
 
 			return
@@ -173,7 +179,7 @@ func New(runtimeConfig *Config) (*Server, error) {
 				http.Error(w, "Bad query string", http.StatusBadRequest)
 			}
 		}
-		results, err := index[source].Search(ctx, qs, (page-1)*search.ResultsPerPage)
+		results, err := index.Search(ctx, source, qs, (page-1)*search.ResultsPerPage)
 		if err != nil {
 			if err == context.DeadlineExceeded {
 				http.Error(w, "Search timed out", http.StatusInternalServerError)
@@ -237,12 +243,6 @@ func New(runtimeConfig *Config) (*Server, error) {
 	})
 
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("frontend/static"))))
-
-	go func() {
-		for source, filename := range sourceFileName {
-			makeIndex(source, filename)
-		}
-	}()
 
 	if runtimeConfig.LiveReload {
 		applyDevModeOverrides(config)

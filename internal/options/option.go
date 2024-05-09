@@ -14,6 +14,7 @@ type Link struct {
 
 type NixOption struct {
 	Option string
+	Source string
 
 	Declarations    []Link
 	Default         *NixValue `json:",omitempty"`
@@ -24,4 +25,6 @@ type NixOption struct {
 	Type            string
 }
 
-type NixOptions []NixOption
+func (*NixOption) BleveType() string {
+	return "option"
+}

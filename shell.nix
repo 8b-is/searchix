@@ -22,6 +22,7 @@ pkgs.mkShell {
     goEnv
 
     brotli
+    bleve
     wgo
     gomod2nix
     niv

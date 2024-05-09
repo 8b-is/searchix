@@ -15,10 +15,6 @@ in
     inherit (sources.simple-css) url sha256;
   };
 
-  nixos-options = import (./. + "/importers/nixos-options.nix") { };
-  darwin-options = (import <darwin/release.nix> { }).options;
-  home-manager-options = (import <home-manager> { }).docs.json;
-
   searchix = pkgs.buildGoApplication {
     pname = "searchix";
     version = "0.1";
