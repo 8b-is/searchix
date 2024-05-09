@@ -13,15 +13,31 @@ import (
 	"searchix/internal/search"
 	"strings"
 	"time"
+
+	"github.com/ardanlabs/conf/v3"
 )
 
 const timeout = 30 * time.Minute
+
+type Config struct {
+	ConfigFile string `conf:"short:c"`
+}
 
 func main() {
 	if _, found := os.LookupEnv("DEBUG"); found {
 		slog.SetLogLoggerLevel(slog.LevelDebug)
 	}
-	cfg, err := config.GetConfig()
+	var runtimeConfig Config
+	help, err := conf.Parse("", &runtimeConfig)
+	if err != nil {
+		if errors.Is(err, conf.ErrHelpWanted) {
+			log.Println(help)
+			os.Exit(1)
+		}
+		log.Panicf("parsing runtime configuration: %v", err)
+	}
+
+	cfg, err := config.GetConfig(runtimeConfig.ConfigFile)
 	if err != nil {
 		log.Fatal(err)
 	}

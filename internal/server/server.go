@@ -43,6 +43,7 @@ type Config struct {
 	ListenAddress string  `conf:"default:localhost"`
 	Port          string  `conf:"default:3000,short:p"`
 	BaseURL       cfg.URL `conf:"default:http://localhost:3000,short:b"`
+	ConfigFile    string  `conf:"short:c"`
 }
 
 type HTTPError struct {
@@ -81,7 +82,7 @@ func applyDevModeOverrides(config *cfg.Config) {
 
 func New(runtimeConfig *Config) (*Server, error) {
 	var err error
-	config, err = cfg.GetConfig()
+	config, err = cfg.GetConfig(runtimeConfig.ConfigFile)
 	if err != nil {
 		return nil, errors.WithMessage(err, "error parsing configuration file")
 	}

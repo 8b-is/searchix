@@ -5,7 +5,6 @@ import (
 	"maps"
 	"net/url"
 	"os"
-	"searchix/internal/file"
 	"searchix/internal/importer"
 	"time"
 
@@ -93,15 +92,16 @@ var defaultConfig = Config{
 	},
 }
 
-func GetConfig() (*Config, error) {
+func GetConfig(filename string) (*Config, error) {
 	config := defaultConfig
-	slog.Debug("reading config.toml")
-	f, err := os.Open("config.toml")
-	if err := file.NeedNotExist(err); err != nil {
-		return nil, errors.Wrap(err, "reading config.toml failed")
-	}
-	if f != nil {
+	if filename != "" {
+		slog.Debug("reading config", "filename", filename)
+		f, err := os.Open(filename)
+		if err != nil {
+			return nil, errors.Wrap(err, "reading config failed")
+		}
 		defer f.Close()
+
 		dec := toml.NewDecoder(f)
 		err = dec.Decode(&config)
 		if err != nil {
@@ -113,6 +113,7 @@ func GetConfig() (*Config, error) {
 			return nil, errors.Wrap(err, "config error")
 		}
 	}
+
 	maps.DeleteFunc(config.Sources, func(_ string, v importer.Source) bool {
 		return !v.Enable
 	})
