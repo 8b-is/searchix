@@ -45,6 +45,7 @@ type Config struct {
 	BaseURL       cfg.URL    `conf:"default:http://localhost:3000,short:b"`
 	ConfigFile    string     `conf:"short:c"`
 	LogLevel      slog.Level `conf:"default:INFO"`
+	IndexPath     string     `conf:"default:data/index.bleve"`
 }
 
 type HTTPError struct {
@@ -89,7 +90,7 @@ func New(runtimeConfig *Config) (*Server, error) {
 	}
 
 	slog.Debug("loading index")
-	index, err := search.Open(config.DataPath)
+	index, err := search.Open(runtimeConfig.IndexPath)
 	slog.Debug("loaded index")
 	if err != nil {
 		log.Fatalf("could not open search index, error: %#v", err)

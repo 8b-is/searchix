@@ -29,19 +29,33 @@ type WriteIndex struct {
 	indexMapping *mapping.IndexMappingImpl
 }
 
-func NewIndexer(dir string, force bool) (*WriteIndex, error) {
+const ExpectedIndexExtension = ".bleve"
+
+func NewIndexer(indexPath string, force bool) (*WriteIndex, error) {
 	var err error
 	bleve.SetLog(log.Default())
 
-	indexPath := path.Join(dir, indexFilename)
-
 	exists, err := file.Exists(indexPath)
 	if err != nil {
-		return nil, errors.WithMessagef(err, "could not check if index exists at path %s", indexPath)
+		return nil, errors.WithMessagef(
+			err,
+			"could not check if index exists at path %s",
+			indexPath,
+		)
 	}
 	if exists {
 		if !force {
-			return nil, errors.Errorf("index file %s already exists (use --force to replace)", indexPath)
+			return nil, errors.Errorf(
+				"index file %s already exists (use --force to replace)",
+				indexPath,
+			)
+		}
+		if path.Ext(indexPath) != ExpectedIndexExtension {
+			return nil, errors.Errorf(
+				"cowardly refusing to delete path %s (it doesn't end in '%s')",
+				indexPath,
+				ExpectedIndexExtension,
+			)
 		}
 		err := os.RemoveAll(indexPath)
 		if err != nil {
@@ -130,7 +144,10 @@ func NewIndexer(dir string, force bool) (*WriteIndex, error) {
 	}, nil
 }
 
-func (i *WriteIndex) ImportOptions(ctx context.Context, objects <-chan *options.NixOption) <-chan error {
+func (i *WriteIndex) ImportOptions(
+	ctx context.Context,
+	objects <-chan *options.NixOption,
+) <-chan error {
 	var err error
 	errs := make(chan error)
 

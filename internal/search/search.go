@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
-	"path"
 	"searchix/internal/options"
 
 	"github.com/blevesearch/bleve/v2"
@@ -13,7 +12,6 @@ import (
 )
 
 const ResultsPerPage = 20
-const indexFilename = "index.bleve"
 
 type DocumentMatch struct {
 	search.DocumentMatch
@@ -29,9 +27,7 @@ type ReadIndex struct {
 	index bleve.Index
 }
 
-func Open(dir string) (*ReadIndex, error) {
-	indexPath := path.Join(dir, indexFilename)
-
+func Open(indexPath string) (*ReadIndex, error) {
 	idx, err := bleve.Open(indexPath)
 	if err != nil {
 		return nil, errors.WithMessagef(err, "unable to open index at path %s", indexPath)
