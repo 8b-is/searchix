@@ -74,8 +74,6 @@ function getResults(url) {
       }
     })
     .then(function (html) {
-      state.url = url.toJSON();
-      state.opened = [];
       state.fragment = html;
       history.pushState(state, null, url);
       return renderFragmentHTML(html);
@@ -84,6 +82,11 @@ function getResults(url) {
       range.deleteContents();
       range.insertNode(new Text(error.message));
       console.error("fetch failed", error);
+    })
+    .finally(function () {
+      state.url = url.toJSON();
+      state.opened = [];
+      history.pushState(state, null, url);
     });
 }
 
