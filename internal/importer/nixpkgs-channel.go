@@ -63,7 +63,10 @@ func (i *NixpkgsChannelImporter) FetchIfNeeded(parent context.Context) (bool, er
 	return true, nil
 }
 
-func (i *NixpkgsChannelImporter) Import(parent context.Context, indexer *search.WriteIndex) (bool, error) {
+func (i *NixpkgsChannelImporter) Import(
+	parent context.Context,
+	indexer *search.WriteIndex,
+) (bool, error) {
 	filename := path.Join(i.DataPath, filesToFetch["options"])
 	revFilename := path.Join(i.DataPath, filesToFetch["revision"])
 	bits, err := os.ReadFile(revFilename)

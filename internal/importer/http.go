@@ -44,7 +44,11 @@ func fetchFileIfNeeded(ctx context.Context, path string, url string) (needed boo
 	case http.StatusOK:
 		newMtime, err := time.Parse(time.RFC1123, res.Header.Get("Last-Modified"))
 		if err != nil {
-			slog.Warn("could not parse Last-Modified header from response", "value", res.Header.Get("Last-Modified"))
+			slog.Warn(
+				"could not parse Last-Modified header from response",
+				"value",
+				res.Header.Get("Last-Modified"),
+			)
 		}
 		err = file.WriteToFile(path, res.Body)
 		if err != nil {

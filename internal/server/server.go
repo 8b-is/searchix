@@ -245,7 +245,10 @@ func New(runtimeConfig *Config) (*Server, error) {
 		}
 	})
 
-	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("frontend/static"))))
+	mux.Handle(
+		"/static/",
+		http.StripPrefix("/static/", http.FileServer(http.Dir("frontend/static"))),
+	)
 
 	if runtimeConfig.LiveReload {
 		applyDevModeOverrides(config)

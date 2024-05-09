@@ -50,14 +50,23 @@ func (index *ReadIndex) GetSource(ctx context.Context, name string) (*bleve.Sear
 		return nil, ctx.Err()
 	default:
 		if err != nil {
-			return nil, errors.WithMessagef(err, "failed to execute search to find source %s in index", name)
+			return nil, errors.WithMessagef(
+				err,
+				"failed to execute search to find source %s in index",
+				name,
+			)
 		}
 	}
 
 	return result, nil
 }
 
-func (index *ReadIndex) Search(ctx context.Context, source string, keyword string, from uint64) (*Result, error) {
+func (index *ReadIndex) Search(
+	ctx context.Context,
+	source string,
+	keyword string,
+	from uint64,
+) (*Result, error) {
 	sourceQuery := bleve.NewTermQuery(source)
 	userQuery := bleve.NewMatchQuery(keyword)
 	userQuery.Analyzer = "option_name"

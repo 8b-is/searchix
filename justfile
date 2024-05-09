@@ -7,10 +7,12 @@ prepare:
 checkformat:
 	gofmt -d .
 	goimports -d .
+	golines --dry-run .
 
 format:
 	gofmt -w .
 	goimports -w .
+	golines -w .
 
 fix:
 	go fix .

@@ -55,10 +55,22 @@ func (i *ChannelImporter) FetchIfNeeded(parent context.Context) (bool, error) {
 	i.Logger.Debug("nix-build", "output", strings.TrimSpace(string(out)))
 
 	outPath := path.Join(dest, i.Source.OutputPath)
-	i.Logger.Debug("checking output path", "outputPath", outPath, "dest", dest, "source", i.Source.OutputPath)
+	i.Logger.Debug(
+		"checking output path",
+		"outputPath",
+		outPath,
+		"dest",
+		dest,
+		"source",
+		i.Source.OutputPath,
+	)
 	after, err := os.Readlink(dest)
 	if err := file.NeedNotExist(err); err != nil {
-		return false, errors.WithMessagef(err, "failed to stat output file from nix-build, filename: %s", outPath)
+		return false, errors.WithMessagef(
+			err,
+			"failed to stat output file from nix-build, filename: %s",
+			outPath,
+		)
 	}
 	i.Logger.Debug("stat after", "name", after)
 

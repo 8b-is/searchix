@@ -27,7 +27,11 @@ type Importer interface {
 	Import(context.Context, *search.WriteIndex) (bool, error)
 }
 
-func NewNixpkgsChannelImporter(source Source, dataPath string, logger *slog.Logger) *NixpkgsChannelImporter {
+func NewNixpkgsChannelImporter(
+	source Source,
+	dataPath string,
+	logger *slog.Logger,
+) *NixpkgsChannelImporter {
 	indexPath := dataPath
 	fullpath := path.Join(dataPath, source.Channel)
 
@@ -58,7 +62,11 @@ type importConfig struct {
 	Logger    *slog.Logger
 }
 
-func processOptions(parent context.Context, indexer *search.WriteIndex, conf *importConfig) (bool, error) {
+func processOptions(
+	parent context.Context,
+	indexer *search.WriteIndex,
+	conf *importConfig,
+) (bool, error) {
 	ctx, cancel := context.WithTimeout(parent, conf.Source.ImportTimeout)
 	defer cancel()
 
