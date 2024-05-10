@@ -8,9 +8,7 @@
             <summary>
               {{ .Name }}
             </summary>
-            <p>
-              {{ markdown .Description }}
-            </p>
+            {{ markdown .Description }}
             <dl>
               {{- with .Type }}
                 <dt>Type</dt>
