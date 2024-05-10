@@ -194,6 +194,7 @@ func New(runtimeConfig *Config) (*Server, error) {
 			TemplateData: TemplateData{
 				LiveReload: jsSnippet,
 				Source:     *source,
+				Sources:    config.Sources,
 			},
 			ResultsPerPage: search.ResultsPerPage,
 			Query:          qs,
