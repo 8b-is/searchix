@@ -16,6 +16,7 @@ import (
 	"strconv"
 	"time"
 
+	"searchix/frontend"
 	cfg "searchix/internal/config"
 	"searchix/internal/importer"
 	"searchix/internal/options"
@@ -243,10 +244,7 @@ func New(runtimeConfig *Config) (*Server, error) {
 		}
 	})
 
-	mux.Handle(
-		"/static/",
-		http.StripPrefix("/static/", http.FileServer(http.Dir("frontend/static"))),
-	)
+	mux.Handle("/static/", http.FileServer(http.FS(frontend.Files)))
 
 	if runtimeConfig.LiveReload {
 		applyDevModeOverrides(config)

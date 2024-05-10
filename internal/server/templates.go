@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"html"
 	"html/template"
+	"io/fs"
 	"log/slog"
 	"path"
-	"path/filepath"
+	"searchix/frontend"
 	"searchix/internal/options"
 	"strings"
 
@@ -50,13 +51,13 @@ func loadTemplate(layoutFile string, filename string) (*template.Template, error
 	tpl := template.New("index.gotmpl")
 
 	tpl.Funcs(templateFuncs)
-	_, err := tpl.ParseFiles(layoutFile)
+	_, err := tpl.ParseFS(frontend.Files, layoutFile)
 	if err != nil {
 		return nil, errors.WithMessage(err, "could not parse layout template")
 	}
 
 	if filename != "" {
-		_, err = tpl.ParseGlob(filename)
+		_, err = tpl.ParseFS(frontend.Files, filename)
 		if err != nil {
 			return nil, errors.WithMessage(err, "could not parse template")
 		}
@@ -66,7 +67,7 @@ func loadTemplate(layoutFile string, filename string) (*template.Template, error
 }
 
 func loadTemplates() (TemplateCollection, error) {
-	templateDir := path.Join("frontend", "templates")
+	templateDir := "templates"
 	templates := make(TemplateCollection, 0)
 
 	layoutFile := path.Join(templateDir, "index.gotmpl")
@@ -78,7 +79,7 @@ func loadTemplates() (TemplateCollection, error) {
 	templates["index"] = index
 
 	glob := path.Join(templateDir, "blocks", "*.gotmpl")
-	templatePaths, err := filepath.Glob(glob)
+	templatePaths, err := fs.Glob(frontend.Files, glob)
 	if err != nil {
 		return nil, errors.WithMessage(err, "could not glob block templates")
 	}
