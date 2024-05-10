@@ -24,3 +24,4 @@ go.work
 /.pre-commit-config.yaml
 /frontend/static/base.css
 /data/
+/config.toml

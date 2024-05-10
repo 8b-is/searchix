@@ -1,9 +1,0 @@
-[sources.nixos]
-  enable = true
-  channel = "nixos-unstable"
-
-[sources.darwin]
-  enable = true
-
-[sources.home-manager]
-  enable = true
