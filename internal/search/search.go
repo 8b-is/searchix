@@ -87,7 +87,6 @@ func (index *ReadIndex) Search(
 	search := bleve.NewSearchRequest(query)
 	search.Size = ResultsPerPage
 	search.Fields = []string{"_data"}
-	search.Explain = true
 
 	if from != 0 {
 		search.From = int(from)
