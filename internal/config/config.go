@@ -59,7 +59,7 @@ var defaultConfig = Config{
 			},
 		},
 		"darwin": {
-			Name:          "darwin",
+			Name:          "Darwin",
 			Enable:        false,
 			Type:          importer.Channel,
 			Channel:       "nix-darwin",
@@ -75,7 +75,7 @@ var defaultConfig = Config{
 			},
 		},
 		"home-manager": {
-			Name:          "home-manager",
+			Name:          "Home Manager",
 			Enable:        false,
 			Type:          importer.Channel,
 			ImportPath:    "default.nix",
