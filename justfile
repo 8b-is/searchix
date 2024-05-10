@@ -21,7 +21,7 @@ precommit:
 	nix-build -A pre-commit-check
 
 dev:
-	watchexec wgo run -exit ./serve/ --live --config-file config.toml
+	watchexec -e go -r wgo run -exit ./serve/ --live --config-file config.toml
 
 reindex:
 	wgo run -exit ./import/ --replace --config-file config.toml
