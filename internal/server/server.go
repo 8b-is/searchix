@@ -147,6 +147,7 @@ func New(runtimeConfig *Config) (*Server, error) {
 
 		err = templates["search"].Execute(w, TemplateData{
 			LiveReload:   jsSnippet,
+			Sources:      config.Sources,
 			Source:       *source,
 			SourceResult: sourceResult,
 		})
