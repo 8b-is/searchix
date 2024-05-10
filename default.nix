@@ -10,7 +10,7 @@ in
     }
   )
 }:
-{
+rec {
   css = pkgs.fetchurl {
     inherit (sources.simple-css) url sha256;
   };
@@ -18,8 +18,11 @@ in
   searchix = pkgs.buildGoApplication {
     pname = "searchix";
     version = "0.1";
-    pwd = ./.;
-    src = ./.;
+    src = builtins.filterSource (_: type: type != "symlink") ./.;
+    patchPhase = ''
+      cp ${css} frontend/static/base.css
+    '';
+    tags = [ "embed" ];
     modules = ./gomod2nix.toml;
   };
 
