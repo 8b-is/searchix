@@ -77,6 +77,7 @@ var defaultConfig = Config{
 		"home-manager": {
 			Name:          "Home Manager",
 			Enable:        false,
+			Channel:       "home-manager",
 			Type:          importer.Channel,
 			ImportPath:    "default.nix",
 			Attribute:     "docs.json",
