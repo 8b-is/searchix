@@ -8,7 +8,6 @@ import (
 	"os"
 	"reflect"
 	"searchix/internal/options"
-	"strings"
 
 	"github.com/bcicen/jstream"
 	"github.com/mitchellh/mapstructure"
@@ -221,7 +220,7 @@ func (i *OptionIngester) Process(ctx context.Context) (<-chan *options.NixOption
 			// slog.Debug("sending option", "name", kv.Key)
 			results <- &options.NixOption{
 				Name:            kv.Key,
-				Source:          strings.ToLower(i.source.Name),
+				Source:          i.source.Key,
 				Declarations:    decs,
 				Default:         convertNixValue(i.optJSON.Default),
 				Description:     options.Markdown(i.optJSON.Description),

@@ -44,6 +44,7 @@ var defaultConfig = Config{
 	Sources: map[string]*importer.Source{
 		"nixos": {
 			Name:          "NixOS",
+			Key:           "nixos",
 			Enable:        true,
 			Type:          importer.Channel,
 			Channel:       "nixpkgs",
@@ -60,6 +61,7 @@ var defaultConfig = Config{
 		},
 		"darwin": {
 			Name:          "Darwin",
+			Key:           "darwin",
 			Enable:        false,
 			Type:          importer.Channel,
 			Channel:       "nix-darwin",
@@ -76,6 +78,7 @@ var defaultConfig = Config{
 		},
 		"home-manager": {
 			Name:          "Home Manager",
+			Key:           "home-manager",
 			Enable:        false,
 			Channel:       "home-manager",
 			Type:          importer.Channel,

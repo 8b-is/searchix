@@ -11,6 +11,7 @@ import (
 
 type Source struct {
 	Name          string
+	Key           string
 	Enable        bool
 	Type          Type
 	Channel       string
