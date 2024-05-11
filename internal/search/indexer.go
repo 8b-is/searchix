@@ -28,6 +28,7 @@ import (
 
 type WriteIndex struct {
 	index bleve.Index
+	meta  *IndexMeta
 }
 
 func createIndexMapping() (mapping.IndexMapping, error) {
@@ -125,9 +126,13 @@ func createIndex(indexPath string) (bleve.Index, error) {
 	return idx, nil
 }
 
-const indexBaseName = "index.bleve"
+const (
+	indexBaseName = "index.bleve"
+	metaBaseName  = "meta.json"
+)
 
 var expectedDataFiles = []string{
+	metaBaseName,
 	indexBaseName,
 	"sources",
 }
@@ -137,6 +142,7 @@ func NewIndexer(dataRoot string, force bool) (*WriteIndex, error) {
 	bleve.SetLog(log.Default())
 
 	indexPath := path.Join(dataRoot, indexBaseName)
+	metaPath := path.Join(dataRoot, metaBaseName)
 
 	exists, err := file.Exists(indexPath)
 	if err != nil {
@@ -148,6 +154,7 @@ func NewIndexer(dataRoot string, force bool) (*WriteIndex, error) {
 	}
 
 	var idx bleve.Index
+	var meta *IndexMeta
 	if !exists || force {
 		if force {
 			dir, err := os.ReadDir(dataRoot)
@@ -171,18 +178,35 @@ func NewIndexer(dataRoot string, force bool) (*WriteIndex, error) {
 			}
 		}
 		idx, err = createIndex(indexPath)
+		if err != nil {
+			return nil, err
+		}
+
+		meta, err = createMeta(metaPath)
+		if err != nil {
+			return nil, err
+		}
+
+		err = meta.Save()
+		if err != nil {
+			return nil, err
+		}
 	} else {
 		idx, err = bleve.Open(indexPath)
 		if err != nil {
-			err = errors.WithMessagef(err, "could not open index at path %s", indexPath)
+			return nil, errors.WithMessagef(err, "could not open index at path %s", indexPath)
 		}
-	}
-	if err != nil {
-		return nil, err
+
+		meta, err = openMeta(metaPath)
+		if err != nil {
+			return nil, err
+		}
+
 	}
 
 	return &WriteIndex{
 		idx,
+		meta,
 	}, nil
 }
 
