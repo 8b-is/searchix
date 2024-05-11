@@ -32,34 +32,29 @@ func NewNixpkgsChannelImporter(
 	dataPath string,
 	logger *slog.Logger,
 ) *NixpkgsChannelImporter {
-	indexPath := dataPath
 	fullpath := path.Join(dataPath, source.Channel)
 
 	return &NixpkgsChannelImporter{
-		DataPath:  fullpath,
-		Source:    source,
-		Logger:    logger,
-		indexPath: indexPath,
+		DataPath: fullpath,
+		Source:   source,
+		Logger:   logger,
 	}
 }
 
 func NewChannelImporter(source *Source, dataPath string, logger *slog.Logger) *ChannelImporter {
-	indexPath := dataPath
 	fullpath := path.Join(dataPath, source.Channel)
 
 	return &ChannelImporter{
-		DataPath:  fullpath,
-		Source:    source,
-		Logger:    logger,
-		indexPath: indexPath,
+		DataPath: fullpath,
+		Source:   source,
+		Logger:   logger,
 	}
 }
 
 type importConfig struct {
-	IndexPath string
-	Filename  string
-	Source    *Source
-	Logger    *slog.Logger
+	Filename string
+	Source   *Source
+	Logger   *slog.Logger
 }
 
 func processOptions(

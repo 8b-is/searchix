@@ -14,10 +14,9 @@ import (
 )
 
 type NixpkgsChannelImporter struct {
-	DataPath  string
-	Source    *Source
-	Logger    *slog.Logger
-	indexPath string
+	DataPath string
+	Source   *Source
+	Logger   *slog.Logger
 }
 
 func makeChannelURL(channel string, subPath string) (string, error) {
@@ -77,9 +76,8 @@ func (i *NixpkgsChannelImporter) Import(
 	i.Logger.Debug("preparing import run", "revision", i.Source.Repo.Revision, "filename", filename)
 
 	return processOptions(parent, indexer, &importConfig{
-		IndexPath: i.indexPath,
-		Source:    i.Source,
-		Filename:  filename,
-		Logger:    i.Logger,
+		Source:   i.Source,
+		Filename: filename,
+		Logger:   i.Logger,
 	})
 }

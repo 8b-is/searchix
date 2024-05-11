@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
+	"path"
 	"searchix/internal/options"
 
 	"github.com/blevesearch/bleve/v2"
@@ -27,7 +28,9 @@ type ReadIndex struct {
 	index bleve.Index
 }
 
-func Open(indexPath string) (*ReadIndex, error) {
+func Open(dataRoot string) (*ReadIndex, error) {
+	indexPath := path.Join(dataRoot, indexBaseName)
+
 	idx, err := bleve.Open(indexPath)
 	if err != nil {
 		return nil, errors.WithMessagef(err, "unable to open index at path %s", indexPath)

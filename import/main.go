@@ -22,7 +22,6 @@ type Config struct {
 	LogLevel   slog.Level    `conf:"default:INFO"`
 	Timeout    time.Duration `conf:"default:30m,help:maximum time to wait for all fetchers and importers combined"`
 	Replace    bool          `conf:"default:false,help:whether to remove existing database, if exists"`
-	IndexPath  string        `conf:"default:data/index.bleve"`
 }
 
 func main() {
@@ -51,7 +50,7 @@ func main() {
 		return
 	}
 
-	indexer, err := search.NewIndexer(runtimeConfig.IndexPath, runtimeConfig.Replace)
+	indexer, err := search.NewIndexer(cfg.DataPath, runtimeConfig.Replace)
 	if err != nil {
 		log.Fatalf("Failed to create indexer: %v", err)
 	}

@@ -20,7 +20,6 @@ type ChannelImporter struct {
 	Source     *Source
 	SourceFile string
 	Logger     *slog.Logger
-	indexPath  string
 }
 
 func (i *ChannelImporter) FetchIfNeeded(parent context.Context) (bool, error) {
@@ -86,9 +85,8 @@ func (i *ChannelImporter) Import(parent context.Context, indexer *search.WriteIn
 	i.Logger.Debug("preparing import run", "revision", i.Source.Repo.Revision, "filename", filename)
 
 	return processOptions(parent, indexer, &importConfig{
-		IndexPath: i.indexPath,
-		Source:    i.Source,
-		Filename:  filename,
-		Logger:    i.Logger,
+		Source:   i.Source,
+		Filename: filename,
+		Logger:   i.Logger,
 	})
 }

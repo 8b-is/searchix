@@ -28,8 +28,6 @@ type WriteIndex struct {
 	index bleve.Index
 }
 
-const ExpectedIndexExtension = ".bleve"
-
 func createIndexMapping() (mapping.IndexMapping, error) {
 	indexMapping := bleve.NewIndexMapping()
 	indexMapping.StoreDynamic = false
@@ -125,9 +123,13 @@ func createIndex(indexPath string) (bleve.Index, error) {
 	return idx, nil
 }
 
-func NewIndexer(indexPath string, force bool) (*WriteIndex, error) {
+const indexBaseName = "index.bleve"
+
+func NewIndexer(dataRoot string, force bool) (*WriteIndex, error) {
 	var err error
 	bleve.SetLog(log.Default())
+
+	indexPath := path.Join(dataRoot, indexBaseName)
 
 	exists, err := file.Exists(indexPath)
 	if err != nil {
@@ -141,13 +143,6 @@ func NewIndexer(indexPath string, force bool) (*WriteIndex, error) {
 	var idx bleve.Index
 	if !exists || force {
 		if force {
-			if path.Ext(indexPath) != ExpectedIndexExtension {
-				return nil, errors.Errorf(
-					"cowardly refusing to delete path %s (it doesn't end in '%s')",
-					indexPath,
-					ExpectedIndexExtension,
-				)
-			}
 			err := os.RemoveAll(indexPath)
 			if err != nil {
 				return nil, errors.WithMessagef(err, "could not remove index file %s", indexPath)
