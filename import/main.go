@@ -64,11 +64,13 @@ func main() {
 		logger := slog.With("name", name, "importer", source.Type.String())
 		logger.Debug("starting importer")
 
+		importerDataPath := path.Join(cfg.DataPath, "sources", source.Channel)
+
 		switch source.Type {
 		case importer.ChannelNixpkgs:
-			imp = importer.NewNixpkgsChannelImporter(source, cfg.DataPath, logger)
+			imp = importer.NewNixpkgsChannelImporter(source, importerDataPath, logger)
 		case importer.Channel:
-			imp = importer.NewChannelImporter(source, cfg.DataPath, logger)
+			imp = importer.NewChannelImporter(source, importerDataPath, logger)
 		default:
 			log.Printf("unsupported importer type %s", source.Type.String())
 

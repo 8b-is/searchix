@@ -4,12 +4,14 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
+	"io/fs"
 	"log"
 	"log/slog"
 	"os"
 	"path"
 	"searchix/internal/file"
 	"searchix/internal/options"
+	"slices"
 
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
@@ -125,6 +127,11 @@ func createIndex(indexPath string) (bleve.Index, error) {
 
 const indexBaseName = "index.bleve"
 
+var expectedDataFiles = []string{
+	indexBaseName,
+	"sources",
+}
+
 func NewIndexer(dataRoot string, force bool) (*WriteIndex, error) {
 	var err error
 	bleve.SetLog(log.Default())
@@ -143,7 +150,22 @@ func NewIndexer(dataRoot string, force bool) (*WriteIndex, error) {
 	var idx bleve.Index
 	if !exists || force {
 		if force {
-			err := os.RemoveAll(indexPath)
+			dir, err := os.ReadDir(dataRoot)
+			if err != nil {
+				return nil, errors.WithMessagef(err, "could not read data directory %s", dataRoot)
+			}
+			remainingFiles := slices.DeleteFunc(dir, func(e fs.DirEntry) bool {
+				return slices.Contains(expectedDataFiles, e.Name())
+			})
+			if len(remainingFiles) > 0 {
+				return nil, errors.Errorf(
+					"cowardly refusing to remove data directory %s as it contains unknown files: %v",
+					dataRoot,
+					remainingFiles,
+				)
+			}
+
+			err = os.RemoveAll(dataRoot)
 			if err != nil {
 				return nil, errors.WithMessagef(err, "could not remove index file %s", indexPath)
 			}
