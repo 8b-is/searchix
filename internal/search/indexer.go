@@ -25,44 +25,12 @@ import (
 )
 
 type WriteIndex struct {
-	index        bleve.Index
-	indexMapping *mapping.IndexMappingImpl
+	index bleve.Index
 }
 
 const ExpectedIndexExtension = ".bleve"
 
-func NewIndexer(indexPath string, force bool) (*WriteIndex, error) {
-	var err error
-	bleve.SetLog(log.Default())
-
-	exists, err := file.Exists(indexPath)
-	if err != nil {
-		return nil, errors.WithMessagef(
-			err,
-			"could not check if index exists at path %s",
-			indexPath,
-		)
-	}
-	if exists {
-		if !force {
-			return nil, errors.Errorf(
-				"index file %s already exists (use --force to replace)",
-				indexPath,
-			)
-		}
-		if path.Ext(indexPath) != ExpectedIndexExtension {
-			return nil, errors.Errorf(
-				"cowardly refusing to delete path %s (it doesn't end in '%s')",
-				indexPath,
-				ExpectedIndexExtension,
-			)
-		}
-		err := os.RemoveAll(indexPath)
-		if err != nil {
-			return nil, errors.WithMessagef(err, "could not remove index file %s", indexPath)
-		}
-	}
-
+func createIndexMapping() (mapping.IndexMapping, error) {
 	indexMapping := bleve.NewIndexMapping()
 	indexMapping.StoreDynamic = false
 	indexMapping.IndexDynamic = false
@@ -75,7 +43,7 @@ func NewIndexer(indexPath string, force bool) (*WriteIndex, error) {
 	descriptionFieldMapping.Store = false
 	descriptionFieldMapping.Analyzer = web.Name
 
-	err = indexMapping.AddCustomAnalyzer("option_name", map[string]interface{}{
+	err := indexMapping.AddCustomAnalyzer("option_name", map[string]interface{}{
 		"type":      custom.Name,
 		"tokenizer": letter.Name,
 		"token_filters": []string{
@@ -133,14 +101,71 @@ func NewIndexer(indexPath string, force bool) (*WriteIndex, error) {
 
 	indexMapping.AddDocumentMapping("option", optionMapping)
 
-	idx, err := bleve.New(indexPath, indexMapping)
+	return indexMapping, nil
+}
+
+func createIndex(indexPath string) (bleve.Index, error) {
+	indexMapping, err := createIndexMapping()
+	if err != nil {
+		return nil, err
+	}
+	idx, err := bleve.NewUsing(
+		indexPath,
+		indexMapping,
+		bleve.Config.DefaultIndexType,
+		bleve.Config.DefaultKVStore,
+		map[string]interface{}{
+			"nosync": true,
+		},
+	)
 	if err != nil {
 		return nil, errors.WithMessagef(err, "unable to create index at path %s", indexPath)
 	}
 
+	return idx, nil
+}
+
+func NewIndexer(indexPath string, force bool) (*WriteIndex, error) {
+	var err error
+	bleve.SetLog(log.Default())
+
+	exists, err := file.Exists(indexPath)
+	if err != nil {
+		return nil, errors.WithMessagef(
+			err,
+			"could not check if index exists at path %s",
+			indexPath,
+		)
+	}
+
+	var idx bleve.Index
+	if !exists || force {
+		if force {
+			if path.Ext(indexPath) != ExpectedIndexExtension {
+				return nil, errors.Errorf(
+					"cowardly refusing to delete path %s (it doesn't end in '%s')",
+					indexPath,
+					ExpectedIndexExtension,
+				)
+			}
+			err := os.RemoveAll(indexPath)
+			if err != nil {
+				return nil, errors.WithMessagef(err, "could not remove index file %s", indexPath)
+			}
+		}
+		idx, err = createIndex(indexPath)
+	} else {
+		idx, err = bleve.Open(indexPath)
+		if err != nil {
+			err = errors.WithMessagef(err, "could not open index at path %s", indexPath)
+		}
+	}
+	if err != nil {
+		return nil, err
+	}
+
 	return &WriteIndex{
 		idx,
-		indexMapping,
 	}, nil
 }
 
@@ -154,6 +179,7 @@ func (i *WriteIndex) ImportOptions(
 	go func() {
 		defer close(errs)
 		batch := i.index.NewBatch()
+		indexMapping := i.index.Mapping()
 
 	outer:
 		for opt := range objects {
@@ -166,7 +192,7 @@ func (i *WriteIndex) ImportOptions(
 			}
 
 			doc := document.NewDocument(opt.Source + "/" + opt.Name)
-			err = i.indexMapping.MapDocument(doc, opt)
+			err = indexMapping.MapDocument(doc, opt)
 			if err != nil {
 				errs <- errors.WithMessagef(err, "could not map document for option: %s", opt.Name)
 
