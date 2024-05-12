@@ -45,6 +45,10 @@ func (i *ChannelImporter) FetchIfNeeded(parent context.Context) (bool, error) {
 		dest,
 	}
 
+	if i.Source.URL != "" {
+		args = append(args, "-I", fmt.Sprintf("%s=%s", i.Source.Channel, i.Source.URL))
+	}
+
 	i.Logger.Debug("nix-build command", "args", args)
 	cmd := exec.CommandContext(ctx, "nix-build", args...)
 	out, err := cmd.Output()
