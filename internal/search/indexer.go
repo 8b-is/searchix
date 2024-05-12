@@ -137,6 +137,30 @@ var expectedDataFiles = []string{
 	"sources",
 }
 
+func deleteIndex(dataRoot string) error {
+	dir, err := os.ReadDir(dataRoot)
+	if err != nil {
+		return errors.WithMessagef(err, "could not read data directory %s", dataRoot)
+	}
+	remainingFiles := slices.DeleteFunc(dir, func(e fs.DirEntry) bool {
+		return slices.Contains(expectedDataFiles, e.Name())
+	})
+	if len(remainingFiles) > 0 {
+		return errors.Errorf(
+			"cowardly refusing to remove data directory %s as it contains unknown files: %v",
+			dataRoot,
+			remainingFiles,
+		)
+	}
+
+	err = os.RemoveAll(dataRoot)
+	if err != nil {
+		return errors.WithMessagef(err, "could not remove data directory %s", dataRoot)
+	}
+
+	return nil
+}
+
 func NewIndexer(dataRoot string, force bool) (*WriteIndex, error) {
 	var err error
 	bleve.SetLog(log.Default())
@@ -157,24 +181,9 @@ func NewIndexer(dataRoot string, force bool) (*WriteIndex, error) {
 	var meta *IndexMeta
 	if !exists || force {
 		if force {
-			dir, err := os.ReadDir(dataRoot)
+			err = deleteIndex(dataRoot)
 			if err != nil {
-				return nil, errors.WithMessagef(err, "could not read data directory %s", dataRoot)
-			}
-			remainingFiles := slices.DeleteFunc(dir, func(e fs.DirEntry) bool {
-				return slices.Contains(expectedDataFiles, e.Name())
-			})
-			if len(remainingFiles) > 0 {
-				return nil, errors.Errorf(
-					"cowardly refusing to remove data directory %s as it contains unknown files: %v",
-					dataRoot,
-					remainingFiles,
-				)
-			}
-
-			err = os.RemoveAll(dataRoot)
-			if err != nil {
-				return nil, errors.WithMessagef(err, "could not remove index file %s", indexPath)
+				return nil, err
 			}
 		}
 		idx, err = createIndex(indexPath)
