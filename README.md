@@ -9,7 +9,7 @@
     -   [cachix](https://docs.cachix.org/installation#installation)
     -   [lorri](https://github.com/nix-community/lorri)
     -   [direnv](https://direnv.net/)
-    
+
 ### Setup
 
 1. Optional: use cachix to avoid building some tools
@@ -21,10 +21,10 @@
 2. Start a nix shell (this will take some time)
 
     ```shell-session
-    nix-shell
+    nix develop
     ```
 
-3. Optional: install and set up lorri and use `lorri shell` instead of `nix-shell`
+3. Optional: install and set up lorri and use `lorri shell` instead of `nix develop`
 
 4. Optional: install direnv, integrate it with your shell and then run
 
@@ -32,4 +32,4 @@
     ln -s .envrc.sample .envrc
     ```
 
-    Now `nix-shell` or `lorri shell` will be run for you automatically when you `cd` into this directory.
+    Now `nix develop` or `lorri shell` will be run for you automatically when you `cd` into this directory.
