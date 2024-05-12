@@ -64,34 +64,30 @@ function renderFragmentHTML(html) {
   }
 }
 
-function getResults(url) {
-  fetch(url, {
-    headers: {
-      fetch: "true",
-    },
-  })
-    .then(async function (res) {
-      if (res.ok) {
-        return res.text();
-      } else {
-        throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`);
-      }
-    })
-    .then(function (html) {
-      state.fragment = html;
-      history.pushState(state, null, url);
-      return renderFragmentHTML(html);
-    })
-    .catch(function (error) {
-      range.deleteContents();
-      range.insertNode(new Text(error.message));
-      console.error("fetch failed", error);
-    })
-    .finally(function () {
-      state.url = url.toJSON();
-      state.opened = [];
-      history.pushState(state, null, url);
+async function getResults(url) {
+  try {
+    const res = await fetch(url, {
+      headers: {
+        fetch: "true",
+      },
     });
+
+    if (res.ok) {
+      state.fragment = await res.text();
+      history.pushState(state, null, url);
+      renderFragmentHTML(state.fragment);
+    } else {
+      throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`);
+    }
+  } catch (error) {
+    range.deleteContents();
+    range.insertNode(new Text(error.message));
+    console.error("fetch failed", error);
+  } finally {
+    state.url = url.toJSON();
+    state.opened = [];
+    history.pushState(state, null, url);
+  }
 }
 
 search.addEventListener("submit", function (ev) {
