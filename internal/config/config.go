@@ -109,7 +109,7 @@ func GetConfig(filename string) (*Config, error) {
 		dec := toml.NewDecoder(f)
 		err = dec.Decode(&config)
 		if err != nil {
-			var tomlError toml.DecodeError
+			var tomlError *toml.DecodeError
 			if errors.As(err, &tomlError) {
 				return nil, errors.WithMessage(err, tomlError.Error())
 			}
