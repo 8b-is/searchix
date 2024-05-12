@@ -6,22 +6,7 @@ import (
 	"path"
 	"searchix/internal/search"
 	"sync"
-	"time"
 )
-
-type Source struct {
-	Name          string
-	Key           string
-	Enable        bool
-	Type          Type
-	Channel       string
-	Attribute     string
-	ImportPath    string        `toml:"import-path"`
-	FetchTimeout  time.Duration `toml:"fetch-timeout"`
-	ImportTimeout time.Duration `toml:"import-timeout"`
-	OutputPath    string        `toml:"output-path"`
-	Repo          Repository
-}
 
 type Importer interface {
 	FetchIfNeeded(context.Context) (bool, error)

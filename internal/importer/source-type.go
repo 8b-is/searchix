@@ -2,6 +2,7 @@ package importer
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/stoewer/go-strcase"
 )
@@ -41,4 +42,19 @@ func (f *Type) UnmarshalText(text []byte) error {
 	*f, err = parseType(string(text))
 
 	return err
+}
+
+type Source struct {
+	Name          string
+	Key           string
+	Enable        bool
+	Type          Type
+	Channel       string
+	URL           string
+	Attribute     string
+	ImportPath    string        `toml:"import-path"`
+	FetchTimeout  time.Duration `toml:"fetch-timeout"`
+	ImportTimeout time.Duration `toml:"import-timeout"`
+	OutputPath    string        `toml:"output-path"`
+	Repo          Repository
 }
