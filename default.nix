@@ -18,7 +18,20 @@ rec {
   searchix = pkgs.buildGoApplication {
     pname = "searchix";
     version = "0.1";
-    src = builtins.filterSource (_: type: type != "symlink") ./.;
+    src = with pkgs.lib.fileset; toSource {
+      root = ./.;
+      fileset = intersection
+        (unions [
+          ./go.mod
+          ./go.sum
+          ./serve
+          ./import
+          ./internal
+          ./frontend
+        ])
+        (gitTracked ./.);
+    };
+
     patchPhase = ''
       cp ${css} frontend/static/base.css
     '';
