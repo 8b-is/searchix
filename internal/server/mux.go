@@ -120,7 +120,7 @@ func NewMux(runtimeConfig *Config) (*http.ServeMux, error) {
 		}
 	})
 
-	const getSourceTimeout = 1 * time.Second
+	const searchTimeout = 1 * time.Second
 	mux.HandleFunc("/options/{source}/search", func(w http.ResponseWriter, r *http.Request) {
 		sourceKey := r.PathValue("source")
 
@@ -131,112 +131,101 @@ func NewMux(runtimeConfig *Config) (*http.ServeMux, error) {
 			return
 		}
 
-		ctx, cancel := context.WithTimeout(r.Context(), getSourceTimeout)
+		ctx, cancel := context.WithTimeout(r.Context(), searchTimeout)
 		defer cancel()
 
-		sourceResult, err := index.GetSource(ctx, sourceKey)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-
-			return
-		}
-
-		err = templates["search"].Execute(w, TemplateData{
-			LiveReload:   jsSnippet,
-			Sources:      config.Sources,
-			Source:       *source,
-			SourceResult: sourceResult,
-		})
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-
-			return
-		}
-	})
-
-	timeout := 1 * time.Second
-	mux.HandleFunc("/options/{source}/results", func(w http.ResponseWriter, r *http.Request) {
-		sourceKey := r.PathValue("source")
-		ctx, cancel := context.WithTimeoutCause(r.Context(), timeout, errors.New("timeout"))
-		defer cancel()
-		source := config.Sources[sourceKey]
-		if source == nil {
-			http.Error(w, "Unknown source", http.StatusNotFound)
-
-			return
-		}
-
-		qs := r.URL.Query().Get("query")
-		pg := r.URL.Query().Get("page")
-		var page uint64 = 1
-		if pg != "" {
-			page, err = strconv.ParseUint(pg, 10, 64)
-			if err != nil || page == 0 {
-				http.Error(w, "Bad query string", http.StatusBadRequest)
-			}
-		}
-		results, err := index.Search(ctx, sourceKey, qs, (page-1)*search.ResultsPerPage)
-		if err != nil {
-			if err == context.DeadlineExceeded {
-				http.Error(w, "Search timed out", http.StatusInternalServerError)
-
-				return
-			}
-			slog.Error("search error", "error", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-
-		tdata := ResultData[options.NixOption]{
-			TemplateData: TemplateData{
-				LiveReload: jsSnippet,
-				Source:     *source,
-				Sources:    config.Sources,
-			},
-			ResultsPerPage: search.ResultsPerPage,
-			Query:          qs,
-			Results:        results,
-		}
-
-		hits := uint64(len(results.Hits))
-		if results.Total > hits {
-			q, err := url.ParseQuery(r.URL.RawQuery)
-			if err != nil {
-				http.Error(w, "Query string error", http.StatusBadRequest)
-
-				return
-			}
-
-			if page*search.ResultsPerPage > results.Total {
-				http.Error(w, "Not found", http.StatusNotFound)
-
-				return
-			}
-
-			if page*search.ResultsPerPage < results.Total {
-				q.Set("page", strconv.FormatUint(page+1, 10))
-				tdata.Next = "results?" + q.Encode()
-			}
-
-			if page > 1 {
-				p := page - 1
-				if p == 1 {
-					q.Del("page")
-				} else {
-					q.Set("page", strconv.FormatUint(p, 10))
+		if r.URL.Query().Has("query") {
+			qs := r.URL.Query().Get("query")
+			pg := r.URL.Query().Get("page")
+			var page uint64 = 1
+			if pg != "" {
+				page, err = strconv.ParseUint(pg, 10, 64)
+				if err != nil || page == 0 {
+					http.Error(w, "Bad query string", http.StatusBadRequest)
 				}
-				tdata.Prev = "results?" + q.Encode()
 			}
-		}
+			results, err := index.Search(ctx, sourceKey, qs, (page-1)*search.ResultsPerPage)
+			if err != nil {
+				if err == context.DeadlineExceeded {
+					http.Error(w, "Search timed out", http.StatusInternalServerError)
 
-		if r.Header.Get("Fetch") == "true" {
-			w.Header().Add("Content-Type", "text/html; charset=utf-8")
-			err = templates["options"].ExecuteTemplate(w, "options.gotmpl", tdata)
+					return
+				}
+				slog.Error("search error", "error", err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+
+			tdata := ResultData[options.NixOption]{
+				TemplateData: TemplateData{
+					LiveReload: jsSnippet,
+					Source:     *source,
+					Sources:    config.Sources,
+				},
+				ResultsPerPage: search.ResultsPerPage,
+				Query:          qs,
+				Results:        results,
+			}
+
+			hits := uint64(len(results.Hits))
+			if results.Total > hits {
+				q, err := url.ParseQuery(r.URL.RawQuery)
+				if err != nil {
+					http.Error(w, "Query string error", http.StatusBadRequest)
+
+					return
+				}
+
+				if page*search.ResultsPerPage > results.Total {
+					http.Error(w, "Not found", http.StatusNotFound)
+
+					return
+				}
+
+				if page*search.ResultsPerPage < results.Total {
+					q.Set("page", strconv.FormatUint(page+1, 10))
+					tdata.Next = "search?" + q.Encode()
+				}
+
+				if page > 1 {
+					p := page - 1
+					if p == 1 {
+						q.Del("page")
+					} else {
+						q.Set("page", strconv.FormatUint(p, 10))
+					}
+					tdata.Prev = "search?" + q.Encode()
+				}
+			}
+
+			if r.Header.Get("Fetch") == "true" {
+				w.Header().Add("Content-Type", "text/html; charset=utf-8")
+				err = templates["options"].ExecuteTemplate(w, "options.gotmpl", tdata)
+			} else {
+				err = templates["options"].ExecuteTemplate(w, "index.gotmpl", tdata)
+			}
+			if err != nil {
+				slog.Error("template error", "template", "options", "error", err)
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
 		} else {
-			err = templates["options"].ExecuteTemplate(w, "index.gotmpl", tdata)
-		}
-		if err != nil {
-			slog.Error("template error", "template", "options", "error", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			sourceResult, err := index.GetSource(ctx, sourceKey)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+
+				return
+			}
+
+			err = templates["search"].Execute(w, TemplateData{
+				LiveReload:   jsSnippet,
+				Sources:      config.Sources,
+				Source:       *source,
+				SourceResult: sourceResult,
+			})
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+
+				return
+			}
 		}
 	})
 

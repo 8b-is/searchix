@@ -2,7 +2,7 @@
 {{- template "js" . }}
 
 {{- define "main" }}
-  <form id="search" action="results">
+  <form id="search">
     <label for="query">{{ .Source.Name }} option search</label>
     <fieldset>
       <input id="query" name="query" type="search" value="{{ .Query }}" />
