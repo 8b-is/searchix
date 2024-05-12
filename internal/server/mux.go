@@ -11,7 +11,6 @@ import (
 	"net/url"
 	"os"
 	"path"
-	"slices"
 	"strconv"
 	"time"
 
@@ -69,8 +68,10 @@ type ResultData[T options.NixOption] struct {
 }
 
 func applyDevModeOverrides(config *cfg.Config) {
-	config.CSP.ScriptSrc = slices.Insert(config.CSP.ScriptSrc, 0, "'unsafe-inline'")
-	config.CSP.ConnectSrc = slices.Insert(config.CSP.ConnectSrc, 0, "'self'")
+	if len(config.CSP.ScriptSrc) == 0 {
+		config.CSP.ScriptSrc = config.CSP.DefaultSrc
+	}
+	config.CSP.ScriptSrc = append(config.CSP.ScriptSrc, "'unsafe-inline'")
 }
 
 func NewMux(runtimeConfig *Config) (*http.ServeMux, error) {
