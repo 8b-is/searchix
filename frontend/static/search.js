@@ -66,6 +66,8 @@ function renderFragmentHTML(html) {
 
 async function getResults(url) {
   try {
+    state.url = url.toJSON();
+    history.pushState(state, null, url);
     const res = await fetch(url, {
       headers: {
         fetch: "true",
@@ -74,7 +76,8 @@ async function getResults(url) {
 
     if (res.ok) {
       state.fragment = await res.text();
-      history.pushState(state, null, url);
+      state.opened = [];
+      history.replaceState(state, null, url);
       renderFragmentHTML(state.fragment);
     } else {
       throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`);
@@ -83,16 +86,14 @@ async function getResults(url) {
     range.deleteContents();
     range.insertNode(new Text(error.message));
     console.error("fetch failed", error);
-  } finally {
-    state.url = url.toJSON();
-    state.opened = [];
-    history.pushState(state, null, url);
   }
 }
 
 search.addEventListener("submit", function (ev) {
   const url = new URL(this.action);
-  url.search = new URLSearchParams(new FormData(this)).toString();
+  const formData = new FormData(this);
+  url.search = new URLSearchParams(formData).toString();
+  state.input = formData.get("query");
   getResults(url);
   ev.preventDefault();
 });
