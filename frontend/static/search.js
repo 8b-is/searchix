@@ -56,8 +56,12 @@ function renderFragmentHTML(html) {
   pagination = fragment.querySelector("#pagination");
   range.deleteContents();
   range.insertNode(fragment);
-  addToggleEventListeners(results);
-  addPaginationEventListeners(pagination);
+  if (results !== null) {
+    addToggleEventListeners(results);
+  }
+  if (pagination !== null) {
+    addPaginationEventListeners(pagination);
+  }
 }
 
 function getResults(url) {
