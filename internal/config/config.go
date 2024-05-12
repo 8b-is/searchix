@@ -1,6 +1,7 @@
 package config
 
 import (
+	"html/template"
 	"log/slog"
 	"maps"
 	"net/url"
@@ -27,10 +28,11 @@ func (u *URL) UnmarshalText(text []byte) (err error) {
 }
 
 type Config struct {
-	DataPath string `toml:"data-path"`
-	CSP      CSP    `toml:"content-security-policy"`
-	Headers  map[string]string
-	Sources  map[string]*importer.Source
+	DataPath      string        `toml:"data-path"`
+	CSP           CSP           `toml:"content-security-policy"`
+	ExtraBodyHTML template.HTML `toml:"extra-body-html"`
+	Headers       map[string]string
+	Sources       map[string]*importer.Source
 }
 
 var defaultConfig = Config{

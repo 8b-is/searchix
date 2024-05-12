@@ -50,12 +50,12 @@ type HTTPError struct {
 const jsSnippet = template.HTML(livereload.JsSnippet) // #nosec G203
 
 type TemplateData struct {
-	LiveReload   template.HTML
-	Sources      map[string]*importer.Source
-	Source       importer.Source
-	Query        string
-	Results      bool
-	SourceResult *bleve.SearchResult
+	Sources       map[string]*importer.Source
+	Source        importer.Source
+	Query         string
+	Results       bool
+	SourceResult  *bleve.SearchResult
+	ExtraBodyHTML template.HTML
 }
 
 type ResultData[T options.NixOption] struct {
@@ -109,11 +109,11 @@ func NewMux(runtimeConfig *Config) (*http.ServeMux, error) {
 
 	top := http.NewServeMux()
 	mux := http.NewServeMux()
-	indexData := TemplateData{
-		LiveReload: jsSnippet,
-		Sources:    config.Sources,
-	}
 	mux.HandleFunc("/{$}", func(w http.ResponseWriter, _ *http.Request) {
+		indexData := TemplateData{
+			ExtraBodyHTML: config.ExtraBodyHTML,
+			Sources:       config.Sources,
+		}
 		err := templates["index"].ExecuteTemplate(w, "index.gotmpl", indexData)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -157,9 +157,9 @@ func NewMux(runtimeConfig *Config) (*http.ServeMux, error) {
 
 			tdata := ResultData[options.NixOption]{
 				TemplateData: TemplateData{
-					LiveReload: jsSnippet,
-					Source:     *source,
-					Sources:    config.Sources,
+					ExtraBodyHTML: config.ExtraBodyHTML,
+					Source:        *source,
+					Sources:       config.Sources,
 				},
 				ResultsPerPage: search.ResultsPerPage,
 				Query:          qs,
@@ -216,10 +216,10 @@ func NewMux(runtimeConfig *Config) (*http.ServeMux, error) {
 			}
 
 			err = templates["search"].Execute(w, TemplateData{
-				LiveReload:   jsSnippet,
-				Sources:      config.Sources,
-				Source:       *source,
-				SourceResult: sourceResult,
+				ExtraBodyHTML: config.ExtraBodyHTML,
+				Sources:       config.Sources,
+				Source:        *source,
+				SourceResult:  sourceResult,
 			})
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -233,6 +233,7 @@ func NewMux(runtimeConfig *Config) (*http.ServeMux, error) {
 
 	if runtimeConfig.LiveReload {
 		applyDevModeOverrides(config)
+		config.ExtraBodyHTML = jsSnippet
 		liveReload := livereload.New()
 		liveReload.Start()
 		top.Handle("/livereload", liveReload)
