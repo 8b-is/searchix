@@ -30,6 +30,7 @@ buildGoApplication {
   };
 
   patchPhase = ''
+    rm -f frontend/static/base.css
     cp ${css} frontend/static/base.css
   '';
   tags = [ "embed" ];
