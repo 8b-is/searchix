@@ -57,6 +57,9 @@ func ValueTypeToString(valueType jstream.ValueType) string {
 }
 
 func makeGitHubFileURL(userRepo string, ref string, subPath string) string {
+	if ref == "" {
+		ref = "master"
+	}
 	url, _ := url.JoinPath("https://github.com/", userRepo, "blob", ref, subPath)
 
 	return url
