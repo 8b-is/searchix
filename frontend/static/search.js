@@ -6,8 +6,10 @@ const range = new Range();
 range.setStartAfter(search);
 range.setEndAfter(search.parentNode.lastChild);
 
+let urlLocation = new URL(location);
 let state = history.state || {
-  url: new URL(location).toString(),
+  url: urlLocation.toString(),
+  input: urlLocation.searchParams.get("query"),
   fragment: range.cloneContents().innerHTML || "",
   opened: [],
 };
@@ -117,6 +119,7 @@ addEventListener("popstate", function (ev) {
   if (ev.state != null) {
     url = new URL(ev.state.url);
     if (!url.pathname.endsWith("/search") && ev.state.fragment !== null) {
+      document.getElementById("query").value = ev.state.input;
       renderFragmentHTML(ev.state.fragment);
       return;
     }
