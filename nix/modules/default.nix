@@ -19,6 +19,7 @@ let
     BASE_URL = cfg.baseUrl;
     CONFIG_FILE = settingsFormat.generate "searchix-config.toml" cfg.settings;
     LOG_LEVEL = cfg.logLevel;
+    SENTRY_DSN = cfg.sentryDsn;
   };
 
   defaultServiceConfig = {
