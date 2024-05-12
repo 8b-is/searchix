@@ -22,7 +22,12 @@
   };
 
   outputs = { self, nixpkgs, flake-utils, gomod2nix, pre-commit-hooks, simple-css }:
-    (flake-utils.lib.eachDefaultSystem
+    {
+      nixosModules = {
+        default = import ./nix/modules self;
+      };
+      overlays.default = import ./nix/overlays;
+    } // (flake-utils.lib.eachDefaultSystem
       (system:
         let
           pkgs = import nixpkgs {

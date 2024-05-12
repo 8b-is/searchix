@@ -1,3 +1,4 @@
+flake:
 { config
 , lib
 , pkgs
@@ -7,7 +8,7 @@
 let
   cfg = config.services.searchix;
 
-  package = (import ../.. { inherit pkgs; }).searchix;
+  package = flake.packages.${pkgs.system}.default;
 
   settingsFormat = pkgs.formats.toml { };
 
@@ -133,7 +134,9 @@ in
             default = "${cfg.homeDir}/data";
           };
           sources = mkOption {
-            type = with types; attrsOf (submodule (import ./source-options.nix { inherit cfg; }));
+            type = with types; attrsOf (submodule (import ./source-options.nix {
+              inherit cfg settingsFormat;
+            }));
             default = {
               nixos.enable = true;
               darwin.enable = false;
@@ -149,17 +152,18 @@ in
   };
 
   config = mkIf cfg.enable {
-    nixpkgs.overlays = [
-      (import "${(import ../sources.nix).gomod2nix}/overlay.nix")
-    ];
-
     systemd.services.searchix-importer = {
       description = "Searchix option importer";
-      unitConfig.Conflicts = [ "searchix-web" ];
+      conflicts = [ "searchix-web.service" ];
+      before = [ "searchix-web.service" ];
       path = with pkgs; [ nix ];
       serviceConfig = defaultServiceConfig // {
         ExecStart = "${package}/bin/import";
         Type = "oneshot";
+
+        RestartSec = 10;
+        RestartSteps = 5;
+        RestartMaxDelaySec = "5 min";
       };
       environment = env;
       startAt = cfg.dates;
@@ -175,6 +179,7 @@ in
     systemd.services.searchix-web = {
       description = "Searchix Nix option search";
       after = [ "searchix-importer.service" ];
+      wants = [ "searchix-importer.service" ];
       wantedBy = [ "multi-user.target" ];
       environment = env;
       serviceConfig = defaultServiceConfig // {

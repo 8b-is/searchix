@@ -1,9 +1,11 @@
-{ cfg }:
+{ cfg, settingsFormat }:
 { config, lib, name, ... }:
 let
   inherit (lib) literalExpression mkOption mkEnableOption types;
 in
 {
+  freeformType = settingsFormat.type;
+
   options = {
     key = mkOption {
       type = types.strMatching "[a-z0-9_-]*";
