@@ -1,4 +1,6 @@
 const search = document.getElementById("search");
+const nav = document.querySelectorAll("body > header > nav")[0];
+const queryInput = document.getElementById("query");
 let results = document.getElementById("results");
 let pagination = document.getElementById("pagination");
 
@@ -91,6 +93,20 @@ async function getResults(url) {
   }
 }
 
+queryInput.addEventListener("input", function (ev) {
+  for (const el of nav.children) {
+    if (el.nodeName === "A") {
+      const url = new URL(el.href);
+      if (ev.target.value) {
+        url.searchParams.set("query", ev.target.value);
+      } else {
+        url.searchParams.delete("query");
+      }
+      el.href = url.toString();
+    }
+  }
+});
+
 search.addEventListener("submit", function (ev) {
   const url = new URL(this.action);
   const formData = new FormData(this);
@@ -119,7 +135,7 @@ addEventListener("popstate", function (ev) {
   if (ev.state != null) {
     url = new URL(ev.state.url);
     if (!url.pathname.endsWith("/search") && ev.state.fragment !== null) {
-      document.getElementById("query").value = ev.state.input;
+      queryInput.value = ev.state.input;
       renderFragmentHTML(ev.state.fragment);
       return;
     }

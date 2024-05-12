@@ -14,9 +14,10 @@
         {{- range $key, $value := .Sources }}
           <a
             {{ if eq $.Source.Name $value.Name }}class="current"{{ end }}
-            href="/options/{{ $key }}/search"
-            >{{ $value.Name }}</a
+            href="/options/{{ $key }}/search{{ and $.Query (printf "?query=%s" $.Query) }}"
           >
+            {{- $value.Name -}}
+          </a>
         {{- end }}
       </nav>
     </header>
