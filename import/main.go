@@ -120,7 +120,6 @@ func main() {
 	}
 
 	if hadErrors {
-		os.RemoveAll(path.Join(cfg.DataPath, "index.bleve"))
 		defer os.Exit(1)
 	}
 }
