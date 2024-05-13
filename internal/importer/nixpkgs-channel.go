@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"searchix/internal/config"
 	"searchix/internal/file"
 	"searchix/internal/search"
 
@@ -15,7 +16,7 @@ import (
 
 type NixpkgsChannelImporter struct {
 	DataPath string
-	Source   *Source
+	Source   *config.Source
 	Logger   *slog.Logger
 }
 

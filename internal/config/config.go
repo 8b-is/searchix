@@ -6,7 +6,6 @@ import (
 	"maps"
 	"net/url"
 	"os"
-	"searchix/internal/importer"
 	"time"
 
 	"github.com/pelletier/go-toml/v2"
@@ -32,7 +31,7 @@ type Config struct {
 	CSP           CSP           `toml:"content-security-policy"`
 	ExtraBodyHTML template.HTML `toml:"extra-body-html"`
 	Headers       map[string]string
-	Sources       map[string]*importer.Source
+	Sources       map[string]*Source
 }
 
 var defaultConfig = Config{
@@ -43,12 +42,12 @@ var defaultConfig = Config{
 	Headers: map[string]string{
 		"x-content-type-options": "nosniff",
 	},
-	Sources: map[string]*importer.Source{
+	Sources: map[string]*Source{
 		"nixos": {
 			Name:          "NixOS",
 			Key:           "nixos",
 			Enable:        true,
-			Type:          importer.Channel,
+			Type:          Channel,
 			Channel:       "nixpkgs",
 			URL:           "https://channels.nixos.org/nixos-unstable/nixexprs.tar.xz",
 			ImportPath:    "nixos/release.nix",
@@ -56,7 +55,7 @@ var defaultConfig = Config{
 			OutputPath:    "share/doc/nixos/options.json",
 			FetchTimeout:  5 * time.Minute,
 			ImportTimeout: 15 * time.Minute,
-			Repo: importer.Repository{
+			Repo: Repository{
 				Type:  "github",
 				Owner: "NixOS",
 				Repo:  "nixpkgs",
@@ -66,7 +65,7 @@ var defaultConfig = Config{
 			Name:          "Darwin",
 			Key:           "darwin",
 			Enable:        false,
-			Type:          importer.Channel,
+			Type:          Channel,
 			Channel:       "darwin",
 			URL:           "https://github.com/LnL7/nix-darwin/archive/master.tar.gz",
 			ImportPath:    "release.nix",
@@ -74,7 +73,7 @@ var defaultConfig = Config{
 			OutputPath:    "share/doc/darwin/options.json",
 			FetchTimeout:  5 * time.Minute,
 			ImportTimeout: 15 * time.Minute,
-			Repo: importer.Repository{
+			Repo: Repository{
 				Type:  "github",
 				Owner: "LnL7",
 				Repo:  "nix-darwin",
@@ -86,13 +85,13 @@ var defaultConfig = Config{
 			Enable:        false,
 			Channel:       "home-manager",
 			URL:           "https://github.com/nix-community/home-manager/archive/master.tar.gz",
-			Type:          importer.Channel,
+			Type:          Channel,
 			ImportPath:    "default.nix",
 			Attribute:     "docs.json",
 			OutputPath:    "share/doc/home-manager/options.json",
 			FetchTimeout:  5 * time.Minute,
 			ImportTimeout: 15 * time.Minute,
-			Repo: importer.Repository{
+			Repo: Repository{
 				Type:  "github",
 				Owner: "nix-community",
 				Repo:  "home-manager",
@@ -123,7 +122,7 @@ func GetConfig(filename string) (*Config, error) {
 		}
 	}
 
-	maps.DeleteFunc(config.Sources, func(_ string, v *importer.Source) bool {
+	maps.DeleteFunc(config.Sources, func(_ string, v *Source) bool {
 		return !v.Enable
 	})
 

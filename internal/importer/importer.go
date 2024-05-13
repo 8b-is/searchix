@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"path"
+	"searchix/internal/config"
 	"searchix/internal/search"
 	"sync"
 )
@@ -14,7 +15,7 @@ type Importer interface {
 }
 
 func NewNixpkgsChannelImporter(
-	source *Source,
+	source *config.Source,
 	dataPath string,
 	logger *slog.Logger,
 ) *NixpkgsChannelImporter {
@@ -27,7 +28,11 @@ func NewNixpkgsChannelImporter(
 	}
 }
 
-func NewChannelImporter(source *Source, dataPath string, logger *slog.Logger) *ChannelImporter {
+func NewChannelImporter(
+	source *config.Source,
+	dataPath string,
+	logger *slog.Logger,
+) *ChannelImporter {
 	fullpath := path.Join(dataPath, source.Channel)
 
 	return &ChannelImporter{
@@ -39,7 +44,7 @@ func NewChannelImporter(source *Source, dataPath string, logger *slog.Logger) *C
 
 type importConfig struct {
 	Filename string
-	Source   *Source
+	Source   *config.Source
 	Logger   *slog.Logger
 }
 

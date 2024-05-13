@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"searchix/internal/config"
 	"searchix/internal/file"
 	"searchix/internal/search"
 	"strconv"
@@ -17,7 +18,7 @@ import (
 
 type ChannelImporter struct {
 	DataPath   string
-	Source     *Source
+	Source     *config.Source
 	SourceFile string
 	Logger     *slog.Logger
 }

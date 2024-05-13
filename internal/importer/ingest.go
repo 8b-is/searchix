@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"reflect"
+	"searchix/internal/config"
 	"searchix/internal/options"
 
 	"github.com/bcicen/jstream"
@@ -108,14 +109,14 @@ type OptionIngester struct {
 	ms      *mapstructure.Decoder
 	optJSON nixOptionJSON
 	infile  *os.File
-	source  *Source
+	source  *config.Source
 }
 
 type Ingester[T options.NixOption] interface {
 	Process() (<-chan *T, <-chan error)
 }
 
-func NewOptionProcessor(inpath string, source *Source) (*OptionIngester, error) {
+func NewOptionProcessor(inpath string, source *config.Source) (*OptionIngester, error) {
 	infile, err := os.Open(inpath)
 	if err != nil {
 		return nil, errors.WithMessagef(err, "failed to open input file %s", inpath)
