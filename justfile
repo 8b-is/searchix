@@ -21,10 +21,10 @@ precommit:
 	nix-build -A pre-commit-check
 
 dev:
-	watchexec -e go -r wgo run -exit ./serve/ --live --config-file config.toml
+	watchexec -e go -r wgo run -exit ./serve/ --live --config config.toml
 
 index:
-	wgo run -exit ./import/ --config-file config.toml
+	wgo run -exit ./import/ --config config.toml
 
 reindex:
-	wgo run -exit ./import/ --config-file config.toml --replace
+	wgo run -exit ./import/ --config config.toml --replace
