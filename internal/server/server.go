@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"searchix/internal/config"
 	"searchix/internal/index"
+	"strconv"
 	"time"
 
 	"github.com/pkg/errors"
@@ -22,7 +23,7 @@ func New(conf *config.Config, index *index.ReadIndex, liveReload bool) (*Server,
 	if err != nil {
 		return nil, err
 	}
-	listenAddress := net.JoinHostPort(conf.Web.ListenAddress, conf.Web.Port)
+	listenAddress := net.JoinHostPort(conf.Web.ListenAddress, strconv.Itoa(conf.Web.Port))
 
 	return &Server{
 		&http.Server{

@@ -61,7 +61,7 @@ func mustLocalTime(in string) (time toml.LocalTime) {
 type Web struct {
 	ContentSecurityPolicy CSP
 	ListenAddress         string
-	Port                  string
+	Port                  int
 	BaseURL               URL
 	SentryDSN             string
 	Environment           string
@@ -86,7 +86,7 @@ var defaultConfig = Config{
 	DataPath: "./data",
 	Web: &Web{
 		ListenAddress: "localhost",
-		Port:          "3000",
+		Port:          3000,
 		BaseURL:       mustURL("http://localhost:3000"),
 		ContentSecurityPolicy: CSP{
 			DefaultSrc: []string{"'self'"},
