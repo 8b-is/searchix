@@ -70,13 +70,8 @@ in
       description = "Home directory for searchix user";
     };
 
-    dates = mkOption {
-      type = types.singleLineStr;
-      default = "04:00";
-      example = "weekly";
-    };
-
     settings = mkOption {
+      default = { };
       type = types.submodule {
         freeformType = settingsFormat.type;
         options = {
@@ -115,9 +110,9 @@ in
                 };
 
                 sentryDSN = mkOption {
-                  type = with types; nullOr str;
+                  type = types.str;
                   description = "Optionally enable sentry to track errors.";
-                  default = null;
+                  default = "";
                 };
               };
             };
@@ -127,26 +122,36 @@ in
             type = types.submodule {
               freeformType = settingsFormat.type;
 
-              importTimeout = mkOption {
-                type = types.str;
-                default = "30m";
-                description = ''
-                  Maximum time to wait for all import jobs.
-                  May need to be increased based on the number of sources.
-                '';
-              };
-
-              sources = mkOption {
-                type = with types;
-                  attrsOf (submodule (import ./source-options.nix {
-                    inherit cfg settingsFormat;
-                  }));
-                default = {
-                  nixos.enable = true;
-                  darwin.enable = false;
-                  home-manager.enable = false;
+              options = {
+                timeout = mkOption {
+                  type = types.str;
+                  default = "30m";
+                  description = ''
+                    Maximum time to wait for all import jobs.
+                    May need to be increased based on the number of sources.
+                  '';
                 };
-                description = "Declarative specification of options sources for searchix.";
+
+                updateAt = mkOption {
+                  type = types.strMatching "[[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2}";
+                  default = "04:00:00";
+                  example = "02:00:00";
+                  description = "Time of day to fetch and import new options.";
+                };
+
+                sources = mkOption {
+                  type = with types;
+                    attrsOf (submodule (import ./source-options.nix {
+                      inherit cfg settingsFormat;
+                    }));
+                  default = {
+                    nixos.enable = true;
+                    darwin.enable = false;
+                    home-manager.enable = false;
+                  };
+                  description = "Declarative specification of options sources for searchix.";
+                };
+
               };
             };
           };
@@ -158,37 +163,12 @@ in
   };
 
   config = mkIf cfg.enable {
-    systemd.services.searchix-importer = {
-      description = "Searchix option importer";
-      conflicts = [ "searchix-web.service" ];
-      path = with pkgs; [ nix ];
-      serviceConfig = defaultServiceConfig // {
-        ExecStart = "${package}/bin/import --config ${(settingsFormat.generate "searchix-config.toml" cfg.settings)}";
-        Type = "oneshot";
-
-        RestartSec = 10;
-        RestartSteps = 5;
-        RestartMaxDelaySec = "5 min";
-      };
-
-      startAt = cfg.dates;
-    };
-
-    systemd.timers.searchix-importer = {
-      timerConfig = {
-        Persistent = true;
-        RandomizedDelaySec = 1800;
-      };
-    };
-
-    systemd.services.searchix-web = {
+    systemd.services.searchix = {
       description = "Searchix Nix option search";
-      after = [ "searchix-importer.service" ];
-      wants = [ "searchix-importer.service" ];
       wantedBy = [ "multi-user.target" ];
       serviceConfig = defaultServiceConfig // {
-        ExecStart = "${package}/bin/serve --config ${(settingsFormat.generate "searchix-config.toml" cfg.settings)}";
-      } // lib.optionalAttrs (cfg.port < 1024) {
+        ExecStart = "${package}/bin/searchix --config ${(settingsFormat.generate "searchix-config.toml" cfg.settings)}";
+      } // lib.optionalAttrs (cfg.settings.web.port < 1024) {
         AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];
         CapabilityBoundingSet = [ "CAP_NET_BIND_SERVICE" ];
       };

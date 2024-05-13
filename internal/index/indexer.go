@@ -1,4 +1,4 @@
-package search
+package index
 
 import (
 	"bytes"
@@ -22,13 +22,13 @@ import (
 	"github.com/blevesearch/bleve/v2/analysis/tokenizer/single"
 	"github.com/blevesearch/bleve/v2/document"
 	"github.com/blevesearch/bleve/v2/mapping"
-	index "github.com/blevesearch/bleve_index_api"
+	indexAPI "github.com/blevesearch/bleve_index_api"
 	"github.com/pkg/errors"
 )
 
 type WriteIndex struct {
 	index bleve.Index
-	meta  *IndexMeta
+	meta  *Meta
 }
 
 func createIndexMapping() (mapping.IndexMapping, error) {
@@ -161,7 +161,7 @@ func deleteIndex(dataRoot string) error {
 	return nil
 }
 
-func NewIndexer(dataRoot string, force bool) (*WriteIndex, error) {
+func OpenOrCreate(dataRoot string, force bool) (*ReadIndex, *WriteIndex, bool, error) {
 	var err error
 	bleve.SetLog(log.Default())
 
@@ -170,7 +170,7 @@ func NewIndexer(dataRoot string, force bool) (*WriteIndex, error) {
 
 	exists, err := file.Exists(indexPath)
 	if err != nil {
-		return nil, errors.WithMessagef(
+		return nil, nil, exists, errors.WithMessagef(
 			err,
 			"could not check if index exists at path %s",
 			indexPath,
@@ -178,45 +178,51 @@ func NewIndexer(dataRoot string, force bool) (*WriteIndex, error) {
 	}
 
 	var idx bleve.Index
-	var meta *IndexMeta
+	var meta *Meta
 	if !exists || force {
 		if force {
 			err = deleteIndex(dataRoot)
 			if err != nil {
-				return nil, err
+				return nil, nil, exists, err
 			}
 		}
 		idx, err = createIndex(indexPath)
 		if err != nil {
-			return nil, err
+			return nil, nil, exists, err
 		}
 
 		meta, err = createMeta(metaPath)
 		if err != nil {
-			return nil, err
+			return nil, nil, exists, err
 		}
 
 		err = meta.Save()
 		if err != nil {
-			return nil, err
+			return nil, nil, exists, err
 		}
 	} else {
 		idx, err = bleve.Open(indexPath)
 		if err != nil {
-			return nil, errors.WithMessagef(err, "could not open index at path %s", indexPath)
+			return nil, nil, exists, errors.WithMessagef(err, "could not open index at path %s", indexPath)
 		}
 
 		meta, err = openMeta(metaPath)
 		if err != nil {
-			return nil, err
+			return nil, nil, exists, err
 		}
 
 	}
 
-	return &WriteIndex{
-		idx,
-		meta,
-	}, nil
+	return &ReadIndex{
+			idx,
+			meta,
+		},
+		&WriteIndex{
+			idx,
+			meta,
+		},
+		exists,
+		nil
 }
 
 func (i *WriteIndex) ImportOptions(
@@ -257,7 +263,7 @@ func (i *WriteIndex) ImportOptions(
 
 				continue
 			}
-			field := document.NewTextFieldWithIndexingOptions("_data", nil, data.Bytes(), index.StoreField)
+			field := document.NewTextFieldWithIndexingOptions("_data", nil, data.Bytes(), indexAPI.StoreField)
 			newDoc := doc.AddField(field)
 
 			// slog.Debug("adding option to index", "name", opt.Name)

@@ -1,4 +1,4 @@
-package search
+package index
 
 import (
 	"encoding/json"
@@ -11,12 +11,12 @@ import (
 
 const CurrentSchemaVersion = 1
 
-type IndexMeta struct {
+type Meta struct {
 	path          string
 	SchemaVersion int
 }
 
-func createMeta(path string) (*IndexMeta, error) {
+func createMeta(path string) (*Meta, error) {
 	exists, err := file.Exists(path)
 	if err != nil {
 		return nil, errors.WithMessage(err, "could not check for existence of index metadata")
@@ -25,18 +25,18 @@ func createMeta(path string) (*IndexMeta, error) {
 		return nil, errors.New("index metadata already exists")
 	}
 
-	return &IndexMeta{
+	return &Meta{
 		path:          path,
 		SchemaVersion: CurrentSchemaVersion,
 	}, nil
 }
 
-func openMeta(path string) (*IndexMeta, error) {
+func openMeta(path string) (*Meta, error) {
 	j, err := os.ReadFile(path)
 	if err != nil {
 		return nil, errors.WithMessage(err, "could not open index metadata file")
 	}
-	var meta IndexMeta
+	var meta Meta
 	err = json.Unmarshal(j, &meta)
 	if err != nil {
 		return nil, errors.WithMessage(err, "index metadata is corrupt, try replacing the index")
@@ -47,7 +47,7 @@ func openMeta(path string) (*IndexMeta, error) {
 	return &meta, nil
 }
 
-func (i *IndexMeta) checkSchemaVersion() {
+func (i *Meta) checkSchemaVersion() {
 	if i.SchemaVersion < CurrentSchemaVersion {
 		slog.Warn(
 			"Index schema version out of date, suggest re-indexing",
@@ -59,7 +59,7 @@ func (i *IndexMeta) checkSchemaVersion() {
 	}
 }
 
-func (i *IndexMeta) Save() error {
+func (i *Meta) Save() error {
 	j, err := json.Marshal(i)
 	if err != nil {
 		return errors.WithMessage(err, "could not prepare index metadata for saving")

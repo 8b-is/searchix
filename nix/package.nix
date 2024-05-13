@@ -21,8 +21,7 @@ buildGoApplication {
       (unions [
         ../go.mod
         ../go.sum
-        ../serve
-        ../import
+        ../searchix.go
         ../internal
         ../frontend
       ])

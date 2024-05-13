@@ -26,6 +26,19 @@ func (u *URL) UnmarshalText(text []byte) (err error) {
 	return nil
 }
 
+type Duration struct {
+	time.Duration
+}
+
+func (d *Duration) UnmarshalText(text []byte) (err error) {
+	d.Duration, err = time.ParseDuration(string(text))
+	if err != nil {
+		return errors.WithMessagef(err, "could not parse duration %s", string(text))
+	}
+
+	return nil
+}
+
 func mustURL(in string) (u URL) {
 	var err error
 	u.URL, err = url.Parse(in)
@@ -34,6 +47,15 @@ func mustURL(in string) (u URL) {
 	}
 
 	return u
+}
+
+func mustLocalTime(in string) (time toml.LocalTime) {
+	err := time.UnmarshalText([]byte(in))
+	if err != nil {
+		panic(errors.Errorf("Could not parse time: %s", in))
+	}
+
+	return
 }
 
 type Web struct {
@@ -48,8 +70,9 @@ type Web struct {
 }
 
 type Importer struct {
-	Sources map[string]*Source
-	Timeout time.Duration
+	Sources  map[string]*Source
+	Timeout  Duration
+	UpdateAt toml.LocalTime
 }
 
 type Config struct {
@@ -73,7 +96,8 @@ var defaultConfig = Config{
 		},
 	},
 	Importer: &Importer{
-		Timeout: 30 * time.Minute,
+		Timeout:  Duration{30 * time.Minute},
+		UpdateAt: mustLocalTime("04:00:00"),
 		Sources: map[string]*Source{
 			"nixos": {
 				Name:          "NixOS",

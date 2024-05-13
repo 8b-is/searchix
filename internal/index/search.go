@@ -1,10 +1,9 @@
-package search
+package index
 
 import (
 	"bytes"
 	"context"
 	"encoding/gob"
-	"path"
 	"searchix/internal/options"
 
 	"github.com/blevesearch/bleve/v2"
@@ -26,27 +25,7 @@ type Result struct {
 
 type ReadIndex struct {
 	index bleve.Index
-	meta  *IndexMeta
-}
-
-func Open(dataRoot string) (*ReadIndex, error) {
-	indexPath := path.Join(dataRoot, indexBaseName)
-	metaPath := path.Join(dataRoot, metaBaseName)
-
-	idx, err := bleve.Open(indexPath)
-	if err != nil {
-		return nil, errors.WithMessagef(err, "unable to open index at path %s", indexPath)
-	}
-
-	meta, err := openMeta(metaPath)
-	if err != nil {
-		return nil, errors.WithMessagef(err, "unable to open metadata at path %s", metaPath)
-	}
-
-	return &ReadIndex{
-		idx,
-		meta,
-	}, nil
+	meta  *Meta
 }
 
 func (index *ReadIndex) GetSource(ctx context.Context, name string) (*bleve.SearchResult, error) {

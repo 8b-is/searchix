@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	"searchix/internal/config"
+	"searchix/internal/index"
 	"time"
 
 	"github.com/pkg/errors"
@@ -16,8 +17,8 @@ type Server struct {
 	*http.Server
 }
 
-func New(conf *config.Config, liveReload bool) (*Server, error) {
-	mux, err := NewMux(conf, liveReload)
+func New(conf *config.Config, index *index.ReadIndex, liveReload bool) (*Server, error) {
+	mux, err := NewMux(conf, index, liveReload)
 	if err != nil {
 		return nil, err
 	}

@@ -5,13 +5,13 @@ import (
 	"log/slog"
 	"path"
 	"searchix/internal/config"
-	"searchix/internal/search"
+	"searchix/internal/index"
 	"sync"
 )
 
 type Importer interface {
 	FetchIfNeeded(context.Context) (bool, error)
-	Import(context.Context, *search.WriteIndex) (bool, error)
+	Import(context.Context, *index.WriteIndex) (bool, error)
 }
 
 func NewNixpkgsChannelImporter(
@@ -50,7 +50,7 @@ type importConfig struct {
 
 func processOptions(
 	parent context.Context,
-	indexer *search.WriteIndex,
+	indexer *index.WriteIndex,
 	conf *importConfig,
 ) (bool, error) {
 	ctx, cancel := context.WithTimeout(parent, conf.Source.ImportTimeout)

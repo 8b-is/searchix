@@ -8,23 +8,18 @@ import (
 	"os/exec"
 	"path"
 	"searchix/internal/config"
-	"searchix/internal/search"
+	"searchix/internal/index"
 	"strings"
 )
 
-func Start(cfg *config.Config, replace bool) error {
+func Start(cfg *config.Config, indexer *index.WriteIndex, replace bool) error {
 	if len(cfg.Importer.Sources) == 0 {
 		slog.Info("No sources enabled")
 
 		return nil
 	}
 
-	indexer, err := search.NewIndexer(cfg.DataPath, replace)
-	if err != nil {
-		log.Fatalf("Failed to create indexer: %v", err)
-	}
-
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.Importer.Timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.Importer.Timeout.Duration)
 	defer cancel()
 
 	var imp Importer
@@ -79,11 +74,6 @@ func Start(cfg *config.Config, replace bool) error {
 				logger.Info("importer succeeded")
 			}
 		}
-	}
-
-	err = indexer.Close()
-	if err != nil {
-		slog.Error("error closing indexer", "error", err)
 	}
 
 	return nil

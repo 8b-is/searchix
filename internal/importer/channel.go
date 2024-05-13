@@ -9,7 +9,7 @@ import (
 	"path"
 	"searchix/internal/config"
 	"searchix/internal/file"
-	"searchix/internal/search"
+	"searchix/internal/index"
 	"strconv"
 	"strings"
 
@@ -81,7 +81,7 @@ func (i *ChannelImporter) FetchIfNeeded(parent context.Context) (bool, error) {
 	return before != after, nil
 }
 
-func (i *ChannelImporter) Import(parent context.Context, indexer *search.WriteIndex) (bool, error) {
+func (i *ChannelImporter) Import(parent context.Context, indexer *index.WriteIndex) (bool, error) {
 	if i.Source.OutputPath == "" {
 		return false, errors.New("no output path specified")
 	}

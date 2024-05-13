@@ -16,8 +16,8 @@ import (
 
 	"searchix/frontend"
 	"searchix/internal/config"
+	search "searchix/internal/index"
 	"searchix/internal/options"
-	"searchix/internal/search"
 
 	"github.com/blevesearch/bleve/v2"
 	"github.com/getsentry/sentry-go"
@@ -63,15 +63,12 @@ func applyDevModeOverrides(config *config.Config) {
 	)
 }
 
-func NewMux(config *config.Config, liveReload bool) (*http.ServeMux, error) {
-	slog.Debug("loading index")
-	index, err := search.Open(config.DataPath)
-	slog.Debug("loaded index")
-	if err != nil {
-		log.Fatalf("could not open search index, error: %#v", err)
-	}
-
-	err = sentry.Init(sentry.ClientOptions{
+func NewMux(
+	config *config.Config,
+	index *search.ReadIndex,
+	liveReload bool,
+) (*http.ServeMux, error) {
+	err := sentry.Init(sentry.ClientOptions{
 		EnableTracing:    true,
 		TracesSampleRate: 1.0,
 		Dsn:              config.Web.SentryDSN,

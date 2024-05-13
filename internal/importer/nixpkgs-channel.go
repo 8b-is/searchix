@@ -9,7 +9,7 @@ import (
 	"path"
 	"searchix/internal/config"
 	"searchix/internal/file"
-	"searchix/internal/search"
+	"searchix/internal/index"
 
 	"github.com/pkg/errors"
 )
@@ -65,7 +65,7 @@ func (i *NixpkgsChannelImporter) FetchIfNeeded(parent context.Context) (bool, er
 
 func (i *NixpkgsChannelImporter) Import(
 	parent context.Context,
-	indexer *search.WriteIndex,
+	indexer *index.WriteIndex,
 ) (bool, error) {
 	filename := path.Join(i.DataPath, filesToFetch["options"])
 	revFilename := path.Join(i.DataPath, filesToFetch["revision"])
