@@ -20,7 +20,7 @@ func (u *URL) UnmarshalText(text []byte) (err error) {
 	u.URL, err = url.Parse(string(text))
 
 	if err != nil {
-		return errors.WithMessage(err, "could not parse URL")
+		return errors.WithMessagef(err, "could not parse URL %s", string(text))
 	}
 
 	return nil
