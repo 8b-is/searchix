@@ -15,8 +15,7 @@ import (
 	"time"
 
 	"searchix/frontend"
-	cfg "searchix/internal/config"
-	"searchix/internal/importer"
+	"searchix/internal/config"
 	"searchix/internal/options"
 	"searchix/internal/search"
 
@@ -28,19 +27,6 @@ import (
 	"github.com/shengyanli1982/law"
 )
 
-var config *cfg.Config
-
-type Config struct {
-	Environment   string     `conf:"default:development"`
-	LiveReload    bool       `conf:"default:false,flag:live"`
-	ListenAddress string     `conf:"default:localhost"`
-	Port          string     `conf:"default:3000,short:p"`
-	BaseURL       cfg.URL    `conf:"default:http://localhost:3000,short:b"`
-	ConfigFile    string     `conf:"short:c"`
-	LogLevel      slog.Level `conf:"default:INFO"`
-	SentryDSN     string
-}
-
 type HTTPError struct {
 	Error   error
 	Message string
@@ -50,8 +36,8 @@ type HTTPError struct {
 const jsSnippet = template.HTML(livereload.JsSnippet) // #nosec G203
 
 type TemplateData struct {
-	Sources       map[string]*importer.Source
-	Source        importer.Source
+	Sources       map[string]*config.Source
+	Source        config.Source
 	Query         string
 	Results       bool
 	SourceResult  *bleve.SearchResult
@@ -67,20 +53,17 @@ type ResultData[T options.NixOption] struct {
 	Next           string
 }
 
-func applyDevModeOverrides(config *cfg.Config) {
-	if len(config.CSP.ScriptSrc) == 0 {
-		config.CSP.ScriptSrc = config.CSP.DefaultSrc
+func applyDevModeOverrides(config *config.Config) {
+	if len(config.Web.ContentSecurityPolicy.ScriptSrc) == 0 {
+		config.Web.ContentSecurityPolicy.ScriptSrc = config.Web.ContentSecurityPolicy.DefaultSrc
 	}
-	config.CSP.ScriptSrc = append(config.CSP.ScriptSrc, "'unsafe-inline'")
+	config.Web.ContentSecurityPolicy.ScriptSrc = append(
+		config.Web.ContentSecurityPolicy.ScriptSrc,
+		"'unsafe-inline'",
+	)
 }
 
-func NewMux(runtimeConfig *Config) (*http.ServeMux, error) {
-	var err error
-	config, err = cfg.GetConfig(runtimeConfig.ConfigFile)
-	if err != nil {
-		return nil, errors.WithMessage(err, "error parsing configuration file")
-	}
-
+func NewMux(config *config.Config, liveReload bool) (*http.ServeMux, error) {
 	slog.Debug("loading index")
 	index, err := search.Open(config.DataPath)
 	slog.Debug("loaded index")
@@ -91,8 +74,8 @@ func NewMux(runtimeConfig *Config) (*http.ServeMux, error) {
 	err = sentry.Init(sentry.ClientOptions{
 		EnableTracing:    true,
 		TracesSampleRate: 1.0,
-		Dsn:              runtimeConfig.SentryDSN,
-		Environment:      runtimeConfig.Environment,
+		Dsn:              config.Web.SentryDSN,
+		Environment:      config.Web.Environment,
 	})
 	if err != nil {
 		return nil, errors.WithMessage(err, "could not set up sentry")
@@ -111,8 +94,8 @@ func NewMux(runtimeConfig *Config) (*http.ServeMux, error) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/{$}", func(w http.ResponseWriter, _ *http.Request) {
 		indexData := TemplateData{
-			ExtraBodyHTML: config.ExtraBodyHTML,
-			Sources:       config.Sources,
+			ExtraBodyHTML: config.Web.ExtraBodyHTML,
+			Sources:       config.Importer.Sources,
 		}
 		err := templates["index"].ExecuteTemplate(w, "index.gotmpl", indexData)
 		if err != nil {
@@ -124,7 +107,7 @@ func NewMux(runtimeConfig *Config) (*http.ServeMux, error) {
 	mux.HandleFunc("/options/{source}/search", func(w http.ResponseWriter, r *http.Request) {
 		sourceKey := r.PathValue("source")
 
-		source := config.Sources[sourceKey]
+		source := config.Importer.Sources[sourceKey]
 		if source == nil {
 			http.Error(w, "Source not found", http.StatusNotFound)
 
@@ -157,9 +140,9 @@ func NewMux(runtimeConfig *Config) (*http.ServeMux, error) {
 
 			tdata := ResultData[options.NixOption]{
 				TemplateData: TemplateData{
-					ExtraBodyHTML: config.ExtraBodyHTML,
+					ExtraBodyHTML: config.Web.ExtraBodyHTML,
 					Source:        *source,
-					Sources:       config.Sources,
+					Sources:       config.Importer.Sources,
 				},
 				ResultsPerPage: search.ResultsPerPage,
 				Query:          qs,
@@ -216,8 +199,8 @@ func NewMux(runtimeConfig *Config) (*http.ServeMux, error) {
 			}
 
 			err = templates["search"].Execute(w, TemplateData{
-				ExtraBodyHTML: config.ExtraBodyHTML,
-				Sources:       config.Sources,
+				ExtraBodyHTML: config.Web.ExtraBodyHTML,
+				Sources:       config.Importer.Sources,
 				Source:        *source,
 				SourceResult:  sourceResult,
 			})
@@ -231,9 +214,9 @@ func NewMux(runtimeConfig *Config) (*http.ServeMux, error) {
 
 	mux.Handle("/static/", http.FileServer(http.FS(frontend.Files)))
 
-	if runtimeConfig.LiveReload {
+	if liveReload {
 		applyDevModeOverrides(config)
-		config.ExtraBodyHTML = jsSnippet
+		config.Web.ExtraBodyHTML = jsSnippet
 		liveReload := livereload.New()
 		liveReload.Start()
 		top.Handle("/livereload", liveReload)
@@ -258,7 +241,7 @@ func NewMux(runtimeConfig *Config) (*http.ServeMux, error) {
 	}
 
 	var logWriter io.Writer
-	if runtimeConfig.Environment == "production" {
+	if config.Web.Environment == "production" {
 		logWriter = law.NewWriteAsyncer(os.Stdout, nil)
 	} else {
 		logWriter = os.Stdout
@@ -267,7 +250,7 @@ func NewMux(runtimeConfig *Config) (*http.ServeMux, error) {
 		AddHeadersMiddleware(
 			sentryHandler.Handle(
 				wrapHandlerWithLogging(mux, wrappedHandlerOptions{
-					defaultHostname: runtimeConfig.BaseURL.Hostname(),
+					defaultHostname: config.Web.BaseURL.Hostname(),
 					logger:          logWriter,
 				}),
 			),

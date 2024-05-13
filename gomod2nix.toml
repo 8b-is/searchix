@@ -4,9 +4,6 @@ schema = 3
   [mod."github.com/RoaringBitmap/roaring"]
     version = "v1.9.3"
     hash = "sha256-LZfRufkU4UhuEcgxuCPd6divX2KIdcHp1FOt79mQV7Q="
-  [mod."github.com/ardanlabs/conf/v3"]
-    version = "v3.1.7"
-    hash = "sha256-7H53l0JN5Q6hkAgBivVQ8lFd03oNmP1IG8ihzLKm2CQ="
   [mod."github.com/bcicen/jstream"]
     version = "v1.0.1"
     hash = "sha256-mm+/BuIEYYj6XOHCCJLxVMKd1XcBXCiRCWA+aTvr1sE="

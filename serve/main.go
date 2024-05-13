@@ -1,36 +1,36 @@
 package main
 
 import (
-	"fmt"
+	"flag"
 	"log"
 	"log/slog"
 	"os"
 	"os/signal"
 	"sync"
 
+	"searchix/internal/config"
 	"searchix/internal/server"
+)
 
-	"github.com/ardanlabs/conf/v3"
-	"github.com/pkg/errors"
+var (
+	liveReload = flag.Bool("live", false, "whether to enable live reloading (development)")
+	configFile = flag.String("config", "config.toml", "config file to use")
 )
 
 func main() {
-	runtimeConfig := server.Config{}
-	help, err := conf.Parse("", &runtimeConfig)
+	flag.Parse()
+
+	conf, err := config.GetConfig(*configFile)
 	if err != nil {
-		if errors.Is(err, conf.ErrHelpWanted) {
-			fmt.Println(help)
-			os.Exit(1)
-		}
-		log.Panicf("parsing runtime configuration: %v", err)
+		log.Panicf("error parsing configuration file: %v", err)
 	}
-	slog.SetLogLoggerLevel(runtimeConfig.LogLevel)
+	slog.SetLogLoggerLevel(conf.LogLevel)
 	log.SetFlags(log.LstdFlags | log.Lmsgprefix)
 	log.SetPrefix("searchix: ")
 
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, os.Interrupt)
-	sv, err := server.New(&runtimeConfig)
+	sv, err := server.New(conf, *liveReload)
 	if err != nil {
 		log.Fatalf("error setting up server: %v", err)
 	}

@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"searchix/internal/config"
 	"time"
 
 	"github.com/pkg/errors"
@@ -15,12 +16,12 @@ type Server struct {
 	*http.Server
 }
 
-func New(runtimeConfig *Config) (*Server, error) {
-	mux, err := NewMux(runtimeConfig)
+func New(conf *config.Config, liveReload bool) (*Server, error) {
+	mux, err := NewMux(conf, liveReload)
 	if err != nil {
 		return nil, err
 	}
-	listenAddress := net.JoinHostPort(runtimeConfig.ListenAddress, runtimeConfig.Port)
+	listenAddress := net.JoinHostPort(conf.Web.ListenAddress, conf.Web.Port)
 
 	return &Server{
 		&http.Server{

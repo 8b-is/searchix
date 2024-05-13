@@ -12,16 +12,6 @@ let
 
   settingsFormat = pkgs.formats.toml { };
 
-  env = {
-    ENVIRONMENT = "production";
-    LISTEN_ADDRESS = cfg.listenAddress;
-    PORT = (toString cfg.port);
-    BASE_URL = cfg.baseUrl;
-    CONFIG_FILE = settingsFormat.generate "searchix-config.toml" cfg.settings;
-    LOG_LEVEL = cfg.logLevel;
-    SENTRY_DSN = cfg.sentryDsn;
-  };
-
   defaultServiceConfig = {
     User = cfg.user;
     Group = cfg.group;
@@ -86,69 +76,84 @@ in
       example = "weekly";
     };
 
-    port = mkOption {
-      type = types.port;
-      description = "Port for searchix to listen on";
-      default = 51313;
-    };
-
-    listenAddress = mkOption {
-      type = types.str;
-      description = "Listen on a specific IP address.";
-      default = "localhost";
-    };
-
-    baseUrl = mkOption {
-      type = types.str;
-      description = "The base URL that searchix will be served on.";
-      default = "http://localhost:3000";
-    };
-
-    sentryDsn = mkOption {
-      type = with types; nullOr str;
-      description = "Optionally enable sentry to track errors.";
-      default = null;
-    };
-
-    logLevel = mkOption {
-      type = with types; enum [ "error" "warn" "info" "debug" ];
-      description = "Only log messages with the given severity or above.";
-      default = "info";
-    };
-
-    importTimeout = mkOption {
-      type = types.str;
-      default = "30m";
-      description = ''
-        Maximum time to wait for all import jobs.
-        May need to be increased based on the number of sources.
-      '';
-    };
-
     settings = mkOption {
       type = types.submodule {
         freeformType = settingsFormat.type;
         options = {
-          data-path = mkOption {
+          dataPath = mkOption {
             type = types.str;
-            description = "Where to store search index and other data, can be relative to homeDir.";
+            description = "Where to store search index and other data.";
             default = "${cfg.homeDir}/data";
           };
-          sources = mkOption {
-            type = with types; attrsOf (submodule (import ./source-options.nix {
-              inherit cfg settingsFormat;
-            }));
-            default = {
-              nixos.enable = true;
-              darwin.enable = false;
-              home-manager.enable = false;
+
+          logLevel = mkOption {
+            type = with types; enum [ "error" "warn" "info" "debug" ];
+            description = "Only log messages with the given severity or above.";
+            default = "info";
+          };
+
+          web = mkOption {
+            type = types.submodule {
+              freeformType = settingsFormat.type;
+              options = {
+                port = mkOption {
+                  type = types.port;
+                  description = "Port for searchix to listen on";
+                  default = 51313;
+                };
+
+                listenAddress = mkOption {
+                  type = types.str;
+                  description = "Listen on a specific IP address.";
+                  default = "localhost";
+                };
+
+                baseURL = mkOption {
+                  type = types.str;
+                  description = "The base URL that searchix will be served on.";
+                  default = "http://localhost:3000";
+                };
+
+                sentryDSN = mkOption {
+                  type = with types; nullOr str;
+                  description = "Optionally enable sentry to track errors.";
+                  default = null;
+                };
+              };
             };
-            description = "Declarative specification of options sources for searchix.";
+          };
+
+          importer = mkOption {
+            type = types.submodule {
+              freeformType = settingsFormat.type;
+
+              importTimeout = mkOption {
+                type = types.str;
+                default = "30m";
+                description = ''
+                  Maximum time to wait for all import jobs.
+                  May need to be increased based on the number of sources.
+                '';
+              };
+
+              sources = mkOption {
+                type = with types;
+                  attrsOf (submodule (import ./source-options.nix {
+                    inherit cfg settingsFormat;
+                  }));
+                default = {
+                  nixos.enable = true;
+                  darwin.enable = false;
+                  home-manager.enable = false;
+                };
+                description = "Declarative specification of options sources for searchix.";
+              };
+            };
           };
         };
       };
       default = { };
-      description = "Configuration for searchix (TODO: publish description).";
+      description = "Configuration for searchix (a web search interface for options in the nix ecosystem).";
     };
   };
 
@@ -156,17 +161,16 @@ in
     systemd.services.searchix-importer = {
       description = "Searchix option importer";
       conflicts = [ "searchix-web.service" ];
-      before = [ "searchix-web.service" ];
       path = with pkgs; [ nix ];
       serviceConfig = defaultServiceConfig // {
-        ExecStart = "${package}/bin/import";
+        ExecStart = "${package}/bin/import --config ${(settingsFormat.generate "searchix-config.toml" cfg.settings)}";
         Type = "oneshot";
 
         RestartSec = 10;
         RestartSteps = 5;
         RestartMaxDelaySec = "5 min";
       };
-      environment = env;
+
       startAt = cfg.dates;
     };
 
@@ -182,9 +186,8 @@ in
       after = [ "searchix-importer.service" ];
       wants = [ "searchix-importer.service" ];
       wantedBy = [ "multi-user.target" ];
-      environment = env;
       serviceConfig = defaultServiceConfig // {
-        ExecStart = "${package}/bin/serve";
+        ExecStart = "${package}/bin/serve --config ${(settingsFormat.generate "searchix-config.toml" cfg.settings)}";
       } // lib.optionalAttrs (cfg.port < 1024) {
         AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];
         CapabilityBoundingSet = [ "CAP_NET_BIND_SERVICE" ];
