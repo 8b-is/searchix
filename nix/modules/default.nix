@@ -109,6 +109,12 @@ in
                   default = "http://localhost:3000";
                 };
 
+                environment = mkOption {
+                  type = with types; either "production" "development";
+                  description = "Environment name for logging";
+                  default = "production";
+                };
+
                 sentryDSN = mkOption {
                   type = types.str;
                   description = "Optionally enable sentry to track errors.";
