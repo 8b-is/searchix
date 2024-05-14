@@ -51,7 +51,11 @@ func main() {
 		log.Panicf("error parsing configuration file: %v", err)
 	}
 	slog.SetLogLoggerLevel(conf.LogLevel)
-	log.SetFlags(log.LstdFlags | log.Lmsgprefix)
+	if conf.Web.Environment == "production" {
+		log.SetFlags(log.Lmsgprefix)
+	} else {
+		log.SetFlags(log.LstdFlags | log.Lmsgprefix)
+	}
 	log.SetPrefix("searchix: ")
 
 	read, write, exists, err := index.OpenOrCreate(conf.DataPath, *replace)
