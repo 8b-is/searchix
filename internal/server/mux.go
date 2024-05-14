@@ -35,6 +35,11 @@ type HTTPError struct {
 
 const jsSnippet = template.HTML(livereload.JsSnippet) // #nosec G203
 
+type VersionInfo struct {
+	ShortSHA  string
+	CommitSHA string
+}
+
 type TemplateData struct {
 	Sources       map[string]*config.Source
 	Source        config.Source
@@ -42,6 +47,7 @@ type TemplateData struct {
 	Results       bool
 	SourceResult  *bleve.SearchResult
 	ExtraBodyHTML template.HTML
+	Version       VersionInfo
 }
 
 type ResultData[T options.NixOption] struct {
@@ -51,6 +57,11 @@ type ResultData[T options.NixOption] struct {
 	Results        *search.Result
 	Prev           string
 	Next           string
+}
+
+var versionInfo = &VersionInfo{
+	ShortSHA:  config.ShortSHA,
+	CommitSHA: config.CommitSHA,
 }
 
 func applyDevModeOverrides(config *config.Config) {
@@ -93,6 +104,7 @@ func NewMux(
 		indexData := TemplateData{
 			ExtraBodyHTML: config.Web.ExtraBodyHTML,
 			Sources:       config.Importer.Sources,
+			Version:       *versionInfo,
 		}
 		err := templates["index"].ExecuteTemplate(w, "index.gotmpl", indexData)
 		if err != nil {
@@ -140,6 +152,7 @@ func NewMux(
 					ExtraBodyHTML: config.Web.ExtraBodyHTML,
 					Source:        *source,
 					Sources:       config.Importer.Sources,
+					Version:       *versionInfo,
 				},
 				ResultsPerPage: search.ResultsPerPage,
 				Query:          qs,
@@ -200,6 +213,7 @@ func NewMux(
 				Sources:       config.Importer.Sources,
 				Source:        *source,
 				SourceResult:  sourceResult,
+				Version:       *versionInfo,
 			})
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)

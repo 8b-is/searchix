@@ -12,6 +12,11 @@ import (
 	"github.com/pkg/errors"
 )
 
+var (
+	CommitSHA string
+	ShortSHA  string
+)
+
 type URL struct {
 	*url.URL
 }

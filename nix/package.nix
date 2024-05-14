@@ -12,11 +12,12 @@
 , buildGoApplication ? pkgs.buildGoApplication
 , css
 , self
+, testers
 }:
 let
   inherit (builtins) concatStringsSep match;
 
-  version = concatStringsSep "-" (match
+  version = "0-unstable-" + concatStringsSep "-" (match
     "([[:digit:]]{4})([[:digit:]]{2})([[:digit:]]{2}).*"
     self.lastModifiedDate
   );
@@ -42,5 +43,16 @@ buildGoApplication {
     cp ${css} frontend/static/base.css
   '';
   tags = [ "embed" ];
+  ldflags = [
+    "-s"
+    "-w"
+    "-X"
+    "searchix/internal/config.CommitSHA=${self.rev or self.dirtyRev}"
+    "-X"
+    "searchix/internal/config.ShortSHA=${self.shortRev or self.dirtyShortRev}"
+    "-X"
+    "main.buildVersion=${version}"
+  ];
+
   modules = ../gomod2nix.toml;
 }

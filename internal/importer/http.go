@@ -6,6 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"searchix/internal/config"
 	"searchix/internal/file"
 	"strings"
 	"time"
@@ -28,6 +29,8 @@ func fetchFileIfNeeded(ctx context.Context, path string, url string) (needed boo
 	if err != nil {
 		return false, errors.WithMessagef(err, "could not create HTTP request for %s", url)
 	}
+
+	req.Header.Set("User-Agent", fmt.Sprintf("Searchix %s", config.ShortSHA))
 
 	if mtime != "" {
 		req.Header.Set("If-Modified-Since", mtime)

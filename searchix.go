@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"log/slog"
 	"os"
@@ -17,10 +18,13 @@ import (
 	"github.com/pelletier/go-toml/v2"
 )
 
+var buildVersion string
+
 var (
 	configFile = flag.String("config", "config.toml", "config `file` to use")
 	liveReload = flag.Bool("live", false, "whether to enable live reloading (development)")
 	replace    = flag.Bool("replace", false, "whether to replace existing database, if it exists")
+	version    = flag.Bool("version", false, "print version information")
 )
 
 func nextOccurrenceOfLocalTime(t toml.LocalTime) time.Time {
@@ -45,6 +49,10 @@ func nextOccurrenceOfLocalTime(t toml.LocalTime) time.Time {
 
 func main() {
 	flag.Parse()
+	if *version {
+		fmt.Fprintln(os.Stderr, "searchix", buildVersion, config.CommitSHA)
+		os.Exit(0)
+	}
 
 	conf, err := config.GetConfig(*configFile)
 	if err != nil {

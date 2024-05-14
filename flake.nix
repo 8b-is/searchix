@@ -41,11 +41,11 @@
           # This has no effect on other platforms.
           callPackage = pkgs.darwin.apple_sdk_11_0.callPackage or pkgs.callPackage;
         in
-        {
+        rec {
           packages.default = callPackage ./nix/package.nix {
             inherit (gomod2nix.legacyPackages.${system}) buildGoApplication;
-            css = simple-css;
             inherit self;
+            css = simple-css;
           };
           devShells.default = callPackage ./nix/dev-shell.nix {
             pre-commit-check = {
@@ -61,6 +61,9 @@
                 inherit pkgs;
               }
             );
+            buildVersion = pkgs.testers.testVersion {
+              package = packages.default;
+            };
           };
         })
     );
