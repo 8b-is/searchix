@@ -42,6 +42,20 @@ func NewChannelImporter(
 	}
 }
 
+func NewDownloadOptionsImporter(
+	source *config.Source,
+	dataPath string,
+	logger *slog.Logger,
+) *DownloadOptionsImporter {
+	fullpath := path.Join(dataPath, source.Channel)
+
+	return &DownloadOptionsImporter{
+		DataPath: fullpath,
+		Source:   source,
+		Logger:   logger,
+	}
+}
+
 type importConfig struct {
 	Filename string
 	Source   *config.Source

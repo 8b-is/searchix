@@ -13,6 +13,7 @@ const (
 	Unknown = iota
 	Channel
 	ChannelNixpkgs
+	DownloadOptions
 )
 
 func (f Type) String() string {
@@ -21,6 +22,8 @@ func (f Type) String() string {
 		return "channel"
 	case ChannelNixpkgs:
 		return "channel-nixpkgs"
+	case DownloadOptions:
+		return "download-options"
 	}
 
 	return fmt.Sprintf("Fetcher(%d)", f)
@@ -32,6 +35,8 @@ func parseType(name string) (Type, error) {
 		return Channel, nil
 	case "channel-nixpkgs":
 		return ChannelNixpkgs, nil
+	case "download-options":
+		return DownloadOptions, nil
 	default:
 		return Unknown, fmt.Errorf("unsupported fetcher %s", name)
 	}

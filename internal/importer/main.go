@@ -34,6 +34,8 @@ func Start(cfg *config.Config, indexer *index.WriteIndex, replace bool) error {
 			imp = NewNixpkgsChannelImporter(source, importerDataPath, logger)
 		case config.Channel:
 			imp = NewChannelImporter(source, importerDataPath, logger)
+		case config.DownloadOptions:
+			imp = NewDownloadOptionsImporter(source, importerDataPath, logger)
 		default:
 			log.Printf("unsupported importer type %s", source.Type.String())
 
