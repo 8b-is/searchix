@@ -166,6 +166,7 @@ in
     systemd.services.searchix = {
       description = "Searchix Nix option search";
       wantedBy = [ "multi-user.target" ];
+      path = with pkgs; [ nix ];
       serviceConfig = defaultServiceConfig // {
         ExecStart = "${package}/bin/searchix --config ${(settingsFormat.generate "searchix-config.toml" cfg.settings)}";
       } // lib.optionalAttrs (cfg.settings.web.port < 1024) {
