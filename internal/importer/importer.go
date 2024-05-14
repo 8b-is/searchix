@@ -78,7 +78,7 @@ func processOptions(
 				if !running {
 					wg.Done()
 					iErrs = nil
-					slog.Info("ingest completed")
+					conf.Logger.Info("ingest completed")
 
 					continue
 				}
@@ -88,7 +88,7 @@ func processOptions(
 				if !running {
 					wg.Done()
 					pErrs = nil
-					slog.Info("processing completed")
+					conf.Logger.Debug("processing completed")
 
 					continue
 				}
@@ -98,9 +98,9 @@ func processOptions(
 		}
 	}()
 
-	slog.Debug("options processing", "state", "waiting")
+	conf.Logger.Debug("options processing", "state", "waiting")
 	wg.Wait()
-	slog.Debug("options processing", "state", "complete")
+	conf.Logger.Debug("options processing", "state", "complete")
 
 	return hadErrors, nil
 }
