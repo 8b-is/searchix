@@ -1,9 +1,14 @@
 :root {
   --standard-border-radius: 0;
-  --text: black;
-  --text-light: #212121;
   --preformatted: var(--code);
   --min-width: 60rem;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --text: black;
+    --text-light: #212121;
+  }
 }
 
 body {
