@@ -11,10 +11,19 @@
   )
 , buildGoApplication ? pkgs.buildGoApplication
 , css
+, self
 }:
+let
+  inherit (builtins) concatStringsSep match;
+
+  version = concatStringsSep "-" (match
+    "([[:digit:]]{4})([[:digit:]]{2})([[:digit:]]{2}).*"
+    self.lastModifiedDate
+  );
+in
 buildGoApplication {
   pname = "searchix";
-  version = "0.1";
+  inherit version;
   src = with pkgs.lib.fileset; toSource {
     root = ../.;
     fileset = difference

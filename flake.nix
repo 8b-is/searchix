@@ -45,6 +45,7 @@
           packages.default = callPackage ./nix/package.nix {
             inherit (gomod2nix.legacyPackages.${system}) buildGoApplication;
             css = simple-css;
+            inherit self;
           };
           devShells.default = callPackage ./nix/dev-shell.nix {
             pre-commit-check = {
