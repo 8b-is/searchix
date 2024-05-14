@@ -18,7 +18,7 @@ import (
 )
 
 var (
-	configFile = flag.String("config", "config.toml", "config file to use")
+	configFile = flag.String("config", "config.toml", "config `file` to use")
 	liveReload = flag.Bool("live", false, "whether to enable live reloading (development)")
 	replace    = flag.Bool("replace", false, "whether to replace existing database, if it exists")
 )
