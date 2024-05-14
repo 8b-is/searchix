@@ -3,7 +3,6 @@ package importer
 import (
 	"context"
 	"log/slog"
-	"path"
 	"searchix/internal/config"
 	"searchix/internal/index"
 	"sync"
@@ -19,10 +18,8 @@ func NewNixpkgsChannelImporter(
 	dataPath string,
 	logger *slog.Logger,
 ) *NixpkgsChannelImporter {
-	fullpath := path.Join(dataPath, source.Channel)
-
 	return &NixpkgsChannelImporter{
-		DataPath: fullpath,
+		DataPath: dataPath,
 		Source:   source,
 		Logger:   logger,
 	}
@@ -33,10 +30,8 @@ func NewChannelImporter(
 	dataPath string,
 	logger *slog.Logger,
 ) *ChannelImporter {
-	fullpath := path.Join(dataPath, source.Channel)
-
 	return &ChannelImporter{
-		DataPath: fullpath,
+		DataPath: dataPath,
 		Source:   source,
 		Logger:   logger,
 	}
@@ -47,10 +42,8 @@ func NewDownloadOptionsImporter(
 	dataPath string,
 	logger *slog.Logger,
 ) *DownloadOptionsImporter {
-	fullpath := path.Join(dataPath, source.Channel)
-
 	return &DownloadOptionsImporter{
-		DataPath: fullpath,
+		DataPath: dataPath,
 		Source:   source,
 		Logger:   logger,
 	}
