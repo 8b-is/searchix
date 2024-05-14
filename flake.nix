@@ -26,7 +26,6 @@
       nixosModules = {
         default = import ./nix/modules self;
       };
-      overlays.default = import ./nix/overlays;
     } // (flake-utils.lib.eachDefaultSystem
       (system:
         let

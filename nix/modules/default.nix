@@ -110,7 +110,7 @@ in
                 };
 
                 environment = mkOption {
-                  type = with types; either "production" "development";
+                  type = types.str;
                   description = "Environment name for logging";
                   default = "production";
                 };
