@@ -15,6 +15,7 @@ import (
 	"searchix/internal/index"
 	"searchix/internal/server"
 
+	"github.com/getsentry/sentry-go"
 	"github.com/pelletier/go-toml/v2"
 )
 
@@ -65,6 +66,16 @@ func main() {
 		log.SetFlags(log.LstdFlags)
 	}
 
+	err = sentry.Init(sentry.ClientOptions{
+		EnableTracing:    true,
+		TracesSampleRate: 1.0,
+		Dsn:              cfg.Web.SentryDSN,
+		Environment:      cfg.Web.Environment,
+	})
+	if err != nil {
+		slog.Warn("could not initialise sentry", "error", err)
+	}
+
 	read, write, exists, err := index.OpenOrCreate(cfg.DataPath, *replace)
 	if err != nil {
 		log.Fatalf("Failed to open or create index: %v", err)
@@ -94,23 +105,54 @@ func main() {
 		slog.Debug("server stopped")
 	}()
 
-	go func() {
-		nextRun := nextOccurrenceOfLocalTime(cfg.Importer.UpdateAt)
-		for {
-			slog.Debug("scheduling next run", "next-run", nextRun)
-			<-time.After(time.Until(nextRun))
-			wg.Add(1)
-			slog.Info("updating index")
-			err = importer.Start(cfg, write, false)
-			wg.Done()
-			if err != nil {
-				slog.Warn("error updating index", "error", err)
-			} else {
-				slog.Info("update complete")
+	go func(localHub *sentry.Hub) {
+		const monitorSlug = "import"
+		localHub.WithScope(func(scope *sentry.Scope) {
+			scope.SetContext("monitor", sentry.Context{"slug": monitorSlug})
+			monitorConfig := &sentry.MonitorConfig{
+				Schedule: sentry.IntervalSchedule(1, sentry.MonitorScheduleUnitDay),
+				// minutes
+				MaxRuntime:    10,
+				CheckInMargin: 5,
+				Timezone:      time.Local.String(),
 			}
-			nextRun = nextRun.AddDate(0, 0, 1)
-		}
-	}()
+
+			nextRun := nextOccurrenceOfLocalTime(cfg.Importer.UpdateAt)
+			for {
+				slog.Debug("scheduling next run", "next-run", nextRun)
+				<-time.After(time.Until(nextRun))
+				wg.Add(1)
+				slog.Info("updating index")
+
+				eventID := localHub.CaptureCheckIn(&sentry.CheckIn{
+					MonitorSlug: monitorSlug,
+					Status:      sentry.CheckInStatusInProgress,
+				}, monitorConfig)
+
+				err = importer.Start(cfg, write, false)
+				wg.Done()
+				if err != nil {
+					slog.Warn("error updating index", "error", err)
+
+					localHub.CaptureException(err)
+					localHub.CaptureCheckIn(&sentry.CheckIn{
+						ID:          *eventID,
+						MonitorSlug: monitorSlug,
+						Status:      sentry.CheckInStatusError,
+					}, monitorConfig)
+				} else {
+					slog.Info("update complete")
+
+					localHub.CaptureCheckIn(&sentry.CheckIn{
+						ID:          *eventID,
+						MonitorSlug: monitorSlug,
+						Status:      sentry.CheckInStatusOK,
+					}, monitorConfig)
+				}
+				nextRun = nextRun.AddDate(0, 0, 1)
+			}
+		})
+	}(sentry.CurrentHub().Clone())
 
 	sErr := make(chan error)
 	wg.Add(1)
@@ -128,5 +170,6 @@ func main() {
 		// Error starting or closing listener:
 		log.Fatalf("error: %v", err)
 	}
+	sentry.Flush(2 * time.Second)
 	wg.Wait()
 }

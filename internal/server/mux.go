@@ -20,7 +20,6 @@ import (
 	"searchix/internal/options"
 
 	"github.com/blevesearch/bleve/v2"
-	"github.com/getsentry/sentry-go"
 	sentryhttp "github.com/getsentry/sentry-go/http"
 	"github.com/osdevisnot/sorvor/pkg/livereload"
 	"github.com/pkg/errors"
@@ -83,20 +82,10 @@ func NewMux(
 	index *search.ReadIndex,
 	liveReload bool,
 ) (*http.ServeMux, error) {
-	err := sentry.Init(sentry.ClientOptions{
-		EnableTracing:    true,
-		TracesSampleRate: 1.0,
-		Dsn:              cfg.Web.SentryDSN,
-		Environment:      cfg.Web.Environment,
-	})
-	if err != nil {
-		return nil, errors.WithMessage(err, "could not set up sentry")
-	}
-	defer sentry.Flush(2 * time.Second)
+	var err error
 	sentryHandler := sentryhttp.New(sentryhttp.Options{
 		Repanic: true,
 	})
-
 	templates, err = loadTemplates()
 	if err != nil {
 		log.Panicf("could not load templates: %v", err)
