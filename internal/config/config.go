@@ -70,7 +70,7 @@ type Web struct {
 	BaseURL               URL
 	SentryDSN             string
 	Environment           string
-	ExtraBodyHTML         template.HTML
+	ExtraHeadHTML         template.HTML
 	Headers               map[string]string
 }
 

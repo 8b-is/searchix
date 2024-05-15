@@ -46,7 +46,7 @@ type TemplateData struct {
 	Query         string
 	Results       bool
 	SourceResult  *bleve.SearchResult
-	ExtraBodyHTML template.HTML
+	ExtraHeadHTML template.HTML
 	Version       VersionInfo
 }
 
@@ -102,7 +102,7 @@ func NewMux(
 	mux := http.NewServeMux()
 	mux.HandleFunc("/{$}", func(w http.ResponseWriter, _ *http.Request) {
 		indexData := TemplateData{
-			ExtraBodyHTML: config.Web.ExtraBodyHTML,
+			ExtraHeadHTML: config.Web.ExtraHeadHTML,
 			Sources:       config.Importer.Sources,
 			Version:       *versionInfo,
 		}
@@ -149,7 +149,7 @@ func NewMux(
 
 			tdata := ResultData[options.NixOption]{
 				TemplateData: TemplateData{
-					ExtraBodyHTML: config.Web.ExtraBodyHTML,
+					ExtraHeadHTML: config.Web.ExtraHeadHTML,
 					Source:        *source,
 					Sources:       config.Importer.Sources,
 					Version:       *versionInfo,
@@ -209,7 +209,7 @@ func NewMux(
 			}
 
 			err = templates["search"].Execute(w, TemplateData{
-				ExtraBodyHTML: config.Web.ExtraBodyHTML,
+				ExtraHeadHTML: config.Web.ExtraHeadHTML,
 				Sources:       config.Importer.Sources,
 				Source:        *source,
 				SourceResult:  sourceResult,
@@ -227,7 +227,7 @@ func NewMux(
 
 	if liveReload {
 		applyDevModeOverrides(config)
-		config.Web.ExtraBodyHTML = jsSnippet
+		config.Web.ExtraHeadHTML = jsSnippet
 		liveReload := livereload.New()
 		liveReload.Start()
 		top.Handle("/livereload", liveReload)
