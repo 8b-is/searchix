@@ -48,7 +48,6 @@ func (watcher FileWatcher) Start(callback func(string)) {
 	for {
 		select {
 		case event := <-watcher.Events:
-			slog.Debug(fmt.Sprintf("event received: %s", event))
 			if event.Has(fsnotify.Create) || event.Has(fsnotify.Rename) {
 				f, err := os.Stat(event.Name)
 				if err != nil {
