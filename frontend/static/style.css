@@ -2,6 +2,7 @@
   --standard-border-radius: 0;
   --preformatted: var(--code);
   --min-width: 60rem;
+  --accent-error: #ffe0e0;
 }
 
 @media (prefers-color-scheme: light) {
@@ -108,4 +109,8 @@ section {
   footer {
     text-align: center;
   }
+}
+
+.error {
+  background: var(--accent-error);
 }

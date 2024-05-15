@@ -48,6 +48,8 @@ type TemplateData struct {
 	SourceResult  *bleve.SearchResult
 	ExtraHeadHTML template.HTML
 	Version       VersionInfo
+	Code          int
+	Message       string
 }
 
 type ResultData[T options.NixOption] struct {
@@ -63,6 +65,8 @@ var versionInfo = &VersionInfo{
 	ShortSHA:  config.ShortSHA,
 	CommitSHA: config.CommitSHA,
 }
+
+var templates TemplateCollection
 
 func applyDevModeOverrides(config *config.Config) {
 	if len(config.Web.ContentSecurityPolicy.ScriptSrc) == 0 {
@@ -93,14 +97,16 @@ func NewMux(
 		Repanic: true,
 	})
 
-	templates, err := loadTemplates()
+	templates, err = loadTemplates()
 	if err != nil {
 		log.Panicf("could not load templates: %v", err)
 	}
 
+	errorHandler := createErrorHandler(config)
+
 	top := http.NewServeMux()
 	mux := http.NewServeMux()
-	mux.HandleFunc("/{$}", func(w http.ResponseWriter, _ *http.Request) {
+	mux.HandleFunc("/{$}", func(w http.ResponseWriter, r *http.Request) {
 		indexData := TemplateData{
 			ExtraHeadHTML: config.Web.ExtraHeadHTML,
 			Sources:       config.Importer.Sources,
@@ -108,7 +114,7 @@ func NewMux(
 		}
 		err := templates["index"].Execute(w, indexData)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			errorHandler(w, r, err.Error(), http.StatusInternalServerError)
 		}
 	})
 
@@ -118,7 +124,7 @@ func NewMux(
 
 		source := config.Importer.Sources[sourceKey]
 		if source == nil {
-			http.Error(w, "Source not found", http.StatusNotFound)
+			errorHandler(w, r, "Source not found", http.StatusNotFound)
 
 			return
 		}
@@ -133,18 +139,18 @@ func NewMux(
 			if pg != "" {
 				page, err = strconv.ParseUint(pg, 10, 64)
 				if err != nil || page == 0 {
-					http.Error(w, "Bad query string", http.StatusBadRequest)
+					errorHandler(w, r, "Bad query string", http.StatusBadRequest)
 				}
 			}
 			results, err := index.Search(ctx, sourceKey, qs, (page-1)*search.ResultsPerPage)
 			if err != nil {
 				if err == context.DeadlineExceeded {
-					http.Error(w, "Search timed out", http.StatusInternalServerError)
+					errorHandler(w, r, "Search timed out", http.StatusInternalServerError)
 
 					return
 				}
 				slog.Error("search error", "error", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				errorHandler(w, r, err.Error(), http.StatusInternalServerError)
 			}
 
 			tdata := ResultData[options.NixOption]{
@@ -163,13 +169,13 @@ func NewMux(
 			if results.Total > hits {
 				q, err := url.ParseQuery(r.URL.RawQuery)
 				if err != nil {
-					http.Error(w, "Query string error", http.StatusBadRequest)
+					errorHandler(w, r, "Query string error", http.StatusBadRequest)
 
 					return
 				}
 
 				if page*search.ResultsPerPage > results.Total {
-					http.Error(w, "Not found", http.StatusNotFound)
+					errorHandler(w, r, "Not found", http.StatusNotFound)
 
 					return
 				}
@@ -198,12 +204,12 @@ func NewMux(
 			}
 			if err != nil {
 				slog.Error("template error", "template", "options", "error", err)
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				errorHandler(w, r, err.Error(), http.StatusInternalServerError)
 			}
 		} else {
 			sourceResult, err := index.GetSource(ctx, sourceKey)
 			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				errorHandler(w, r, err.Error(), http.StatusInternalServerError)
 
 				return
 			}
@@ -216,7 +222,7 @@ func NewMux(
 				Version:       *versionInfo,
 			})
 			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				errorHandler(w, r, err.Error(), http.StatusInternalServerError)
 
 				return
 			}
