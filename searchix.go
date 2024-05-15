@@ -54,25 +54,25 @@ func main() {
 		os.Exit(0)
 	}
 
-	conf, err := config.GetConfig(*configFile)
+	cfg, err := config.GetConfig(*configFile)
 	if err != nil {
 		log.Panicf("error parsing configuration file: %v", err)
 	}
-	slog.SetLogLoggerLevel(conf.LogLevel)
-	if conf.Web.Environment == "production" {
+	slog.SetLogLoggerLevel(cfg.LogLevel)
+	if cfg.Web.Environment == "production" {
 		log.SetFlags(0)
 	} else {
 		log.SetFlags(log.LstdFlags)
 	}
 
-	read, write, exists, err := index.OpenOrCreate(conf.DataPath, *replace)
+	read, write, exists, err := index.OpenOrCreate(cfg.DataPath, *replace)
 	if err != nil {
 		log.Fatalf("Failed to open or create index: %v", err)
 	}
 
 	if !exists {
 		slog.Info("Index doesn't exist. Starting build job...")
-		err = importer.Start(conf, write, *replace)
+		err = importer.Start(cfg, write, *replace)
 		if err != nil {
 			log.Fatalf("Failed to build index: %v", err)
 		}
@@ -80,7 +80,7 @@ func main() {
 
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, os.Interrupt)
-	sv, err := server.New(conf, read, *liveReload)
+	sv, err := server.New(cfg, read, *liveReload)
 	if err != nil {
 		log.Fatalf("error setting up server: %v", err)
 	}
@@ -95,13 +95,13 @@ func main() {
 	}()
 
 	go func() {
-		nextRun := nextOccurrenceOfLocalTime(conf.Importer.UpdateAt)
+		nextRun := nextOccurrenceOfLocalTime(cfg.Importer.UpdateAt)
 		for {
 			slog.Debug("scheduling next run", "next-run", nextRun)
 			<-time.After(time.Until(nextRun))
 			wg.Add(1)
 			slog.Info("updating index")
-			err = importer.Start(conf, write, false)
+			err = importer.Start(cfg, write, false)
 			wg.Done()
 			if err != nil {
 				slog.Warn("error updating index", "error", err)

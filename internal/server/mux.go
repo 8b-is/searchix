@@ -68,26 +68,26 @@ var versionInfo = &VersionInfo{
 
 var templates TemplateCollection
 
-func applyDevModeOverrides(config *config.Config) {
-	if len(config.Web.ContentSecurityPolicy.ScriptSrc) == 0 {
-		config.Web.ContentSecurityPolicy.ScriptSrc = config.Web.ContentSecurityPolicy.DefaultSrc
+func applyDevModeOverrides(cfg *config.Config) {
+	if len(cfg.Web.ContentSecurityPolicy.ScriptSrc) == 0 {
+		cfg.Web.ContentSecurityPolicy.ScriptSrc = cfg.Web.ContentSecurityPolicy.DefaultSrc
 	}
-	config.Web.ContentSecurityPolicy.ScriptSrc = append(
-		config.Web.ContentSecurityPolicy.ScriptSrc,
+	cfg.Web.ContentSecurityPolicy.ScriptSrc = append(
+		cfg.Web.ContentSecurityPolicy.ScriptSrc,
 		"'unsafe-inline'",
 	)
 }
 
 func NewMux(
-	config *config.Config,
+	cfg *config.Config,
 	index *search.ReadIndex,
 	liveReload bool,
 ) (*http.ServeMux, error) {
 	err := sentry.Init(sentry.ClientOptions{
 		EnableTracing:    true,
 		TracesSampleRate: 1.0,
-		Dsn:              config.Web.SentryDSN,
-		Environment:      config.Web.Environment,
+		Dsn:              cfg.Web.SentryDSN,
+		Environment:      cfg.Web.Environment,
 	})
 	if err != nil {
 		return nil, errors.WithMessage(err, "could not set up sentry")
@@ -102,14 +102,14 @@ func NewMux(
 		log.Panicf("could not load templates: %v", err)
 	}
 
-	errorHandler := createErrorHandler(config)
+	errorHandler := createErrorHandler(cfg)
 
 	top := http.NewServeMux()
 	mux := http.NewServeMux()
 	mux.HandleFunc("/{$}", func(w http.ResponseWriter, r *http.Request) {
 		indexData := TemplateData{
-			ExtraHeadHTML: config.Web.ExtraHeadHTML,
-			Sources:       config.Importer.Sources,
+			ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
+			Sources:       cfg.Importer.Sources,
 			Version:       *versionInfo,
 		}
 		err := templates["index"].Execute(w, indexData)
@@ -122,7 +122,7 @@ func NewMux(
 	mux.HandleFunc("/options/{source}/search", func(w http.ResponseWriter, r *http.Request) {
 		sourceKey := r.PathValue("source")
 
-		source := config.Importer.Sources[sourceKey]
+		source := cfg.Importer.Sources[sourceKey]
 		if source == nil {
 			errorHandler(w, r, "Source not found", http.StatusNotFound)
 
@@ -155,9 +155,9 @@ func NewMux(
 
 			tdata := ResultData[options.NixOption]{
 				TemplateData: TemplateData{
-					ExtraHeadHTML: config.Web.ExtraHeadHTML,
+					ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
 					Source:        *source,
-					Sources:       config.Importer.Sources,
+					Sources:       cfg.Importer.Sources,
 					Version:       *versionInfo,
 				},
 				ResultsPerPage: search.ResultsPerPage,
@@ -215,8 +215,8 @@ func NewMux(
 			}
 
 			err = templates["search"].Execute(w, TemplateData{
-				ExtraHeadHTML: config.Web.ExtraHeadHTML,
-				Sources:       config.Importer.Sources,
+				ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
+				Sources:       cfg.Importer.Sources,
 				Source:        *source,
 				SourceResult:  sourceResult,
 				Version:       *versionInfo,
@@ -232,8 +232,8 @@ func NewMux(
 	mux.Handle("/static/", http.FileServer(http.FS(frontend.Files)))
 
 	if liveReload {
-		applyDevModeOverrides(config)
-		config.Web.ExtraHeadHTML = jsSnippet
+		applyDevModeOverrides(cfg)
+		cfg.Web.ExtraHeadHTML = jsSnippet
 		liveReload := livereload.New()
 		liveReload.Start()
 		top.Handle("/livereload", liveReload)
@@ -258,7 +258,7 @@ func NewMux(
 	}
 
 	var logWriter io.Writer
-	if config.Web.Environment == "production" {
+	if cfg.Web.Environment == "production" {
 		logWriter = law.NewWriteAsyncer(os.Stdout, nil)
 	} else {
 		logWriter = os.Stdout
@@ -267,11 +267,11 @@ func NewMux(
 		AddHeadersMiddleware(
 			sentryHandler.Handle(
 				wrapHandlerWithLogging(mux, wrappedHandlerOptions{
-					defaultHostname: config.Web.BaseURL.Hostname(),
+					defaultHostname: cfg.Web.BaseURL.Hostname(),
 					logger:          logWriter,
 				}),
 			),
-			config,
+			cfg,
 		),
 	)
 	// no logging, no sentry
