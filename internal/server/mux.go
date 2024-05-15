@@ -106,7 +106,7 @@ func NewMux(
 			Sources:       config.Importer.Sources,
 			Version:       *versionInfo,
 		}
-		err := templates["index"].ExecuteTemplate(w, "index.gotmpl", indexData)
+		err := templates["index"].Execute(w, indexData)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
@@ -192,9 +192,9 @@ func NewMux(
 
 			if r.Header.Get("Fetch") == "true" {
 				w.Header().Add("Content-Type", "text/html; charset=utf-8")
-				err = templates["options"].ExecuteTemplate(w, "options.gotmpl", tdata)
+				err = templates["options"].ExecuteTemplate(w, "results", tdata)
 			} else {
-				err = templates["options"].ExecuteTemplate(w, "index.gotmpl", tdata)
+				err = templates["options"].Execute(w, tdata)
 			}
 			if err != nil {
 				slog.Error("template error", "template", "options", "error", err)
