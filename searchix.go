@@ -119,6 +119,10 @@ func main() {
 		sErr <- sv.Start()
 	}()
 
+	if conf.Web.Environment == "development" {
+		log.Printf("server listening on %s", conf.Web.BaseURL.String())
+	}
+
 	err = <-sErr
 	if err != nil {
 		// Error starting or closing listener:
