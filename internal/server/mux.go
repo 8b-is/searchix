@@ -229,6 +229,42 @@ func NewMux(
 		}
 	})
 
+	mux.HandleFunc(
+		"/options/{source}/opensearch.xml",
+		func(w http.ResponseWriter, r *http.Request) {
+			type openSearchData struct {
+				BaseURL string
+				Source  *config.Source
+			}
+
+			sourceKey := r.PathValue("source")
+			source := cfg.Importer.Sources[sourceKey]
+			if source == nil {
+				errorHandler(w, r, "Source not found", http.StatusNotFound)
+
+				return
+			}
+
+			w.Header().Set("Content-Type", "application/opensearchdescription+xml")
+			err := templates["opensearch.xml"].ExecuteTemplate(
+				w,
+				"opensearch.xml.gotmpl",
+				openSearchData{
+					BaseURL: cfg.Web.BaseURL.String(),
+					Source:  source,
+				},
+			)
+			if err != nil {
+				// no errorHandler; HTML does not make sense here
+				http.Error(
+					w,
+					fmt.Sprintf("Template render error: %v", err),
+					http.StatusInternalServerError,
+				)
+			}
+		},
+	)
+
 	mux.Handle("/static/", http.FileServer(http.FS(frontend.Files)))
 
 	if liveReload {

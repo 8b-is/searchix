@@ -6,9 +6,17 @@
     <title>Searchix</title>
     <link href="/static/base.css" rel="stylesheet" />
     <link href="/static/style.css" rel="stylesheet" />
-    {{ block "js" . }}
+    {{ block "head" . }}
     {{ end }}
     {{ .ExtraHeadHTML }}
+    {{- range $key, $value := .Sources }}
+      <link
+        rel="search"
+        type="application/opensearchdescription+xml"
+        title="Searchix {{ $value.Name }}"
+        href="/options/{{ $key }}/opensearch.xml"
+      />
+    {{- end }}
   </head>
   <body>
     <header>
