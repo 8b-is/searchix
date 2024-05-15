@@ -60,11 +60,10 @@ func main() {
 	}
 	slog.SetLogLoggerLevel(conf.LogLevel)
 	if conf.Web.Environment == "production" {
-		log.SetFlags(log.Lmsgprefix)
+		log.SetFlags(0)
 	} else {
-		log.SetFlags(log.LstdFlags | log.Lmsgprefix)
+		log.SetFlags(log.LstdFlags)
 	}
-	log.SetPrefix("searchix: ")
 
 	read, write, exists, err := index.OpenOrCreate(conf.DataPath, *replace)
 	if err != nil {
