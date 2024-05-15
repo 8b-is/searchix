@@ -93,6 +93,7 @@ var defaultConfig = Config{
 		ListenAddress: "localhost",
 		Port:          3000,
 		BaseURL:       mustURL("http://localhost:3000"),
+		Environment:   "development",
 		ContentSecurityPolicy: CSP{
 			DefaultSrc: []string{"'self'"},
 		},
