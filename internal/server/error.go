@@ -21,6 +21,8 @@ func createErrorHandler(
 			Code:          code,
 			Message:       message,
 		}
+		w.Header().Set("Cache-Control", "no-store")
+		w.Header().Del("Vary")
 		w.WriteHeader(code)
 		if r.Header.Get("Fetch") == "true" {
 			err = templates["error"].ExecuteTemplate(w, "main", indexData)

@@ -101,6 +101,7 @@ func NewMux(
 			Sources:       cfg.Importer.Sources,
 			Version:       *versionInfo,
 		}
+		w.Header().Add("Cache-Control", "max-age=86400")
 		err := templates["index"].Execute(w, indexData)
 		if err != nil {
 			errorHandler(w, r, err.Error(), http.StatusInternalServerError)
@@ -185,6 +186,8 @@ func NewMux(
 				}
 			}
 
+			w.Header().Add("Cache-Control", "max-age=300")
+			w.Header().Add("Vary", "Fetch")
 			if r.Header.Get("Fetch") == "true" {
 				w.Header().Add("Content-Type", "text/html; charset=utf-8")
 				err = templates["options"].ExecuteTemplate(w, "results", tdata)
@@ -203,6 +206,7 @@ func NewMux(
 				return
 			}
 
+			w.Header().Add("Cache-Control", "max-age=14400")
 			err = templates["search"].Execute(w, TemplateData{
 				ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
 				Sources:       cfg.Importer.Sources,
@@ -234,6 +238,7 @@ func NewMux(
 				return
 			}
 
+			w.Header().Add("Cache-Control", "max-age=604800")
 			w.Header().Set("Content-Type", "application/opensearchdescription+xml")
 			err := templates["opensearch.xml"].ExecuteTemplate(
 				w,
@@ -254,7 +259,11 @@ func NewMux(
 		},
 	)
 
-	mux.Handle("/static/", http.FileServer(http.FS(frontend.Files)))
+	fs := http.FileServer(http.FS(frontend.Files))
+	mux.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Cache-Control", "max-age=86400")
+		fs.ServeHTTP(w, r)
+	})
 
 	if liveReload {
 		applyDevModeOverrides(cfg)
