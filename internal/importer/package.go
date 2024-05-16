@@ -226,9 +226,15 @@ func (i *PackageIngester) Process(
 
 			subpath, line, _ := strings.Cut(i.pkg.Meta.Position, ":")
 
-			results <- nix.Package{
+			pkgSet, _, found := strings.Cut(kv.Key, ".")
+			if !found {
+				pkgSet = ""
+			}
+
+			results <- &nix.Package{
 				Name:            i.pkg.Name,
 				Source:          i.source.Key,
+				PackageSet:      pkgSet,
 				Version:         i.pkg.Version,
 				Broken:          i.pkg.Meta.Broken,
 				Description:     i.pkg.Meta.Description,

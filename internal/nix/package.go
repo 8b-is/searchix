@@ -11,6 +11,7 @@ type Package struct {
 	LongDescription string
 	MainProgram     string
 	Maintainers     []Maintainer
+	PackageSet      string
 	Platforms       []string
 	Version         string
 }
