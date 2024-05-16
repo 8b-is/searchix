@@ -35,7 +35,6 @@ func createIndexMapping() (mapping.IndexMapping, error) {
 	indexMapping := bleve.NewIndexMapping()
 	indexMapping.StoreDynamic = false
 	indexMapping.IndexDynamic = false
-	indexMapping.TypeField = "BleveType"
 
 	textFieldMapping := bleve.NewTextFieldMapping()
 	textFieldMapping.Store = false
