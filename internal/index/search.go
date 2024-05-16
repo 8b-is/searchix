@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
-	"searchix/internal/options"
+	"searchix/internal/nix"
 
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/search"
@@ -15,7 +15,7 @@ const ResultsPerPage = 20
 
 type DocumentMatch struct {
 	search.DocumentMatch
-	Data options.NixOption
+	Data nix.Option
 }
 
 type Result struct {

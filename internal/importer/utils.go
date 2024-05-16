@@ -3,7 +3,7 @@ package importer
 import (
 	"fmt"
 	"net/url"
-	"searchix/internal/options"
+	"searchix/internal/nix"
 
 	"github.com/bcicen/jstream"
 )
@@ -48,12 +48,12 @@ var channelRepoMap = map[string]string{
 	"home-manager": "nix-community/home-manager",
 }
 
-func MakeChannelLink(channel string, ref string, subPath string) (*options.Link, error) {
+func MakeChannelLink(channel string, ref string, subPath string) (*nix.Link, error) {
 	if channelRepoMap[channel] == "" {
 		return nil, fmt.Errorf("don't know what repository relates to channel <%s>", channel)
 	}
 
-	return &options.Link{
+	return &nix.Link{
 		Name: fmt.Sprintf("<%s/%s>", channel, subPath),
 		URL:  makeGitHubFileURL(channelRepoMap[channel], ref, subPath, ""),
 	}, nil

@@ -1,21 +1,18 @@
-package packages
+package nix
 
 type Package struct {
-	Name    string
-	Meta    Meta
-	Version string
-}
-
-type Meta struct {
+	Name            string
+	Source          string
 	Broken          bool
+	Definition      string
 	Description     string
-	LongDescription string
 	Homepages       []string
 	Licenses        []License
+	LongDescription string
 	MainProgram     string
 	Maintainers     []Maintainer
 	Platforms       []string
-	Position        string
+	Version         string
 }
 
 type License struct {
@@ -31,6 +28,14 @@ type Maintainer struct {
 	Name   string
 }
 
-func (*Package) BleveType() string {
+func (Package) BleveType() string {
 	return "package"
+}
+
+func (p Package) GetName() string {
+	return p.Name
+}
+
+func (p Package) GetSource() string {
+	return p.Source
 }

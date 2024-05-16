@@ -6,7 +6,7 @@ import (
 	"os"
 	"reflect"
 	"searchix/internal/config"
-	"searchix/internal/options"
+	"searchix/internal/nix"
 
 	"github.com/bcicen/jstream"
 	"github.com/mitchellh/mapstructure"
@@ -34,21 +34,21 @@ type nixOptionJSON struct {
 	Type            string
 }
 
-func convertNixValue(nj *nixValueJSON) *options.NixValue {
+func convertValue(nj *nixValueJSON) *nix.Value {
 	if nj == nil {
 		return nil
 	}
 	switch nj.Type {
 	case "", "literalExpression":
-		return &options.NixValue{
+		return &nix.Value{
 			Text: nj.Text,
 		}
 	case "literalMD":
-		return &options.NixValue{
-			Markdown: options.Markdown(nj.Text),
+		return &nix.Value{
+			Markdown: nix.Markdown(nj.Text),
 		}
 	default:
-		slog.Warn("got unexpected NixValue type", "type", nj.Type, "text", nj.Text)
+		slog.Warn("got unexpected Value type", "type", nj.Type, "text", nj.Text)
 
 		return nil
 	}
@@ -91,8 +91,10 @@ func NewOptionProcessor(inpath string, source *config.Source) (*OptionIngester, 
 	return &i, nil
 }
 
-func (i *OptionIngester) Process(ctx context.Context) (<-chan *options.NixOption, <-chan error) {
-	results := make(chan *options.NixOption)
+func (i *OptionIngester) Process(
+	ctx context.Context,
+) (<-chan nix.Importable, <-chan error) {
+	results := make(chan nix.Importable)
 	errs := make(chan error)
 
 	go func() {
@@ -121,7 +123,7 @@ func (i *OptionIngester) Process(ctx context.Context) (<-chan *options.NixOption
 			kv := mv.Value.(jstream.KV)
 			x := kv.Value.(map[string]interface{})
 
-			var decls []*options.Link
+			var decls []*nix.Link
 			for _, decl := range x["declarations"].([]interface{}) {
 				i.optJSON = nixOptionJSON{}
 
@@ -140,7 +142,7 @@ func (i *OptionIngester) Process(ctx context.Context) (<-chan *options.NixOption
 					decls = append(decls, link)
 				case reflect.Map:
 					v := decl.Interface().(map[string]interface{})
-					link := options.Link{
+					link := nix.Link{
 						Name: v["name"].(string),
 						URL:  v["url"].(string),
 					}
@@ -162,20 +164,20 @@ func (i *OptionIngester) Process(ctx context.Context) (<-chan *options.NixOption
 				continue
 			}
 
-			var decs = make([]options.Link, len(i.optJSON.Declarations))
+			var decs = make([]nix.Link, len(i.optJSON.Declarations))
 			for i, d := range i.optJSON.Declarations {
-				decs[i] = options.Link(d)
+				decs[i] = nix.Link(d)
 			}
 
 			// slog.Debug("sending option", "name", kv.Key)
-			results <- &options.NixOption{
+			results <- nix.Option{
 				Name:            kv.Key,
 				Source:          i.source.Key,
 				Declarations:    decs,
-				Default:         convertNixValue(i.optJSON.Default),
-				Description:     options.Markdown(i.optJSON.Description),
-				Example:         convertNixValue(i.optJSON.Example),
-				RelatedPackages: options.Markdown(i.optJSON.RelatedPackages),
+				Default:         convertValue(i.optJSON.Default),
+				Description:     nix.Markdown(i.optJSON.Description),
+				Example:         convertValue(i.optJSON.Example),
+				RelatedPackages: nix.Markdown(i.optJSON.RelatedPackages),
 				Loc:             i.optJSON.Loc,
 				Type:            i.optJSON.Type,
 			}

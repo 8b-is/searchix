@@ -75,7 +75,7 @@ func processOptions(
 	options, pErrs := processor.Process(ctx)
 
 	wg.Add(1)
-	iErrs := indexer.ImportOptions(ctx, options)
+	iErrs := indexer.Import(ctx, options)
 
 	var hadErrors bool
 	go func() {

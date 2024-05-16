@@ -17,7 +17,7 @@ import (
 	"searchix/frontend"
 	"searchix/internal/config"
 	search "searchix/internal/index"
-	"searchix/internal/options"
+	"searchix/internal/nix"
 
 	"github.com/blevesearch/bleve/v2"
 	sentryhttp "github.com/getsentry/sentry-go/http"
@@ -51,7 +51,7 @@ type TemplateData struct {
 	Message       string
 }
 
-type ResultData[T options.NixOption] struct {
+type ResultData[T nix.Option] struct {
 	TemplateData
 	Query          string
 	ResultsPerPage int
@@ -143,7 +143,7 @@ func NewMux(
 				errorHandler(w, r, err.Error(), http.StatusInternalServerError)
 			}
 
-			tdata := ResultData[options.NixOption]{
+			tdata := ResultData[nix.Option]{
 				TemplateData: TemplateData{
 					ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
 					Source:        *source,

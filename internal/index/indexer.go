@@ -10,7 +10,7 @@ import (
 	"os"
 	"path"
 	"searchix/internal/file"
-	"searchix/internal/options"
+	"searchix/internal/nix"
 	"slices"
 
 	"github.com/blevesearch/bleve/v2"
@@ -225,9 +225,9 @@ func OpenOrCreate(dataRoot string, force bool) (*ReadIndex, *WriteIndex, bool, e
 		nil
 }
 
-func (i *WriteIndex) ImportOptions(
+func (i *WriteIndex) Import(
 	ctx context.Context,
-	objects <-chan *options.NixOption,
+	objects <-chan nix.Importable,
 ) <-chan error {
 	var err error
 	errs := make(chan error)
@@ -238,7 +238,7 @@ func (i *WriteIndex) ImportOptions(
 		indexMapping := i.index.Mapping()
 
 	outer:
-		for opt := range objects {
+		for obj := range objects {
 			select {
 			case <-ctx.Done():
 				slog.Debug("context cancelled")
@@ -247,30 +247,30 @@ func (i *WriteIndex) ImportOptions(
 			default:
 			}
 
-			doc := document.NewDocument(opt.Source + "/" + opt.Name)
-			err = indexMapping.MapDocument(doc, opt)
+			doc := document.NewDocument(nix.GetKey(obj))
+			err = indexMapping.MapDocument(doc, obj)
 			if err != nil {
-				errs <- errors.WithMessagef(err, "could not map document for option: %s", opt.Name)
+				errs <- errors.WithMessagef(err, "could not map document for object: %s", obj.GetName())
 
 				continue
 			}
 
 			var data bytes.Buffer
 			enc := gob.NewEncoder(&data)
-			err = enc.Encode(opt)
+			err = enc.Encode(obj)
 			if err != nil {
-				errs <- errors.WithMessage(err, "could not store option in search index")
+				errs <- errors.WithMessage(err, "could not store object in search index")
 
 				continue
 			}
 			field := document.NewTextFieldWithIndexingOptions("_data", nil, data.Bytes(), indexAPI.StoreField)
 			newDoc := doc.AddField(field)
 
-			// slog.Debug("adding option to index", "name", opt.Name)
+			// slog.Debug("adding object to index", "name", opt.Name)
 			err = batch.IndexAdvanced(newDoc)
 
 			if err != nil {
-				errs <- errors.WithMessagef(err, "could not index option %s", opt.Name)
+				errs <- errors.WithMessagef(err, "could not index object %s", obj.GetName())
 
 				continue
 			}

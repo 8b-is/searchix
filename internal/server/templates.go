@@ -8,7 +8,7 @@ import (
 	"log/slog"
 	"path"
 	"searchix/frontend"
-	"searchix/internal/options"
+	"searchix/internal/nix"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -22,7 +22,7 @@ var md = goldmark.New(
 	goldmark.WithExtensions(extension.NewLinkify()),
 )
 var templateFuncs = template.FuncMap{
-	"markdown": func(input options.Markdown) template.HTML {
+	"markdown": func(input nix.Markdown) template.HTML {
 		var out strings.Builder
 		err := md.Convert([]byte(input), &out)
 		if err != nil {

@@ -7,7 +7,7 @@ import (
 	"os"
 	"reflect"
 	"searchix/internal/config"
-	"searchix/internal/packages"
+	"searchix/internal/nix"
 	"strings"
 
 	"github.com/bcicen/jstream"
@@ -45,8 +45,8 @@ type PackageIngester struct {
 	source *config.Source
 }
 
-func makeAdhocLicense(name string) packages.License {
-	return packages.License{
+func makeAdhocLicense(name string) nix.License {
+	return nix.License{
 		FullName: name,
 	}
 }
@@ -88,8 +88,8 @@ func NewPackageProcessor(inpath string, source *config.Source) (*PackageIngester
 	return i, nil
 }
 
-func convertToLicense(in map[string]any) *packages.License {
-	l := &packages.License{}
+func convertToLicense(in map[string]any) *nix.License {
+	l := &nix.License{}
 	if v, found := in["shortName"]; found {
 		l.Name = v.(string)
 	}
@@ -109,8 +109,10 @@ func convertToLicense(in map[string]any) *packages.License {
 	return l
 }
 
-func (i *PackageIngester) Process(ctx context.Context) (<-chan *packages.Package, <-chan error) {
-	results := make(chan *packages.Package)
+func (i *PackageIngester) Process(
+	ctx context.Context,
+) (<-chan nix.Importable, <-chan error) {
+	results := make(chan nix.Importable)
 	errs := make(chan error)
 
 	go func() {
@@ -143,13 +145,13 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan *packages.Package
 
 			meta := x["meta"].(map[string]interface{})
 
-			var licenses []packages.License
+			var licenses []nix.License
 			if meta["license"] != nil {
 				switch v := reflect.ValueOf(meta["license"]); v.Kind() {
 				case reflect.Map:
 					licenses = append(licenses, *convertToLicense(v.Interface().(map[string]interface{})))
 				case reflect.Array, reflect.Slice:
-					licenses = make([]packages.License, v.Len())
+					licenses = make([]nix.License, v.Len())
 					for i, v := range v.Interface().([]interface{}) {
 						switch v := reflect.ValueOf(v); v.Kind() {
 						case reflect.String:
@@ -214,9 +216,9 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan *packages.Package
 				continue
 			}
 
-			maintainers := make([]packages.Maintainer, len(i.pkg.Meta.Maintainers))
+			maintainers := make([]nix.Maintainer, len(i.pkg.Meta.Maintainers))
 			for i, m := range i.pkg.Meta.Maintainers {
-				maintainers[i] = packages.Maintainer{
+				maintainers[i] = nix.Maintainer{
 					Name:   m.Name,
 					Github: m.Github,
 				}
@@ -224,20 +226,19 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan *packages.Package
 
 			subpath, line, _ := strings.Cut(i.pkg.Meta.Position, ":")
 
-			results <- &packages.Package{
-				Name:    i.pkg.Name,
-				Version: i.pkg.Version,
-				Meta: packages.Meta{
-					Broken:          i.pkg.Meta.Broken,
-					Description:     i.pkg.Meta.Description,
-					LongDescription: i.pkg.Meta.LongDescription,
-					Homepages:       i.pkg.Meta.Homepages,
-					Licenses:        licenses,
-					MainProgram:     i.pkg.Meta.MainProgram,
-					Platforms:       i.pkg.Meta.Platforms,
-					Maintainers:     maintainers,
-					Position:        makeGitHubFileURL(userRepo, "", subpath, line),
-				},
+			results <- nix.Package{
+				Name:            i.pkg.Name,
+				Source:          i.source.Key,
+				Version:         i.pkg.Version,
+				Broken:          i.pkg.Meta.Broken,
+				Description:     i.pkg.Meta.Description,
+				LongDescription: i.pkg.Meta.LongDescription,
+				Homepages:       i.pkg.Meta.Homepages,
+				MainProgram:     i.pkg.Meta.MainProgram,
+				Platforms:       i.pkg.Meta.Platforms,
+				Licenses:        licenses,
+				Maintainers:     maintainers,
+				Definition:      makeGitHubFileURL(userRepo, "", subpath, line),
 			}
 		}
 	}()
