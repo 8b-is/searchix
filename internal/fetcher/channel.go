@@ -1,4 +1,4 @@
-package importer
+package fetcher
 
 import (
 	"context"
@@ -9,29 +9,33 @@ import (
 	"path"
 	"searchix/internal/config"
 	"searchix/internal/file"
-	"searchix/internal/index"
 	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
 )
 
-type ChannelImporter struct {
+type ChannelFetcher struct {
 	DataPath   string
 	Source     *config.Source
 	SourceFile string
 	Logger     *slog.Logger
 }
 
-func (i *ChannelImporter) FetchIfNeeded(parent context.Context) (bool, error) {
+func (i *ChannelFetcher) FetchIfNeeded(
+	parent context.Context,
+) (f FetchedFiles, updated bool, err error) {
 	ctx, cancel := context.WithTimeout(parent, i.Source.FetchTimeout)
 	defer cancel()
 
 	dest := i.DataPath
 
-	before, err := os.Readlink(dest)
+	var before string
+	before, err = os.Readlink(dest)
 	if file.NeedNotExist(err) != nil {
-		return false, errors.WithMessagef(err, "could not call readlink on file %s", dest)
+		err = errors.WithMessagef(err, "could not call readlink on file %s", dest)
+
+		return
 	}
 	i.Logger.Debug("stat before", "name", before)
 
@@ -52,9 +56,12 @@ func (i *ChannelImporter) FetchIfNeeded(parent context.Context) (bool, error) {
 
 	i.Logger.Debug("nix-build command", "args", args)
 	cmd := exec.CommandContext(ctx, "nix-build", args...)
-	out, err := cmd.Output()
+	var out []byte
+	out, err = cmd.Output()
 	if err != nil {
-		return false, errors.WithMessage(err, "failed to run nix-build (--dry-run)")
+		err = errors.WithMessage(err, "failed to run nix-build (--dry-run)")
+
+		return
 	}
 	i.Logger.Debug("nix-build", "output", strings.TrimSpace(string(out)))
 
@@ -68,30 +75,25 @@ func (i *ChannelImporter) FetchIfNeeded(parent context.Context) (bool, error) {
 		"source",
 		i.Source.OutputPath,
 	)
-	after, err := os.Readlink(dest)
-	if err := file.NeedNotExist(err); err != nil {
-		return false, errors.WithMessagef(
+	var after string
+	after, err = os.Readlink(dest)
+	if err = file.NeedNotExist(err); err != nil {
+		err = errors.WithMessagef(
 			err,
 			"failed to stat output file from nix-build, filename: %s",
 			outPath,
 		)
+
+		return
 	}
 	i.Logger.Debug("stat after", "name", after)
 
-	return before != after, nil
-}
+	updated = before != after
 
-func (i *ChannelImporter) Import(parent context.Context, indexer *index.WriteIndex) (bool, error) {
-	if i.Source.OutputPath == "" {
-		return false, errors.New("no output path specified")
+	f = FetchedFiles{
+		Options:  path.Join(dest, i.Source.OutputPath, "options.json"),
+		Packages: path.Join(dest, i.Source.OutputPath, "packages.json"),
 	}
 
-	filename := path.Join(i.DataPath, i.SourceFile, i.Source.OutputPath)
-	i.Logger.Debug("preparing import run", "revision", i.Source.Repo.Revision, "filename", filename)
-
-	return processOptions(parent, indexer, &importConfig{
-		Source:   i.Source,
-		Filename: filename,
-		Logger:   i.Logger,
-	})
+	return
 }

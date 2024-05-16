@@ -2,14 +2,15 @@ package importer
 
 import (
 	"context"
-	"errors"
-	"log"
 	"log/slog"
 	"os/exec"
 	"path"
 	"searchix/internal/config"
+	"searchix/internal/fetcher"
 	"searchix/internal/index"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 func Start(cfg *config.Config, indexer *index.WriteIndex, replace bool) error {
@@ -22,27 +23,20 @@ func Start(cfg *config.Config, indexer *index.WriteIndex, replace bool) error {
 	ctx, cancel := context.WithTimeout(context.Background(), cfg.Importer.Timeout.Duration)
 	defer cancel()
 
-	var imp Importer
 	for name, source := range cfg.Importer.Sources {
-		logger := slog.With("name", name, "importer", source.Type.String())
-		logger.Debug("starting importer")
+		logger := slog.With("name", name, "fetcher", source.Fetcher.String())
+		logger.Debug("starting fetcher")
 
-		importerDataPath := path.Join(cfg.DataPath, "sources", source.Channel)
+		fetcherDataPath := path.Join(cfg.DataPath, "sources", source.Key)
 
-		switch source.Type {
-		case config.ChannelNixpkgs:
-			imp = NewNixpkgsChannelImporter(source, importerDataPath, logger)
-		case config.Channel:
-			imp = NewChannelImporter(source, importerDataPath, logger)
-		case config.DownloadOptions:
-			imp = NewDownloadOptionsImporter(source, importerDataPath, logger)
-		default:
-			log.Printf("unsupported importer type %s", source.Type.String())
+		fetcher, err := fetcher.New(source, fetcherDataPath, logger)
+		if err != nil {
+			logger.Warn("error creating fetcher", "error", err)
 
 			continue
 		}
 
-		updated, err := imp.FetchIfNeeded(ctx)
+		files, updated, err := fetcher.FetchIfNeeded(ctx)
 
 		if err != nil {
 			var exerr *exec.ExitError
@@ -60,16 +54,38 @@ func Start(cfg *config.Config, indexer *index.WriteIndex, replace bool) error {
 		logger.Info("importer fetch succeeded", "updated", updated)
 
 		if updated || replace {
-			hadWarnings, err := imp.Import(ctx, indexer)
-
+			err = setRepoRevision(files.Revision, source)
 			if err != nil {
-				msg := err.Error()
-				for _, line := range strings.Split(strings.TrimSpace(msg), "\n") {
-					logger.Error("importer init failed", "error", line)
-				}
-
-				continue
+				logger.Warn("could not set source repo revision", "error", err)
 			}
+
+			var processor Processor
+			switch source.Importer {
+			case config.Options:
+				logger.Debug(
+					"creating processor",
+					"filename",
+					files.Options,
+					"revision",
+					source.Repo.Revision,
+				)
+				processor, err = NewOptionProcessor(files.Options, source)
+			case config.Packages:
+				logger.Debug(
+					"creating processor",
+					"filename",
+					files.Packages,
+					"revision",
+					source.Repo.Revision,
+				)
+				processor, err = NewPackageProcessor(files.Packages, source)
+			}
+			if err != nil {
+				logger.Warn("failed to create processor", "type", source.Importer, "error", err)
+			}
+
+			hadWarnings := process(ctx, indexer, processor, logger)
+
 			if hadWarnings {
 				logger.Warn("importer succeeded, but with warnings/errors")
 			} else {

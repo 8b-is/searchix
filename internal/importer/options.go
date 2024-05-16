@@ -91,9 +91,8 @@ func NewOptionProcessor(inpath string, source *config.Source) (*OptionIngester, 
 	return &i, nil
 }
 
-func (i *OptionIngester) Process(
-	ctx context.Context,
-) (<-chan nix.Importable, <-chan error) {
+func (i *OptionIngester) Process(parent context.Context) (<-chan nix.Importable, <-chan error) {
+	ctx, cancel := context.WithTimeout(parent, i.source.ImportTimeout)
 	results := make(chan nix.Importable)
 	errs := make(chan error)
 
@@ -101,6 +100,7 @@ func (i *OptionIngester) Process(
 		defer i.infile.Close()
 		defer close(results)
 		defer close(errs)
+		defer cancel()
 
 		slog.Debug("starting decoder stream")
 	outer:

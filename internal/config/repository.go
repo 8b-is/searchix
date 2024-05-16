@@ -8,7 +8,8 @@ import (
 type RepoType int
 
 const (
-	GitHub = iota + 1
+	UnknownRepoType = iota
+	GitHub
 )
 
 type Repository struct {
@@ -32,7 +33,7 @@ func parseRepoType(name string) (RepoType, error) {
 	case "github":
 		return GitHub, nil
 	default:
-		return Unknown, fmt.Errorf("unsupported repo type %s", name)
+		return UnknownRepoType, fmt.Errorf("unsupported repo type %s", name)
 	}
 }
 

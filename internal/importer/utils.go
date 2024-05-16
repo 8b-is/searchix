@@ -1,11 +1,15 @@
 package importer
 
 import (
+	"bytes"
 	"fmt"
 	"net/url"
+	"os"
+	"searchix/internal/config"
 	"searchix/internal/nix"
 
 	"github.com/bcicen/jstream"
+	"github.com/pkg/errors"
 )
 
 func ValueTypeToString(valueType jstream.ValueType) string {
@@ -57,4 +61,22 @@ func MakeChannelLink(channel string, ref string, subPath string) (*nix.Link, err
 		Name: fmt.Sprintf("<%s/%s>", channel, subPath),
 		URL:  makeGitHubFileURL(channelRepoMap[channel], ref, subPath, ""),
 	}, nil
+}
+
+func setRepoRevision(filename string, source *config.Source) error {
+	if filename != "" {
+		bits, err := os.ReadFile(filename)
+		if err != nil {
+			return errors.WithMessagef(
+				err,
+				"unable to read revision file at %s",
+				filename,
+			)
+		}
+
+		source.Repo.Revision = string(bytes.TrimSpace(bits))
+
+	}
+
+	return nil
 }
