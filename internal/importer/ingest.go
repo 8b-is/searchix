@@ -62,10 +62,6 @@ type OptionIngester struct {
 	source  *config.Source
 }
 
-type Ingester[T options.NixOption] interface {
-	Process() (<-chan *T, <-chan error)
-}
-
 func NewOptionProcessor(inpath string, source *config.Source) (*OptionIngester, error) {
 	infile, err := os.Open(inpath)
 	if err != nil {
