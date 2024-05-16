@@ -182,22 +182,22 @@ func OpenOrCreate(dataRoot string, force bool) (*ReadIndex, *WriteIndex, bool, e
 		if force {
 			err = deleteIndex(dataRoot)
 			if err != nil {
-				return nil, nil, exists, err
+				return nil, nil, false, err
 			}
 		}
 		idx, err = createIndex(indexPath)
 		if err != nil {
-			return nil, nil, exists, err
+			return nil, nil, false, err
 		}
 
 		meta, err = createMeta(metaPath)
 		if err != nil {
-			return nil, nil, exists, err
+			return nil, nil, false, err
 		}
 
 		err = meta.Save()
 		if err != nil {
-			return nil, nil, exists, err
+			return nil, nil, false, err
 		}
 	} else {
 		idx, err = bleve.Open(indexPath)
