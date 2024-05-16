@@ -57,9 +57,9 @@ type Source struct {
 	Channel       string
 	URL           string
 	Attribute     string
-	ImportPath    string        `toml:"import-path"`
-	FetchTimeout  time.Duration `toml:"fetch-timeout"`
-	ImportTimeout time.Duration `toml:"import-timeout"`
-	OutputPath    string        `toml:"output-path"`
+	ImportPath    string
+	FetchTimeout  time.Duration
+	ImportTimeout time.Duration
+	OutputPath    string
 	Repo          Repository
 }
