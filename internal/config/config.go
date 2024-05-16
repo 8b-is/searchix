@@ -87,6 +87,12 @@ type Config struct {
 	Importer *Importer
 }
 
+var nixpkgs = Repository{
+	Type:  "github",
+	Owner: "NixOS",
+	Repo:  "nixpkgs",
+}
+
 var defaultConfig = Config{
 	DataPath: "./data",
 	Web: &Web{
@@ -117,11 +123,7 @@ var defaultConfig = Config{
 				OutputPath:    "share/doc/nixos/options.json",
 				FetchTimeout:  5 * time.Minute,
 				ImportTimeout: 15 * time.Minute,
-				Repo: Repository{
-					Type:  "github",
-					Owner: "NixOS",
-					Repo:  "nixpkgs",
-				},
+				Repo:          nixpkgs,
 			},
 			"darwin": {
 				Name:          "Darwin",
@@ -158,6 +160,16 @@ var defaultConfig = Config{
 					Owner: "nix-community",
 					Repo:  "home-manager",
 				},
+			},
+			"nixpkgs": {
+				Name:          "Nix Packages",
+				Key:           "nixpkgs",
+				Enable:        true,
+				Type:          ChannelNixpkgs,
+				OutputPath:    "packages.json.br",
+				FetchTimeout:  5 * time.Minute,
+				ImportTimeout: 15 * time.Minute,
+				Repo:          nixpkgs,
 			},
 		},
 	},
