@@ -1,6 +1,31 @@
 # Changelog
 
-## Unreleased (2024-05-17)
+## [Unreleased](https://git.alanpearce.eu/searchix/diff/?id=v0.1.2&id2=HEAD) (2024-05-17)
+
+### Features
+
+-   **ui:** enable resetting form by clicking current source link
+    ([6ea953b](https://git.alanpearce.eu/searchix/commit/?id=6ea953b1c9f9c352a9619e42a6f0ce80d183d7f8))
+-   render markdown in packages' LongDescription
+    ([934a069](https://git.alanpearce.eu/searchix/commit/?id=934a0693213df901078cd1bc75a5b7e1b5c87555))
+-   use attribute instead of name for packages
+    ([698881a](https://git.alanpearce.eu/searchix/commit/?id=698881aa577d2c209f162db9263fab17ced3643f))
+
+### [v0.1.2](https://git.alanpearce.eu/searchix/diff/?id=v0.1.1&id2=v0.1.2) (2024-05-17)
+
+#### Fixes
+
+-   **css:** pagination styles not applied
+    ([f10543d](https://git.alanpearce.eu/searchix/commit/?id=f10543d0aff0e203dd57287dc2b736c686e69102))
+
+### [v0.1.1](https://git.alanpearce.eu/searchix/diff/?id=v0.1.0&id2=v0.1.1) (2024-05-17)
+
+#### Fixes
+
+-   **nix:** missing version variable in build
+    ([8a1c2e8](https://git.alanpearce.eu/searchix/commit/?id=8a1c2e805b70ea4c4730fe7d785b942f46a54dea))
+
+## v0.1.0 (2024-05-17)
 
 ### Features
 
