@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
+	"searchix/internal/config"
 	"searchix/internal/nix"
 
 	"github.com/blevesearch/bleve/v2"
@@ -15,7 +16,7 @@ const ResultsPerPage = 20
 
 type DocumentMatch struct {
 	search.DocumentMatch
-	Data nix.Option
+	Data nix.Importable
 }
 
 type Result struct {
@@ -53,11 +54,12 @@ func (index *ReadIndex) GetSource(ctx context.Context, name string) (*bleve.Sear
 
 func (index *ReadIndex) Search(
 	ctx context.Context,
-	source string,
+	source *config.Source,
 	keyword string,
 	from uint64,
 ) (*Result, error) {
-	sourceQuery := bleve.NewTermQuery(source)
+	sourceQuery := bleve.NewTermQuery(source.Key)
+	sourceQuery.SetField("Source")
 	userQuery := bleve.NewMatchQuery(keyword)
 	userQuery.Analyzer = "option_name"
 

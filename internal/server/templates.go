@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"path"
 	"searchix/frontend"
+	"searchix/internal/config"
 	"searchix/internal/nix"
 	"strings"
 
@@ -32,6 +33,16 @@ var templateFuncs = template.FuncMap{
 		}
 
 		return template.HTML(out.String()) // #nosec G203
+	},
+	"sourceNameAndType": func(source config.Source) (string, error) {
+		switch source.Importer {
+		case config.Options:
+			return source.Name + " " + source.Importer.String(), nil
+		case config.Packages:
+			return source.Name, nil
+		default:
+			return "", errors.Errorf("unknown source importer type %s", source.Importer.String())
+		}
 	},
 	"sourceName": func(input string) string {
 		switch input {

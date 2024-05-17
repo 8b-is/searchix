@@ -2,15 +2,15 @@
   xmlns="http://a9.com/-/spec/opensearch/1.1/"
   xmlns:moz="http://www.mozilla.org/2006/browser/search/"
 >
-  <ShortName>Searchix {{ .Source.Name }}</ShortName>
-  <LongName>Search {{ .Source.Name }} options with Searchix</LongName>
-  <Description>Search options {{ .Source.Name }}</Description>
+  <ShortName>Searchix {{ sourceNameAndType .Source }}</ShortName>
+  <LongName>Search {{ sourceNameAndType .Source }} with Searchix</LongName>
+  <Description>Search {{ sourceNameAndType .Source }}</Description>
   <Url
     type="text/html"
     method="get"
-    template="{{ .BaseURL }}/options/{{ .Source.Key }}/search?query={searchTerms}&amp;from=opensearch"
+    template="{{ .BaseURL }}/{{ .Source.ImporterType }}/{{ .Source.Key }}/search?query={searchTerms}&amp;from=opensearch"
   />
   <moz:SearchForm
-    >{{ .BaseURL }}/options/{{ .Source.Key }}/search</moz:SearchForm
+    >{{ .BaseURL }}/{{ .Source.ImporterType }}/{{ .Source.Key }}/search</moz:SearchForm
   >
 </OpenSearchDescription>

@@ -13,8 +13,8 @@
       <link
         rel="search"
         type="application/opensearchdescription+xml"
-        title="Searchix {{ $value.Name }}"
-        href="/options/{{ $key }}/opensearch.xml"
+        title="Searchix {{ sourceNameAndType $value }}"
+        href="/{{ .Importer }}/{{ $key }}/opensearch.xml"
       />
     {{- end }}
   </head>
@@ -25,7 +25,7 @@
         {{- range $key, $value := .Sources }}
           <a
             {{ if eq $.Source.Name $value.Name }}class="current"{{ end }}
-            href="/options/{{ $key }}/search{{ and $.Query (printf "?query=%s" $.Query) }}"
+            href="/{{ .Importer }}/{{ $key }}/search{{ and $.Query (printf "?query=%s" $.Query) }}"
           >
             {{- $value.Name -}}
           </a>

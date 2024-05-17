@@ -17,7 +17,6 @@ import (
 	"searchix/frontend"
 	"searchix/internal/config"
 	search "searchix/internal/index"
-	"searchix/internal/nix"
 
 	"github.com/blevesearch/bleve/v2"
 	sentryhttp "github.com/getsentry/sentry-go/http"
@@ -51,7 +50,7 @@ type TemplateData struct {
 	Message       string
 }
 
-type ResultData[T nix.Option] struct {
+type ResultData struct {
 	TemplateData
 	Query          string
 	ResultsPerPage int
@@ -109,131 +108,133 @@ func NewMux(
 	})
 
 	const searchTimeout = 1 * time.Second
-	mux.HandleFunc("/options/{source}/search", func(w http.ResponseWriter, r *http.Request) {
-		sourceKey := r.PathValue("source")
+	createSearchHandler := func(importerType config.ImporterType) func(http.ResponseWriter, *http.Request) {
+		return func(w http.ResponseWriter, r *http.Request) {
+			var err error
+			source := cfg.Importer.Sources[r.PathValue("source")]
+			if source == nil || importerType != source.Importer {
+				errorHandler(w, r, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 
-		source := cfg.Importer.Sources[sourceKey]
-		if source == nil {
-			errorHandler(w, r, "Source not found", http.StatusNotFound)
-
-			return
-		}
-
-		ctx, cancel := context.WithTimeout(r.Context(), searchTimeout)
-		defer cancel()
-
-		if r.URL.Query().Has("query") {
-			qs := r.URL.Query().Get("query")
-			pg := r.URL.Query().Get("page")
-			var page uint64 = 1
-			if pg != "" {
-				page, err = strconv.ParseUint(pg, 10, 64)
-				if err != nil || page == 0 {
-					errorHandler(w, r, "Bad query string", http.StatusBadRequest)
-				}
-			}
-			results, err := index.Search(ctx, sourceKey, qs, (page-1)*search.ResultsPerPage)
-			if err != nil {
-				if err == context.DeadlineExceeded {
-					errorHandler(w, r, "Search timed out", http.StatusInternalServerError)
-
-					return
-				}
-				slog.Error("search error", "error", err)
-				errorHandler(w, r, err.Error(), http.StatusInternalServerError)
+				return
 			}
 
-			tdata := ResultData[nix.Option]{
-				TemplateData: TemplateData{
-					ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
-					Source:        *source,
-					Sources:       cfg.Importer.Sources,
-					Version:       *versionInfo,
-				},
-				ResultsPerPage: search.ResultsPerPage,
-				Query:          qs,
-				Results:        results,
-			}
+			ctx, cancel := context.WithTimeout(r.Context(), searchTimeout)
+			defer cancel()
 
-			hits := uint64(len(results.Hits))
-			if results.Total > hits {
-				q, err := url.ParseQuery(r.URL.RawQuery)
-				if err != nil {
-					errorHandler(w, r, "Query string error", http.StatusBadRequest)
-
-					return
-				}
-
-				if page*search.ResultsPerPage > results.Total {
-					errorHandler(w, r, "Not found", http.StatusNotFound)
-
-					return
-				}
-
-				if page*search.ResultsPerPage < results.Total {
-					q.Set("page", strconv.FormatUint(page+1, 10))
-					tdata.Next = "search?" + q.Encode()
-				}
-
-				if page > 1 {
-					p := page - 1
-					if p == 1 {
-						q.Del("page")
-					} else {
-						q.Set("page", strconv.FormatUint(p, 10))
+			if r.URL.Query().Has("query") {
+				qs := r.URL.Query().Get("query")
+				pg := r.URL.Query().Get("page")
+				var page uint64 = 1
+				if pg != "" {
+					page, err = strconv.ParseUint(pg, 10, 64)
+					if err != nil || page == 0 {
+						errorHandler(w, r, "Bad query string", http.StatusBadRequest)
 					}
-					tdata.Prev = "search?" + q.Encode()
+				}
+				results, err := index.Search(ctx, source, qs, (page-1)*search.ResultsPerPage)
+				if err != nil {
+					if err == context.DeadlineExceeded {
+						errorHandler(w, r, "Search timed out", http.StatusInternalServerError)
+
+						return
+					}
+					slog.Error("search error", "error", err)
+					errorHandler(w, r, err.Error(), http.StatusInternalServerError)
+				}
+
+				tdata := ResultData{
+					TemplateData: TemplateData{
+						ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
+						Source:        *source,
+						Sources:       cfg.Importer.Sources,
+						Version:       *versionInfo,
+					},
+					ResultsPerPage: search.ResultsPerPage,
+					Query:          qs,
+					Results:        results,
+				}
+
+				hits := uint64(len(results.Hits))
+				if results.Total > hits {
+					q, err := url.ParseQuery(r.URL.RawQuery)
+					if err != nil {
+						errorHandler(w, r, "Query string error", http.StatusBadRequest)
+
+						return
+					}
+
+					if page*search.ResultsPerPage > results.Total {
+						errorHandler(w, r, "Not found", http.StatusNotFound)
+
+						return
+					}
+
+					if page*search.ResultsPerPage < results.Total {
+						q.Set("page", strconv.FormatUint(page+1, 10))
+						tdata.Next = "search?" + q.Encode()
+					}
+
+					if page > 1 {
+						p := page - 1
+						if p == 1 {
+							q.Del("page")
+						} else {
+							q.Set("page", strconv.FormatUint(p, 10))
+						}
+						tdata.Prev = "search?" + q.Encode()
+					}
+				}
+
+				w.Header().Add("Cache-Control", "max-age=300")
+				w.Header().Add("Vary", "Fetch")
+				if r.Header.Get("Fetch") == "true" {
+					w.Header().Add("Content-Type", "text/html; charset=utf-8")
+					err = templates[importerType.String()].ExecuteTemplate(w, "results", tdata)
+				} else {
+					err = templates[importerType.String()].Execute(w, tdata)
+				}
+				if err != nil {
+					slog.Error("template error", "template", importerType, "error", err)
+					errorHandler(w, r, err.Error(), http.StatusInternalServerError)
+				}
+			} else {
+				sourceResult, err := index.GetSource(ctx, source.Key)
+				if err != nil {
+					errorHandler(w, r, err.Error(), http.StatusInternalServerError)
+
+					return
+				}
+
+				w.Header().Add("Cache-Control", "max-age=14400")
+				err = templates["search"].Execute(w, TemplateData{
+					ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
+					Sources:       cfg.Importer.Sources,
+					Source:        *source,
+					SourceResult:  sourceResult,
+					Version:       *versionInfo,
+				})
+				if err != nil {
+					errorHandler(w, r, err.Error(), http.StatusInternalServerError)
+
+					return
 				}
 			}
-
-			w.Header().Add("Cache-Control", "max-age=300")
-			w.Header().Add("Vary", "Fetch")
-			if r.Header.Get("Fetch") == "true" {
-				w.Header().Add("Content-Type", "text/html; charset=utf-8")
-				err = templates["options"].ExecuteTemplate(w, "results", tdata)
-			} else {
-				err = templates["options"].Execute(w, tdata)
-			}
-			if err != nil {
-				slog.Error("template error", "template", "options", "error", err)
-				errorHandler(w, r, err.Error(), http.StatusInternalServerError)
-			}
-		} else {
-			sourceResult, err := index.GetSource(ctx, sourceKey)
-			if err != nil {
-				errorHandler(w, r, err.Error(), http.StatusInternalServerError)
-
-				return
-			}
-
-			w.Header().Add("Cache-Control", "max-age=14400")
-			err = templates["search"].Execute(w, TemplateData{
-				ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
-				Sources:       cfg.Importer.Sources,
-				Source:        *source,
-				SourceResult:  sourceResult,
-				Version:       *versionInfo,
-			})
-			if err != nil {
-				errorHandler(w, r, err.Error(), http.StatusInternalServerError)
-
-				return
-			}
 		}
-	})
+	}
 
-	mux.HandleFunc(
-		"/options/{source}/opensearch.xml",
-		func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/options/{source}/search", createSearchHandler(config.Options))
+	mux.HandleFunc("/packages/{source}/search", createSearchHandler(config.Packages))
+
+	createOpenSearchXMLHandler := func(importerType config.ImporterType) func(http.ResponseWriter, *http.Request) {
+		return func(w http.ResponseWriter, r *http.Request) {
 			type openSearchData struct {
 				BaseURL string
 				Source  *config.Source
 			}
 
-			sourceKey := r.PathValue("source")
-			source := cfg.Importer.Sources[sourceKey]
-			if source == nil {
-				errorHandler(w, r, "Source not found", http.StatusNotFound)
+			source := cfg.Importer.Sources[r.PathValue("source")]
+			if source == nil || importerType != source.Importer {
+				errorHandler(w, r, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 
 				return
 			}
@@ -256,8 +257,11 @@ func NewMux(
 					http.StatusInternalServerError,
 				)
 			}
-		},
-	)
+		}
+	}
+
+	mux.HandleFunc("/options/{source}/opensearch.xml", createOpenSearchXMLHandler(config.Options))
+	mux.HandleFunc("/packages/{source}/opensearch.xml", createOpenSearchXMLHandler(config.Packages))
 
 	fs := http.FileServer(http.FS(frontend.Files))
 	mux.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {

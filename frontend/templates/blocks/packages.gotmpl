@@ -1,0 +1,26 @@
+{{- define "hits" }}
+  {{- range . }}
+    {{- with .Data }}
+      <details id="{{ .Name }}">
+        <summary>
+          <h3>
+            {{ .Name }}
+          </h3>
+        </summary>
+        {{ .Description }}
+        <dl>
+          {{- with .Version }}
+            <dt>Version</dt>
+            <dd>{{ . }}</dd>
+          {{- end }}
+          {{- with .Definition }}
+            <dt>Defined</dt>
+            <dd>
+              <a href="{{ . }}">Source</a>
+            </dd>
+          {{- end }}
+        </dl>
+      </details>
+    {{- end }}
+  {{- end }}
+{{- end }}
