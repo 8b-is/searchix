@@ -101,7 +101,17 @@ func createIndexMapping() (mapping.IndexMapping, error) {
 	optionMapping.AddSubDocumentMapping("Default", nixValueMapping)
 	optionMapping.AddSubDocumentMapping("Example", nixValueMapping)
 
+	packageMapping := bleve.NewDocumentStaticMapping()
+
+	packageMapping.AddFieldMappingsAt("Name", keywordFieldMapping)
+	packageMapping.AddFieldMappingsAt("Source", keywordFieldMapping)
+	packageMapping.AddFieldMappingsAt("Description", textFieldMapping)
+	packageMapping.AddFieldMappingsAt("MainProgram", keywordFieldMapping)
+	packageMapping.AddFieldMappingsAt("PackageSet", keywordFieldMapping)
+	packageMapping.AddFieldMappingsAt("Platforms", keywordFieldMapping)
+
 	indexMapping.AddDocumentMapping("option", optionMapping)
+	indexMapping.AddDocumentMapping("package", packageMapping)
 
 	return indexMapping, nil
 }
@@ -259,7 +269,7 @@ func (i *WriteIndex) Import(
 
 			var data bytes.Buffer
 			enc := gob.NewEncoder(&data)
-			err = enc.Encode(obj)
+			err = enc.Encode(&obj)
 			if err != nil {
 				errs <- errors.WithMessage(err, "could not store object in search index")
 
