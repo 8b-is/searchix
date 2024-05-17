@@ -60,7 +60,7 @@ func (i *NixpkgsChannelFetcher) FetchIfNeeded(
 		}
 		// don't bother to issue requests for the later files
 		if !updated {
-			return
+			break
 		}
 	}
 

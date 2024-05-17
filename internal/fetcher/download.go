@@ -62,7 +62,7 @@ func (i *DownloadFetcher) FetchIfNeeded(
 		}
 		// don't bother to issue requests for the later files
 		if !updated {
-			return
+			break
 		}
 	}
 
