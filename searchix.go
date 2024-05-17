@@ -52,7 +52,11 @@ func nextOccurrenceOfLocalTime(t toml.LocalTime) time.Time {
 func main() {
 	flag.Parse()
 	if *version {
-		fmt.Fprintln(os.Stderr, "searchix", buildVersion, config.CommitSHA)
+		fmt.Fprintf(os.Stderr, "searchix %s", buildVersion)
+		if buildVersion != config.CommitSHA && buildVersion != config.ShortSHA {
+			fmt.Fprintf(os.Stderr, " %s", config.CommitSHA)
+		}
+		fmt.Fprint(os.Stderr, "\n")
 		os.Exit(0)
 	}
 

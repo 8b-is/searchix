@@ -17,14 +17,10 @@
 let
   inherit (builtins) concatStringsSep match;
 
-  version = "0-unstable-" + concatStringsSep "-" (match
-    "([[:digit:]]{4})([[:digit:]]{2})([[:digit:]]{2}).*"
-    self.lastModifiedDate
-  );
 in
 buildGoApplication {
   pname = "searchix";
-  inherit version;
+  version = "0.1.0";
   src = with pkgs.lib.fileset; toSource {
     root = ../.;
     fileset = difference
