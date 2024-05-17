@@ -2,6 +2,7 @@ package importer
 
 import (
 	"context"
+	"io"
 	"log/slog"
 	"os/exec"
 	"path"
@@ -59,6 +60,7 @@ func Start(cfg *config.Config, indexer *index.WriteIndex, replace bool) error {
 				logger.Warn("could not set source repo revision", "error", err)
 			}
 
+			var file io.ReadCloser
 			var processor Processor
 			switch source.Importer {
 			case config.Options:
@@ -69,7 +71,11 @@ func Start(cfg *config.Config, indexer *index.WriteIndex, replace bool) error {
 					"revision",
 					source.Repo.Revision,
 				)
-				processor, err = NewOptionProcessor(files.Options, source)
+				file, err = openFileDecoded(files.Options)
+				if err != nil {
+					logger.Warn("could not open file", "filename", files.Options, "error", err)
+				}
+				processor, err = NewOptionProcessor(file, source)
 			case config.Packages:
 				logger.Debug(
 					"creating processor",
@@ -78,7 +84,11 @@ func Start(cfg *config.Config, indexer *index.WriteIndex, replace bool) error {
 					"revision",
 					source.Repo.Revision,
 				)
-				processor, err = NewPackageProcessor(files.Packages, source)
+				file, err = openFileDecoded(files.Packages)
+				if err != nil {
+					logger.Warn("could not open file", "filename", files.Packages, "error", err)
+				}
+				processor, err = NewPackageProcessor(file, source)
 			}
 			if err != nil {
 				logger.Warn("failed to create processor", "type", source.Importer, "error", err)

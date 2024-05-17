@@ -2,8 +2,8 @@ package importer
 
 import (
 	"context"
+	"io"
 	"log/slog"
-	"os"
 	"reflect"
 	"searchix/internal/config"
 	"searchix/internal/nix"
@@ -58,15 +58,11 @@ type OptionIngester struct {
 	dec     *jstream.Decoder
 	ms      *mapstructure.Decoder
 	optJSON nixOptionJSON
-	infile  *os.File
+	infile  io.ReadCloser
 	source  *config.Source
 }
 
-func NewOptionProcessor(inpath string, source *config.Source) (*OptionIngester, error) {
-	infile, err := os.Open(inpath)
-	if err != nil {
-		return nil, errors.WithMessagef(err, "failed to open input file %s", inpath)
-	}
+func NewOptionProcessor(infile io.ReadCloser, source *config.Source) (*OptionIngester, error) {
 	i := OptionIngester{
 		dec:     jstream.NewDecoder(infile, 1).EmitKV(),
 		optJSON: nixOptionJSON{},

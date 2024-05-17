@@ -3,11 +3,14 @@ package importer
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"net/url"
 	"os"
+	"path"
 	"searchix/internal/config"
 	"searchix/internal/nix"
 
+	"github.com/andybalholm/brotli"
 	"github.com/bcicen/jstream"
 	"github.com/pkg/errors"
 )
@@ -79,4 +82,42 @@ func setRepoRevision(filename string, source *config.Source) error {
 	}
 
 	return nil
+}
+
+type brotliReadCloser struct {
+	src io.ReadCloser
+	*brotli.Reader
+}
+
+func newBrotliReader(src io.ReadCloser) *brotliReadCloser {
+	return &brotliReadCloser{
+		src:    src,
+		Reader: brotli.NewReader(src),
+	}
+}
+
+func (r *brotliReadCloser) Close() error {
+	return errors.Wrap(r.src.Close(), "failed to call close on underlying reader")
+}
+
+func openFileDecoded(filename string) (io.ReadCloser, error) {
+	var reader io.ReadCloser
+	var err error
+	ext := path.Ext(filename)
+	reader, err = os.Open(filename)
+	if err != nil {
+		return nil, errors.WithMessagef(err, "failed to open file %s", filename)
+	}
+	switch ext {
+	case ".json":
+	// nothing to do
+	case ".br":
+		reader = newBrotliReader(reader)
+	default:
+		reader.Close()
+
+		return nil, errors.Errorf("invalid file extension %s", ext)
+	}
+
+	return reader, nil
 }

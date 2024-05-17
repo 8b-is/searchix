@@ -3,8 +3,8 @@ package importer
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"log/slog"
-	"os"
 	"reflect"
 	"searchix/internal/config"
 	"searchix/internal/nix"
@@ -41,7 +41,7 @@ type PackageIngester struct {
 	dec    *jstream.Decoder
 	ms     *mapstructure.Decoder
 	pkg    *packageJSON
-	infile *os.File
+	infile io.ReadCloser
 	source *config.Source
 }
 
@@ -60,11 +60,7 @@ func makeAdhocPlatform(v any) string {
 	return string(s)
 }
 
-func NewPackageProcessor(inpath string, source *config.Source) (*PackageIngester, error) {
-	infile, err := os.Open(inpath)
-	if err != nil {
-		return nil, errors.WithMessagef(err, "failed to open input file %s", inpath)
-	}
+func NewPackageProcessor(infile io.ReadCloser, source *config.Source) (*PackageIngester, error) {
 	i := &PackageIngester{
 		dec:    jstream.NewDecoder(infile, 2).EmitKV(),
 		pkg:    &packageJSON{},

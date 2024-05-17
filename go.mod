@@ -3,6 +3,7 @@ module searchix
 go 1.22.2
 
 require (
+	github.com/andybalholm/brotli v1.1.0
 	github.com/bcicen/jstream v1.0.1
 	github.com/blevesearch/bleve/v2 v2.4.0
 	github.com/blevesearch/bleve_index_api v1.1.6
