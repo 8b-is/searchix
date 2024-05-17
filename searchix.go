@@ -62,7 +62,9 @@ func main() {
 
 	cfg, err := config.GetConfig(*configFile)
 	if err != nil {
-		log.Panicf("error parsing configuration file: %v", err)
+		// only use log functions after the config file has been read successfully
+		fmt.Fprintf(os.Stderr, "error parsing configuration file: %v", err)
+		os.Exit(1)
 	}
 	slog.SetLogLoggerLevel(cfg.LogLevel)
 	if cfg.Web.Environment == "production" {
