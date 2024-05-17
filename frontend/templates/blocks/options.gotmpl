@@ -1,71 +1,54 @@
-{{- define "results" }}
-  {{- if gt .Results.Total 0 }}
-    <section id="results">
-      {{- range .Results.Hits }}
-        {{- with .Data }}
-          <details id="{{ .Name }}">
-            <summary>
-              {{ .Name }}
-            </summary>
-            {{ markdown .Description }}
-            <dl>
-              {{- with .Type }}
-                <dt>Type</dt>
-                <dd><code>{{ . }}</code></dd>
-              {{- end }}
-              {{- with .Default }}
-                {{- if or .Text .Markdown }}
-                  <dt>Default</dt>
-                  <dd>
-                    {{- if .Markdown }}
-                      {{ markdown .Markdown }}
-                    {{- else }}
-                      <pre><code>{{ .Text }}</code></pre>
-                    {{- end }}
-                  </dd>
-                {{- end }}
-              {{- end }}
-              {{- with .Example }}
-                {{- if or .Text .Markdown }}
-                  <dt>Example</dt>
-                  <dd>
-                    {{- if .Markdown }}
-                      {{ markdown .Markdown }}
-                    {{- else }}
-                      <pre><code>{{ .Text }}</code></pre>
-                    {{- end }}
-                  </dd>
-                {{- end }}
-              {{- end }}
-              {{- with .RelatedPackages }}
-                <dt>Related Packages</dt>
-                <dd>{{ . }}</dd>
-              {{- end }}
-              {{- with .Declarations }}
-                <dt>Declared</dt>
-                {{- range . }}
-                  <dd>
-                    <a href="{{ .URL }}">{{ .Name }}</a>
-                  </dd>
-                {{- end }}
-              {{- end }}
-            </dl>
-          </details>
-        {{- end }}
-      {{- end }}
-      <footer>
-        <nav id="pagination">
-          {{- with .Prev }}
-            <a class="button" href="{{ . }}" rel="prev">Prev</a>
+{{- define "hits" }}
+  {{- range . }}
+    {{- with .Data }}
+      <details id="{{ .Name }}">
+        <summary>
+          {{ .Name }}
+        </summary>
+        {{ markdown .Description }}
+        <dl>
+          {{- with .Type }}
+            <dt>Type</dt>
+            <dd><code>{{ . }}</code></dd>
           {{- end }}
-          {{- with .Next }}
-            <a class="button" href="{{ . }}" rel="next">Next</a>
+          {{- with .Default }}
+            {{- if or .Text .Markdown }}
+              <dt>Default</dt>
+              <dd>
+                {{- if .Markdown }}
+                  {{ markdown .Markdown }}
+                {{- else }}
+                  <pre><code>{{ .Text }}</code></pre>
+                {{- end }}
+              </dd>
+            {{- end }}
           {{- end }}
-        </nav>
-        <span> {{ .Results.Total }} results </span>
-      </footer>
-    </section>
-  {{- else }}
-    Nothing found
+          {{- with .Example }}
+            {{- if or .Text .Markdown }}
+              <dt>Example</dt>
+              <dd>
+                {{- if .Markdown }}
+                  {{ markdown .Markdown }}
+                {{- else }}
+                  <pre><code>{{ .Text }}</code></pre>
+                {{- end }}
+              </dd>
+            {{- end }}
+          {{- end }}
+          {{- with .RelatedPackages }}
+            <dt>Related Packages</dt>
+            <dd>{{ . }}</dd>
+          {{- end }}
+          {{- with .Declarations }}
+            <dt>Declared</dt>
+            {{- range . }}
+              <dd>
+                <a href="{{ .URL }}">{{ .Name }}</a>
+              </dd>
+            {{- end }}
+          {{- end }}
+        </dl>
+      </details>
+    {{- end }}
   {{- end }}
 {{- end }}

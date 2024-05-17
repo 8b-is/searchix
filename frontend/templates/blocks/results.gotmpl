@@ -1,0 +1,23 @@
+{{- define "results" }}
+  {{- with .Results }}
+    {{- if gt .Total 0 }}
+      <section id="results">
+        {{ block "hits" .Hits }}
+        {{ end }}
+        <footer>
+          <nav id="pagination">
+            {{- with $.Prev }}
+              <a class="button" href="{{ . }}" rel="prev">Prev</a>
+            {{- end }}
+            {{- with $.Next }}
+              <a class="button" href="{{ . }}" rel="next">Next</a>
+            {{- end }}
+          </nav>
+          <span>{{ .Total }} results</span>
+        </footer>
+      </section>
+    {{- else }}
+      Nothing found
+    {{- end }}
+  {{- end }}
+{{- end }}
