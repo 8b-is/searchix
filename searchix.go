@@ -87,6 +87,9 @@ func main() {
 		if err != nil {
 			log.Fatalf("Failed to build index: %v", err)
 		}
+		if *replace {
+			return
+		}
 	}
 
 	c := make(chan os.Signal, 2)
