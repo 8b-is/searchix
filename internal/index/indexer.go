@@ -31,6 +31,8 @@ type WriteIndex struct {
 	meta  *Meta
 }
 
+const batchSize = 10_000
+
 func createIndexMapping() (mapping.IndexMapping, error) {
 	indexMapping := bleve.NewIndexMapping()
 	indexMapping.StoreDynamic = false
@@ -233,6 +235,7 @@ func (i *WriteIndex) Import(
 
 	go func() {
 		defer close(errs)
+		k := 0
 		batch := i.index.NewBatch()
 		indexMapping := i.index.Mapping()
 
@@ -273,18 +276,36 @@ func (i *WriteIndex) Import(
 
 				continue
 			}
+
+			if k++; k%batchSize == 0 {
+				err = i.Flush(batch)
+				if err != nil {
+					errs <- err
+				}
+			}
 		}
 
-		size := batch.Size()
-		slog.Debug("flushing batch", "size", size)
-
-		err := i.index.Batch(batch)
+		err := i.Flush(batch)
 		if err != nil {
-			errs <- errors.WithMessagef(err, "could not flush batch")
+			errs <- err
 		}
 	}()
 
 	return errs
+}
+
+func (i *WriteIndex) Flush(batch *bleve.Batch) error {
+	size := batch.Size()
+	slog.Debug("flushing batch", "size", size)
+
+	err := i.index.Batch(batch)
+	if err != nil {
+		return errors.WithMessagef(err, "could not flush batch")
+	}
+
+	batch.Reset()
+
+	return nil
 }
 
 func (i *WriteIndex) Close() error {
