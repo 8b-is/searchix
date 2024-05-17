@@ -96,7 +96,7 @@ pre:has(> code) {
   background: var(--bg);
 }
 
-section > nav {
+#pagination {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
