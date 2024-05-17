@@ -1,0 +1,6 @@
+host: "https://git.alanpearce.eu"
+repository: "searchix"
+commitUrlFormat: "{{@root.host}}/{{@root.repository}}/commit/?id={{hash}}"
+compareUrlFormat: "{{@root.host}}/{{@root.repository}}/diff/?id={{previousTag}}&id2={{currentTag}}"
+issueUrlFormat: "https://todo.sr.ht/~alanpearce/searchix/{{id}}"
+userUrlFormat: "https://sr.ht/~{{user}}"
