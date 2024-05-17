@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"log/slog"
+	"math"
 	"net/http"
 	"net/url"
 	"os"
@@ -163,7 +164,7 @@ func NewMux(
 						return
 					}
 
-					if page*search.ResultsPerPage > results.Total {
+					if page > uint64(math.Ceil(float64(results.Total)/search.ResultsPerPage)) {
 						errorHandler(w, r, "Not found", http.StatusNotFound)
 
 						return
