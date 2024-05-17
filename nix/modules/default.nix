@@ -152,6 +152,7 @@ in
                     }));
                   default = {
                     nixos.enable = true;
+                    nixpkgs.enable = true;
                     darwin.enable = false;
                     home-manager.enable = false;
                   };
