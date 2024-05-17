@@ -25,7 +25,7 @@ func (i ImporterType) String() string {
 	return fmt.Sprintf("Type(%d)", i)
 }
 
-func parseType(name string) (ImporterType, error) {
+func ParseImporterType(name string) (ImporterType, error) {
 	switch strcase.KebabCase(name) {
 	case "packages":
 		return Packages, nil
@@ -38,7 +38,7 @@ func parseType(name string) (ImporterType, error) {
 
 func (i *ImporterType) UnmarshalText(text []byte) error {
 	var err error
-	*i, err = parseType(string(text))
+	*i, err = ParseImporterType(string(text))
 
 	return err
 }

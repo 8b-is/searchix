@@ -28,7 +28,7 @@ func (f Fetcher) String() string {
 	return fmt.Sprintf("Fetcher(%d)", f)
 }
 
-func parseFetcher(name string) (Fetcher, error) {
+func ParseFetcher(name string) (Fetcher, error) {
 	switch strcase.KebabCase(name) {
 	case "channel":
 		return Channel, nil
@@ -43,7 +43,7 @@ func parseFetcher(name string) (Fetcher, error) {
 
 func (f *Fetcher) UnmarshalText(text []byte) error {
 	var err error
-	*f, err = parseFetcher(string(text))
+	*f, err = ParseFetcher(string(text))
 
 	return err
 }
