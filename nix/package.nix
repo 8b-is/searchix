@@ -17,10 +17,11 @@
 let
   inherit (builtins) concatStringsSep match;
 
+  version = "0.1.0";
 in
 buildGoApplication {
   pname = "searchix";
-  version = "0.1.0";
+  inherit version;
   src = with pkgs.lib.fileset; toSource {
     root = ../.;
     fileset = difference
