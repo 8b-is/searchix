@@ -39,7 +39,7 @@ type maintainerJSON struct {
 type PackageIngester struct {
 	dec    *jstream.Decoder
 	ms     *mapstructure.Decoder
-	pkg    *packageJSON
+	pkg    packageJSON
 	infile io.ReadCloser
 	source *config.Source
 }
@@ -62,14 +62,14 @@ func makeAdhocPlatform(v any) string {
 func NewPackageProcessor(infile io.ReadCloser, source *config.Source) (*PackageIngester, error) {
 	i := &PackageIngester{
 		dec:    jstream.NewDecoder(infile, 2).EmitKV(),
-		pkg:    &packageJSON{},
+		pkg:    packageJSON{},
 		infile: infile,
 		source: source,
 	}
 
 	ms, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
 		ZeroFields: true,
-		Result:     i.pkg,
+		Result:     &i.pkg,
 		Squash:     true,
 		DecodeHook: mapstructure.TextUnmarshallerHookFunc(),
 	})
@@ -203,6 +203,7 @@ func (i *PackageIngester) Process(parent context.Context) (<-chan nix.Importable
 				}
 			}
 
+			i.pkg = packageJSON{}
 			err = i.ms.Decode(x) // stores in i.pkg
 			if err != nil {
 				errs <- errors.WithMessagef(err, "failed to decode package %#v", x)

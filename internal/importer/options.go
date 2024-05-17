@@ -120,7 +120,6 @@ func (i *OptionIngester) Process(parent context.Context) (<-chan nix.Importable,
 
 			var decls []*nix.Link
 			for _, decl := range x["declarations"].([]interface{}) {
-				i.optJSON = nixOptionJSON{}
 
 				switch decl := reflect.ValueOf(decl); decl.Kind() {
 				case reflect.String:
@@ -152,6 +151,7 @@ func (i *OptionIngester) Process(parent context.Context) (<-chan nix.Importable,
 				x["declarations"] = decls
 			}
 
+			i.optJSON = nixOptionJSON{}
 			err := i.ms.Decode(x) // stores in optJSON
 			if err != nil {
 				errs <- errors.WithMessagef(err, "failed to decode option %#v", x)
