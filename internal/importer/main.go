@@ -33,7 +33,7 @@ func Start(
 	forceUpdate = forceUpdate || (onlyUpdateSources != nil && len(*onlyUpdateSources) > 0)
 
 	for name, source := range cfg.Importer.Sources {
-		if len(*onlyUpdateSources) > 0 {
+		if onlyUpdateSources != nil && len(*onlyUpdateSources) > 0 {
 			if !slices.Contains(*onlyUpdateSources, name) {
 				continue
 			}
