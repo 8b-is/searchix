@@ -4,14 +4,59 @@
       <details id="{{ .Name }}">
         <summary>
           <h3>
-            {{ .Name }}
+            {{- if .Broken }}
+              <del>{{ .Name }}</del>
+            {{- else }}
+              {{ .Name }}
+            {{- end }}
           </h3>
         </summary>
-        {{ .Description }}
+        <p>{{ or .LongDescription .Description }}</p>
         <dl>
+          {{- with .MainProgram }}
+            <dt>Main Program</dt>
+            <dd>
+              <code>{{ . }}</code>
+            </dd>
+          {{- end }}
+          {{- with .Homepages }}
+            <dt>Homepage</dt>
+            <dd>
+              {{- range . }}
+                <a href="{{ . }}">{{ . }}</a>
+              {{- end }}
+            </dd>
+          {{- end }}
           {{- with .Version }}
             <dt>Version</dt>
             <dd>{{ . }}</dd>
+          {{- end }}
+          {{- with .Licenses }}
+            <dt>License</dt>
+            <dd>
+              {{- range . }}
+                {{- if .URL }}
+                  <a href="{{ .URL }}">{{ or .FullName .Name }}</a>
+                {{- else }}
+                  {{ or .FullName .Name }}
+                {{- end }}
+                {{- with .AppendixURL }}
+                  <a href="{{ . }}">Appendix</a>
+                {{- end }}
+              {{- end }}
+            </dd>
+          {{- end }}
+          {{- with .Maintainers }}
+            <dt>Maintainer{{ if gt (len .) 1 }}s{{ end }}</dt>
+            <dd>
+              {{- range . }}
+                {{- if .Github }}
+                  <a href="https://github.com/{{ .Github }}">{{ .Name }}</a>
+                {{- else }}
+                  {{ .Name }}
+                {{- end }}
+              {{- end }}
+            </dd>
           {{- end }}
           {{- with .Definition }}
             <dt>Defined</dt>
