@@ -80,7 +80,8 @@ async function getResults(url) {
       },
     });
 
-    if (res.ok) {
+    // render errors sent as HTML as well as OK responses
+    if (res.headers.get("content-type").startsWith("text/html")) {
       state.fragment = await res.text();
       state.opened = [];
       history.replaceState(state, null, url);
