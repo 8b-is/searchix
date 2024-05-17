@@ -21,7 +21,7 @@ precommit:
 	nix-build -A pre-commit-check
 
 dev:
-	watchexec -e go -r wgo run -exit ./ --live --config config.toml
+	watchexec --no-vcs-ignore --filter "**/*.go" --filter config.toml -r wgo run -exit ./ --live --config config.toml
 
 reindex:
 	wgo run -exit . --config config.toml --replace
