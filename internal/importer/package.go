@@ -228,6 +228,7 @@ func (i *PackageIngester) Process(parent context.Context) (<-chan nix.Importable
 
 			results <- &nix.Package{
 				Name:            i.pkg.Name,
+				Attribute:       kv.Key,
 				Source:          i.source.Key,
 				PackageSet:      pkgSet,
 				Version:         i.pkg.Version,

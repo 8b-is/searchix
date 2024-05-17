@@ -104,7 +104,7 @@ func createIndexMapping() (mapping.IndexMapping, error) {
 
 	packageMapping := bleve.NewDocumentStaticMapping()
 
-	packageMapping.AddFieldMappingsAt("Name", keywordFieldMapping)
+	packageMapping.AddFieldMappingsAt("Attribute", keywordFieldMapping)
 	packageMapping.AddFieldMappingsAt("Source", keywordFieldMapping)
 	packageMapping.AddFieldMappingsAt("Description", textFieldMapping)
 	packageMapping.AddFieldMappingsAt("MainProgram", keywordFieldMapping)

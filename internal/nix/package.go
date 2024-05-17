@@ -2,6 +2,7 @@ package nix
 
 type Package struct {
 	Name            string
+	Attribute       string
 	Source          string
 	Broken          bool
 	Definition      string
