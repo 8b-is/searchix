@@ -191,11 +191,16 @@ func GetConfig(filename string) (*Config, error) {
 		defer f.Close()
 
 		dec := toml.NewDecoder(f)
+		dec.DisallowUnknownFields()
 		err = dec.Decode(&config)
 		if err != nil {
 			var tomlError *toml.DecodeError
 			if errors.As(err, &tomlError) {
 				return nil, errors.WithMessage(err, tomlError.Error())
+			}
+			var missingConfigError *toml.StrictMissingError
+			if errors.As(err, &missingConfigError) {
+				return nil, errors.Errorf("unexpected config: %s", missingConfigError.String())
 			}
 
 			return nil, errors.Wrap(err, "config error")
