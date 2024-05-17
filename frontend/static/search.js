@@ -49,7 +49,9 @@ function paginationLinkClicked(ev) {
 }
 
 function addPaginationEventListeners(pagination) {
-  pagination.addEventListener("click", paginationLinkClicked);
+  Array.from(pagination.children).forEach((child) =>
+    child.addEventListener("click", paginationLinkClicked),
+  );
 }
 
 function renderFragmentHTML(html) {

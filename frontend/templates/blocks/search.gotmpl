@@ -1,8 +1,18 @@
 {{- define "main" }}
-  <form id="search">
-    <label for="query">{{ .Source.Name }} option search</label>
+  <form id="search" role="search">
     <fieldset>
-      <input id="query" name="query" type="search" value="{{ .Query }}" />
+      <legend id="legend">
+        <h2>{{ sourceNameAndType .Source }} search</h2>
+      </legend>
+      <input
+        id="query"
+        aria-labelledby="legend"
+        name="query"
+        type="search"
+        value="{{ .Query }}"
+        autofocus
+        spellcheck="false"
+      />
       <button>Search</button>
     </fieldset>
   </form>

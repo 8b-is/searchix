@@ -1,10 +1,10 @@
 {{- define "results" }}
   {{- with .Results }}
     {{- if gt .Total 0 }}
-      <section id="results">
+      <section id="results" role="list" aria-label="search results">
         {{ block "hits" .Hits }}
         {{ end }}
-        <footer>
+        <footer aria-label="pagination">
           <nav id="pagination">
             {{- with $.Prev }}
               <a class="button" href="{{ . }}" rel="prev">Prev</a>
@@ -13,11 +13,11 @@
               <a class="button" href="{{ . }}" rel="next">Next</a>
             {{- end }}
           </nav>
-          <span>{{ .Total }} results</span>
+          <span role="status">{{ .Total }} results</span>
         </footer>
       </section>
     {{- else }}
-      Nothing found
+      <span role="status">Nothing found</span>
     {{- end }}
   {{- end }}
 {{- end }}
