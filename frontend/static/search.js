@@ -100,7 +100,7 @@ queryInput.addEventListener("input", function (ev) {
   for (const el of nav.children) {
     if (el.nodeName === "A") {
       const url = new URL(el.href);
-      if (ev.target.value) {
+      if (ev.target.value && !el.classList.contains("current")) {
         url.searchParams.set("query", ev.target.value);
       } else {
         url.searchParams.delete("query");
@@ -125,6 +125,16 @@ if (results !== null) {
 if (pagination !== null) {
   addPaginationEventListeners(pagination);
 }
+
+document.querySelector("a.current").addEventListener("click", function (ev) {
+  search.reset();
+  state.input = null;
+  range.deleteContents();
+  state.fragment = "";
+  history.pushState(state, null, ev.target.href);
+  ev.preventDefault();
+  queryInput.value = "";
+});
 
 if (state.opened.length > 0) {
   state.opened.forEach((id) =>

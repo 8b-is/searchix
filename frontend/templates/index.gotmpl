@@ -25,7 +25,9 @@
         {{- range $key, $value := .Sources }}
           <a
             {{ if eq $.Source.Name $value.Name }}class="current"{{ end }}
-            href="/{{ .Importer }}/{{ $key }}/search{{ and $.Query (printf "?query=%s" $.Query) }}"
+            href="/{{ .Importer }}/{{ $key }}/search{{ if and (ne $.Source.Name $value.Name) $.Query }}
+              {{- printf "?query=%s" $.Query -}}
+            {{ end }}"
           >
             {{- $value.Name -}}
           </a>
