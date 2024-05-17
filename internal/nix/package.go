@@ -9,7 +9,7 @@ type Package struct {
 	Description     string
 	Homepages       []string
 	Licenses        []License
-	LongDescription string
+	LongDescription Markdown
 	MainProgram     string
 	Maintainers     []Maintainer
 	PackageSet      string

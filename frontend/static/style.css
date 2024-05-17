@@ -125,3 +125,7 @@ h3 {
   font-size: 1.25rem;
   display: inline-block;
 }
+
+blockquote > p {
+  margin: unset;
+}

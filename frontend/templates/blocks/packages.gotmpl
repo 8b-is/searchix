@@ -11,7 +11,11 @@
             {{- end }}
           </h3>
         </summary>
-        <p>{{ or .LongDescription .Description }}</p>
+        {{- if .LongDescription }}
+          {{ markdown .LongDescription }}
+        {{- else }}
+          <p>{{ .Description }}</p>
+        {{- end }}
         <dl>
           {{- with .MainProgram }}
             <dt>Main Program</dt>

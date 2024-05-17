@@ -234,7 +234,7 @@ func (i *PackageIngester) Process(parent context.Context) (<-chan nix.Importable
 				Version:         i.pkg.Version,
 				Broken:          i.pkg.Meta.Broken,
 				Description:     i.pkg.Meta.Description,
-				LongDescription: i.pkg.Meta.LongDescription,
+				LongDescription: nix.Markdown(i.pkg.Meta.LongDescription),
 				Homepages:       i.pkg.Meta.Homepages,
 				MainProgram:     i.pkg.Meta.MainProgram,
 				Platforms:       i.pkg.Meta.Platforms,
