@@ -21,30 +21,28 @@ body > header {
   display: flex;
   justify-content: center;
   padding: unset;
-  & > :only-child {
-    margin-block-start: 0;
-  }
-  & > nav {
-    width: min(var(--min-width), 90%);
-    display: flex;
-    padding: 0.5rem 0;
-
-    a {
-      margin-bottom: unset;
-      font-size: 1.15rem;
-    }
-
-    & h1 {
-      margin: unset;
-      font-size: 1.15rem;
-      line-height: 2;
-      & > a {
-        margin-left: unset;
-        padding-left: unset;
-        border: 1px transparent;
-      }
-    }
-  }
+}
+body > header > :only-child {
+  margin-block-start: 1ex;
+}
+header > nav {
+  width: min(var(--min-width), 90%);
+  display: flex;
+  padding: 0.5rem 0;
+}
+header > nav a {
+  margin-bottom: 1ex;
+  font-size: 1.15rem;
+}
+nav > h1 > a {
+  margin-left: unset;
+  padding-left: unset;
+  border: 1px transparent;
+}
+body > header h1 {
+  margin: unset;
+  font-size: 1.15rem;
+  line-height: 2;
 }
 
 form {
@@ -98,18 +96,16 @@ pre:has(> code) {
   background: var(--bg);
 }
 
-section {
-  nav {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    a[rel="next"] {
-      margin-left: auto;
-    }
+section > nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  a[rel="next"] {
+    margin-left: auto;
   }
-  footer {
-    text-align: center;
-  }
+}
+section > footer {
+  text-align: center;
 }
 
 .error {
