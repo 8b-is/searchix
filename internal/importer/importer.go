@@ -58,9 +58,7 @@ func process(
 		}
 	}()
 
-	logger.Debug("object processing", "state", "waiting")
 	wg.Wait()
-	logger.Debug("object processing", "state", "complete")
 
 	return hadErrors
 }

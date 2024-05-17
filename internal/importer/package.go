@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"io"
-	"log/slog"
 	"reflect"
 	"searchix/internal/config"
 	"searchix/internal/nix"
@@ -117,7 +116,6 @@ func (i *PackageIngester) Process(parent context.Context) (<-chan nix.Importable
 		defer cancel()
 
 		userRepo := i.source.Repo.Owner + "/" + i.source.Repo.Repo
-		slog.Debug("starting decoder stream")
 	outer:
 		for mv := range i.dec.Stream() {
 			var err error

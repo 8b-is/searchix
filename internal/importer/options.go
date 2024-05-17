@@ -98,7 +98,6 @@ func (i *OptionIngester) Process(parent context.Context) (<-chan nix.Importable,
 		defer close(errs)
 		defer cancel()
 
-		slog.Debug("starting decoder stream")
 	outer:
 		for mv := range i.dec.Stream() {
 			select {
