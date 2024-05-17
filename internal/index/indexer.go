@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"log"
 	"log/slog"
+	"math"
 	"os"
 	"path"
 	"searchix/internal/file"
@@ -322,6 +323,40 @@ func (i *WriteIndex) Close() error {
 	err := i.index.Close()
 	if err != nil {
 		return errors.WithMessagef(err, "could not close index")
+	}
+
+	return nil
+}
+
+func (i *WriteIndex) DeleteBySource(source string) error {
+	query := bleve.NewTermQuery(source)
+	search := bleve.NewSearchRequest(query)
+	search.Size = math.MaxInt
+	search.Fields = []string{"_id"}
+
+	results, err := i.index.Search(search)
+	if err != nil {
+		return errors.WithMessagef(err, "failed to query documents of retired index %s", source)
+	}
+
+	batch := i.index.NewBatch()
+	var k uint
+	for _, hit := range results.Hits {
+		batch.Delete(hit.ID)
+		if k++; k%batchSize == 0 {
+			err := i.Flush(batch)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	err = i.Flush(batch)
+	if err != nil {
+		return err
+	}
+
+	if uint64(search.Size) < results.Total {
+		return i.DeleteBySource(source) // unlikely :^)
 	}
 
 	return nil

@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"slices"
 	"sync"
 	"time"
 
@@ -76,6 +77,14 @@ func main() {
 		slog.Warn("could not initialise sentry", "error", err)
 	}
 
+	var i uint
+	cfgEnabledSources := make([]string, len(cfg.Importer.Sources))
+	for key := range cfg.Importer.Sources {
+		cfgEnabledSources[i] = key
+		i++
+	}
+	slices.Sort(cfgEnabledSources)
+
 	read, write, exists, err := index.OpenOrCreate(cfg.DataPath, *replace)
 	if err != nil {
 		log.Fatalf("Failed to open or create index: %v", err)
@@ -83,12 +92,42 @@ func main() {
 
 	if !exists || *replace {
 		slog.Info("Index doesn't exist. Starting build job...")
-		err = importer.Start(cfg, write, *replace)
+		err = importer.Start(cfg, write, *replace, nil)
 		if err != nil {
 			log.Fatalf("Failed to build index: %v", err)
 		}
 		if *replace {
 			return
+		}
+	} else {
+		indexedSources, err := read.GetEnabledSources()
+		if err != nil {
+			log.Fatalln("failed to get enabled sources from index")
+		}
+		slices.Sort(indexedSources)
+		if !slices.Equal(cfgEnabledSources, indexedSources) {
+			newSources := slices.DeleteFunc(slices.Clone(cfgEnabledSources), func(s string) bool {
+				return slices.Contains(indexedSources, s)
+			})
+			retiredSources := slices.DeleteFunc(slices.Clone(indexedSources), func(s string) bool {
+				return slices.Contains(cfgEnabledSources, s)
+			})
+			if len(newSources) > 0 {
+				slog.Info("adding new sources", "sources", newSources)
+				err := importer.Start(cfg, write, false, &newSources)
+				if err != nil {
+					log.Fatalf("failed to update index with new sources: %v", err)
+				}
+			}
+			if len(retiredSources) > 0 {
+				slog.Info("removing retired sources", "sources", retiredSources)
+				for _, s := range retiredSources {
+					err := write.DeleteBySource(s)
+					if err != nil {
+						log.Fatalf("failed to remove retired source %s from index: %v", s, err)
+					}
+				}
+			}
 		}
 	}
 
@@ -132,7 +171,7 @@ func main() {
 					Status:      sentry.CheckInStatusInProgress,
 				}, monitorConfig)
 
-				err = importer.Start(cfg, write, false)
+				err = importer.Start(cfg, write, false, nil)
 				wg.Done()
 				if err != nil {
 					slog.Warn("error updating index", "error", err)

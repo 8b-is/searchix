@@ -9,12 +9,18 @@ import (
 	"searchix/internal/config"
 	"searchix/internal/fetcher"
 	"searchix/internal/index"
+	"slices"
 	"strings"
 
 	"github.com/pkg/errors"
 )
 
-func Start(cfg *config.Config, indexer *index.WriteIndex, replace bool) error {
+func Start(
+	cfg *config.Config,
+	indexer *index.WriteIndex,
+	forceUpdate bool,
+	onlyUpdateSources *[]string,
+) error {
 	if len(cfg.Importer.Sources) == 0 {
 		slog.Info("No sources enabled")
 
@@ -24,7 +30,15 @@ func Start(cfg *config.Config, indexer *index.WriteIndex, replace bool) error {
 	ctx, cancel := context.WithTimeout(context.Background(), cfg.Importer.Timeout.Duration)
 	defer cancel()
 
+	forceUpdate = forceUpdate || (onlyUpdateSources != nil && len(*onlyUpdateSources) > 0)
+
 	for name, source := range cfg.Importer.Sources {
+		if len(*onlyUpdateSources) > 0 {
+			if !slices.Contains(*onlyUpdateSources, name) {
+				continue
+			}
+		}
+
 		logger := slog.With("name", name, "fetcher", source.Fetcher.String())
 		logger.Debug("starting fetcher")
 
@@ -54,7 +68,7 @@ func Start(cfg *config.Config, indexer *index.WriteIndex, replace bool) error {
 		}
 		logger.Info("importer fetch succeeded", "updated", updated)
 
-		if updated || replace {
+		if updated || forceUpdate {
 			err = setRepoRevision(files.Revision, source)
 			if err != nil {
 				logger.Warn("could not set source repo revision", "error", err)

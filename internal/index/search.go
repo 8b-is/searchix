@@ -29,6 +29,25 @@ type ReadIndex struct {
 	meta  *Meta
 }
 
+func (index *ReadIndex) GetEnabledSources() ([]string, error) {
+	facet := bleve.NewFacetRequest("Source", 100)
+	query := bleve.NewMatchAllQuery()
+	search := bleve.NewSearchRequest(query)
+	search.AddFacet("Source", facet)
+
+	results, err := index.index.Search(search)
+	if err != nil {
+		return nil, errors.WithMessage(err, "could not get list of enabled sources from index")
+	}
+
+	enabledSources := make([]string, results.Facets["Source"].Terms.Len())
+	for i, term := range results.Facets["Source"].Terms.Terms() {
+		enabledSources[i] = term.Term
+	}
+
+	return enabledSources, nil
+}
+
 func (index *ReadIndex) GetSource(ctx context.Context, name string) (*bleve.SearchResult, error) {
 	query := bleve.NewTermQuery(name)
 	query.SetField("Source")
