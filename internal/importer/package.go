@@ -225,6 +225,10 @@ func (i *PackageIngester) Process(parent context.Context) (<-chan nix.Importable
 				pkgSet = ""
 			}
 
+			url, err := makeRepoURL(i.source.Repo, subpath, line)
+			if err != nil {
+				errs <- err
+			}
 			results <- &nix.Package{
 				Name:            i.pkg.Name,
 				Attribute:       kv.Key,
@@ -239,7 +243,7 @@ func (i *PackageIngester) Process(parent context.Context) (<-chan nix.Importable
 				Platforms:       i.pkg.Meta.Platforms,
 				Licenses:        licenses,
 				Maintainers:     maintainers,
-				Definition:      makeRepoURL(i.source.Repo, subpath, line),
+				Definition:      url,
 			}
 		}
 	}()
