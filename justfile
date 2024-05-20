@@ -24,4 +24,4 @@ dev:
 	watchexec --no-vcs-ignore --filter "**/*.go" --filter config.toml -r wgo run -exit ./ --live --config config.toml
 
 reindex:
-	wgo run -exit . --config config.toml --replace
+	wgo run --exit . --config config.toml --replace
