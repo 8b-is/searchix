@@ -91,5 +91,19 @@ rec {
       entry = "${pkgs.gomod2nix}/bin/gomod2nix";
       pass_filenames = false;
     };
+
+    generate-default-config = {
+      enable = true;
+      name = "generate-default-config";
+      description = "Ensure default configuration file is up-to-date";
+      files = "config.go$";
+      entry =
+        let
+          script = pkgs.writeShellScript "generate-default-config" ''
+            ${pkgs.wgo}/bin/wgo run -exit searchix.go --print-default-config > defaults.toml
+          '';
+        in
+        builtins.toString script;
+    };
   };
 }

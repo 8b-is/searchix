@@ -1,0 +1,143 @@
+DataPath = './data'
+LogLevel = 'INFO'
+
+[Web]
+ListenAddress = 'localhost'
+Port = 3000
+SentryDSN = ''
+Environment = 'development'
+ExtraHeadHTML = ''
+
+[Web.ContentSecurityPolicy]
+base-uri = []
+block-all-mixed-content = false
+child-src = []
+connect-src = []
+default-src = ["'self'"]
+font-src = []
+form-action = []
+frame-ancestors = []
+frame-src = []
+img-src = []
+manifest-src = []
+media-src = []
+navigate-to = []
+object-src = []
+plugin-types = []
+prefetch-src = []
+referrer = ''
+report-to = ''
+report-uri = ''
+require-sri-for = []
+require-trusted-types-for = []
+sandbox = ''
+script-src = []
+script-src-attr = []
+script-src-elem = []
+style-src = []
+style-src-attr = []
+style-src-elem = []
+trusted-types = []
+upgrade-insecure-requests = false
+worker-src = []
+
+[Web.BaseURL]
+Scheme = 'http'
+Opaque = ''
+Host = 'localhost:3000'
+Path = ''
+RawPath = ''
+OmitHost = false
+ForceQuery = false
+RawQuery = ''
+Fragment = ''
+RawFragment = ''
+
+[Web.Headers]
+x-content-type-options = 'nosniff'
+
+[Importer]
+UpdateAt = 04:00:00
+
+[Importer.Sources]
+[Importer.Sources.darwin]
+Name = 'Darwin'
+Key = 'darwin'
+Enable = false
+Fetcher = 1
+Importer = 2
+Channel = 'darwin'
+URL = 'https://github.com/LnL7/nix-darwin/archive/master.tar.gz'
+Attribute = 'options'
+ImportPath = 'release.nix'
+FetchTimeout = 300000000000
+ImportTimeout = 900000000000
+OutputPath = 'share/doc/darwin'
+
+[Importer.Sources.darwin.Repo]
+Type = 'github'
+Owner = 'LnL7'
+Repo = 'nix-darwin'
+Revision = ''
+
+[Importer.Sources.home-manager]
+Name = 'Home Manager'
+Key = 'home-manager'
+Enable = false
+Fetcher = 1
+Importer = 2
+Channel = 'home-manager'
+URL = 'https://github.com/nix-community/home-manager/archive/master.tar.gz'
+Attribute = 'docs.json'
+ImportPath = 'default.nix'
+FetchTimeout = 300000000000
+ImportTimeout = 900000000000
+OutputPath = 'share/doc/home-manager'
+
+[Importer.Sources.home-manager.Repo]
+Type = 'github'
+Owner = 'nix-community'
+Repo = 'home-manager'
+Revision = ''
+
+[Importer.Sources.nixos]
+Name = 'NixOS'
+Key = 'nixos'
+Enable = true
+Fetcher = 1
+Importer = 2
+Channel = 'nixpkgs'
+URL = 'https://channels.nixos.org/nixos-unstable/nixexprs.tar.xz'
+Attribute = 'options'
+ImportPath = 'nixos/release.nix'
+FetchTimeout = 300000000000
+ImportTimeout = 900000000000
+OutputPath = 'share/doc/nixos'
+
+[Importer.Sources.nixos.Repo]
+Type = 'github'
+Owner = 'NixOS'
+Repo = 'nixpkgs'
+Revision = ''
+
+[Importer.Sources.nixpkgs]
+Name = 'Nix Packages'
+Key = 'nixpkgs'
+Enable = true
+Fetcher = 2
+Importer = 1
+Channel = 'nixos-unstable'
+URL = ''
+Attribute = ''
+ImportPath = ''
+FetchTimeout = 300000000000
+ImportTimeout = 900000000000
+OutputPath = 'packages.json.br'
+
+[Importer.Sources.nixpkgs.Repo]
+Type = 'github'
+Owner = 'NixOS'
+Repo = 'nixpkgs'
+Revision = ''
+
+[Importer.Timeout]

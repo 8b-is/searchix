@@ -6,9 +6,12 @@ flake:
 }:
 
 let
+  inherit (builtins) fromTOML readFile;
   cfg = config.services.searchix;
 
   package = flake.packages.${pkgs.system}.default;
+
+  defaults = fromTOML (readFile ../../defaults.toml);
 
   settingsFormat = pkgs.formats.toml { };
 
@@ -120,6 +123,20 @@ in
                   description = "Optionally enable sentry to track errors.";
                   default = "";
                 };
+
+                contentSecurityPolicy = mkOption {
+                  type = types.submodule {
+                    freeformType = settingsFormat.type;
+                  };
+                  description = "Control resources a browser should be allowed to load.";
+                  default = defaults.Web.ContentSecurityPolicy;
+                };
+
+                headers = mkOption {
+                  type = with types; attrsOf str;
+                  description = "HTTP Headers to send with every request. Case-insensitive.";
+                  default = defaults.Web.Headers;
+                };
               };
             };
           };
@@ -140,7 +157,7 @@ in
 
                 updateAt = mkOption {
                   type = types.strMatching "[[:digit:]]{2}:[[:digit:]]{2}:[[:digit:]]{2}";
-                  default = "04:00:00";
+                  default = defaults.Importer.UpdateAt;
                   example = "02:00:00";
                   description = "Time of day to fetch and import new options.";
                 };
@@ -150,15 +167,9 @@ in
                     attrsOf (submodule (import ./source-options.nix {
                       inherit cfg settingsFormat;
                     }));
-                  default = {
-                    nixos.enable = true;
-                    nixpkgs.enable = true;
-                    darwin.enable = false;
-                    home-manager.enable = false;
-                  };
+                  default = defaults.Importer.Sources;
                   description = "Declarative specification of options sources for searchix.";
                 };
-
               };
             };
           };
