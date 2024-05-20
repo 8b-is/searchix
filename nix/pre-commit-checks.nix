@@ -96,7 +96,8 @@ rec {
       enable = true;
       name = "generate-default-config";
       description = "Ensure default configuration file is up-to-date";
-      files = "config.go$";
+      files = "^defaults.toml|internal/config/";
+      types_or = [ "go" "toml" ];
       entry =
         let
           script = pkgs.writeShellScript "generate-default-config" ''
