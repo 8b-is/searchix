@@ -23,11 +23,11 @@ func makeChannelURL(channel string, subPath string) (string, error) {
 	return url, errors.WithMessagef(err, "error creating URL")
 }
 
-var filesToFetch = map[string]string{
-	"revision": "git-revision",
-	"options":  "options.json.br",
-	"packages": "packages.json.br",
-}
+const (
+	revisionFilename = "git-revision"
+	optionsFilename  = "options.json.br"
+	packagesFileName = "packages.json.br"
+)
 
 func (i *NixpkgsChannelFetcher) FetchIfNeeded(
 	parent context.Context,
@@ -42,6 +42,15 @@ func (i *NixpkgsChannelFetcher) FetchIfNeeded(
 		err = errors.WithMessagef(err, "error creating directory for data: %s", root)
 
 		return
+	}
+
+	filesToFetch := make([]string, 2)
+	filesToFetch[0] = revisionFilename
+	switch i.Source.Importer {
+	case config.Packages:
+		filesToFetch[1] = packagesFileName
+	case config.Options:
+		filesToFetch[1] = optionsFilename
 	}
 
 	var fetchURL string
