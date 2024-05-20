@@ -94,7 +94,7 @@ func mustLocalTime(in string) (time LocalTime) {
 }
 
 var nixpkgs = Repository{
-	Type:  "github",
+	Type:  GitHub,
 	Owner: "NixOS",
 	Repo:  "nixpkgs",
 }
@@ -146,7 +146,7 @@ var defaultConfig = Config{
 				FetchTimeout:  Duration{5 * time.Minute},
 				ImportTimeout: Duration{15 * time.Minute},
 				Repo: Repository{
-					Type:  "github",
+					Type:  GitHub,
 					Owner: "LnL7",
 					Repo:  "nix-darwin",
 				},
@@ -165,7 +165,7 @@ var defaultConfig = Config{
 				FetchTimeout:  Duration{5 * time.Minute},
 				ImportTimeout: Duration{15 * time.Minute},
 				Repo: Repository{
-					Type:  "github",
+					Type:  GitHub,
 					Owner: "nix-community",
 					Repo:  "home-manager",
 				},

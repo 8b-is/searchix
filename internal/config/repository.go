@@ -13,7 +13,7 @@ const (
 )
 
 type Repository struct {
-	Type     string `toml:""  default:"github" comment:"Currently only 'github' is supported."`
+	Type     RepoType `toml:""  default:"github" comment:"Currently only 'github' is supported."`
 	Owner    string
 	Repo     string
 	Revision string `toml:"-"`
@@ -42,4 +42,8 @@ func (f *RepoType) UnmarshalText(text []byte) error {
 	*f, err = parseRepoType(string(text))
 
 	return err
+}
+
+func (f *RepoType) MarshalText() ([]byte, error) {
+	return []byte(f.String()), nil
 }
