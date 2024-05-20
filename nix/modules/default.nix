@@ -176,7 +176,11 @@ in
         };
       };
       default = { };
-      description = "Configuration for searchix (a web search interface for options in the nix ecosystem).";
+      description = ''
+        Configuration for searchix.
+
+        See https://git.alanpearce.eu/searchix/tree/defaults.toml
+      '';
     };
   };
 
