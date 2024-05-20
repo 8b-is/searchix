@@ -46,7 +46,7 @@ func Start(
 
 		fetcher, err := fetcher.New(source, fetcherDataPath, logger)
 		if err != nil {
-			logger.Warn("error creating fetcher", "error", err)
+			logger.Error("error creating fetcher", "error", err)
 
 			continue
 		}
@@ -58,10 +58,20 @@ func Start(
 			if errors.As(err, &exerr) {
 				lines := strings.Split(strings.TrimSpace(string(exerr.Stderr)), "\n")
 				for _, line := range lines {
-					logger.Warn("importer fetch failed", "stderr", line, "status", exerr.ExitCode())
+					logger.Error(
+						"importer fetch failed",
+						"stderr",
+						line,
+						"status",
+						exerr.ExitCode(),
+					)
+
+					continue
 				}
 			} else {
-				logger.Warn("importer fetch failed", "error", err)
+				logger.Error("importer fetch failed", "error", err)
+
+				continue
 			}
 
 			continue
@@ -87,7 +97,9 @@ func Start(
 				)
 				file, err = openFileDecoded(files.Options)
 				if err != nil {
-					logger.Warn("could not open file", "filename", files.Options, "error", err)
+					logger.Error("could not open file", "filename", files.Options, "error", err)
+
+					continue
 				}
 				processor, err = NewOptionProcessor(file, source)
 			case config.Packages:
@@ -100,12 +112,16 @@ func Start(
 				)
 				file, err = openFileDecoded(files.Packages)
 				if err != nil {
-					logger.Warn("could not open file", "filename", files.Packages, "error", err)
+					logger.Error("could not open file", "filename", files.Packages, "error", err)
+
+					continue
 				}
 				processor, err = NewPackageProcessor(file, source)
 			}
 			if err != nil {
-				logger.Warn("failed to create processor", "type", source.Importer, "error", err)
+				logger.Error("failed to create processor", "type", source.Importer, "error", err)
+
+				continue
 			}
 
 			hadWarnings := process(ctx, indexer, processor, logger)
