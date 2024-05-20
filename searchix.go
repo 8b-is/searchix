@@ -23,10 +23,19 @@ import (
 var buildVersion string
 
 var (
-	configFile = flag.String("config", "config.toml", "config `file` to use")
+	configFile         = flag.String("config", "config.toml", "config `file` to use")
+	printDefaultConfig = flag.Bool(
+		"print-default-config",
+		false,
+		"print default configuration and exit",
+	)
 	liveReload = flag.Bool("live", false, "whether to enable live reloading (development)")
-	replace    = flag.Bool("replace", false, "whether to replace existing database, if it exists")
-	version    = flag.Bool("version", false, "print version information")
+	replace    = flag.Bool(
+		"replace",
+		false,
+		"whether to replace existing database, if it exists",
+	)
+	version = flag.Bool("version", false, "print version information")
 )
 
 func nextOccurrenceOfLocalTime(t toml.LocalTime) time.Time {
@@ -56,7 +65,17 @@ func main() {
 		if buildVersion != config.CommitSHA && buildVersion != config.ShortSHA {
 			fmt.Fprintf(os.Stderr, " %s", config.CommitSHA)
 		}
-		fmt.Fprint(os.Stderr, "\n")
+		_, err := fmt.Fprint(os.Stderr, "\n")
+		if err != nil {
+			panic("can't write to standard error?!")
+		}
+		os.Exit(0)
+	}
+	if *printDefaultConfig {
+		_, err := fmt.Print(config.GetDefaultConfig())
+		if err != nil {
+			panic("can't write to standard output?!")
+		}
 		os.Exit(0)
 	}
 

@@ -180,6 +180,15 @@ var defaultConfig = Config{
 	},
 }
 
+func GetDefaultConfig() string {
+	out, err := toml.Marshal(&defaultConfig)
+	if err != nil {
+		panic("could not read default configuration")
+	}
+
+	return string(out)
+}
+
 func GetConfig(filename string) (*Config, error) {
 	config := defaultConfig
 	if filename != "" {
