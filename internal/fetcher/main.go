@@ -18,42 +18,6 @@ type Fetcher interface {
 	FetchIfNeeded(context.Context) (FetchedFiles, bool, error)
 }
 
-func NewNixpkgsChannelFetcher(
-	source *config.Source,
-	dataPath string,
-	logger *slog.Logger,
-) *NixpkgsChannelFetcher {
-	return &NixpkgsChannelFetcher{
-		DataPath: dataPath,
-		Source:   source,
-		Logger:   logger,
-	}
-}
-
-func NewChannelFetcher(
-	source *config.Source,
-	dataPath string,
-	logger *slog.Logger,
-) *ChannelFetcher {
-	return &ChannelFetcher{
-		DataPath: dataPath,
-		Source:   source,
-		Logger:   logger,
-	}
-}
-
-func NewDownloadFetcher(
-	source *config.Source,
-	dataPath string,
-	logger *slog.Logger,
-) *DownloadFetcher {
-	return &DownloadFetcher{
-		DataPath: dataPath,
-		Source:   source,
-		Logger:   logger,
-	}
-}
-
 func New(
 	source *config.Source,
 	fetcherDataPath string,
@@ -61,11 +25,11 @@ func New(
 ) (fetcher Fetcher, err error) {
 	switch source.Fetcher {
 	case config.ChannelNixpkgs:
-		fetcher = NewNixpkgsChannelFetcher(source, fetcherDataPath, logger)
+		fetcher, err = NewNixpkgsChannelFetcher(source, fetcherDataPath, logger)
 	case config.Channel:
-		fetcher = NewChannelFetcher(source, fetcherDataPath, logger)
+		fetcher, err = NewChannelFetcher(source, fetcherDataPath, logger)
 	case config.Download:
-		fetcher = NewDownloadFetcher(source, fetcherDataPath, logger)
+		fetcher, err = NewDownloadFetcher(source, fetcherDataPath, logger)
 	default:
 		err = errors.Errorf("unsupported fetcher type %s", source.Fetcher.String())
 	}

@@ -22,6 +22,23 @@ type ChannelFetcher struct {
 	Logger     *slog.Logger
 }
 
+func NewChannelFetcher(
+	source *config.Source,
+	dataPath string,
+	logger *slog.Logger,
+) (*ChannelFetcher, error) {
+	switch source.Importer {
+	case config.Options:
+		return &ChannelFetcher{
+			DataPath: dataPath,
+			Source:   source,
+			Logger:   logger,
+		}, nil
+	default:
+		return nil, fmt.Errorf("unsupported importer type %s", source.Importer)
+	}
+}
+
 func (i *ChannelFetcher) FetchIfNeeded(
 	parent context.Context,
 ) (f FetchedFiles, updated bool, err error) {
@@ -91,8 +108,7 @@ func (i *ChannelFetcher) FetchIfNeeded(
 	updated = before != after
 
 	f = FetchedFiles{
-		Options:  path.Join(dest, i.Source.OutputPath, "options.json"),
-		Packages: path.Join(dest, i.Source.OutputPath, "packages.json"),
+		Options: path.Join(dest, i.Source.OutputPath, "options.json"),
 	}
 
 	return

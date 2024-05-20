@@ -2,6 +2,7 @@ package fetcher
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net/url"
 	"path"
@@ -21,6 +22,23 @@ func makeChannelURL(channel string, subPath string) (string, error) {
 	url, err := url.JoinPath("https://channels.nixos.org/", channel, subPath)
 
 	return url, errors.WithMessagef(err, "error creating URL")
+}
+
+func NewNixpkgsChannelFetcher(
+	source *config.Source,
+	dataPath string,
+	logger *slog.Logger,
+) (*NixpkgsChannelFetcher, error) {
+	switch source.Importer {
+	case config.Options, config.Packages:
+		return &NixpkgsChannelFetcher{
+			DataPath: dataPath,
+			Source:   source,
+			Logger:   logger,
+		}, nil
+	default:
+		return nil, fmt.Errorf("unsupported importer type %s", source.Importer)
+	}
 }
 
 const (

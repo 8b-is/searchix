@@ -2,6 +2,7 @@ package fetcher
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"net/url"
 	"path"
@@ -16,6 +17,23 @@ type DownloadFetcher struct {
 	Source     *config.Source
 	SourceFile string
 	Logger     *slog.Logger
+}
+
+func NewDownloadFetcher(
+	source *config.Source,
+	dataPath string,
+	logger *slog.Logger,
+) (*DownloadFetcher, error) {
+	switch source.Importer {
+	case config.Options:
+		return &DownloadFetcher{
+			DataPath: dataPath,
+			Source:   source,
+			Logger:   logger,
+		}, nil
+	default:
+		return nil, fmt.Errorf("unsupported importer type %s", source.Importer)
+	}
 }
 
 var files = map[string]string{
