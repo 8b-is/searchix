@@ -31,6 +31,7 @@ var (
 	)
 	liveReload = flag.Bool("live", false, "whether to enable live reloading (development)")
 	replace    = flag.Bool("replace", false, "replace existing index and exit")
+	update     = flag.Bool("update", false, "update index and exit")
 	version    = flag.Bool("version", false, "print version information")
 )
 
@@ -111,13 +112,13 @@ func main() {
 		log.Fatalf("Failed to open or create index: %v", err)
 	}
 
-	if !exists || *replace {
+	if !exists || *replace || *update {
 		slog.Info("Index doesn't exist. Starting build job...")
 		err = importer.Start(cfg, write, *replace, nil)
 		if err != nil {
 			log.Fatalf("Failed to build index: %v", err)
 		}
-		if *replace {
+		if *replace || *update {
 			return
 		}
 	} else {

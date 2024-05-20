@@ -25,3 +25,6 @@ dev:
 
 reindex:
 	wgo run --exit . --config config.toml --replace
+
+update:
+	wgo run --exit . --config config.toml --update
