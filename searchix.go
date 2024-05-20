@@ -30,12 +30,8 @@ var (
 		"print default configuration and exit",
 	)
 	liveReload = flag.Bool("live", false, "whether to enable live reloading (development)")
-	replace    = flag.Bool(
-		"replace",
-		false,
-		"whether to replace existing database, if it exists",
-	)
-	version = flag.Bool("version", false, "print version information")
+	replace    = flag.Bool("replace", false, "replace existing index and exit")
+	version    = flag.Bool("version", false, "print version information")
 )
 
 func nextOccurrenceOfLocalTime(t toml.LocalTime) time.Time {
