@@ -62,7 +62,30 @@ func mustURL(in string) (u URL) {
 	return u
 }
 
-func mustLocalTime(in string) (time toml.LocalTime) {
+// this type is necessary as nix's `fromTOML` doesn't support TOML date/time formats
+type LocalTime struct {
+	toml.LocalTime
+}
+
+func (t *LocalTime) MarshalText() ([]byte, error) {
+	b, err := t.LocalTime.MarshalText()
+	if err != nil {
+		return nil, errors.WithMessage(err, "could not marshal time value")
+	}
+
+	return b, nil
+}
+
+func (t *LocalTime) UnmarshalText(in []byte) (err error) {
+	err = t.LocalTime.UnmarshalText(in)
+	if err != nil {
+		return errors.WithMessage(err, "could not parse time value")
+	}
+
+	return nil
+}
+
+func mustLocalTime(in string) (time LocalTime) {
 	err := time.UnmarshalText([]byte(in))
 	if err != nil {
 		panic(errors.Errorf("Could not parse time: %s", in))
@@ -85,7 +108,7 @@ type Web struct {
 type Importer struct {
 	Sources  map[string]*Source
 	Timeout  Duration
-	UpdateAt toml.LocalTime
+	UpdateAt LocalTime
 }
 
 type Config struct {

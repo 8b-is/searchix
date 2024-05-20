@@ -184,7 +184,7 @@ func main() {
 				Timezone:      time.Local.String(),
 			}
 
-			nextRun := nextOccurrenceOfLocalTime(cfg.Importer.UpdateAt)
+			nextRun := nextOccurrenceOfLocalTime(cfg.Importer.UpdateAt.LocalTime)
 			for {
 				slog.Debug("scheduling next run", "next-run", nextRun)
 				<-time.After(time.Until(nextRun))
