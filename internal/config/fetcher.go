@@ -47,3 +47,7 @@ func (f *Fetcher) UnmarshalText(text []byte) error {
 
 	return err
 }
+
+func (f *Fetcher) MarshalText() ([]byte, error) {
+	return []byte(f.String()), nil
+}

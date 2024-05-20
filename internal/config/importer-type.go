@@ -42,3 +42,7 @@ func (i *ImporterType) UnmarshalText(text []byte) error {
 
 	return err
 }
+
+func (i *ImporterType) MarshalText() ([]byte, error) {
+	return []byte(i.String()), nil
+}
