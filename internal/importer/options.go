@@ -88,7 +88,7 @@ func NewOptionProcessor(infile io.ReadCloser, source *config.Source) (*OptionIng
 }
 
 func (i *OptionIngester) Process(parent context.Context) (<-chan nix.Importable, <-chan error) {
-	ctx, cancel := context.WithTimeout(parent, i.source.ImportTimeout)
+	ctx, cancel := context.WithTimeout(parent, i.source.ImportTimeout.Duration)
 	results := make(chan nix.Importable)
 	errs := make(chan error)
 

@@ -26,7 +26,7 @@ var files = map[string]string{
 func (i *DownloadFetcher) FetchIfNeeded(
 	parent context.Context,
 ) (f FetchedFiles, updated bool, err error) {
-	ctx, cancel := context.WithTimeout(parent, i.Source.FetchTimeout)
+	ctx, cancel := context.WithTimeout(parent, i.Source.FetchTimeout.Duration)
 	defer cancel()
 
 	root := i.DataPath

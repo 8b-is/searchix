@@ -105,7 +105,7 @@ func convertToLicense(in map[string]any) *nix.License {
 }
 
 func (i *PackageIngester) Process(parent context.Context) (<-chan nix.Importable, <-chan error) {
-	ctx, cancel := context.WithTimeout(parent, i.source.ImportTimeout)
+	ctx, cancel := context.WithTimeout(parent, i.source.ImportTimeout.Duration)
 	results := make(chan nix.Importable)
 	errs := make(chan error)
 

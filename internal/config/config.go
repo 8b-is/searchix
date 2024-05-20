@@ -21,6 +21,10 @@ type URL struct {
 	*url.URL
 }
 
+func (u *URL) MarshalText() ([]byte, error) {
+	return []byte(u.URL.String()), nil
+}
+
 func (u *URL) UnmarshalText(text []byte) (err error) {
 	u.URL, err = url.Parse(string(text))
 
@@ -33,6 +37,10 @@ func (u *URL) UnmarshalText(text []byte) (err error) {
 
 type Duration struct {
 	time.Duration
+}
+
+func (d *Duration) MarshalText() ([]byte, error) {
+	return []byte(d.Duration.String()), nil
 }
 
 func (d *Duration) UnmarshalText(text []byte) (err error) {
@@ -122,8 +130,8 @@ var defaultConfig = Config{
 				ImportPath:    "nixos/release.nix",
 				Attribute:     "options",
 				OutputPath:    "share/doc/nixos",
-				FetchTimeout:  5 * time.Minute,
-				ImportTimeout: 15 * time.Minute,
+				FetchTimeout:  Duration{5 * time.Minute},
+				ImportTimeout: Duration{15 * time.Minute},
 				Repo:          nixpkgs,
 			},
 			"darwin": {
@@ -137,8 +145,8 @@ var defaultConfig = Config{
 				ImportPath:    "release.nix",
 				Attribute:     "options",
 				OutputPath:    "share/doc/darwin",
-				FetchTimeout:  5 * time.Minute,
-				ImportTimeout: 15 * time.Minute,
+				FetchTimeout:  Duration{5 * time.Minute},
+				ImportTimeout: Duration{15 * time.Minute},
 				Repo: Repository{
 					Type:  "github",
 					Owner: "LnL7",
@@ -156,8 +164,8 @@ var defaultConfig = Config{
 				ImportPath:    "default.nix",
 				Attribute:     "docs.json",
 				OutputPath:    "share/doc/home-manager",
-				FetchTimeout:  5 * time.Minute,
-				ImportTimeout: 15 * time.Minute,
+				FetchTimeout:  Duration{5 * time.Minute},
+				ImportTimeout: Duration{15 * time.Minute},
 				Repo: Repository{
 					Type:  "github",
 					Owner: "nix-community",
@@ -172,8 +180,8 @@ var defaultConfig = Config{
 				Fetcher:       ChannelNixpkgs,
 				Channel:       "nixos-unstable",
 				OutputPath:    "packages.json.br",
-				FetchTimeout:  5 * time.Minute,
-				ImportTimeout: 15 * time.Minute,
+				FetchTimeout:  Duration{5 * time.Minute},
+				ImportTimeout: Duration{15 * time.Minute},
 				Repo:          nixpkgs,
 			},
 		},

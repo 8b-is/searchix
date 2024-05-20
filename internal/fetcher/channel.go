@@ -25,7 +25,7 @@ type ChannelFetcher struct {
 func (i *ChannelFetcher) FetchIfNeeded(
 	parent context.Context,
 ) (f FetchedFiles, updated bool, err error) {
-	ctx, cancel := context.WithTimeout(parent, i.Source.FetchTimeout)
+	ctx, cancel := context.WithTimeout(parent, i.Source.FetchTimeout.Duration)
 	defer cancel()
 
 	dest := i.DataPath

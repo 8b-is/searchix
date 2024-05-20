@@ -1,9 +1,5 @@
 package config
 
-import (
-	"time"
-)
-
 type Source struct {
 	Name          string
 	Key           string
@@ -14,8 +10,8 @@ type Source struct {
 	URL           string
 	Attribute     string
 	ImportPath    string
-	FetchTimeout  time.Duration
-	ImportTimeout time.Duration
+	FetchTimeout  Duration
+	ImportTimeout Duration
 	OutputPath    string
 	Repo          Repository
 }
