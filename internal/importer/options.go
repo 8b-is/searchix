@@ -124,7 +124,7 @@ func (i *OptionIngester) Process(parent context.Context) (<-chan nix.Importable,
 				switch decl := reflect.ValueOf(decl); decl.Kind() {
 				case reflect.String:
 					s := decl.String()
-					link, err := MakeChannelLink(i.source.Channel, i.source.Repo.Revision, s)
+					link, err := MakeChannelLink(i.source.Repo, s)
 					if err != nil {
 						errs <- errors.WithMessagef(err,
 							"could not make a channel link for channel %s, revision %s and subpath %s",

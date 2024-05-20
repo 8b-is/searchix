@@ -115,7 +115,6 @@ func (i *PackageIngester) Process(parent context.Context) (<-chan nix.Importable
 		defer close(errs)
 		defer cancel()
 
-		userRepo := i.source.Repo.Owner + "/" + i.source.Repo.Repo
 	outer:
 		for mv := range i.dec.Stream() {
 			var err error
@@ -240,7 +239,7 @@ func (i *PackageIngester) Process(parent context.Context) (<-chan nix.Importable
 				Platforms:       i.pkg.Meta.Platforms,
 				Licenses:        licenses,
 				Maintainers:     maintainers,
-				Definition:      makeGitHubFileURL(userRepo, "", subpath, line),
+				Definition:      makeRepoURL(i.source.Repo, subpath, line),
 			}
 		}
 	}()
