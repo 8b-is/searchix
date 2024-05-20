@@ -1,7 +1,6 @@
 package config
 
 import (
-	"html/template"
 	"log/slog"
 	"maps"
 	"net/url"
@@ -92,30 +91,6 @@ func mustLocalTime(in string) (time LocalTime) {
 	}
 
 	return
-}
-
-type Web struct {
-	ContentSecurityPolicy CSP
-	ListenAddress         string
-	Port                  int
-	BaseURL               URL
-	SentryDSN             string
-	Environment           string
-	ExtraHeadHTML         template.HTML
-	Headers               map[string]string
-}
-
-type Importer struct {
-	Sources  map[string]*Source
-	Timeout  Duration
-	UpdateAt LocalTime
-}
-
-type Config struct {
-	DataPath string
-	LogLevel slog.Level
-	Web      *Web
-	Importer *Importer
 }
 
 var nixpkgs = Repository{

@@ -13,10 +13,10 @@ const (
 )
 
 type Repository struct {
-	Type     string `default:"github"`
+	Type     string `toml:""  default:"github" comment:"Currently only 'github' is supported."`
 	Owner    string
 	Repo     string
-	Revision string
+	Revision string `toml:"-"`
 }
 
 func (f RepoType) String() string {

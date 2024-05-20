@@ -1,14 +1,24 @@
+# Path to store index data.
 DataPath = './data'
+# How much information to log, one of 'debug', 'info', 'warn', 'error'.
 LogLevel = 'INFO'
 
+# Settings for the web server
 [Web]
+# Which address or hostname to listen on. IPv6 addresses need square brackets.
 ListenAddress = 'localhost'
+# Port number to listen on.
 Port = 3000
+# Absolute URL to this instance, useful if behind a reverse proxy
 BaseURL = 'http://localhost:3000'
+# If set, will send server errors to Sentry
 SentryDSN = ''
+# Affects logging parameters. One of 'development' or 'production'
 Environment = 'development'
+# Content to add to HTML <head>. Can be used to override styling, add scripts, etc.
 ExtraHeadHTML = ''
 
+# Content-Security-Policy header to send with requests. Should only need changing if ExtraHeadHTML is used.
 [Web.ContentSecurityPolicy]
 base-uri = []
 block-all-mixed-content = false
@@ -42,90 +52,146 @@ trusted-types = []
 upgrade-insecure-requests = false
 worker-src = []
 
+# Extra headers to send with HTTP requests
 [Web.Headers]
 x-content-type-options = 'nosniff'
 
+# Settings for the import job
 [Importer]
+# Abort fetch and import process for all jobs if it takes longer than this value.
 Timeout = '30m0s'
+# Local time of day to run fetch/import process
 UpdateAt = '04:00:00'
 
 [Importer.Sources]
 [Importer.Sources.darwin]
+# Human-readable name of source for generating links
 Name = 'Darwin'
+# Machine-readable name of source. Must be URL- and path-safe.
 Key = 'darwin'
+# Controls whether to show in the web interface and to run fetch/import jobs.
 Enable = false
+# How to fetch options.json. One of 'channel', 'channel-nixpkgs' or 'download'.
 Fetcher = 'channel'
+# Kind of data available from source. Currently supports 'packages' and 'options'.
 Importer = 'options'
+# (Fetcher=channel) Local name for channel, (Fetcher=channel-nixpkgs) Remote name of channel.
 Channel = 'darwin'
+# (Fetcher=channel) Remote URL for channel, (Fetcher=download) Path containing files named 'revision' and 'options.json'.
 URL = 'https://github.com/LnL7/nix-darwin/archive/master.tar.gz'
+# (Fetcher=channel) Nix attribute name (i.e. nix-build -A) that builds an {options,packages}.json
 Attribute = 'options'
+# (Fetcher=channel) Sub-path of imported channel which contains the attribute above, e.g. release.nix
 ImportPath = 'release.nix'
+# Abort fetch if it takes longer than this.
 FetchTimeout = '5m0s'
+# Abort import if it takes longer than this.
 ImportTimeout = '15m0s'
+# (Fetcher=channel) Path under ./result symlink to folder containing {options,packages}.json.
 OutputPath = 'share/doc/darwin'
 
+# Used to generate declaration/definition links
 [Importer.Sources.darwin.Repo]
+# Currently only 'github' is supported.
 Type = 'github'
 Owner = 'LnL7'
 Repo = 'nix-darwin'
-Revision = ''
 
 [Importer.Sources.home-manager]
+# Human-readable name of source for generating links
 Name = 'Home Manager'
+# Machine-readable name of source. Must be URL- and path-safe.
 Key = 'home-manager'
+# Controls whether to show in the web interface and to run fetch/import jobs.
 Enable = false
+# How to fetch options.json. One of 'channel', 'channel-nixpkgs' or 'download'.
 Fetcher = 'channel'
+# Kind of data available from source. Currently supports 'packages' and 'options'.
 Importer = 'options'
+# (Fetcher=channel) Local name for channel, (Fetcher=channel-nixpkgs) Remote name of channel.
 Channel = 'home-manager'
+# (Fetcher=channel) Remote URL for channel, (Fetcher=download) Path containing files named 'revision' and 'options.json'.
 URL = 'https://github.com/nix-community/home-manager/archive/master.tar.gz'
+# (Fetcher=channel) Nix attribute name (i.e. nix-build -A) that builds an {options,packages}.json
 Attribute = 'docs.json'
+# (Fetcher=channel) Sub-path of imported channel which contains the attribute above, e.g. release.nix
 ImportPath = 'default.nix'
+# Abort fetch if it takes longer than this.
 FetchTimeout = '5m0s'
+# Abort import if it takes longer than this.
 ImportTimeout = '15m0s'
+# (Fetcher=channel) Path under ./result symlink to folder containing {options,packages}.json.
 OutputPath = 'share/doc/home-manager'
 
+# Used to generate declaration/definition links
 [Importer.Sources.home-manager.Repo]
+# Currently only 'github' is supported.
 Type = 'github'
 Owner = 'nix-community'
 Repo = 'home-manager'
-Revision = ''
 
 [Importer.Sources.nixos]
+# Human-readable name of source for generating links
 Name = 'NixOS'
+# Machine-readable name of source. Must be URL- and path-safe.
 Key = 'nixos'
+# Controls whether to show in the web interface and to run fetch/import jobs.
 Enable = true
+# How to fetch options.json. One of 'channel', 'channel-nixpkgs' or 'download'.
 Fetcher = 'channel'
+# Kind of data available from source. Currently supports 'packages' and 'options'.
 Importer = 'options'
+# (Fetcher=channel) Local name for channel, (Fetcher=channel-nixpkgs) Remote name of channel.
 Channel = 'nixpkgs'
+# (Fetcher=channel) Remote URL for channel, (Fetcher=download) Path containing files named 'revision' and 'options.json'.
 URL = 'https://channels.nixos.org/nixos-unstable/nixexprs.tar.xz'
+# (Fetcher=channel) Nix attribute name (i.e. nix-build -A) that builds an {options,packages}.json
 Attribute = 'options'
+# (Fetcher=channel) Sub-path of imported channel which contains the attribute above, e.g. release.nix
 ImportPath = 'nixos/release.nix'
+# Abort fetch if it takes longer than this.
 FetchTimeout = '5m0s'
+# Abort import if it takes longer than this.
 ImportTimeout = '15m0s'
+# (Fetcher=channel) Path under ./result symlink to folder containing {options,packages}.json.
 OutputPath = 'share/doc/nixos'
 
+# Used to generate declaration/definition links
 [Importer.Sources.nixos.Repo]
+# Currently only 'github' is supported.
 Type = 'github'
 Owner = 'NixOS'
 Repo = 'nixpkgs'
-Revision = ''
 
 [Importer.Sources.nixpkgs]
+# Human-readable name of source for generating links
 Name = 'Nix Packages'
+# Machine-readable name of source. Must be URL- and path-safe.
 Key = 'nixpkgs'
+# Controls whether to show in the web interface and to run fetch/import jobs.
 Enable = true
+# How to fetch options.json. One of 'channel', 'channel-nixpkgs' or 'download'.
 Fetcher = 'channel-nixpkgs'
+# Kind of data available from source. Currently supports 'packages' and 'options'.
 Importer = 'packages'
+# (Fetcher=channel) Local name for channel, (Fetcher=channel-nixpkgs) Remote name of channel.
 Channel = 'nixos-unstable'
+# (Fetcher=channel) Remote URL for channel, (Fetcher=download) Path containing files named 'revision' and 'options.json'.
 URL = ''
+# (Fetcher=channel) Nix attribute name (i.e. nix-build -A) that builds an {options,packages}.json
 Attribute = ''
+# (Fetcher=channel) Sub-path of imported channel which contains the attribute above, e.g. release.nix
 ImportPath = ''
+# Abort fetch if it takes longer than this.
 FetchTimeout = '5m0s'
+# Abort import if it takes longer than this.
 ImportTimeout = '15m0s'
+# (Fetcher=channel) Path under ./result symlink to folder containing {options,packages}.json.
 OutputPath = 'packages.json.br'
 
+# Used to generate declaration/definition links
 [Importer.Sources.nixpkgs.Repo]
+# Currently only 'github' is supported.
 Type = 'github'
 Owner = 'NixOS'
 Repo = 'nixpkgs'
-Revision = ''
