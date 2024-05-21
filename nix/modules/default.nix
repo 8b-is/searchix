@@ -199,7 +199,7 @@ in
 
     users.users = optionalAttrs (cfg.user == "searchix") {
       searchix = {
-        group = cfg.group;
+        inherit (cfg) group;
         home = cfg.homeDir;
         isSystemUser = true;
       };

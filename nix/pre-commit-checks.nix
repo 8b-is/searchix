@@ -38,15 +38,15 @@ rec {
 
     statix = {
       enable = true;
-      settings.ignore = [ "nix/*" ];
+      settings.ignore = [ "nix/overlays/*" ];
     };
     deadnix = {
       enable = true;
-      excludes = [ "nix/.*" ];
+      excludes = [ "nix/overlays/*" ];
     };
     nixpkgs-fmt = {
       enable = true;
-      excludes = [ "nix/.*" ];
+      excludes = [ "nix/overlays/*" ];
     };
 
     convco.enable = true;
