@@ -55,7 +55,10 @@ rec {
 
     check-case-conflicts.enable = true;
     check-symlinks.enable = true;
-    editorconfig-checker.enable = true;
+    editorconfig-checker = {
+      enable = true;
+      excludes = [ "\.md$" ];
+    };
     prettier = {
       enable = true;
       types_or = [ "plain-text" "yaml" "gotmpl" "javascript" ];

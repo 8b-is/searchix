@@ -1,35 +1,50 @@
 # Searchix
 
-## Development
+A search tool to find options and packages in the NixOS ecosystem. Aims to be like [search.nixos.org](https://search.nixos.org/) with more sources:
 
-### Pre-requisites
+-   NixOS options
+-   Nix packages
+-   [Nix darwin](https://github.com/LnL7/nix-darwin) options
+-   [Home manager](https://github.com/nix-community/home-manager) options.
 
--   [Nix (the package manager)](https://nixos.org/download/)
--   Optional:
-    -   [cachix](https://docs.cachix.org/installation#installation)
-    -   [lorri](https://github.com/nix-community/lorri)
-    -   [direnv](https://direnv.net/)
+There is an instance running at [searchix.alanpearce.eu](https://searchix.alanpearce.eu/), which uses the following channels, with updates attempted daily:
 
-### Setup
+-   nixos-options: nixos-unstable
+-   nixpkgs: nixos-unstable
+-   darwin: master
+-   home-manager: master
 
-1. Optional: use cachix to avoid building some tools
+You can also [run it yourself](./docs/running.md), if you're feeling bold. It's very light-weight!
 
-    ```shell-session
-    cachix use pre-commit-hooks
-    ```
+## Status
 
-2. Start a nix shell (this will take some time)
+**Alpha**
 
-    ```shell-session
-    nix develop
-    ```
+Expect breakage. Search results are not expected to match the quality of [search.nixos.org](https://search.nixos.org/), the priority is more on having multiple sources in one location.
 
-3. Optional: install and set up lorri and use `lorri shell` instead of `nix develop`
+Feel free to report bugs at [sourcehut](https://todo.sr.ht/~alanpearce/searchix) or open a discussion either on the [mailing list](https://lists.sr.ht/~alanpearce/searchix-discuss) or on [NixOS community forum](https://discourse.nixos.org/).
 
-4. Optional: install direnv, integrate it with your shell and then run
+## Motivation
 
-    ```shell-session
-    ln -s .envrc.sample .envrc
-    ```
+I missed having a tool like [search.nixos.org](https://search.nixos.org/) but for [nix darwin](https://github.com/LnL7/nix-darwin) and [home manager](https://github.com/nix-community/home-manager)[^1].
 
-    Now `nix develop` or `lorri shell` will be run for you automatically when you `cd` into this directory.
+I wanted to contribute something to the nix community. 🩵
+
+Also, I wanted to learn Go!
+
+## Goals
+
+-   Lean/simple
+-   Responsive (i.e. low latency)
+-   Minimal JavaScript for progressive enhancement
+-   Quickly switch between (options) sources with the same query
+
+### Future
+
+-   [ ] `programs.git.enable` should be in the first few results for the query "git"
+
+## Developing
+
+See [docs/developing.md](./docs/developing.md)
+
+[^1]: It was only during development that I found [Home Manager Option Search](https://home-manager-options.extranix.com/)
