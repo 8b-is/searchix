@@ -106,11 +106,15 @@ in
                   default = "localhost";
                 };
 
-                baseURL = mkOption {
-                  type = types.str;
-                  description = "The base URL that searchix will be served on.";
-                  default = "http://localhost:3000";
-                };
+                baseURL =
+                  let
+                    inherit (config.services.searchix.settings) web;
+                  in
+                  mkOption {
+                    type = types.str;
+                    description = "The base URL that searchix will be served on.";
+                    default = "http://${web.listenAddress}:${web.port}";
+                  };
 
                 environment = mkOption {
                   type = types.str;
