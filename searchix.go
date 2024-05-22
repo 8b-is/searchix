@@ -113,7 +113,15 @@ func main() {
 	}
 
 	if !exists || *replace || *update {
-		slog.Info("Index doesn't exist. Starting build job...")
+		slog.Info(
+			"Starting build job",
+			"new",
+			!exists,
+			"replace",
+			*replace,
+			"update",
+			*update,
+		)
 		err = importer.Start(cfg, write, *replace, nil)
 		if err != nil {
 			log.Fatalf("Failed to build index: %v", err)
