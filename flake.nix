@@ -24,7 +24,7 @@
   outputs = { self, nixpkgs, flake-utils, gomod2nix, pre-commit-hooks, simple-css }:
     {
       nixosModules = {
-        default = import ./nix/modules self;
+        web = import ./nix/modules self;
       };
     } // (flake-utils.lib.eachDefaultSystem
       (system:
