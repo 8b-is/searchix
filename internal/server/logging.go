@@ -51,7 +51,7 @@ func wrapHandlerWithLogging(wrappedHandler http.Handler, opts wrappedHandlerOpti
 		if scheme == "" {
 			scheme = "http"
 		}
-		host := r.Header.Get("Host")
+		host := r.Host
 		if host == "" {
 			host = opts.defaultHostname
 		}
