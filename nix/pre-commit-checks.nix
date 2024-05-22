@@ -38,15 +38,17 @@ rec {
 
     statix = {
       enable = true;
+      # ignore is a glob
       settings.ignore = [ "nix/overlays/*" ];
     };
     deadnix = {
       enable = true;
-      excludes = [ "nix/overlays/*" ];
+      # excludes is a regex
+      excludes = [ "nix/overlays/.*" ];
     };
     nixpkgs-fmt = {
       enable = true;
-      excludes = [ "nix/overlays/*" ];
+      excludes = [ "nix/overlays/.*" ];
     };
 
     convco.enable = true;
