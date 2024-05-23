@@ -1,8 +1,40 @@
 # Changelog
 
-## [Unreleased](https://git.alanpearce.eu/searchix/diff/?id=v0.1.2&id2=HEAD) (2024-05-17)
+### [v0.1.4](https://git.alanpearce.eu/searchix/diff/?id=v0.1.3&id2=v0.1.4) (2024-05-23)
 
-### Features
+#### Features
+
+-   stream files directly from fetcher to importer
+    ([0dbfe37](https://git.alanpearce.eu/searchix/commit/?id=0dbfe37fbddb95c184d845c79bbe014597d55fe8))
+-   add --update flag to force-update index and exit
+    ([9c790c1](https://git.alanpearce.eu/searchix/commit/?id=9c790c1c620e46ca8d2cf49c50951635621e9a7d))
+-   **config:** use enums' string representations to print defaults
+    ([a90419a](https://git.alanpearce.eu/searchix/commit/?id=a90419aa46ec42588f65e6327559ce479f9c5b67))
+-   **config:** print durations and URLs with human values
+    ([0f55080](https://git.alanpearce.eu/searchix/commit/?id=0f5508013d776f8806a87957f80e74c7f74c72eb))
+-   show default configuration with --print-default-config
+    ([60a1569](https://git.alanpearce.eu/searchix/commit/?id=60a15699657cef86d1a644c0d13b0d117a818633))
+
+#### Fixes
+
+-   abort import of source on batch processing errors
+    ([3053e41](https://git.alanpearce.eu/searchix/commit/?id=3053e41b1528ef898cccd44e056e4d167619af6b))
+-   **web:** fetch host from request, not header, where it's expected
+    ([e69d785](https://git.alanpearce.eu/searchix/commit/?id=e69d78542a4ec92da5931b3db105b14a39a4c964))
+-   **nix:** generate default baseURL from listen address and port
+    ([027db43](https://git.alanpearce.eu/searchix/commit/?id=027db4372e82e445c531c958c2da0f9cf6ae1e03))
+-   make fetcher check on creation that it supports Source.Importer
+    ([b77a24f](https://git.alanpearce.eu/searchix/commit/?id=b77a24f9f75378ffe97be83cf4dfd7f1683b9a7e))
+-   **importer:** abort import of current source in case of error
+    ([c821da1](https://git.alanpearce.eu/searchix/commit/?id=c821da1cf55864852bcd8f337dd7acd0cc02f0b9))
+-   nix cannot read date/time TOML values from default config
+    ([202317d](https://git.alanpearce.eu/searchix/commit/?id=202317df1dba891654bf749c3720fbd602df04ff))
+-   duplicate error logging on config parse error
+    ([6037d5c](https://git.alanpearce.eu/searchix/commit/?id=6037d5c33e9b98360f61a4fe4f09659d0e3e6160))
+
+### [v0.1.3](https://git.alanpearce.eu/searchix/diff/?id=v0.1.2&id2=v0.1.3) (2024-05-17)
+
+#### Features
 
 -   **ui:** enable resetting form by clicking current source link
     ([6ea953b](https://git.alanpearce.eu/searchix/commit/?id=6ea953b1c9f9c352a9619e42a6f0ce80d183d7f8))

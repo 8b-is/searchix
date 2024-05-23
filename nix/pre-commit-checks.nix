@@ -62,6 +62,7 @@ rec {
     prettier = {
       enable = true;
       types_or = [ "plain-text" "yaml" "gotmpl" "javascript" ];
+      excludes = [ "CHANGELOG\.md$" ];
       settings = {
         plugins = with pkgs.nodePackages; [
           "${prettier-plugin-go-template}/lib/node_modules/prettier-plugin-go-template/lib/index.js"
