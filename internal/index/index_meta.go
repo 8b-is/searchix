@@ -5,15 +5,27 @@ import (
 	"log/slog"
 	"os"
 	"searchix/internal/file"
+	"time"
 
 	"github.com/pkg/errors"
 )
 
-const CurrentSchemaVersion = 1
+const CurrentSchemaVersion = 2
+
+type SourceMeta struct {
+	Updated time.Time
+	Path    string
+	Rev     string
+}
+
+type data struct {
+	SchemaVersion int
+	Sources       map[string]*SourceMeta
+}
 
 type Meta struct {
-	path          string
-	SchemaVersion int
+	path string
+	data
 }
 
 func createMeta(path string) (*Meta, error) {
@@ -26,8 +38,10 @@ func createMeta(path string) (*Meta, error) {
 	}
 
 	return &Meta{
-		path:          path,
-		SchemaVersion: CurrentSchemaVersion,
+		path: path,
+		data: data{
+			SchemaVersion: CurrentSchemaVersion,
+		},
 	}, nil
 }
 
@@ -36,8 +50,10 @@ func openMeta(path string) (*Meta, error) {
 	if err != nil {
 		return nil, errors.WithMessage(err, "could not open index metadata file")
 	}
-	var meta Meta
-	err = json.Unmarshal(j, &meta)
+	meta := Meta{
+		path: path,
+	}
+	err = json.Unmarshal(j, &meta.data)
 	if err != nil {
 		return nil, errors.WithMessage(err, "index metadata is corrupt, try replacing the index")
 	}
@@ -60,14 +76,32 @@ func (i *Meta) checkSchemaVersion() {
 }
 
 func (i *Meta) Save() error {
-	j, err := json.Marshal(i)
+	i.SchemaVersion = CurrentSchemaVersion
+	j, err := json.Marshal(i.data)
 	if err != nil {
 		return errors.WithMessage(err, "could not prepare index metadata for saving")
 	}
+	slog.Debug("saving index metadata", "path", i.path)
 	err = os.WriteFile(i.path, j, 0o600)
 	if err != nil {
 		return errors.WithMessage(err, "could not save index metadata")
 	}
 
 	return nil
+}
+
+func (i *Meta) GetSourceMeta(source string) SourceMeta {
+	sourceMeta := i.data.Sources[source]
+	if sourceMeta == nil {
+		return SourceMeta{}
+	}
+
+	return *sourceMeta
+}
+
+func (i *Meta) SetSourceMeta(source string, meta SourceMeta) {
+	if i.data.Sources == nil {
+		i.data.Sources = make(map[string]*SourceMeta)
+	}
+	i.data.Sources[source] = &meta
 }

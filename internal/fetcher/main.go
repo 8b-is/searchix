@@ -2,34 +2,35 @@ package fetcher
 
 import (
 	"context"
+	"io"
 	"log/slog"
 	"searchix/internal/config"
+	"searchix/internal/index"
 
 	"github.com/pkg/errors"
 )
 
 type FetchedFiles struct {
-	Revision string
-	Options  string
-	Packages string
+	Revision io.ReadCloser
+	Options  io.ReadCloser
+	Packages io.ReadCloser
 }
 
 type Fetcher interface {
-	FetchIfNeeded(context.Context) (FetchedFiles, bool, error)
+	FetchIfNeeded(context.Context, *index.SourceMeta) (FetchedFiles, error)
 }
 
 func New(
 	source *config.Source,
-	fetcherDataPath string,
 	logger *slog.Logger,
 ) (fetcher Fetcher, err error) {
 	switch source.Fetcher {
 	case config.ChannelNixpkgs:
-		fetcher, err = NewNixpkgsChannelFetcher(source, fetcherDataPath, logger)
+		fetcher, err = NewNixpkgsChannelFetcher(source, logger)
 	case config.Channel:
-		fetcher, err = NewChannelFetcher(source, fetcherDataPath, logger)
+		fetcher, err = NewChannelFetcher(source, logger)
 	case config.Download:
-		fetcher, err = NewDownloadFetcher(source, fetcherDataPath, logger)
+		fetcher, err = NewDownloadFetcher(source, logger)
 	default:
 		err = errors.Errorf("unsupported fetcher type %s", source.Fetcher.String())
 	}

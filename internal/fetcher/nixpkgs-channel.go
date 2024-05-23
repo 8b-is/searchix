@@ -5,17 +5,15 @@ import (
 	"fmt"
 	"log/slog"
 	"net/url"
-	"path"
 	"searchix/internal/config"
-	"searchix/internal/file"
+	"searchix/internal/index"
 
 	"github.com/pkg/errors"
 )
 
 type NixpkgsChannelFetcher struct {
-	DataPath string
-	Source   *config.Source
-	Logger   *slog.Logger
+	Source *config.Source
+	Logger *slog.Logger
 }
 
 func makeChannelURL(channel string, subPath string) (string, error) {
@@ -26,15 +24,13 @@ func makeChannelURL(channel string, subPath string) (string, error) {
 
 func NewNixpkgsChannelFetcher(
 	source *config.Source,
-	dataPath string,
 	logger *slog.Logger,
 ) (*NixpkgsChannelFetcher, error) {
 	switch source.Importer {
 	case config.Options, config.Packages:
 		return &NixpkgsChannelFetcher{
-			DataPath: dataPath,
-			Source:   source,
-			Logger:   logger,
+			Source: source,
+			Logger: logger,
 		}, nil
 	default:
 		return nil, fmt.Errorf("unsupported importer type %s", source.Importer)
@@ -48,19 +44,9 @@ const (
 )
 
 func (i *NixpkgsChannelFetcher) FetchIfNeeded(
-	parent context.Context,
-) (f FetchedFiles, updated bool, err error) {
-	ctx, cancel := context.WithTimeout(parent, i.Source.FetchTimeout.Duration)
-	defer cancel()
-
-	root := i.DataPath
-
-	err = file.Mkdirp(root)
-	if err != nil {
-		err = errors.WithMessagef(err, "error creating directory for data: %s", root)
-
-		return
-	}
+	ctx context.Context,
+	sourceMeta *index.SourceMeta,
+) (f FetchedFiles, err error) {
 
 	filesToFetch := make([]string, 2)
 	filesToFetch[0] = revisionFilename
@@ -78,23 +64,29 @@ func (i *NixpkgsChannelFetcher) FetchIfNeeded(
 			return
 		}
 
-		outPath := path.Join(root, filename)
-
-		i.Logger.Debug("attempting to fetch file", "url", fetchURL, "outPath", outPath)
-		updated, err = fetchFileIfNeeded(ctx, outPath, fetchURL)
+		i.Logger.Debug("attempting to fetch file", "url", fetchURL)
+		body, mtime, err := fetchFileIfNeeded(ctx, sourceMeta.Updated, fetchURL)
 		if err != nil {
-			return
+			i.Logger.Warn("failed to fetch file", "url", fetchURL, "error", err)
+
+			return f, err
 		}
 		// don't bother to issue requests for the later files
-		if !updated {
+		if mtime.Before(sourceMeta.Updated) {
 			break
 		}
-	}
+		sourceMeta.Updated = mtime
 
-	f = FetchedFiles{
-		Revision: path.Join(root, "git-revision"),
-		Options:  path.Join(root, "options.json.br"),
-		Packages: path.Join(root, "packages.json.br"),
+		switch filename {
+		case revisionFilename:
+			f.Revision = body
+		case optionsFilename:
+			f.Options = body
+		case packagesFileName:
+			f.Packages = body
+		default:
+			return f, errors.Errorf("unknown file kind %s", filename)
+		}
 	}
 
 	return

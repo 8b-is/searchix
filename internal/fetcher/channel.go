@@ -8,15 +8,15 @@ import (
 	"os/exec"
 	"path"
 	"searchix/internal/config"
-	"searchix/internal/file"
+	"searchix/internal/index"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/pkg/errors"
 )
 
 type ChannelFetcher struct {
-	DataPath   string
 	Source     *config.Source
 	SourceFile string
 	Logger     *slog.Logger
@@ -24,15 +24,13 @@ type ChannelFetcher struct {
 
 func NewChannelFetcher(
 	source *config.Source,
-	dataPath string,
 	logger *slog.Logger,
 ) (*ChannelFetcher, error) {
 	switch source.Importer {
 	case config.Options:
 		return &ChannelFetcher{
-			DataPath: dataPath,
-			Source:   source,
-			Logger:   logger,
+			Source: source,
+			Logger: logger,
 		}, nil
 	default:
 		return nil, fmt.Errorf("unsupported importer type %s", source.Importer)
@@ -40,22 +38,9 @@ func NewChannelFetcher(
 }
 
 func (i *ChannelFetcher) FetchIfNeeded(
-	parent context.Context,
-) (f FetchedFiles, updated bool, err error) {
-	ctx, cancel := context.WithTimeout(parent, i.Source.FetchTimeout.Duration)
-	defer cancel()
-
-	dest := i.DataPath
-
-	var before string
-	before, err = os.Readlink(dest)
-	if file.NeedNotExist(err) != nil {
-		err = errors.WithMessagef(err, "could not call readlink on file %s", dest)
-
-		return
-	}
-	i.Logger.Debug("stat before", "name", before)
-
+	ctx context.Context,
+	sourceMeta *index.SourceMeta,
+) (f FetchedFiles, err error) {
 	args := []string{
 		"--no-build-output",
 		"--timeout",
@@ -63,8 +48,7 @@ func (i *ChannelFetcher) FetchIfNeeded(
 		fmt.Sprintf("<%s/%s>", i.Source.Channel, i.Source.ImportPath),
 		"--attr",
 		i.Source.Attribute,
-		"--out-link",
-		dest,
+		"--no-out-link",
 	}
 
 	if i.Source.URL != "" {
@@ -80,35 +64,28 @@ func (i *ChannelFetcher) FetchIfNeeded(
 
 		return
 	}
-	i.Logger.Debug("nix-build", "output", strings.TrimSpace(string(out)))
 
-	outPath := path.Join(dest, i.Source.OutputPath)
+	outPath := path.Join(strings.TrimSpace(string(out)), i.Source.OutputPath, "options.json")
 	i.Logger.Debug(
 		"checking output path",
 		"outputPath",
 		outPath,
-		"dest",
-		dest,
-		"source",
-		i.Source.OutputPath,
 	)
-	var after string
-	after, err = os.Readlink(dest)
-	if err = file.NeedNotExist(err); err != nil {
-		err = errors.WithMessagef(
-			err,
-			"failed to stat output file from nix-build, filename: %s",
-			outPath,
-		)
+
+	if outPath != sourceMeta.Path {
+		sourceMeta.Path = outPath
+		sourceMeta.Updated = time.Now().Truncate(time.Second)
+	}
+
+	file, err := os.Open(outPath)
+	if err != nil {
+		err = errors.WithMessage(err, "failed to open options.json")
 
 		return
 	}
-	i.Logger.Debug("stat after", "name", after)
-
-	updated = before != after
 
 	f = FetchedFiles{
-		Options: path.Join(dest, i.Source.OutputPath, "options.json"),
+		Options: file,
 	}
 
 	return
