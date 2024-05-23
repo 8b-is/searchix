@@ -21,7 +21,7 @@ func process(
 	indexer *index.WriteIndex,
 	processor Processor,
 	logger *slog.Logger,
-) bool {
+) (bool, error) {
 	wg := sync.WaitGroup{}
 
 	wg.Add(1)
@@ -30,7 +30,8 @@ func process(
 	wg.Add(1)
 	iErrs := indexer.Import(ctx, objects)
 
-	var hadErrors bool
+	var hadObjectErrors bool
+	var criticalError error
 	go func() {
 		for {
 			select {
@@ -42,7 +43,13 @@ func process(
 
 					continue
 				}
-				hadErrors = true
+				be, isBatchError := err.(*index.BatchError)
+				if isBatchError {
+					criticalError = be
+
+					break
+				}
+				hadObjectErrors = true
 				logger.Warn("error ingesting object", "error", err)
 			case err, running := <-pErrs:
 				if !running {
@@ -52,7 +59,7 @@ func process(
 
 					continue
 				}
-				hadErrors = true
+				hadObjectErrors = true
 				logger.Warn("error processing object", "error", err)
 			}
 		}
@@ -60,5 +67,5 @@ func process(
 
 	wg.Wait()
 
-	return hadErrors
+	return hadObjectErrors, criticalError
 }

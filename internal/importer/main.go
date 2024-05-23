@@ -124,7 +124,12 @@ func Start(
 				continue
 			}
 
-			hadWarnings := process(ctx, indexer, processor, logger)
+			hadWarnings, err := process(ctx, indexer, processor, logger)
+			if err != nil {
+				logger.Error("failed to process source", "error", err)
+
+				continue
+			}
 
 			if hadWarnings {
 				logger.Warn("importer succeeded, but with warnings/errors")
