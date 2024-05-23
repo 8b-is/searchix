@@ -87,8 +87,7 @@ func NewOptionProcessor(infile io.ReadCloser, source *config.Source) (*OptionIng
 	return &i, nil
 }
 
-func (i *OptionIngester) Process(parent context.Context) (<-chan nix.Importable, <-chan error) {
-	ctx, cancel := context.WithTimeout(parent, i.source.ImportTimeout.Duration)
+func (i *OptionIngester) Process(ctx context.Context) (<-chan nix.Importable, <-chan error) {
 	results := make(chan nix.Importable)
 	errs := make(chan error)
 
@@ -96,7 +95,6 @@ func (i *OptionIngester) Process(parent context.Context) (<-chan nix.Importable,
 		defer i.infile.Close()
 		defer close(results)
 		defer close(errs)
-		defer cancel()
 
 	outer:
 		for mv := range i.dec.Stream() {

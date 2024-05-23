@@ -33,17 +33,16 @@ type Importer struct {
 }
 
 type Source struct {
-	Name          string       `comment:"Human-readable name of source for generating links"`
-	Key           string       `comment:"Machine-readable name of source. Must be URL- and path-safe."`
-	Enable        bool         `comment:"Controls whether to show in the web interface and to run fetch/import jobs."`
-	Fetcher       Fetcher      `comment:"How to fetch options.json. One of 'channel', 'channel-nixpkgs' or 'download'."`
-	Importer      ImporterType `comment:"Kind of data available from source. Currently supports 'packages' and 'options'."`
-	Channel       string       `comment:"(Fetcher=channel) Local name for channel, (Fetcher=channel-nixpkgs) Remote name of channel."`
-	URL           string       `comment:"(Fetcher=channel) Remote URL for channel, (Fetcher=download) Path containing files named 'revision' and 'options.json'."`
-	Attribute     string       `comment:"(Fetcher=channel) Nix attribute name (i.e. nix-build -A) that builds an {options,packages}.json"`
-	ImportPath    string       `comment:"(Fetcher=channel) Sub-path of imported channel which contains the attribute above, e.g. release.nix"`
-	FetchTimeout  Duration     `comment:"Abort fetch if it takes longer than this."`
-	ImportTimeout Duration     `comment:"Abort import if it takes longer than this."`
-	OutputPath    string       `comment:"(Fetcher=channel) Path under ./result symlink to folder containing {options,packages}.json."`
-	Repo          Repository   `comment:"Used to generate declaration/definition links"`
+	Name       string       `comment:"Human-readable name of source for generating links"`
+	Key        string       `comment:"Machine-readable name of source. Must be URL- and path-safe."`
+	Enable     bool         `comment:"Controls whether to show in the web interface and to run fetch/import jobs."`
+	Fetcher    Fetcher      `comment:"How to fetch options.json. One of 'channel', 'channel-nixpkgs' or 'download'."`
+	Importer   ImporterType `comment:"Kind of data available from source. Currently supports 'packages' and 'options'."`
+	Channel    string       `comment:"(Fetcher=channel) Local name for channel, (Fetcher=channel-nixpkgs) Remote name of channel."`
+	URL        string       `comment:"(Fetcher=channel) Remote URL for channel, (Fetcher=download) Path containing files named 'revision' and 'options.json'."`
+	Attribute  string       `comment:"(Fetcher=channel) Nix attribute name (i.e. nix-build -A) that builds an {options,packages}.json"`
+	ImportPath string       `comment:"(Fetcher=channel) Sub-path of imported channel which contains the attribute above, e.g. release.nix"`
+	Timeout    Duration     `comment:"Abort import if it takes longer than this."`
+	OutputPath string       `comment:"(Fetcher=channel) Path under ./result symlink to folder containing {options,packages}.json."`
+	Repo       Repository   `comment:"Used to generate declaration/definition links"`
 }

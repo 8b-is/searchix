@@ -44,7 +44,7 @@ func (i *ChannelFetcher) FetchIfNeeded(
 	args := []string{
 		"--no-build-output",
 		"--timeout",
-		strconv.Itoa(int(i.Source.FetchTimeout.Seconds() - 1)),
+		strconv.Itoa(int(i.Source.Timeout.Seconds() - 1)),
 		fmt.Sprintf("<%s/%s>", i.Source.Channel, i.Source.ImportPath),
 		"--attr",
 		i.Source.Attribute,

@@ -104,8 +104,7 @@ func convertToLicense(in map[string]any) *nix.License {
 	return l
 }
 
-func (i *PackageIngester) Process(parent context.Context) (<-chan nix.Importable, <-chan error) {
-	ctx, cancel := context.WithTimeout(parent, i.source.ImportTimeout.Duration)
+func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <-chan error) {
 	results := make(chan nix.Importable)
 	errs := make(chan error)
 
@@ -113,7 +112,6 @@ func (i *PackageIngester) Process(parent context.Context) (<-chan nix.Importable
 		defer i.infile.Close()
 		defer close(results)
 		defer close(errs)
-		defer cancel()
 
 	outer:
 		for mv := range i.dec.Stream() {

@@ -28,7 +28,7 @@ func createSourceImporter(
 			"fetcher",
 			source.Fetcher.String(),
 			"timeout",
-			source.FetchTimeout.Duration,
+			source.Timeout.Duration,
 		)
 		logger.Debug("starting fetcher")
 
@@ -42,7 +42,7 @@ func createSourceImporter(
 			sourceMeta.Updated = time.Time{}
 		}
 		previousUpdate := sourceMeta.Updated
-		ctx, cancel := context.WithTimeout(parent, source.FetchTimeout.Duration)
+		ctx, cancel := context.WithTimeout(parent, source.Timeout.Duration)
 		defer cancel()
 		files, err := fetcher.FetchIfNeeded(ctx, &sourceMeta)
 

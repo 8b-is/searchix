@@ -83,10 +83,8 @@ URL = 'https://github.com/LnL7/nix-darwin/archive/master.tar.gz'
 Attribute = 'options'
 # (Fetcher=channel) Sub-path of imported channel which contains the attribute above, e.g. release.nix
 ImportPath = 'release.nix'
-# Abort fetch if it takes longer than this.
-FetchTimeout = '5m0s'
 # Abort import if it takes longer than this.
-ImportTimeout = '15m0s'
+Timeout = '5m0s'
 # (Fetcher=channel) Path under ./result symlink to folder containing {options,packages}.json.
 OutputPath = 'share/doc/darwin'
 
@@ -116,10 +114,8 @@ URL = 'https://github.com/nix-community/home-manager/archive/master.tar.gz'
 Attribute = 'docs.json'
 # (Fetcher=channel) Sub-path of imported channel which contains the attribute above, e.g. release.nix
 ImportPath = 'default.nix'
-# Abort fetch if it takes longer than this.
-FetchTimeout = '5m0s'
 # Abort import if it takes longer than this.
-ImportTimeout = '15m0s'
+Timeout = '5m0s'
 # (Fetcher=channel) Path under ./result symlink to folder containing {options,packages}.json.
 OutputPath = 'share/doc/home-manager'
 
@@ -149,10 +145,8 @@ URL = 'https://channels.nixos.org/nixos-unstable/nixexprs.tar.xz'
 Attribute = 'options'
 # (Fetcher=channel) Sub-path of imported channel which contains the attribute above, e.g. release.nix
 ImportPath = 'nixos/release.nix'
-# Abort fetch if it takes longer than this.
-FetchTimeout = '5m0s'
 # Abort import if it takes longer than this.
-ImportTimeout = '15m0s'
+Timeout = '5m0s'
 # (Fetcher=channel) Path under ./result symlink to folder containing {options,packages}.json.
 OutputPath = 'share/doc/nixos'
 
@@ -182,10 +176,8 @@ URL = ''
 Attribute = ''
 # (Fetcher=channel) Sub-path of imported channel which contains the attribute above, e.g. release.nix
 ImportPath = ''
-# Abort fetch if it takes longer than this.
-FetchTimeout = '5m0s'
 # Abort import if it takes longer than this.
-ImportTimeout = '15m0s'
+Timeout = '5m0s'
 # (Fetcher=channel) Path under ./result symlink to folder containing {options,packages}.json.
 OutputPath = 'packages.json.br'
 
