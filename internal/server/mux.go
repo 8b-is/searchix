@@ -83,6 +83,12 @@ func NewMux(
 	liveReload bool,
 ) (*http.ServeMux, error) {
 	var err error
+	if cfg == nil {
+		return nil, errors.New("cfg is nil")
+	}
+	if index == nil {
+		return nil, errors.New("index is nil")
+	}
 	sentryHandler := sentryhttp.New(sentryhttp.Options{
 		Repanic: true,
 	})
