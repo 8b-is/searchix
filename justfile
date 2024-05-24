@@ -21,10 +21,10 @@ precommit:
 	nix-build -A pre-commit-check
 
 dev:
-	watchexec --no-vcs-ignore --filter "**/*.go" --filter config.toml -r wgo run -exit ./ --live --config config.toml
+	watchexec --no-vcs-ignore --filter "**/*.go" --filter config.toml -r wgo run -exit ./cmd/searchix-web --live --config config.toml
 
 reindex:
-	wgo run --exit . --config config.toml --replace
+	wgo run --exit ./cmd/searchix-web --config config.toml --replace
 
 update:
-	wgo run --exit . --config config.toml --update
+	wgo run --exit ./cmd/searchix-web --config config.toml --update

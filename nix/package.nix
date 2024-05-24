@@ -31,9 +31,12 @@ buildGoApplication {
         ../searchix.go
         ../internal
         ../frontend
+        ../cmd
       ])
       (maybeMissing ../frontend/static/base.css);
   };
+
+  subPackages = [ "cmd/searchix-web" ];
 
   patchPhase = ''
     rm -f frontend/static/base.css
