@@ -51,20 +51,15 @@ func wrapHandlerWithLogging(wrappedHandler http.Handler, opts wrappedHandlerOpti
 		if scheme == "" {
 			scheme = "http"
 		}
-		host := r.Host
-		if host == "" {
-			host = opts.defaultHostname
-		}
 		lw := NewLoggingResponseWriter(w)
 		wrappedHandler.ServeHTTP(lw, r)
 		statusCode := lw.statusCode
 		fmt.Fprintf(
 			opts.logger,
-			"%s %s %d %s %s %s\n",
+			"%s %s %d %s %s\n",
 			scheme,
 			r.Method,
 			statusCode,
-			host,
 			r.URL.Path,
 			lw.Header().Get("Location"),
 		)
