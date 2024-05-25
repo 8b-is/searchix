@@ -13,8 +13,6 @@ import (
 	"searchix/internal/config"
 )
 
-var buildVersion string
-
 var (
 	configFile         = flag.String("config", "config.toml", "config `file` to use")
 	printDefaultConfig = flag.Bool(
@@ -31,11 +29,7 @@ var (
 func main() {
 	flag.Parse()
 	if *version {
-		fmt.Fprintf(os.Stderr, "searchix %s", buildVersion)
-		if buildVersion != config.CommitSHA && buildVersion != config.ShortSHA {
-			fmt.Fprintf(os.Stderr, " %s", config.CommitSHA)
-		}
-		_, err := fmt.Fprint(os.Stderr, "\n")
+		_, err := fmt.Fprintf(os.Stderr, "searchix %s\n", config.Version)
 		if err != nil {
 			panic("can't write to standard error?!")
 		}

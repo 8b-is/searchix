@@ -11,12 +11,8 @@
   )
 , buildGoApplication ? pkgs.buildGoApplication
 , css
-, self
-, testers
 }:
 let
-  inherit (builtins) concatStringsSep match;
-
   version = "0.1.4";
 in
 buildGoApplication {
@@ -47,11 +43,7 @@ buildGoApplication {
     "-s"
     "-w"
     "-X"
-    "searchix/internal/config.CommitSHA=${self.rev or self.dirtyRev or "unknown"}"
-    "-X"
-    "searchix/internal/config.ShortSHA=${self.shortRev or self.dirtyShortRev or "unknown"}"
-    "-X"
-    "main.buildVersion=${version}"
+    "searchix/internal/config.Version=${version}"
   ];
 
   modules = ../gomod2nix.toml;

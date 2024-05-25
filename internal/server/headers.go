@@ -11,7 +11,7 @@ func AddHeadersMiddleware(next http.Handler, config *cfg.Config) http.Handler {
 			w.Header().Add(h, v)
 		}
 		w.Header().Add("Content-Security-Policy", config.Web.ContentSecurityPolicy.String())
-		w.Header().Add("Server", "searchix/"+cfg.ShortSHA)
+		w.Header().Add("Server", "searchix/"+cfg.Version)
 
 		next.ServeHTTP(w, r)
 	})

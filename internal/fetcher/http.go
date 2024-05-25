@@ -47,7 +47,7 @@ func fetchFileIfNeeded(
 		return
 	}
 
-	req.Header.Set("User-Agent", fmt.Sprintf("Searchix %s", config.ShortSHA))
+	req.Header.Set("User-Agent", fmt.Sprintf("Searchix %s", config.Version))
 
 	if ifModifiedSince != "" {
 		req.Header.Set("If-Modified-Since", ifModifiedSince)

@@ -11,10 +11,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var (
-	CommitSHA string
-	ShortSHA  string
-)
+var Version string
 
 type URL struct {
 	*url.URL

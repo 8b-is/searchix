@@ -17,7 +17,6 @@ func createErrorHandler(
 		indexData := TemplateData{
 			ExtraHeadHTML: config.Web.ExtraHeadHTML,
 			Sources:       config.Importer.Sources,
-			Version:       *versionInfo,
 			Code:          code,
 			Message:       message,
 		}

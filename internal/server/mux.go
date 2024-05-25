@@ -34,11 +34,6 @@ type HTTPError struct {
 
 const jsSnippet = template.HTML(livereload.JsSnippet) // #nosec G203
 
-type VersionInfo struct {
-	ShortSHA  string
-	CommitSHA string
-}
-
 type TemplateData struct {
 	Sources       map[string]*config.Source
 	Source        config.Source
@@ -46,7 +41,6 @@ type TemplateData struct {
 	Results       bool
 	SourceResult  *bleve.SearchResult
 	ExtraHeadHTML template.HTML
-	Version       VersionInfo
 	Code          int
 	Message       string
 }
@@ -58,11 +52,6 @@ type ResultData struct {
 	Results        *search.Result
 	Prev           string
 	Next           string
-}
-
-var versionInfo = &VersionInfo{
-	ShortSHA:  config.ShortSHA,
-	CommitSHA: config.CommitSHA,
 }
 
 var templates TemplateCollection
@@ -105,7 +94,6 @@ func NewMux(
 		indexData := TemplateData{
 			ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
 			Sources:       cfg.Importer.Sources,
-			Version:       *versionInfo,
 		}
 		w.Header().Add("Cache-Control", "max-age=86400")
 		err := templates["index"].Execute(w, indexData)
@@ -154,7 +142,6 @@ func NewMux(
 						ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
 						Source:        *source,
 						Sources:       cfg.Importer.Sources,
-						Version:       *versionInfo,
 					},
 					ResultsPerPage: search.ResultsPerPage,
 					Query:          qs,
@@ -218,7 +205,6 @@ func NewMux(
 					Sources:       cfg.Importer.Sources,
 					Source:        *source,
 					SourceResult:  sourceResult,
-					Version:       *versionInfo,
 				})
 				if err != nil {
 					errorHandler(w, r, err.Error(), http.StatusInternalServerError)
