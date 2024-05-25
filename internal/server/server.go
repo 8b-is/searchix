@@ -11,6 +11,8 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 )
 
 type Server struct {
@@ -28,7 +30,12 @@ func New(conf *config.Config, index *index.ReadIndex, liveReload bool) (*Server,
 	return &Server{
 		cfg: conf,
 		server: &http.Server{
-			Handler:           mux,
+			Handler: http.MaxBytesHandler(
+				h2c.NewHandler(mux, &http2.Server{
+					IdleTimeout: 5 * time.Minute,
+				}),
+				1024*1024,
+			),
 			ReadHeaderTimeout: 20 * time.Second,
 		},
 	}, nil
