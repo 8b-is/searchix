@@ -1,4 +1,3 @@
-flake:
 { config
 , lib
 , pkgs
@@ -9,7 +8,7 @@ let
   inherit (builtins) fromTOML readFile;
   cfg = config.services.searchix;
 
-  package = flake.packages.${pkgs.system}.default;
+  package = pkgs.callPackage ../.. { };
 
   defaults = fromTOML (readFile ../../defaults.toml);
 
@@ -91,6 +90,7 @@ in
           };
 
           web = mkOption {
+            default = { };
             type = types.submodule {
               freeformType = settingsFormat.type;
               options = {
@@ -113,7 +113,7 @@ in
                   mkOption {
                     type = types.str;
                     description = "The base URL that searchix will be served on.";
-                    default = "http://${web.listenAddress}:${web.port}";
+                    default = "http://${web.listenAddress}:${toString web.port}";
                   };
 
                 environment = mkOption {
@@ -146,6 +146,7 @@ in
           };
 
           importer = mkOption {
+            default = { };
             type = types.submodule {
               freeformType = settingsFormat.type;
 
@@ -179,7 +180,6 @@ in
           };
         };
       };
-      default = { };
       description = ''
         Configuration for searchix.
 

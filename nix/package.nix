@@ -47,9 +47,9 @@ buildGoApplication {
     "-s"
     "-w"
     "-X"
-    "searchix/internal/config.CommitSHA=${self.rev or self.dirtyRev}"
+    "searchix/internal/config.CommitSHA=${self.rev or self.dirtyRev or "unknown"}"
     "-X"
-    "searchix/internal/config.ShortSHA=${self.shortRev or self.dirtyShortRev}"
+    "searchix/internal/config.ShortSHA=${self.shortRev or self.dirtyShortRev or "unknown"}"
     "-X"
     "main.buildVersion=${version}"
   ];
