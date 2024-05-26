@@ -45,7 +45,6 @@
           packages.css = "${simple-css}";
           packages.default = callPackage ./nix/package.nix {
             inherit (gomod2nix.legacyPackages.${system}) buildGoApplication;
-            inherit self;
             css = simple-css;
           };
           devShells.default = callPackage ./nix/dev-shell.nix {
