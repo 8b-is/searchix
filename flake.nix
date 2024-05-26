@@ -6,7 +6,6 @@
     flake-utils.url = "github:numtide/flake-utils";
     pre-commit-hooks = {
       url = "github:cachix/pre-commit-hooks.nix";
-      inputs.flake-utils.follows = "flake-utils";
     };
     gomod2nix = {
       url = "github:nix-community/gomod2nix";

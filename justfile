@@ -4,6 +4,16 @@ default:
 prepare:
 	nix build .#css -o frontend/static/base.css
 
+update-go-dependencies:
+	go get -u all
+	go mod tidy
+	gomod2nix
+
+update-nix-dependencies:
+	nix flake update
+
+update-dependencies: update-go-dependencies update-nix-dependencies
+
 checkformat:
 	gofmt -d .
 	goimports -d .
