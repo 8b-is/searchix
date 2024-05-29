@@ -35,7 +35,7 @@ func (Package) BleveType() string {
 }
 
 func (p Package) GetName() string {
-	return p.Name
+	return p.Attribute
 }
 
 func (p Package) GetSource() string {
