@@ -1,5 +1,25 @@
 # Changelog
 
+### [v0.1.5](https://git.alanpearce.eu/searchix/diff/?id=v0.1.4&id2=v0.1.5) (2024-05-29)
+
+#### Features
+
+-   improve search relevance by boosting keyword matches
+    ([73185e4](https://git.alanpearce.eu/searchix/commit/?id=73185e4633d4f56ce8acdd3cc19f78faaa78bd2b))
+-   support cleartext HTTP/2 (i.e. from a reverse proxy)
+    ([16b4337](https://git.alanpearce.eu/searchix/commit/?id=16b433791b619f4144110e4429d98684bf5e98eb))
+
+#### Fixes
+
+-   missing alternate forms of packages with the same name
+    ([838e178](https://git.alanpearce.eu/searchix/commit/?id=838e178e503d9576a40fce8fc986c4e1972e4c0f))
+-   incorrect (switched) behaviour of --update/--replace
+    ([97021f7](https://git.alanpearce.eu/searchix/commit/?id=97021f769a0f06103b4af5019d942759d644e291))
+-   re-enable exit --update/--replace
+    ([a5e3c14](https://git.alanpearce.eu/searchix/commit/?id=a5e3c144034eab0cb41c4b65557e5c30e877c9fb))
+-   check for nil pointers in NewMux
+    ([2c1491d](https://git.alanpearce.eu/searchix/commit/?id=2c1491de56d0c3e2f4cb0b0c1e33035510f72fc5))
+
 ### [v0.1.4](https://git.alanpearce.eu/searchix/diff/?id=v0.1.3&id2=v0.1.4) (2024-05-23)
 
 #### Features
