@@ -64,7 +64,7 @@ func (s *Server) SetupIndex(update bool, replace bool) error {
 			"update",
 			update,
 		)
-		err = importer.Start(s.cfg, write, replace, nil)
+		err = importer.Start(s.cfg, write, replace || update, nil)
 		if err != nil {
 			return errors.Wrap(err, "Failed to build index")
 		}

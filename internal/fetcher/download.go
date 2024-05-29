@@ -42,6 +42,7 @@ func (i *DownloadFetcher) FetchIfNeeded(
 	sourceMeta *index.SourceMeta,
 ) (f FetchedFiles, err error) {
 	var fetchURL string
+	sourceUpdated := sourceMeta.Updated
 	for key, filename := range files {
 		fetchURL, err = url.JoinPath(i.Source.URL, filename)
 		if err != nil {
@@ -57,14 +58,14 @@ func (i *DownloadFetcher) FetchIfNeeded(
 
 		i.Logger.Debug("preparing to fetch URL", "url", fetchURL)
 
-		body, mtime, err := fetchFileIfNeeded(ctx, sourceMeta.Updated, fetchURL)
+		body, mtime, err := fetchFileIfNeeded(ctx, sourceUpdated, fetchURL)
 		if err != nil {
 			i.Logger.Warn("failed to fetch file", "url", fetchURL, "error", err)
 
 			return f, err
 		}
 		// don't bother to issue requests for the later files
-		if mtime.Before(sourceMeta.Updated) {
+		if mtime.Before(sourceUpdated) {
 			break
 		}
 		sourceMeta.Updated = mtime
