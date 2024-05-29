@@ -38,10 +38,11 @@ Also, I wanted to learn Go!
 -   Responsive (i.e. low latency)
 -   Minimal JavaScript for progressive enhancement
 -   Quickly switch between (options) sources with the same query
+-   Querying "git" should give relevant results:
+    -   Options: programs.git.{enable,package}
+    -   Packages: git/gitMinimal/gitFull...
 
 ### Future
-
--   [ ] `programs.git.enable` should be in the first few results for the query "git"
 
 ## Developing
 
