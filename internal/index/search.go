@@ -8,7 +8,9 @@ import (
 	"searchix/internal/nix"
 
 	"github.com/blevesearch/bleve/v2"
+	"github.com/blevesearch/bleve/v2/analysis/analyzer/standard"
 	"github.com/blevesearch/bleve/v2/search"
+	"github.com/blevesearch/bleve/v2/search/query"
 	"github.com/pkg/errors"
 )
 
@@ -71,18 +73,57 @@ func (index *ReadIndex) GetSource(ctx context.Context, name string) (*bleve.Sear
 	return result, nil
 }
 
+func setField(
+	q query.FieldableQuery,
+	field string,
+) query.FieldableQuery {
+	q.SetField(field)
+
+	return q
+}
+
 func (index *ReadIndex) Search(
 	ctx context.Context,
 	source *config.Source,
 	keyword string,
 	from uint64,
 ) (*Result, error) {
-	sourceQuery := bleve.NewTermQuery(source.Key)
-	sourceQuery.SetField("Source")
+	query := bleve.NewBooleanQuery()
+
+	// match the user's query in any field ...
 	userQuery := bleve.NewMatchQuery(keyword)
 	userQuery.Analyzer = "option_name"
 
-	query := bleve.NewConjunctionQuery(sourceQuery, userQuery)
+	query.AddMust(
+		setField(bleve.NewTermQuery(source.Key), "Source"),
+		userQuery,
+	)
+
+	switch source.Importer {
+	case config.Packages:
+		// ...and boost it if it matches any of these
+		query.AddShould(
+			setField(bleve.NewMatchQuery(keyword), "MainProgram"),
+			setField(bleve.NewMatchQuery(keyword), "Name"),
+			setField(bleve.NewMatchQuery(keyword), "Attribute"),
+		)
+	case config.Options:
+		query.AddShould(
+			setField(bleve.NewMatchQuery(keyword), "Loc"),
+			setField(bleve.NewMatchQuery(keyword), "Name"),
+		)
+		nameLiteralQuery := bleve.NewMatchQuery(keyword)
+		nameLiteralQuery.SetField("Name")
+		nameLiteralQuery.Analyzer = standard.Name
+		query.AddShould(
+			nameLiteralQuery,
+		)
+	default:
+		return nil, errors.Errorf(
+			"unsupported source type for search: %s",
+			source.Importer.String(),
+		)
+	}
 
 	search := bleve.NewSearchRequest(query)
 	search.Size = ResultsPerPage
