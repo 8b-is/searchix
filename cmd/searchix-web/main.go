@@ -58,6 +58,10 @@ func main() {
 		log.Fatalf("Failed to setup index: %v", err)
 	}
 
+	if *replace || *update {
+		os.Exit(0)
+	}
+
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
