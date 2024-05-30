@@ -20,16 +20,16 @@ ExtraHeadHTML = ''
 
 # Content-Security-Policy header to send with requests. Should only need changing if ExtraHeadHTML is used.
 [Web.ContentSecurityPolicy]
-base-uri = []
+base-uri = ["'none'"]
 block-all-mixed-content = false
 child-src = []
-connect-src = []
-default-src = ["'self'"]
+connect-src = ["'self'"]
+default-src = ["'none'"]
 font-src = []
-form-action = []
+form-action = ["'self'"]
 frame-ancestors = []
 frame-src = []
-img-src = []
+img-src = ["'self'"]
 manifest-src = []
 media-src = []
 navigate-to = []
@@ -45,7 +45,7 @@ sandbox = ''
 script-src = []
 script-src-attr = []
 script-src-elem = []
-style-src = []
+style-src = ["'self'"]
 style-src-attr = []
 style-src-elem = []
 trusted-types = []
@@ -54,7 +54,9 @@ worker-src = []
 
 # Extra headers to send with HTTP requests
 [Web.Headers]
+strict-transport-security = 'max-age=31536000'
 x-content-type-options = 'nosniff'
+x-frame-options = 'DENY'
 
 # Settings for the import job
 [Importer]

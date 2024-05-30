@@ -117,6 +117,11 @@ func GetConfig(filename string) (*Config, error) {
 		}
 	}
 
+	config.Web.ContentSecurityPolicy.ScriptSrc = append(
+		config.Web.ContentSecurityPolicy.ScriptSrc,
+		config.Web.BaseURL.JoinPath("/static/").String(),
+	)
+
 	maps.DeleteFunc(config.Importer.Sources, func(_ string, v *Source) bool {
 		return !v.Enable
 	})

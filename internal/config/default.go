@@ -1,6 +1,7 @@
 package config
 
 import (
+	"strconv"
 	"time"
 
 	"github.com/pelletier/go-toml/v2"
@@ -12,6 +13,11 @@ var nixpkgs = Repository{
 	Repo:  "nixpkgs",
 }
 
+const none = "'none'"
+const self = "'self'"
+
+const maxAge = (1 * 365 * 24 * time.Hour)
+
 var defaultConfig = Config{
 	DataPath: "./data",
 	Web: &Web{
@@ -20,10 +26,24 @@ var defaultConfig = Config{
 		BaseURL:       mustURL("http://localhost:3000"),
 		Environment:   "development",
 		ContentSecurityPolicy: CSP{
-			DefaultSrc: []string{"'self'"},
+			DefaultSrc: []string{none},
+			BaseURI:    []string{none},
+			ImgSrc:     []string{self},
+			StyleSrc:   []string{self},
+			// added dynamically based on final value of BaseURL
+			ScriptSrc:  []string{},
+			FormAction: []string{self},
+			ConnectSrc: []string{self},
 		},
 		Headers: map[string]string{
+			"strict-transport-security": "max-age=" + strconv.FormatFloat(
+				maxAge.Seconds(),
+				'f',
+				0,
+				64,
+			),
 			"x-content-type-options": "nosniff",
+			"x-frame-options":        "DENY",
 		},
 	},
 	Importer: &Importer{
