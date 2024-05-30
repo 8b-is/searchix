@@ -22,5 +22,11 @@
 {{- end }}
 
 {{- define "head" }}
-  <script src="/static/search.js" defer></script>
+  {{- with (index .Assets.Scripts "static/search.js") }}
+    <script
+      src="{{ .URL }}"
+      defer
+      integrity="sha256-{{ .Base64SHA256 }}"
+    ></script>
+  {{- end }}
 {{- end }}

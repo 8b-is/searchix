@@ -43,6 +43,7 @@ type TemplateData struct {
 	ExtraHeadHTML template.HTML
 	Code          int
 	Message       string
+	Assets        frontend.AssetCollection
 }
 
 type ResultData struct {
@@ -94,6 +95,7 @@ func NewMux(
 		indexData := TemplateData{
 			ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
 			Sources:       cfg.Importer.Sources,
+			Assets:        frontend.Assets,
 		}
 		w.Header().Add("Cache-Control", "max-age=86400")
 		err := templates["index"].Execute(w, indexData)
@@ -142,6 +144,7 @@ func NewMux(
 						ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
 						Source:        *source,
 						Sources:       cfg.Importer.Sources,
+						Assets:        frontend.Assets,
 					},
 					ResultsPerPage: search.ResultsPerPage,
 					Query:          qs,
@@ -205,6 +208,7 @@ func NewMux(
 					Sources:       cfg.Importer.Sources,
 					Source:        *source,
 					SourceResult:  sourceResult,
+					Assets:        frontend.Assets,
 				})
 				if err != nil {
 					errorHandler(w, r, err.Error(), http.StatusInternalServerError)

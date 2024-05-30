@@ -4,8 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Searchix</title>
-    <link href="/static/base.css" rel="stylesheet" />
-    <link href="/static/style.css" rel="stylesheet" />
+    {{- range .Assets.Stylesheets }}
+      <link
+        href="{{ .URL }}"
+        rel="stylesheet"
+        integrity="sha256-{{ .Base64SHA256 }}"
+      />
+    {{- end }}
     {{ block "head" . }}
     {{ end }}
     {{ .ExtraHeadHTML }}
