@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var Assets = AssetCollection{
+var Assets = &AssetCollection{
 	Scripts:     make(map[string]Asset),
 	Stylesheets: make(map[string]Asset),
 }
@@ -83,12 +83,21 @@ func hashStyles() error {
 	return nil
 }
 
-func init() {
-	err := hashScripts()
+func Rehash() (err error) {
+	err = hashScripts()
 	if err != nil {
-		panic(err)
+		return err
 	}
 	err = hashStyles()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func init() {
+	err := Rehash()
 	if err != nil {
 		panic(err)
 	}

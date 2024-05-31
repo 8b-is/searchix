@@ -43,7 +43,7 @@ type TemplateData struct {
 	ExtraHeadHTML template.HTML
 	Code          int
 	Message       string
-	Assets        frontend.AssetCollection
+	Assets        *frontend.AssetCollection
 }
 
 type ResultData struct {
@@ -282,6 +282,12 @@ func NewMux(
 		}
 		go fw.Start(func(filename string) {
 			slog.Debug(fmt.Sprintf("got filename %s", filename))
+			if match, _ := path.Match("frontend/static/*", filename); match {
+				err := frontend.Rehash()
+				if err != nil {
+					slog.Error("failed to re-hash frontend assets", "error", err)
+				}
+			}
 			if path.Ext(filename) == ".gotmpl" {
 				templates, err = loadTemplates()
 				if err != nil {
