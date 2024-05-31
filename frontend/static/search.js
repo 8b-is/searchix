@@ -12,7 +12,7 @@ let urlLocation = new URL(location);
 let state = history.state || {
   url: urlLocation.toString(),
   input: urlLocation.searchParams.get("query"),
-  fragment: range.cloneContents().innerHTML || "",
+  fragment: range.cloneContents().innerHTML || null,
   opened: [],
 };
 
@@ -147,7 +147,7 @@ if (state.opened.length > 0) {
 addEventListener("popstate", function (ev) {
   if (ev.state != null) {
     url = new URL(ev.state.url);
-    if (!url.pathname.endsWith("/search") && ev.state.fragment !== null) {
+    if (ev.state.fragment !== null) {
       queryInput.value = ev.state.input;
       renderFragmentHTML(ev.state.fragment);
       return;
