@@ -260,10 +260,17 @@ func NewMux(
 	mux.HandleFunc("/options/{source}/opensearch.xml", createOpenSearchXMLHandler(config.Options))
 	mux.HandleFunc("/packages/{source}/opensearch.xml", createOpenSearchXMLHandler(config.Packages))
 
-	fs := http.FileServer(http.FS(frontend.Files))
 	mux.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("Cache-Control", "max-age=86400")
-		fs.ServeHTTP(w, r)
+		// optimisation for HTTP/3: first header sent as byte(41), not the string
+		asset, found := frontend.Assets.ByImmutablePath[r.URL.Path]
+		if !found {
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+
+			return
+		}
+		w.Header().Add("Cache-Control", "public, max-age=31536000")
+		w.Header().Add("Cache-Control", "immutable")
+		http.ServeFileFS(w, r, frontend.Files, asset.Filename)
 	})
 
 	if liveReload {

@@ -3,52 +3,58 @@ package frontend
 import (
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/hex"
+	"hash/fnv"
 	"io"
 	"io/fs"
-	"net/url"
+	"path/filepath"
+	"strings"
 
 	"github.com/pkg/errors"
 )
 
 var Assets = &AssetCollection{
-	Scripts:     make(map[string]Asset),
-	Stylesheets: make(map[string]Asset),
+	Scripts:         make(map[string]*Asset),
+	Stylesheets:     make(map[string]*Asset),
+	ByImmutablePath: make(map[string]*Asset),
 }
 
 type Asset struct {
 	URL          string
+	Filename     string
 	Base64SHA256 string
 }
 
 type AssetCollection struct {
-	Scripts     map[string]Asset
-	Stylesheets map[string]Asset
+	Scripts         map[string]*Asset
+	Stylesheets     map[string]*Asset
+	ByImmutablePath map[string]*Asset
 }
 
-func hashFile(filename string) ([]byte, error) {
+func newAsset(filename string) (*Asset, error) {
 	file, err := Files.Open(filename)
 	if err != nil {
 		return nil, errors.WithMessagef(err, "could not open file %s", filename)
 	}
-	sum := sha256.New()
 	defer file.Close()
-	if _, err := io.Copy(sum, file); err != nil {
+
+	shasum := sha256.New()
+	hash := fnv.New64a()
+	if _, err := io.Copy(io.MultiWriter(shasum, hash), file); err != nil {
 		return nil, errors.WithMessagef(err, "could not hash file %s", filename)
 	}
 
-	return sum.Sum(nil), nil
+	return &Asset{
+		URL:          makeImmutablePath(filename, hex.EncodeToString(hash.Sum(nil))),
+		Filename:     filename,
+		Base64SHA256: base64.StdEncoding.EncodeToString(shasum.Sum(nil)),
+	}, nil
 }
 
-func newAsset(filename string, hash []byte) Asset {
-	u, err := url.JoinPath("/", filename)
-	if err != nil {
-		panic(err)
-	}
+func makeImmutablePath(filename string, hash string) string {
+	ext := filepath.Ext(filename)
 
-	return Asset{
-		URL:          u,
-		Base64SHA256: base64.StdEncoding.EncodeToString(hash),
-	}
+	return "/" + strings.Replace(filename, ext, "."+hash+ext, 1)
 }
 
 func hashScripts() error {
@@ -57,11 +63,12 @@ func hashScripts() error {
 		return errors.WithMessage(err, "could not glob files")
 	}
 	for _, filename := range scripts {
-		hash, err := hashFile(filename)
+		asset, err := newAsset(filename)
 		if err != nil {
 			return err
 		}
-		Assets.Scripts[filename] = newAsset(filename, hash)
+		Assets.Scripts[filename] = asset
+		Assets.ByImmutablePath[asset.URL] = asset
 	}
 
 	return nil
@@ -73,11 +80,12 @@ func hashStyles() error {
 		return errors.WithMessage(err, "could not glob files")
 	}
 	for _, filename := range styles {
-		hash, err := hashFile(filename)
+		asset, err := newAsset(filename)
 		if err != nil {
 			return err
 		}
-		Assets.Stylesheets[filename] = newAsset(filename, hash)
+		Assets.Stylesheets[filename] = asset
+		Assets.ByImmutablePath[asset.URL] = asset
 	}
 
 	return nil
