@@ -3,32 +3,31 @@ package frontend
 import (
 	"crypto/sha256"
 	"encoding/base64"
-	"encoding/hex"
+	"fmt"
 	"hash/fnv"
 	"io"
 	"io/fs"
-	"path/filepath"
-	"strings"
 
 	"github.com/pkg/errors"
 )
 
 var Assets = &AssetCollection{
-	Scripts:         make(map[string]*Asset),
-	Stylesheets:     make(map[string]*Asset),
-	ByImmutablePath: make(map[string]*Asset),
+	Scripts:     make(map[string]*Asset),
+	Stylesheets: make(map[string]*Asset),
+	ByPath:      make(map[string]*Asset),
 }
 
 type Asset struct {
 	URL          string
+	ETag         string
 	Filename     string
 	Base64SHA256 string
 }
 
 type AssetCollection struct {
-	Scripts         map[string]*Asset
-	Stylesheets     map[string]*Asset
-	ByImmutablePath map[string]*Asset
+	Scripts     map[string]*Asset
+	Stylesheets map[string]*Asset
+	ByPath      map[string]*Asset
 }
 
 func newAsset(filename string) (*Asset, error) {
@@ -45,16 +44,11 @@ func newAsset(filename string) (*Asset, error) {
 	}
 
 	return &Asset{
-		URL:          makeImmutablePath(filename, hex.EncodeToString(hash.Sum(nil))),
+		URL:          "/" + filename,
+		ETag:         fmt.Sprintf(`W/"%x"`, hash.Sum(nil)),
 		Filename:     filename,
 		Base64SHA256: base64.StdEncoding.EncodeToString(shasum.Sum(nil)),
 	}, nil
-}
-
-func makeImmutablePath(filename string, hash string) string {
-	ext := filepath.Ext(filename)
-
-	return "/" + strings.Replace(filename, ext, "."+hash+ext, 1)
 }
 
 func hashScripts() error {
@@ -68,7 +62,7 @@ func hashScripts() error {
 			return err
 		}
 		Assets.Scripts[filename] = asset
-		Assets.ByImmutablePath[asset.URL] = asset
+		Assets.ByPath[asset.URL] = asset
 	}
 
 	return nil
@@ -85,7 +79,7 @@ func hashStyles() error {
 			return err
 		}
 		Assets.Stylesheets[filename] = asset
-		Assets.ByImmutablePath[asset.URL] = asset
+		Assets.ByPath[asset.URL] = asset
 	}
 
 	return nil

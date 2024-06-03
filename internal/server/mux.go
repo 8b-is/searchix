@@ -261,15 +261,15 @@ func NewMux(
 	mux.HandleFunc("/packages/{source}/opensearch.xml", createOpenSearchXMLHandler(config.Packages))
 
 	mux.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
-		// optimisation for HTTP/3: first header sent as byte(41), not the string
-		asset, found := frontend.Assets.ByImmutablePath[r.URL.Path]
+		asset, found := frontend.Assets.ByPath[r.URL.Path]
 		if !found {
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 
 			return
 		}
-		w.Header().Add("Cache-Control", "public, max-age=31536000")
-		w.Header().Add("Cache-Control", "immutable")
+		// optimisation for HTTP/3: first header sent as byte(41), not the string
+		w.Header().Add("Cache-Control", "public, max-age=86400")
+		w.Header().Add("Cache-Control", "stale-while-revalidate")
 		http.ServeFileFS(w, r, frontend.Files, asset.Filename)
 	})
 
