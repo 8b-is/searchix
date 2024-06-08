@@ -125,7 +125,7 @@ func New(cfg *config.Config) (*Server, error) {
 
 	err := sentry.Init(sentry.ClientOptions{
 		EnableTracing:    true,
-		TracesSampleRate: 1.0,
+		TracesSampleRate: 0.01,
 		Dsn:              cfg.Web.SentryDSN,
 		Environment:      cfg.Web.Environment,
 	})
