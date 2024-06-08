@@ -18,6 +18,7 @@ import (
 	"searchix/frontend"
 	"searchix/internal/config"
 	search "searchix/internal/index"
+	"searchix/internal/nix"
 
 	"github.com/blevesearch/bleve/v2"
 	sentryhttp "github.com/getsentry/sentry-go/http"
@@ -53,6 +54,12 @@ type ResultData struct {
 	Results        *search.Result
 	Prev           string
 	Next           string
+}
+
+type DocumentData struct {
+	TemplateData
+	Document *nix.Importable
+	Children *search.Result
 }
 
 var templates TemplateCollection
@@ -221,6 +228,61 @@ func NewMux(
 
 	mux.HandleFunc("/options/{source}/search", createSearchHandler(config.Options))
 	mux.HandleFunc("/packages/{source}/search", createSearchHandler(config.Packages))
+
+	createSourceIDHandler := func(importerType config.ImporterType) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			source := cfg.Importer.Sources[r.PathValue("source")]
+			if source == nil || source.Importer != importerType {
+				errorHandler(w, r, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+
+				return
+			}
+			importerSingular := importerType.Singular()
+
+			ctx, cancel := context.WithTimeout(r.Context(), searchTimeout)
+			defer cancel()
+
+			doc, err := index.GetDocument(ctx, source, r.PathValue("id"))
+			if err != nil {
+				errorHandler(
+					w,
+					r,
+					http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError,
+				)
+
+				return
+			}
+
+			if doc == nil {
+				errorHandler(w, r, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+
+				return
+			}
+
+			tdata := DocumentData{
+				TemplateData: TemplateData{
+					ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
+					Source:        *source,
+					Sources:       cfg.Importer.Sources,
+					Assets:        frontend.Assets,
+				},
+				Document: doc,
+			}
+			if r.Header.Get("Fetch") == "true" {
+				w.Header().Add("Content-Type", "text/html; charset=utf-8")
+				err = templates[importerSingular].ExecuteTemplate(w, "main", tdata)
+			} else {
+				err = templates[importerSingular].Execute(w, tdata)
+			}
+			if err != nil {
+				slog.Error("template error", "template", importerSingular, "error", err)
+				errorHandler(w, r, err.Error(), http.StatusInternalServerError)
+			}
+		}
+	}
+	mux.HandleFunc("/options/{source}/{id}", createSourceIDHandler(config.Options))
+	mux.HandleFunc("/packages/{source}/{id}", createSourceIDHandler(config.Packages))
 
 	createOpenSearchXMLHandler := func(importerType config.ImporterType) func(http.ResponseWriter, *http.Request) {
 		return func(w http.ResponseWriter, r *http.Request) {

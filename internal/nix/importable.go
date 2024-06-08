@@ -1,6 +1,9 @@
 package nix
 
-import "encoding/gob"
+import (
+	"encoding/gob"
+	"searchix/internal/config"
+)
 
 type Importable interface {
 	BleveType() string
@@ -10,6 +13,10 @@ type Importable interface {
 
 func GetKey(i Importable) string {
 	return i.BleveType() + "/" + i.GetSource() + "/" + i.GetName()
+}
+
+func MakeKey(source *config.Source, id string) string {
+	return source.Importer.Singular() + "/" + source.Key + "/" + id
 }
 
 func init() {

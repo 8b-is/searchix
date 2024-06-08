@@ -82,6 +82,42 @@ func setField(
 	return q
 }
 
+func (index *ReadIndex) search(
+	ctx context.Context,
+	request *bleve.SearchRequest,
+) (*Result, error) {
+	request.Fields = []string{"_data"}
+
+	bleveResult, err := index.index.SearchInContext(ctx, request)
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+		if err != nil {
+			return nil, errors.WithMessage(err, "failed to execute search query")
+		}
+
+		results := make([]DocumentMatch, min(ResultsPerPage, bleveResult.Total))
+		var buf bytes.Buffer
+		for i, result := range bleveResult.Hits {
+			_, err = buf.WriteString(result.Fields["_data"].(string))
+			if err != nil {
+				return nil, errors.WithMessage(err, "error fetching result data")
+			}
+			err = gob.NewDecoder(&buf).Decode(&results[i].Data)
+			if err != nil {
+				return nil, errors.WithMessagef(err, "error decoding gob data: %s", buf.String())
+			}
+			buf.Reset()
+		}
+
+		return &Result{
+			SearchResult: bleveResult,
+			Hits:         results,
+		}, nil
+	}
+}
+
 func (index *ReadIndex) Search(
 	ctx context.Context,
 	source *config.Source,
@@ -127,38 +163,27 @@ func (index *ReadIndex) Search(
 
 	search := bleve.NewSearchRequest(query)
 	search.Size = ResultsPerPage
-	search.Fields = []string{"_data"}
 
 	if from != 0 {
 		search.From = int(from)
 	}
 
-	bleveResult, err := index.index.SearchInContext(ctx, search)
-	select {
-	case <-ctx.Done():
-		return nil, ctx.Err()
-	default:
-		if err != nil {
-			return nil, errors.WithMessage(err, "failed to execute search query")
-		}
+	return index.search(ctx, search)
+}
 
-		results := make([]DocumentMatch, min(ResultsPerPage, bleveResult.Total))
-		var buf bytes.Buffer
-		for i, result := range bleveResult.Hits {
-			_, err = buf.WriteString(result.Fields["_data"].(string))
-			if err != nil {
-				return nil, errors.WithMessage(err, "error fetching result data")
-			}
-			err = gob.NewDecoder(&buf).Decode(&results[i].Data)
-			if err != nil {
-				return nil, errors.WithMessagef(err, "error decoding gob data: %s", buf.String())
-			}
-			buf.Reset()
-		}
+func (index *ReadIndex) GetDocument(
+	ctx context.Context,
+	source *config.Source,
+	id string,
+) (*nix.Importable, error) {
+	key := nix.MakeKey(source, id)
+	query := bleve.NewDocIDQuery([]string{key})
+	search := bleve.NewSearchRequest(query)
 
-		return &Result{
-			SearchResult: bleveResult,
-			Hits:         results,
-		}, nil
+	result, err := index.search(ctx, search)
+	if err != nil {
+		return nil, err
 	}
+
+	return &result.Hits[0].Data, err
 }

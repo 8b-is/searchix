@@ -1,0 +1,69 @@
+{{- define "main" }}
+  {{- with .Document }}
+    <h2>
+      {{- if .Broken }}
+        <del>{{ .Attribute }}</del>
+      {{- else }}
+        {{ .Attribute }}
+      {{- end }}
+    </h2>
+    {{- if .LongDescription }}
+      {{ markdown .LongDescription }}
+    {{- else }}
+      <p>{{ .Description }}</p>
+    {{- end }}
+    <dl>
+      {{- with .MainProgram }}
+        <dt>Main Program</dt>
+        <dd>
+          <code>{{ . }}</code>
+        </dd>
+      {{- end }}
+      {{- with .Homepages }}
+        <dt>Homepage</dt>
+        <dd>
+          {{- range . }}
+            <a href="{{ . }}">{{ . }}</a>
+          {{- end }}
+        </dd>
+      {{- end }}
+      {{- with .Version }}
+        <dt>Version</dt>
+        <dd>{{ . }}</dd>
+      {{- end }}
+      {{- with .Licenses }}
+        <dt>License</dt>
+        <dd>
+          {{- range . }}
+            {{- if .URL }}
+              <a href="{{ .URL }}">{{ or .FullName .Name }}</a>
+            {{- else }}
+              {{ or .FullName .Name }}
+            {{- end }}
+            {{- with .AppendixURL }}
+              <a href="{{ . }}">Appendix</a>
+            {{- end }}
+          {{- end }}
+        </dd>
+      {{- end }}
+      {{- with .Maintainers }}
+        <dt>Maintainer{{ if gt (len .) 1 }}s{{ end }}</dt>
+        <dd>
+          {{- range . }}
+            {{- if .Github }}
+              <a href="https://github.com/{{ .Github }}">{{ .Name }}</a>
+            {{- else }}
+              {{ .Name }}
+            {{- end }}
+          {{- end }}
+        </dd>
+      {{- end }}
+      {{- with .Definition }}
+        <dt>Defined</dt>
+        <dd>
+          <a href="{{ . }}">Source</a>
+        </dd>
+      {{- end }}
+    </dl>
+  {{- end }}
+{{- end }}

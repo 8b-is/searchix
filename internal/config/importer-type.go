@@ -25,6 +25,17 @@ func (i ImporterType) String() string {
 	return fmt.Sprintf("Type(%d)", i)
 }
 
+func (i ImporterType) Singular() string {
+	switch i {
+	case Packages:
+		return "package"
+	case Options:
+		return "option"
+	}
+
+	return fmt.Sprintf("Type(%d)", i)
+}
+
 func ParseImporterType(name string) (ImporterType, error) {
 	switch strcase.KebabCase(name) {
 	case "packages":

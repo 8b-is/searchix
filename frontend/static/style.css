@@ -92,10 +92,6 @@ pre {
   padding: 1ch 1.4ch;
 }
 
-pre:has(> code) {
-  background: var(--bg);
-}
-
 #pagination {
   display: flex;
   justify-content: space-between;
