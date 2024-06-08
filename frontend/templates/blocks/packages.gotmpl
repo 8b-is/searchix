@@ -1,75 +1,30 @@
 {{- define "hits" }}
-  {{- range . }}
-    {{- with .Data }}
-      <details id="{{ .Name }}">
-        <summary>
-          <h3>
-            {{- if .Broken }}
-              <del>{{ .Attribute }}</del>
-            {{- else }}
-              {{ .Attribute }}
-            {{- end }}
-          </h3>
-        </summary>
-        {{- if .LongDescription }}
-          {{ markdown .LongDescription }}
-        {{- else }}
-          <p>{{ .Description }}</p>
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Attribute</th>
+        <th scope="col">Name</th>
+        <th scope="col">Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{- range . }}
+        {{- with .Data }}
+          <tr>
+            <td>
+              {{- with .Attribute }}
+                <a href="{{ . }}" class="open-dialog">{{ . }}</a>
+              {{- end }}
+            </td>
+            <td>
+              {{ .Name }}
+            </td>
+            <td>
+              {{ .Description }}
+            </td>
+          </tr>
         {{- end }}
-        <dl>
-          {{- with .MainProgram }}
-            <dt>Main Program</dt>
-            <dd>
-              <code>{{ . }}</code>
-            </dd>
-          {{- end }}
-          {{- with .Homepages }}
-            <dt>Homepage</dt>
-            <dd>
-              {{- range . }}
-                <a href="{{ . }}">{{ . }}</a>
-              {{- end }}
-            </dd>
-          {{- end }}
-          {{- with .Version }}
-            <dt>Version</dt>
-            <dd>{{ . }}</dd>
-          {{- end }}
-          {{- with .Licenses }}
-            <dt>License</dt>
-            <dd>
-              {{- range . }}
-                {{- if .URL }}
-                  <a href="{{ .URL }}">{{ or .FullName .Name }}</a>
-                {{- else }}
-                  {{ or .FullName .Name }}
-                {{- end }}
-                {{- with .AppendixURL }}
-                  <a href="{{ . }}">Appendix</a>
-                {{- end }}
-              {{- end }}
-            </dd>
-          {{- end }}
-          {{- with .Maintainers }}
-            <dt>Maintainer{{ if gt (len .) 1 }}s{{ end }}</dt>
-            <dd>
-              {{- range . }}
-                {{- if .Github }}
-                  <a href="https://github.com/{{ .Github }}">{{ .Name }}</a>
-                {{- else }}
-                  {{ .Name }}
-                {{- end }}
-              {{- end }}
-            </dd>
-          {{- end }}
-          {{- with .Definition }}
-            <dt>Defined</dt>
-            <dd>
-              <a href="{{ . }}">Source</a>
-            </dd>
-          {{- end }}
-        </dl>
-      </details>
-    {{- end }}
-  {{- end }}
+      {{- end }}
+    </tbody>
+  </table>
 {{- end }}

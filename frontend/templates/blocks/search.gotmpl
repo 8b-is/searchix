@@ -16,9 +16,14 @@
       <button>Search</button>
     </fieldset>
   </form>
-  {{- if .Results }}
-    {{ block "results" . }}{{ end }}
-  {{- end }}
+  <section id="results" role="list" aria-label="search results">
+    {{- if .Results }}
+      {{ block "results" . }}{{ end }}
+    {{- end }}
+  </section>
+  <dialog id="dialog">
+    <button autofocus>Close</button>
+  </dialog>
 {{- end }}
 
 {{- define "head" }}

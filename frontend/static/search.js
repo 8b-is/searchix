@@ -1,18 +1,23 @@
 const search = document.getElementById("search");
 const nav = document.querySelectorAll("body > header > nav")[0];
 const queryInput = document.getElementById("query");
-let results = document.getElementById("results");
+const dialog = document.getElementById("dialog");
+const results = document.getElementById("results");
 let pagination = document.getElementById("pagination");
 
-const range = new Range();
-range.setStartAfter(search);
-range.setEndAfter(search.parentNode.lastChild);
+const resultsRange = new Range();
+resultsRange.setStartBefore(results.firstChild);
+resultsRange.setEndAfter(results.lastChild);
+
+const detailsRange = new Range();
+detailsRange.setStartAfter(dialog.firstElementChild);
+detailsRange.setEndAfter(dialog.lastElementChild);
 
 let urlLocation = new URL(location);
 let state = history.state || {
   url: urlLocation.toString(),
   input: urlLocation.searchParams.get("query"),
-  fragment: range.cloneContents().innerHTML || null,
+  results: resultsRange.cloneContents().innerHTML || null,
   opened: [],
 };
 
@@ -23,23 +28,10 @@ if (window.trustedTypes && trustedTypes.createPolicy) {
   });
 }
 
-function detailsToggled(ev) {
-  const nextURL = new URL(location);
-  if (ev.newState == "open" || ev.target.open === true) {
-    state.opened.push(this.id);
-    nextURL.hash = this.id;
-  } else {
-    state.opened = state.opened.filter((x) => x != this.id);
-    nextURL.hash = "";
-  }
-  state.url = nextURL.toJSON();
-  history.replaceState(state, "", nextURL);
-}
-function addToggleEventListeners(results) {
-  results.querySelectorAll("details").forEach((details) =>
-    // toggle event doesn't bubble :(
-    details.addEventListener("toggle", detailsToggled, { passive: true }),
-  );
+function addOpenDialogListeners(results) {
+  results.querySelectorAll("a.open-dialog").forEach(function (element) {
+    element.addEventListener("click", handleDialogOpen);
+  });
 }
 
 function paginationLinkClicked(ev) {
@@ -54,17 +46,14 @@ function addPaginationEventListeners(pagination) {
   );
 }
 
-function renderFragmentHTML(html) {
-  const fragment = range.createContextualFragment(
+function renderResults(html) {
+  const fragment = resultsRange.createContextualFragment(
     escapePolicy !== null ? escapePolicy.createHTML(html) : html,
   );
-  results = fragment.querySelector("#results");
   pagination = fragment.querySelector("#pagination");
-  range.deleteContents();
-  range.insertNode(fragment);
-  if (results !== null) {
-    addToggleEventListeners(results);
-  }
+  resultsRange.deleteContents();
+  resultsRange.insertNode(fragment);
+  addOpenDialogListeners(results);
   if (pagination !== null) {
     addPaginationEventListeners(pagination);
   }
@@ -82,16 +71,16 @@ async function getResults(url) {
 
     // render errors sent as HTML as well as OK responses
     if (res.headers.get("content-type").startsWith("text/html")) {
-      state.fragment = await res.text();
+      state.results = await res.text();
       state.opened = [];
       history.replaceState(state, null, url);
-      renderFragmentHTML(state.fragment);
+      renderResults(state.results);
     } else {
       throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`);
     }
   } catch (error) {
-    range.deleteContents();
-    range.insertNode(new Text(error.message));
+    resultsRange.deleteContents();
+    resultsRange.insertNode(new Text(error.message));
     console.error("fetch failed", error);
   }
 }
@@ -120,7 +109,7 @@ search.addEventListener("submit", function (ev) {
 });
 
 if (results !== null) {
-  addToggleEventListeners(results);
+  addOpenDialogListeners(results);
 }
 if (pagination !== null) {
   addPaginationEventListeners(pagination);
@@ -129,12 +118,54 @@ if (pagination !== null) {
 document.querySelector("a.current").addEventListener("click", function (ev) {
   search.reset();
   state.input = null;
-  range.deleteContents();
-  state.fragment = "";
+  resultsRange.deleteContents();
+  state.results = "";
   history.pushState(state, null, ev.target.href);
   ev.preventDefault();
   queryInput.value = "";
 });
+
+function renderDetails(html) {
+  const fragment = detailsRange.createContextualFragment(
+    escapePolicy !== null ? escapePolicy.createHTML(html) : html,
+  );
+  detailsRange.insertNode(fragment);
+  dialog.showModal();
+}
+
+dialog.addEventListener("close", function (event) {
+  detailsRange.deleteContents();
+});
+
+dialog.querySelector("button").addEventListener("click", function () {
+  dialog.close();
+});
+
+async function getDetail(url) {
+  try {
+    state.url = url.toJSON();
+    const res = await fetch(url, {
+      headers: {
+        fetch: "true",
+      },
+    });
+
+    // render errors sent as HTML as well as OK responses
+    if (res.headers.get("content-type").startsWith("text/html")) {
+      renderDetails(await res.text());
+    } else {
+      throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`);
+    }
+  } catch (error) {
+    console.error("fetch failed", error);
+    renderDetails(new Text(error.message));
+  }
+}
+
+function handleDialogOpen(ev) {
+  getDetail(new URL(ev.target.href));
+  ev.preventDefault();
+}
 
 if (state.opened.length > 0) {
   state.opened.forEach((id) =>
@@ -147,12 +178,15 @@ if (state.opened.length > 0) {
 addEventListener("popstate", function (ev) {
   if (ev.state != null) {
     url = new URL(ev.state.url);
-    if (ev.state.fragment !== null) {
+    if (ev.state.results !== null) {
       queryInput.value = ev.state.input;
-      renderFragmentHTML(ev.state.fragment);
-      return;
+      renderResults(ev.state.results);
     }
+    if (ev.state.details !== null) {
+      renderDetails(ev.state.details);
+    }
+  } else {
+    resultsRange.deleteContents();
+    search.reset();
   }
-  range.deleteContents();
-  search.reset();
 });

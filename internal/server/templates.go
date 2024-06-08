@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"log/slog"
 	"path"
+	"regexp"
 	"searchix/frontend"
 	"searchix/internal/config"
 	"searchix/internal/nix"
@@ -19,10 +20,20 @@ import (
 
 type TemplateCollection map[string]*template.Template
 
-var md = goldmark.New(
-	goldmark.WithExtensions(extension.NewLinkify()),
+var (
+	md = goldmark.New(
+		goldmark.WithExtensions(extension.NewLinkify()),
+	)
+	firstSentenceRegexp = regexp.MustCompile(`^.*?\.[[:space:]]`)
 )
 var templateFuncs = template.FuncMap{
+	"firstSentence": func(input nix.Markdown) nix.Markdown {
+		if fs := firstSentenceRegexp.FindString(string(input)); fs != "" {
+			return nix.Markdown(fs)
+		}
+
+		return input
+	},
 	"markdown": func(input nix.Markdown) template.HTML {
 		var out strings.Builder
 		err := md.Convert([]byte(input), &out)

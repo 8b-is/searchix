@@ -58,7 +58,7 @@ fieldset {
 }
 
 section {
-  border-top: none;
+  border: none;
   margin: unset;
   padding: unset;
 }
@@ -75,7 +75,8 @@ dd {
   margin-inline-start: 1rem;
 }
 
-dd > p {
+dd > p,
+td > p {
   margin: unset;
 }
 
@@ -124,4 +125,21 @@ h3 {
 
 blockquote > p {
   margin: unset;
+}
+
+dialog {
+  max-width: unset;
+  width: min(var(--min-width), 90%);
+}
+
+dialog > button {
+  float: right;
+}
+
+dialog > h2 {
+  margin-top: 0.5rem;
+}
+
+table {
+  width: 100%;
 }
