@@ -46,6 +46,14 @@ func createMeta(path string) (*Meta, error) {
 }
 
 func openMeta(path string) (*Meta, error) {
+	exists, err := file.Exists(path)
+	if err != nil {
+		return nil, errors.WithMessage(err, "could not check for existence of index metadata")
+	}
+	if !exists {
+		return createMeta(path)
+	}
+
 	j, err := os.ReadFile(path)
 	if err != nil {
 		return nil, errors.WithMessage(err, "could not open index metadata file")
