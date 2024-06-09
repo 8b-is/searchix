@@ -55,7 +55,10 @@ func main() {
 		log.Fatalf("Failed to initialise searchix: %v", err)
 	}
 
-	err = s.SetupIndex(*update, *replace)
+	err = s.SetupIndex(&searchix.IndexOptions{
+		Update:  *update,
+		Replace: *replace,
+	})
 	if err != nil {
 		log.Fatalf("Failed to setup index: %v", err)
 	}

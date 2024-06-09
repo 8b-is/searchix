@@ -38,7 +38,12 @@ func nextOccurrenceOfLocalTime(t toml.LocalTime) time.Time {
 	return nextRun
 }
 
-func (s *Server) SetupIndex(update bool, replace bool) error {
+type IndexOptions struct {
+	Update  bool
+	Replace bool
+}
+
+func (s *Server) SetupIndex(options *IndexOptions) error {
 	var i uint
 	cfgEnabledSources := make([]string, len(s.cfg.Importer.Sources))
 	for key := range s.cfg.Importer.Sources {
@@ -47,28 +52,31 @@ func (s *Server) SetupIndex(update bool, replace bool) error {
 	}
 	slices.Sort(cfgEnabledSources)
 
-	read, write, exists, err := index.OpenOrCreate(s.cfg.DataPath, replace)
+	read, write, exists, err := index.OpenOrCreate(
+		s.cfg.DataPath,
+		options.Replace,
+	)
 	if err != nil {
 		return errors.Wrap(err, "Failed to open or create index")
 	}
 	s.readIndex = read
 	s.writeIndex = write
 
-	if !exists || replace || update {
+	if !exists || options.Replace || options.Update {
 		slog.Info(
 			"Starting build job",
 			"new",
 			!exists,
 			"replace",
-			replace,
+			options.Replace,
 			"update",
-			update,
+			options.Update,
 		)
-		err = importer.Start(s.cfg, write, replace || update, nil)
+		err = importer.Start(s.cfg, write, options.Replace || options.Update, nil)
 		if err != nil {
 			return errors.Wrap(err, "Failed to build index")
 		}
-		if replace || update {
+		if options.Replace || options.Update {
 			return nil
 		}
 	} else {
