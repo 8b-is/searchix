@@ -60,6 +60,8 @@ x-frame-options = 'DENY'
 
 # Settings for the import job
 [Importer]
+# Use less memory at the expense of import performance
+LowMemory = false
 # Abort fetch and import process for all jobs if it takes longer than this value.
 Timeout = '30m0s'
 # Local time of day to run fetch/import process

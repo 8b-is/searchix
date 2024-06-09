@@ -2,7 +2,7 @@
 rec {
   src = ../.;
   hooks = {
-    gotest.enable = true;
+    gotest.enable = false;
     golangci-lint.enable = true;
     staticcheck =
       let

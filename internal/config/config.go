@@ -91,7 +91,7 @@ func mustLocalTime(in string) (time LocalTime) {
 }
 
 func GetConfig(filename string) (*Config, error) {
-	config := defaultConfig
+	config := DefaultConfig
 	if filename != "" {
 		slog.Debug("reading config", "filename", filename)
 		f, err := os.Open(filename)

@@ -39,8 +39,9 @@ func nextOccurrenceOfLocalTime(t toml.LocalTime) time.Time {
 }
 
 type IndexOptions struct {
-	Update  bool
-	Replace bool
+	Update    bool
+	Replace   bool
+	LowMemory bool
 }
 
 func (s *Server) SetupIndex(options *IndexOptions) error {
@@ -55,6 +56,9 @@ func (s *Server) SetupIndex(options *IndexOptions) error {
 	read, write, exists, err := index.OpenOrCreate(
 		s.cfg.DataPath,
 		options.Replace,
+		&index.Options{
+			LowMemory: options.LowMemory,
+		},
 	)
 	if err != nil {
 		return errors.Wrap(err, "Failed to open or create index")

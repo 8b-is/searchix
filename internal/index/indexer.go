@@ -40,7 +40,7 @@ func (e *BatchError) Error() string {
 	return e.error.Error()
 }
 
-const batchSize = 10_000
+var batchSize = 10_000
 
 func createIndexMapping() (mapping.IndexMapping, error) {
 	indexMapping := bleve.NewIndexMapping()
@@ -126,19 +126,24 @@ func createIndexMapping() (mapping.IndexMapping, error) {
 	return indexMapping, nil
 }
 
-func createIndex(indexPath string) (bleve.Index, error) {
+func createIndex(indexPath string, options *Options) (bleve.Index, error) {
 	indexMapping, err := createIndexMapping()
 	if err != nil {
 		return nil, err
+	}
+	kvconfig := make(map[string]interface{})
+	if options.LowMemory {
+		kvconfig = map[string]interface{}{
+			"PersisterNapTimeMSec":      1000,
+			"PersisterNapUnderNumFiles": 500,
+		}
 	}
 	idx, err := bleve.NewUsing(
 		indexPath,
 		indexMapping,
 		bleve.Config.DefaultIndexType,
 		bleve.Config.DefaultKVStore,
-		map[string]interface{}{
-			"nosync": true,
-		},
+		kvconfig,
 	)
 	if err != nil {
 		return nil, errors.WithMessagef(err, "unable to create index at path %s", indexPath)
@@ -182,7 +187,15 @@ func deleteIndex(dataRoot string) error {
 	return nil
 }
 
-func OpenOrCreate(dataRoot string, force bool) (*ReadIndex, *WriteIndex, bool, error) {
+type Options struct {
+	LowMemory bool
+}
+
+func OpenOrCreate(
+	dataRoot string,
+	force bool,
+	options *Options,
+) (*ReadIndex, *WriteIndex, bool, error) {
 	var err error
 	bleve.SetLog(log.Default())
 
@@ -207,7 +220,7 @@ func OpenOrCreate(dataRoot string, force bool) (*ReadIndex, *WriteIndex, bool, e
 				return nil, nil, false, err
 			}
 		}
-		idx, err = createIndex(indexPath)
+		idx, err = createIndex(indexPath, options)
 		if err != nil {
 			return nil, nil, false, err
 		}
@@ -227,7 +240,10 @@ func OpenOrCreate(dataRoot string, force bool) (*ReadIndex, *WriteIndex, bool, e
 		if err != nil {
 			return nil, nil, exists, err
 		}
+	}
 
+	if options.LowMemory {
+		batchSize = 1_000
 	}
 
 	return &ReadIndex{
@@ -362,7 +378,7 @@ func (i *WriteIndex) DeleteBySource(source string) error {
 	}
 
 	batch := i.index.NewBatch()
-	var k uint
+	var k int
 	for _, hit := range results.Hits {
 		batch.Delete(hit.ID)
 		if k++; k%batchSize == 0 {

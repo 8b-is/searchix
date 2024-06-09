@@ -18,7 +18,7 @@ const self = "'self'"
 
 const maxAge = (1 * 365 * 24 * time.Hour)
 
-var defaultConfig = Config{
+var DefaultConfig = Config{
 	DataPath: "./data",
 	Web: &Web{
 		ListenAddress: "localhost",
@@ -47,8 +47,9 @@ var defaultConfig = Config{
 		},
 	},
 	Importer: &Importer{
-		Timeout:  Duration{30 * time.Minute},
-		UpdateAt: mustLocalTime("04:00:00"),
+		LowMemory: false,
+		Timeout:   Duration{30 * time.Minute},
+		UpdateAt:  mustLocalTime("04:00:00"),
 		Sources: map[string]*Source{
 			"nixos": {
 				Name:       "NixOS",
@@ -116,7 +117,7 @@ var defaultConfig = Config{
 }
 
 func GetDefaultConfig() string {
-	out, err := toml.Marshal(&defaultConfig)
+	out, err := toml.Marshal(&DefaultConfig)
 	if err != nil {
 		panic("could not read default configuration")
 	}

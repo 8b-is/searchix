@@ -56,8 +56,9 @@ func main() {
 	}
 
 	err = s.SetupIndex(&searchix.IndexOptions{
-		Update:  *update,
-		Replace: *replace,
+		Update:    *update,
+		Replace:   *replace,
+		LowMemory: cfg.Importer.LowMemory,
 	})
 	if err != nil {
 		log.Fatalf("Failed to setup index: %v", err)
