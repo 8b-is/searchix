@@ -3,6 +3,7 @@ module searchix
 go 1.22.2
 
 require (
+	badc0de.net/pkg/flagutil v1.0.1
 	github.com/andybalholm/brotli v1.1.0
 	github.com/bcicen/jstream v1.0.1
 	github.com/blevesearch/bleve/v2 v2.4.0
@@ -48,6 +49,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/mschoch/smat v0.2.0 // indirect
 	go.etcd.io/bbolt v1.3.10 // indirect
+	golang.org/x/sync v0.6.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
 	golang.org/x/text v0.15.0 // indirect
 	google.golang.org/protobuf v1.34.1 // indirect

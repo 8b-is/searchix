@@ -1,6 +1,9 @@
 schema = 3
 
 [mod]
+  [mod."badc0de.net/pkg/flagutil"]
+    version = "v1.0.1"
+    hash = "sha256-0LRWL5DUHW3gXQhPAhUCxnUCN7HN1qKI2yZp8MrDN6M="
   [mod."github.com/RoaringBitmap/roaring"]
     version = "v1.9.3"
     hash = "sha256-LZfRufkU4UhuEcgxuCPd6divX2KIdcHp1FOt79mQV7Q="
@@ -127,6 +130,9 @@ schema = 3
   [mod."golang.org/x/net"]
     version = "v0.25.0"
     hash = "sha256-IjFfXLYNj27WLF7vpkZ6mfFXBnp+7QER3OQ0RgjxN54="
+  [mod."golang.org/x/sync"]
+    version = "v0.6.0"
+    hash = "sha256-LLims/wjDZtIqlYCVHREewcUOX4hwRwplEuZKPOJ/HI="
   [mod."golang.org/x/sys"]
     version = "v0.20.0"
     hash = "sha256-mowlaoG2k4n1c1rApWef5EMiXd3I77CsUi8jPh6pTYA="

@@ -9,6 +9,8 @@ import (
 	"os"
 	"os/signal"
 
+	"badc0de.net/pkg/flagutil"
+
 	"searchix"
 	"searchix/internal/config"
 )
@@ -27,7 +29,7 @@ var (
 )
 
 func main() {
-	flag.Parse()
+	flagutil.Parse()
 	if *version {
 		_, err := fmt.Fprintf(os.Stderr, "searchix %s\n", config.Version)
 		if err != nil {
