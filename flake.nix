@@ -15,7 +15,7 @@
       };
     };
     simple-css = {
-      url = "https://raw.githubusercontent.com/kevquirk/simple.css/v2.3.0/simple.css";
+      url = "https://raw.githubusercontent.com/kevquirk/simple.css/v2.3.1/simple.css";
       flake = false;
     };
   };
