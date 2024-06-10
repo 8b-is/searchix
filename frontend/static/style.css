@@ -14,35 +14,53 @@
 
 body {
   grid-template-columns: 1fr min(var(--min-width), 90%) 1fr;
+  font-size: unset;
+  line-height: 1.25;
 }
 
 body > header {
-  align-items: center;
+  align-items: baseline;
   display: flex;
   justify-content: center;
   padding: unset;
 }
 body > header > :only-child {
-  margin-block-start: 1ex;
+  margin-block-start: unset;
 }
 header > nav {
   width: min(var(--min-width), 90%);
   display: flex;
+  align-items: baseline;
   padding: 0.5rem 0;
 }
 header > nav a {
-  margin-bottom: 1ex;
+  margin-bottom: unset;
   font-size: 1.15rem;
 }
 nav > h1 > a {
   margin-left: unset;
   padding-left: unset;
   border: 1px transparent;
+  text-decoration: none;
 }
 body > header h1 {
   margin: unset;
   font-size: 1.15rem;
-  line-height: 2;
+}
+
+@media only screen and (max-width: 600px) {
+  header > nav {
+    display: unset;
+  }
+}
+@media only screen and (max-width: 720px) {
+  header > nav {
+    padding: 1.5ex 0;
+  }
+}
+
+main {
+  padding-top: unset;
 }
 
 form {
@@ -61,6 +79,7 @@ section {
   border: none;
   margin: unset;
   padding: unset;
+  overflow-x: auto;
 }
 
 input[type="search"] {
@@ -142,4 +161,10 @@ dialog > h2 {
 
 table {
   width: 100%;
+  margin-top: 0;
+}
+
+td,
+th {
+  padding: 0.25rem 0.5rem;
 }
