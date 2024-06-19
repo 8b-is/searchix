@@ -34,7 +34,7 @@ changelog:
 	convco changelog | prettier --stdin-filepath CHANGELOG.md > CHANGELOG.md
 
 dev:
-	watchexec --no-vcs-ignore --filter "**/*.go" --filter config.toml -r wgo run -exit ./cmd/searchix-web --live --config config.toml
+	modd
 
 reindex:
 	wgo run --exit ./cmd/searchix-web --config config.toml --replace

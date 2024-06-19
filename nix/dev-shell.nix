@@ -11,6 +11,7 @@ mkShell {
   packages = with pkgs;  [
     goEnv
 
+    modd
     brotli
     bleve
     wgo
