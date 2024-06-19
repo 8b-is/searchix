@@ -1,5 +1,35 @@
 # Changelog
 
+## [Unreleased](https://git.alanpearce.eu/searchix/diff/?id=v0.1.5&id2=HEAD) (2024-06-10)
+
+### Features
+
+-   add low-memory mode
+    ([63599c7](https://git.alanpearce.eu/searchix/commit/?id=63599c719d8e4e09548546bb366a849ef40c602b))
+-   enable configuration of flags as environment variables
+    ([a495a67](https://git.alanpearce.eu/searchix/commit/?id=a495a673d2dda7b2aa9b11217d4662367a627517))
+-   display results in a table, showing details on click
+    ([408aed0](https://git.alanpearce.eu/searchix/commit/?id=408aed03d3454330120475ca53838a2f4fe28ea3))
+-   add detail pages for packages/options
+    ([d40c0e1](https://git.alanpearce.eu/searchix/commit/?id=d40c0e188a7fe1b36887f59c4a9958faa81b3d44))
+-   use stale-while-revalidate instead of immutable asset paths
+    ([872ae5d](https://git.alanpearce.eu/searchix/commit/?id=872ae5db32c605ef385588a33673ce5fef29ff21))
+-   serve assets via immutable paths
+    ([896926a](https://git.alanpearce.eu/searchix/commit/?id=896926a63a8f2d145467b325f9b0198315e0af6d))
+-   make security headers stricter
+    ([b537694](https://git.alanpearce.eu/searchix/commit/?id=b53769462bf830f860b7d741a3d0801afdbc9aa2))
+-   enable sub-resource integrity for assets
+    ([4698a97](https://git.alanpearce.eu/searchix/commit/?id=4698a97974ae82e7bd8592828c58294b222a58ff))
+
+### Fixes
+
+-   create index metadata when index exists and meta doesn't
+    ([e665146](https://git.alanpearce.eu/searchix/commit/?id=e6651469b9e934cb4dc65f760277111a79e9ae2d))
+-   moving through search history shows no results
+    ([66b2556](https://git.alanpearce.eu/searchix/commit/?id=66b2556a6a7c911a69b231fddeefe0a939d8898d))
+-   nil pointer exception when (re-)indexing
+    ([2c4a19a](https://git.alanpearce.eu/searchix/commit/?id=2c4a19ad6cb71065d31304370708c859b4f68f6d))
+
 ### [v0.1.5](https://git.alanpearce.eu/searchix/diff/?id=v0.1.4&id2=v0.1.5) (2024-05-29)
 
 #### Features
