@@ -1,4 +1,5 @@
 :root {
+  --sans-font: -apple-system, BlinkMacSystemFont, sans-serif;
   --standard-border-radius: 0;
   --preformatted: var(--code);
   --min-width: 60rem;
