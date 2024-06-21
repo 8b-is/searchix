@@ -16,7 +16,9 @@ templ Packages(result *index.Result) {
 		</thead>
 		<tbody>
 			for _, hit := range result.Hits {
-				@packageRow(hit.Data.(nix.Package))
+				if m := convertMatch[nix.Package](hit.Data); m != nil {
+					@packageRow(*m)
+				}
 			}
 		</tbody>
 	</table>

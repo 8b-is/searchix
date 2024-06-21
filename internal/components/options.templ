@@ -15,7 +15,9 @@ templ Options(result *index.Result) {
 		</thead>
 		<tbody>
 			for _, hit := range result.Hits {
-				@optionRow(hit.Data.(nix.Option))
+				if m := convertMatch[nix.Option](hit.Data); m != nil {
+					@optionRow(*m)
+				}
 			}
 		</tbody>
 	</table>

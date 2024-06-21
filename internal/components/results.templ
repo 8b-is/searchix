@@ -2,8 +2,18 @@ package components
 
 import (
 	"strconv"
+	"log/slog"
 	"searchix/internal/nix"
 )
+
+func convertMatch[I nix.Importable](m nix.Importable) *I {
+	i, ok := m.(I)
+	if !ok {
+		slog.Warn("Converting match failed", "match", m)
+		return nil
+	}
+	return &i
+}
 
 templ Results(r ResultData) {
 	if r.Query != "" {
