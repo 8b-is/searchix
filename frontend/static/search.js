@@ -7,7 +7,7 @@ let pagination = document.getElementById("pagination");
 
 const resultsRange = new Range();
 resultsRange.setStart(results, 0);
-resultsRange.setEnd(results, 0);
+resultsRange.setEnd(results, results.childNodes.length);
 
 const detailsRange = new Range();
 detailsRange.setStartAfter(dialog.firstElementChild);
