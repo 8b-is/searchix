@@ -81,6 +81,7 @@ section {
   margin: unset;
   padding: unset;
   overflow-x: auto;
+  overflow-y: hidden;
 }
 
 input[type="search"] {
