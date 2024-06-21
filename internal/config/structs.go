@@ -4,6 +4,7 @@ package config
 // keep config structs here so that lll ignores the long lines (go doesn't support multi-line struct tags)
 
 import (
+	"fmt"
 	"log/slog"
 )
 
@@ -46,4 +47,15 @@ type Source struct {
 	Timeout    Duration     `comment:"Abort import if it takes longer than this."`
 	OutputPath string       `comment:"(Fetcher=channel) Path under ./result symlink to folder containing {options,packages}.json."`
 	Repo       Repository   `comment:"Used to generate declaration/definition links"`
+}
+
+func (source *Source) String() string {
+	switch source.Importer {
+	case Options:
+		return source.Name + " " + source.Importer.String()
+	case Packages:
+		return source.Name
+	default:
+		return fmt.Sprintf("Source(%s)", source.Name)
+	}
 }

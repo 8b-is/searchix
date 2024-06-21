@@ -31,6 +31,18 @@ func (u *URL) UnmarshalText(text []byte) (err error) {
 	return nil
 }
 
+func (u *URL) JoinPath(elems ...string) *URL {
+	return &URL{u.URL.JoinPath(elems...)}
+}
+
+func (u *URL) AddQuery(key, value string) *URL {
+	q := u.URL.Query()
+	q.Add(key, value)
+	u.RawQuery = q.Encode()
+
+	return u
+}
+
 type Duration struct {
 	time.Duration
 }

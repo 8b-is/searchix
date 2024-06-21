@@ -1,0 +1,21 @@
+package opensearch
+
+import (
+	"encoding/xml"
+	"searchix/internal/config"
+)
+
+type Description struct {
+	XMLName     xml.Name `xml:"http://a9.com/-/spec/opensearch/1.1/ OpenSearchDescription"`
+	Description string
+	LongName    string
+	ShortName   string
+	SearchForm  *config.URL `xml:"http://www.mozilla.org/2006/browser/search/ SearchForm"`
+	URL         URL         `xml:"Url"`
+}
+
+type URL struct {
+	Method   string      `xml:"method,attr"`
+	Template *config.URL `xml:"template,attr"`
+	Type     string      `xml:"type,attr"`
+}

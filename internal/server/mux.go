@@ -2,9 +2,9 @@ package server
 
 import (
 	"context"
+	"encoding/xml"
 	"fmt"
 	"io"
-	"log"
 	"log/slog"
 	"math"
 	"net/http"
@@ -18,6 +18,7 @@ import (
 	"searchix/internal/components"
 	"searchix/internal/config"
 	search "searchix/internal/index"
+	"searchix/internal/opensearch"
 
 	sentryhttp "github.com/getsentry/sentry-go/http"
 	"github.com/osdevisnot/sorvor/pkg/livereload"
@@ -32,8 +33,7 @@ type HTTPError struct {
 }
 
 var (
-	templates TemplateCollection
-	sources   []*config.Source
+	sources []*config.Source
 )
 
 func applyDevModeOverrides(cfg *config.Config) {
@@ -59,7 +59,6 @@ func NewMux(
 	index *search.ReadIndex,
 	liveReload bool,
 ) (*http.ServeMux, error) {
-	var err error
 	if cfg == nil {
 		return nil, errors.New("cfg is nil")
 	}
@@ -69,10 +68,6 @@ func NewMux(
 	sentryHandler := sentryhttp.New(sentryhttp.Options{
 		Repanic: true,
 	})
-	templates, err = loadTemplates()
-	if err != nil {
-		log.Panicf("could not load templates: %v", err)
-	}
 	sortSources(cfg.Importer.Sources)
 
 	errorHandler := createErrorHandler(cfg)
@@ -271,11 +266,6 @@ func NewMux(
 
 	createOpenSearchXMLHandler := func(importerType config.ImporterType) func(http.ResponseWriter, *http.Request) {
 		return func(w http.ResponseWriter, r *http.Request) {
-			type openSearchData struct {
-				BaseURL string
-				Source  *config.Source
-			}
-
 			source := cfg.Importer.Sources[r.PathValue("source")]
 			if source == nil || importerType != source.Importer {
 				errorHandler(w, r, http.StatusText(http.StatusNotFound), http.StatusNotFound)
@@ -285,19 +275,33 @@ func NewMux(
 
 			w.Header().Add("Cache-Control", "max-age=604800")
 			w.Header().Set("Content-Type", "application/opensearchdescription+xml")
-			err := templates["opensearch.xml"].ExecuteTemplate(
-				w,
-				"opensearch.xml.gotmpl",
-				openSearchData{
-					BaseURL: cfg.Web.BaseURL.String(),
-					Source:  source,
+			osd := &opensearch.Description{
+				ShortName:   fmt.Sprintf("Searchix %s", source),
+				LongName:    fmt.Sprintf("Search %s with Searchix", source),
+				Description: fmt.Sprintf("Search %s", source),
+				SearchForm: cfg.Web.BaseURL.JoinPath(
+					source.Importer.String(),
+					source.Key,
+					"search",
+				),
+				URL: opensearch.URL{
+					Method: "get",
+					Type:   "text/html",
+					Template: cfg.Web.BaseURL.JoinPath(
+						source.Importer.String(),
+						source.Key,
+						"search",
+					).AddQuery("query", "{searchTerms}"),
 				},
-			)
+			}
+			enc := xml.NewEncoder(w)
+			enc.Indent("", "    ")
+			err := enc.Encode(osd)
 			if err != nil {
 				// no errorHandler; HTML does not make sense here
 				http.Error(
 					w,
-					fmt.Sprintf("Template render error: %v", err),
+					fmt.Sprintf("OpenSearch XML encoding error: %v", err),
 					http.StatusInternalServerError,
 				)
 			}
@@ -340,12 +344,6 @@ func NewMux(
 				err := frontend.Rehash()
 				if err != nil {
 					slog.Error("failed to re-hash frontend assets", "error", err)
-				}
-			}
-			if path.Ext(filename) == ".gotmpl" {
-				templates, err = loadTemplates()
-				if err != nil {
-					slog.Error(fmt.Sprintf("could not reload templates: %v", err))
 				}
 			}
 			liveReload.Reload()
