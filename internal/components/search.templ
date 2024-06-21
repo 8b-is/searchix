@@ -1,0 +1,34 @@
+package components
+
+templ Search(tdata TemplateData, r ResultData) {
+	<form id="search" role="search">
+		<fieldset>
+			<legend id="legend">
+				<h2>{ sourceNameAndType(tdata.Source) } search</h2>
+			</legend>
+			<input
+				id="query"
+				aria-labelledby="legend"
+				name="query"
+				type="search"
+				value={ r.Query }
+				autofocus
+				spellcheck="false"
+			/>
+			<button>Search</button>
+		</fieldset>
+	</form>
+}
+
+templ SearchPage(tdata TemplateData, r ResultData) {
+	@Page(tdata) {
+		@script(tdata.Assets.ByPath["/static/search.js"])
+		@Search(tdata, r)
+		<section id="results" role="list" aria-label="search results">
+			{ children... }
+		</section>
+		<dialog id="dialog">
+			<button autofocus>Close</button>
+		</dialog>
+	}
+}

@@ -71,6 +71,8 @@ UpdateAt = '04:00:00'
 [Importer.Sources.darwin]
 # Human-readable name of source for generating links
 Name = 'Darwin'
+# Order in which to show source in web interface.
+Order = 1
 # Machine-readable name of source. Must be URL- and path-safe.
 Key = 'darwin'
 # Controls whether to show in the web interface and to run fetch/import jobs.
@@ -102,6 +104,8 @@ Repo = 'nix-darwin'
 [Importer.Sources.home-manager]
 # Human-readable name of source for generating links
 Name = 'Home Manager'
+# Order in which to show source in web interface.
+Order = 2
 # Machine-readable name of source. Must be URL- and path-safe.
 Key = 'home-manager'
 # Controls whether to show in the web interface and to run fetch/import jobs.
@@ -133,6 +137,8 @@ Repo = 'home-manager'
 [Importer.Sources.nixos]
 # Human-readable name of source for generating links
 Name = 'NixOS'
+# Order in which to show source in web interface.
+Order = 0
 # Machine-readable name of source. Must be URL- and path-safe.
 Key = 'nixos'
 # Controls whether to show in the web interface and to run fetch/import jobs.
@@ -164,6 +170,8 @@ Repo = 'nixpkgs'
 [Importer.Sources.nixpkgs]
 # Human-readable name of source for generating links
 Name = 'Nix Packages'
+# Order in which to show source in web interface.
+Order = 3
 # Machine-readable name of source. Must be URL- and path-safe.
 Key = 'nixpkgs'
 # Controls whether to show in the web interface and to run fetch/import jobs.

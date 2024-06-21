@@ -1,0 +1,20 @@
+package components
+
+import (
+	"searchix/internal/nix"
+)
+
+templ Detail(thing nix.Importable) {
+	switch thing.(type) {
+		case nix.Option:
+			@OptionDetail(thing.(nix.Option))
+		case nix.Package:
+			@PackageDetail(thing.(nix.Package))
+	}
+}
+
+templ DetailPage(tdata TemplateData, thing nix.Importable) {
+	@Page(tdata) {
+		@Detail(thing)
+	}
+}

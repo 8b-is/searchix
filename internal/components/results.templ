@@ -1,0 +1,44 @@
+package components
+
+import (
+	"strconv"
+	"searchix/internal/nix"
+)
+
+templ Results(r ResultData) {
+	if r.Query != "" {
+		if r.Results != nil && r.Results.Total > 0 {
+			switch r.Results.Hits[0].Data.(type) {
+				case nix.Option:
+					@Options(r.Results)
+				case nix.Package:
+					@Packages(r.Results)
+			}
+			<footer aria-label="pagination">
+				<nav id="pagination">
+					if r.Prev != "" {
+						<a class="button" href={ templ.SafeURL(r.Prev) } rel="prev">Prev</a>
+					}
+					if r.Next != "" {
+						<a class="button" href={ templ.SafeURL(r.Next) } rel="next">Next</a>
+					}
+				</nav>
+				<span role="status">{ strconv.FormatUint(r.Results.Total, 10) } results</span>
+			</footer>
+		} else {
+			<span role="status">Nothing found</span>
+		}
+	} else {
+		<br/>
+	}
+}
+
+templ ResultsPage(r ResultData) {
+	@SearchPage(r.TemplateData, r) {
+		@Results(r)
+	}
+}
+
+templ openDialogLink(attr string) {
+	<a class="open-dialog" href={ templ.SafeURL(attr) }>{ attr }</a>
+}

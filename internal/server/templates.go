@@ -95,39 +95,16 @@ func loadTemplates() (TemplateCollection, error) {
 	templateDir := "templates"
 	templates := make(TemplateCollection, 0)
 
-	layoutFile := path.Join(templateDir, "index.gotmpl")
-
-	index, err := loadTemplate(layoutFile)
-	if err != nil {
-		return nil, err
-	}
-	templates["index"] = index
-
 	glob := path.Join(templateDir, "*.gotmpl")
 	templatePaths, err := fs.Glob(frontend.Files, glob)
 	if err != nil {
 		return nil, errors.WithMessage(err, "could not glob main templates")
 	}
 	for _, fullname := range templatePaths {
-		tpl, err := loadTemplate(layoutFile, fullname)
+		tpl, err := loadTemplate(fullname)
 		if err != nil {
 			return nil, err
 		}
-		name, _ := strings.CutSuffix(path.Base(fullname), ".gotmpl")
-		templates[name] = tpl
-	}
-
-	glob = path.Join(templateDir, "blocks", "*.gotmpl")
-	templatePaths, err = fs.Glob(frontend.Files, glob)
-	if err != nil {
-		return nil, errors.WithMessage(err, "could not glob block templates")
-	}
-	for _, fullname := range templatePaths {
-		tpl, err := loadTemplate(layoutFile, glob, fullname)
-		if err != nil {
-			return nil, err
-		}
-
 		name, _ := strings.CutSuffix(path.Base(fullname), ".gotmpl")
 		templates[name] = tpl
 	}

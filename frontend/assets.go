@@ -12,8 +12,8 @@ import (
 )
 
 var Assets = &AssetCollection{
-	Scripts:     make(map[string]*Asset),
-	Stylesheets: make(map[string]*Asset),
+	Scripts:     []*Asset{},
+	Stylesheets: []*Asset{},
 	ByPath:      make(map[string]*Asset),
 }
 
@@ -25,8 +25,8 @@ type Asset struct {
 }
 
 type AssetCollection struct {
-	Scripts     map[string]*Asset
-	Stylesheets map[string]*Asset
+	Scripts     []*Asset
+	Stylesheets []*Asset
 	ByPath      map[string]*Asset
 }
 
@@ -61,7 +61,7 @@ func hashScripts() error {
 		if err != nil {
 			return err
 		}
-		Assets.Scripts[filename] = asset
+		Assets.Scripts = append(Assets.Scripts, asset)
 		Assets.ByPath[asset.URL] = asset
 	}
 
@@ -78,7 +78,7 @@ func hashStyles() error {
 		if err != nil {
 			return err
 		}
-		Assets.Stylesheets[filename] = asset
+		Assets.Stylesheets = append(Assets.Stylesheets, asset)
 		Assets.ByPath[asset.URL] = asset
 	}
 

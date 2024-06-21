@@ -7,6 +7,9 @@ schema = 3
   [mod."github.com/RoaringBitmap/roaring"]
     version = "v1.9.4"
     hash = "sha256-OKOLQ/PsH6630Vb5/9yG28TLIPGxdG9WDbAZxgK8EcI="
+  [mod."github.com/a-h/templ"]
+    version = "v0.2.707"
+    hash = "sha256-UoM2qj8E7C4NBAMhS/2jrOw0Dj/gnsyZRL4NpRCWaMo="
   [mod."github.com/andybalholm/brotli"]
     version = "v1.1.0"
     hash = "sha256-njLViV4v++ZdgOWGWzlvkefuFvA/nkugl3Ta/h1nu/0="
@@ -88,9 +91,6 @@ schema = 3
   [mod."github.com/golang/snappy"]
     version = "v0.0.4"
     hash = "sha256-Umx+5xHAQCN/Gi4HbtMhnDCSPFAXSsjVbXd8n5LhjAA="
-  [mod."github.com/google/go-cmp"]
-    version = "v0.6.0"
-    hash = "sha256-qgra5jze4iPGP0JSTVeY5qV5AvEnEu39LYAuUCIkMtg="
   [mod."github.com/json-iterator/go"]
     version = "v1.1.12"
     hash = "sha256-To8A0h+lbfZ/6zM+2PpRpY3+L6725OPC66lffq6fUoM="

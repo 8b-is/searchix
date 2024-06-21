@@ -37,6 +37,7 @@ buildGoApplication {
   patchPhase = ''
     rm -f frontend/static/base.css
     cp ${css} frontend/static/base.css
+    ${pkgs.templ}/bin/templ generate
   '';
   tags = [ "embed" ];
   ldflags = [

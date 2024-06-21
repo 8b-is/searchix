@@ -1,0 +1,35 @@
+package components
+
+import (
+	"regexp"
+
+	"searchix/internal/nix"
+
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/extension"
+	"context"
+	"io"
+)
+
+var (
+	md = goldmark.New(
+		goldmark.WithExtensions(extension.NewLinkify()),
+	)
+	firstSentenceRegexp = regexp.MustCompile(`^.*?\.[[:space:]]`)
+)
+
+func firstSentence[T ~string](text T) T {
+	if fs := firstSentenceRegexp.FindString(string(text)); fs != "" {
+		return T(fs)
+	}
+
+	return text
+}
+
+func markdown(text nix.Markdown) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+		err := md.Convert([]byte(text), w)
+
+		return err
+	})
+}

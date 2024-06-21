@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"fmt"
-	"html/template"
 	"io"
 	"log"
 	"log/slog"
@@ -16,11 +15,10 @@ import (
 	"time"
 
 	"searchix/frontend"
+	"searchix/internal/components"
 	"searchix/internal/config"
 	search "searchix/internal/index"
-	"searchix/internal/nix"
 
-	"github.com/blevesearch/bleve/v2"
 	sentryhttp "github.com/getsentry/sentry-go/http"
 	"github.com/osdevisnot/sorvor/pkg/livereload"
 	"github.com/pkg/errors"
@@ -33,36 +31,10 @@ type HTTPError struct {
 	Code    int
 }
 
-const jsSnippet = template.HTML(livereload.JsSnippet) // #nosec G203
-
-type TemplateData struct {
-	Sources       map[string]*config.Source
-	Source        config.Source
-	Query         string
-	Results       bool
-	SourceResult  *bleve.SearchResult
-	ExtraHeadHTML template.HTML
-	Code          int
-	Message       string
-	Assets        *frontend.AssetCollection
-}
-
-type ResultData struct {
-	TemplateData
-	Query          string
-	ResultsPerPage int
-	Results        *search.Result
-	Prev           string
-	Next           string
-}
-
-type DocumentData struct {
-	TemplateData
-	Document *nix.Importable
-	Children *search.Result
-}
-
-var templates TemplateCollection
+var (
+	templates TemplateCollection
+	sources   []*config.Source
+)
 
 func applyDevModeOverrides(cfg *config.Config) {
 	if len(cfg.Web.ContentSecurityPolicy.ScriptSrc) == 0 {
@@ -70,8 +42,16 @@ func applyDevModeOverrides(cfg *config.Config) {
 	}
 	cfg.Web.ContentSecurityPolicy.ScriptSrc = append(
 		cfg.Web.ContentSecurityPolicy.ScriptSrc,
+		"http://localhost:7331",
 		"'unsafe-inline'",
 	)
+}
+
+func sortSources(ss map[string]*config.Source) {
+	sources = make([]*config.Source, len(ss))
+	for _, v := range ss {
+		sources[v.Order] = v
+	}
 }
 
 func NewMux(
@@ -93,19 +73,20 @@ func NewMux(
 	if err != nil {
 		log.Panicf("could not load templates: %v", err)
 	}
+	sortSources(cfg.Importer.Sources)
 
 	errorHandler := createErrorHandler(cfg)
 
 	top := http.NewServeMux()
 	mux := http.NewServeMux()
 	mux.HandleFunc("/{$}", func(w http.ResponseWriter, r *http.Request) {
-		indexData := TemplateData{
+		indexData := components.TemplateData{
 			ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
-			Sources:       cfg.Importer.Sources,
+			Sources:       sources,
 			Assets:        frontend.Assets,
 		}
 		w.Header().Add("Cache-Control", "max-age=86400")
-		err := templates["index"].Execute(w, indexData)
+		err := components.Homepage(indexData).Render(r.Context(), w)
 		if err != nil {
 			errorHandler(w, r, err.Error(), http.StatusInternalServerError)
 		}
@@ -146,12 +127,13 @@ func NewMux(
 					errorHandler(w, r, err.Error(), http.StatusInternalServerError)
 				}
 
-				tdata := ResultData{
-					TemplateData: TemplateData{
+				tdata := components.ResultData{
+					TemplateData: components.TemplateData{
 						ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
 						Source:        *source,
-						Sources:       cfg.Importer.Sources,
+						Sources:       sources,
 						Assets:        frontend.Assets,
+						Query:         qs,
 					},
 					ResultsPerPage: search.ResultsPerPage,
 					Query:          qs,
@@ -193,9 +175,9 @@ func NewMux(
 				w.Header().Add("Vary", "Fetch")
 				if r.Header.Get("Fetch") == "true" {
 					w.Header().Add("Content-Type", "text/html; charset=utf-8")
-					err = templates[importerType.String()].ExecuteTemplate(w, "results", tdata)
+					err = components.Results(tdata).Render(r.Context(), w)
 				} else {
-					err = templates[importerType.String()].Execute(w, tdata)
+					err = components.ResultsPage(tdata).Render(r.Context(), w)
 				}
 				if err != nil {
 					slog.Error("template error", "template", importerType, "error", err)
@@ -210,13 +192,16 @@ func NewMux(
 				}
 
 				w.Header().Add("Cache-Control", "max-age=14400")
-				err = templates["search"].Execute(w, TemplateData{
-					ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
-					Sources:       cfg.Importer.Sources,
-					Source:        *source,
-					SourceResult:  sourceResult,
-					Assets:        frontend.Assets,
-				})
+				err = components.SearchPage(
+					components.TemplateData{
+						ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
+						Sources:       sources,
+						Source:        *source,
+						SourceResult:  sourceResult,
+						Assets:        frontend.Assets,
+					},
+					components.ResultData{},
+				).Render(r.Context(), w)
 				if err != nil {
 					errorHandler(w, r, err.Error(), http.StatusInternalServerError)
 
@@ -260,20 +245,20 @@ func NewMux(
 				return
 			}
 
-			tdata := DocumentData{
-				TemplateData: TemplateData{
+			tdata := components.DocumentData{
+				TemplateData: components.TemplateData{
 					ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
 					Source:        *source,
-					Sources:       cfg.Importer.Sources,
+					Sources:       sources,
 					Assets:        frontend.Assets,
 				},
 				Document: doc,
 			}
 			if r.Header.Get("Fetch") == "true" {
 				w.Header().Add("Content-Type", "text/html; charset=utf-8")
-				err = templates[importerSingular].ExecuteTemplate(w, "main", tdata)
+				err = components.Detail(*doc).Render(r.Context(), w)
 			} else {
-				err = templates[importerSingular].Execute(w, tdata)
+				err = components.DetailPage(tdata.TemplateData, *doc).Render(r.Context(), w)
 			}
 			if err != nil {
 				slog.Error("template error", "template", importerSingular, "error", err)
@@ -337,7 +322,7 @@ func NewMux(
 
 	if liveReload {
 		applyDevModeOverrides(cfg)
-		cfg.Web.ExtraHeadHTML = jsSnippet
+		cfg.Web.ExtraHeadHTML = livereload.JsSnippet
 		liveReload := livereload.New()
 		liveReload.Start()
 		top.Handle("/livereload", liveReload)

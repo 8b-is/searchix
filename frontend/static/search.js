@@ -6,8 +6,8 @@ const results = document.getElementById("results");
 let pagination = document.getElementById("pagination");
 
 const resultsRange = new Range();
-resultsRange.setStartBefore(results.firstChild);
-resultsRange.setEndAfter(results.lastChild);
+resultsRange.setStart(results, 0);
+resultsRange.setEnd(results, 0);
 
 const detailsRange = new Range();
 detailsRange.setStartAfter(dialog.firstElementChild);

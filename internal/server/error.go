@@ -3,6 +3,8 @@ package server
 import (
 	"log/slog"
 	"net/http"
+
+	"searchix/internal/components"
 	"searchix/internal/config"
 )
 
@@ -14,9 +16,9 @@ func createErrorHandler(
 		if message == "" {
 			message = http.StatusText(code)
 		}
-		indexData := TemplateData{
+		indexData := components.TemplateData{
 			ExtraHeadHTML: config.Web.ExtraHeadHTML,
-			Sources:       config.Importer.Sources,
+			Sources:       sources,
 			Code:          code,
 			Message:       message,
 		}
@@ -24,9 +26,9 @@ func createErrorHandler(
 		w.Header().Del("Vary")
 		w.WriteHeader(code)
 		if r.Header.Get("Fetch") == "true" {
-			err = templates["error"].ExecuteTemplate(w, "main", indexData)
+			err = components.Error(indexData).Render(r.Context(), w)
 		} else {
-			err = templates["error"].Execute(w, indexData)
+			err = components.ErrorPage(indexData).Render(r.Context(), w)
 		}
 		if err != nil {
 			slog.Error(

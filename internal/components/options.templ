@@ -1,0 +1,34 @@
+package components
+
+import (
+	"searchix/internal/index"
+	"searchix/internal/nix"
+)
+
+templ Options(result *index.Result) {
+	<table>
+		<thead>
+			<tr>
+				<td scope="col">Title</td>
+				<td scope="col">Description</td>
+			</tr>
+		</thead>
+		<tbody>
+			for _, hit := range result.Hits {
+				@optionRow(hit.Data.(nix.Option))
+			}
+		</tbody>
+	</table>
+}
+
+templ optionRow(o nix.Option) {
+	<tr>
+		<td>
+			@openDialogLink(o.Name)
+		</td>
+		<td>
+			@markdown(firstSentence(o.Description))
+			<dialog id={ o.Name }></dialog>
+		</td>
+	</tr>
+}

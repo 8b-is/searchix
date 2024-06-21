@@ -1,0 +1,37 @@
+package components
+
+import (
+	"searchix/frontend"
+	"searchix/internal/config"
+	search "searchix/internal/index"
+	"searchix/internal/nix"
+
+	"github.com/blevesearch/bleve/v2"
+)
+
+type TemplateData struct {
+	Sources       []*config.Source
+	Source        config.Source
+	Query         string
+	Results       bool
+	SourceResult  *bleve.SearchResult
+	ExtraHeadHTML string
+	Code          int
+	Message       string
+	Assets        *frontend.AssetCollection
+}
+
+type ResultData struct {
+	TemplateData
+	Query          string
+	ResultsPerPage int
+	Results        *search.Result
+	Prev           string
+	Next           string
+}
+
+type DocumentData struct {
+	TemplateData
+	Document *nix.Importable
+	Children *search.Result
+}

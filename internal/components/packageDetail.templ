@@ -1,0 +1,99 @@
+package components
+
+import (
+	"searchix/internal/nix"
+)
+
+func licenseName(l nix.License) string {
+	if l.FullName != "" {
+		return l.FullName
+	} else {
+		return l.Name
+	}
+}
+
+templ PackageDetail(pkg nix.Package) {
+	<h2>
+		if pkg.Broken {
+			<del>{ pkg.Attribute }</del>
+		} else {
+			{ pkg.Attribute }
+		}
+	</h2>
+	if pkg.LongDescription != "" {
+		@markdown(pkg.LongDescription)
+	} else {
+		<p>{ pkg.Description }</p>
+	}
+	<dl>
+		if pkg.MainProgram != "" {
+			<dt>Main Program</dt>
+			<dd>
+				<code>{ pkg.MainProgram }</code>
+			</dd>
+		}
+		if len(pkg.Homepages) > 0 {
+			<dt>Homepage</dt>
+			<dd>
+				<ul>
+					for _, u := range pkg.Homepages {
+						<li>
+							<a href={ templ.SafeURL(u) }>{ u }</a>
+						</li>
+					}
+				</ul>
+			</dd>
+		}
+		if pkg.Version != "" {
+			<dt>Version</dt>
+			<dd>{ pkg.Version }</dd>
+		}
+		if len(pkg.Licenses) > 0 {
+			<dt>License</dt>
+			<dd>
+				<ul>
+					for _, l := range pkg.Licenses {
+						<li>
+							if l.URL != "" {
+								<a href={ templ.SafeURL(l.URL) }>{ licenseName(l) }</a>
+							} else {
+								{ licenseName(l) }
+							}
+							if l.AppendixURL != "" {
+								<a href={ templ.SafeURL(l.AppendixURL) }>Appendix</a>
+							}
+						</li>
+					}
+				</ul>
+			</dd>
+		}
+		if len(pkg.Maintainers) > 0 {
+			<dt>Maintainers</dt>
+			<dd>
+				<ul>
+					for _, m := range pkg.Maintainers {
+						<li>
+							if m.Github != "" {
+								<a href={ joinPath("https://github.com", m.Github) }>{ m.Name }</a>
+							} else {
+								{ m.Name }
+							}
+						</li>
+					}
+				</ul>
+			</dd>
+		}
+		if pkg.Definition != "" {
+			<dt>Defined</dt>
+			<dd>
+				<a href={ templ.SafeURL(pkg.Definition) }>Source</a>
+			</dd>
+		}
+	</dl>
+}
+
+templ PackageDetailPage(tdata TemplateData, pkg nix.Package) {
+	@Page(tdata) {
+		@PackageDetail(pkg)
+	}
+}

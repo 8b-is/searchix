@@ -4,7 +4,6 @@ package config
 // keep config structs here so that lll ignores the long lines (go doesn't support multi-line struct tags)
 
 import (
-	"html/template"
 	"log/slog"
 )
 
@@ -22,7 +21,7 @@ type Web struct {
 	BaseURL               URL               `comment:"Absolute URL to this instance, useful if behind a reverse proxy"`
 	SentryDSN             string            `comment:"If set, will send server errors to Sentry"`
 	Environment           string            `comment:"Affects logging parameters. One of 'development' or 'production'"`
-	ExtraHeadHTML         template.HTML     `comment:"Content to add to HTML <head>. Can be used to override styling, add scripts, etc."`
+	ExtraHeadHTML         string            `comment:"Content to add to HTML <head>. Can be used to override styling, add scripts, etc."`
 	Headers               map[string]string `comment:"Extra headers to send with HTTP requests"`
 }
 
@@ -35,6 +34,7 @@ type Importer struct {
 
 type Source struct {
 	Name       string       `comment:"Human-readable name of source for generating links"`
+	Order      uint         `comment:"Order in which to show source in web interface."`
 	Key        string       `comment:"Machine-readable name of source. Must be URL- and path-safe."`
 	Enable     bool         `comment:"Controls whether to show in the web interface and to run fetch/import jobs."`
 	Fetcher    Fetcher      `comment:"How to fetch options.json. One of 'channel', 'channel-nixpkgs' or 'download'."`

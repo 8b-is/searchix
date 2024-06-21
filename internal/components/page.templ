@@ -1,0 +1,91 @@
+package components
+
+import (
+	"net/url"
+
+	"searchix/internal/config"
+	"searchix/frontend"
+)
+
+templ Page(tdata TemplateData) {
+	<!DOCTYPE html>
+	<html lang="en-GB">
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			<title>Searchix</title>
+			for _, sheet := range tdata.Assets.Stylesheets {
+				<link href={ sheet.URL } rel="stylesheet" integrity={ "sha256-" + sheet.Base64SHA256 }/>
+			}
+			@Unsafe(tdata.ExtraHeadHTML)
+			for _, source := range tdata.Sources {
+				<link
+					rel="search"
+					type="application/opensearchdescription+xml"
+					title={ "Searchix " + sourceNameAndType(*source) }
+					href={ string(joinPath("/", source.Importer.String(), source.Key, "opensearch.xml")) }
+				/>
+			}
+		</head>
+		<body>
+			<header>
+				<nav>
+					<h1><a href="/">Searchix</a></h1>
+					for _, source := range tdata.Sources {
+						<a
+							if tdata.Source.Name == source.Name {
+								class="current"
+								href={ joinPath("/", source.Importer.String(), source.Key, "search") }
+							} else {
+								href={ joinPathQuery(joinPath("/", source.Importer.String(), source.Key, "search"), tdata.Query) }
+							}
+						>{ source.Name }</a>
+					}
+				</nav>
+			</header>
+			<main>
+				{ children... }
+			</main>
+			<footer>
+				Made by <a href="https://alanpearce.eu">Alan Pearce</a>.
+				<a href="https://todo.sr.ht/~alanpearce/searchix">Report issues</a>
+			</footer>
+		</body>
+	</html>
+}
+
+templ script(s *frontend.Asset) {
+	<script src={ s.URL } defer integrity={ "sha256-" + s.Base64SHA256 }></script>
+}
+
+func Unsafe(html string) templ.Component {
+	return templ.ComponentFunc(func(_ context.Context, w io.Writer) (err error) {
+		_, err = io.WriteString(w, html)
+		return
+	})
+}
+
+func sourceNameAndType(source config.Source) string {
+	switch source.Importer {
+	case config.Options:
+		return source.Name + " " + source.Importer.String()
+	case config.Packages:
+		return source.Name
+	}
+	return ""
+}
+
+func joinPath(base string, parts ...string) templ.SafeURL {
+	u, err := url.JoinPath(base, parts...)
+	if err != nil {
+		panic(err)
+	}
+	return templ.SafeURL(u)
+}
+
+func joinPathQuery[T ~string](path T, query string) templ.SafeURL {
+	if query == "" {
+		return templ.SafeURL(path)
+	}
+	return templ.SafeURL(string(path) + "?query=" + url.QueryEscape(query))
+}

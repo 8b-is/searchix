@@ -53,6 +53,7 @@ var DefaultConfig = Config{
 		Sources: map[string]*Source{
 			"nixos": {
 				Name:       "NixOS",
+				Order:      0,
 				Key:        "nixos",
 				Enable:     true,
 				Importer:   Options,
@@ -67,6 +68,7 @@ var DefaultConfig = Config{
 			},
 			"darwin": {
 				Name:       "Darwin",
+				Order:      1,
 				Key:        "darwin",
 				Enable:     false,
 				Importer:   Options,
@@ -85,6 +87,7 @@ var DefaultConfig = Config{
 			},
 			"home-manager": {
 				Name:       "Home Manager",
+				Order:      2,
 				Key:        "home-manager",
 				Enable:     false,
 				Importer:   Options,
@@ -103,6 +106,7 @@ var DefaultConfig = Config{
 			},
 			"nixpkgs": {
 				Name:       "Nix Packages",
+				Order:      3,
 				Key:        "nixpkgs",
 				Enable:     true,
 				Importer:   Packages,

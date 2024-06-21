@@ -169,3 +169,14 @@ td,
 th {
   padding: 0.25rem 0.5rem;
 }
+
+ul:only-child {
+  padding-inline-start: unset;
+  margin: unset;
+}
+
+li {
+  display: inline-block;
+  margin-right: 1ex;
+  list-style: none;
+}

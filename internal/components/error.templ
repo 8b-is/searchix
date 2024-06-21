@@ -1,0 +1,18 @@
+package components
+
+import (
+	"strconv"
+)
+
+templ Error(tdata TemplateData) {
+	<p class="notice error">
+		{ strconv.Itoa(tdata.Code) }
+		{ tdata.Message }
+	</p>
+}
+
+templ ErrorPage(tdata TemplateData) {
+	@Page(tdata) {
+		@Error(tdata)
+	}
+}
