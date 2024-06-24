@@ -182,9 +182,6 @@ addEventListener("popstate", function (ev) {
       queryInput.value = ev.state.input;
       renderResults(ev.state.results);
     }
-    if (ev.state.details !== null) {
-      renderDetails(ev.state.details);
-    }
   } else {
     resultsRange.deleteContents();
     search.reset();
