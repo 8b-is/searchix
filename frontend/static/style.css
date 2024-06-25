@@ -181,3 +181,7 @@ li {
   margin-right: 1ex;
   list-style: none;
 }
+
+p:last-child {
+  margin-bottom: unset;
+}
