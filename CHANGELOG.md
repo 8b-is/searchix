@@ -1,8 +1,26 @@
 # Changelog
 
-## [Unreleased](https://git.alanpearce.eu/searchix/diff/?id=v0.1.5&id2=HEAD) (2024-06-10)
+## [v0.1.7](https://git.alanpearce.eu/searchix/diff/?id=v0.1.6&id2=v0.1.7) (2024-06-29)
 
 ### Features
+
+-   add message for users with javascript disabled
+    ([e500a10](https://git.alanpearce.eu/searchix/commit/?id=e500a1089797eee1b027d5237b2e4f140004098c))
+
+### Fixes
+
+-   blank modal when using browser navigation
+    ([8ef4bc9](https://git.alanpearce.eu/searchix/commit/?id=8ef4bc9b1f16dd6395d0e0daa85ada9b8db12015))
+-   duplicated results tables via JS search
+    ([e0d86be](https://git.alanpearce.eu/searchix/commit/?id=e0d86bec7c9e8bedd1e71173b486668e16ec7c2e))
+-   panic rendering results
+    ([dbeddce](https://git.alanpearce.eu/searchix/commit/?id=dbeddced4046cb5756af2604f5cb6734b3e7cee6))
+-   incorrect formatting of options results headers
+    ([107d54a](https://git.alanpearce.eu/searchix/commit/?id=107d54a4c4a415f3581a452878cdd625f7f2634a))
+
+### [v0.1.6](https://git.alanpearce.eu/searchix/diff/?id=v0.1.5&id2=v0.1.6) (2024-06-19)
+
+#### Features
 
 -   add low-memory mode
     ([63599c7](https://git.alanpearce.eu/searchix/commit/?id=63599c719d8e4e09548546bb366a849ef40c602b))
@@ -21,7 +39,7 @@
 -   enable sub-resource integrity for assets
     ([4698a97](https://git.alanpearce.eu/searchix/commit/?id=4698a97974ae82e7bd8592828c58294b222a58ff))
 
-### Fixes
+#### Fixes
 
 -   create index metadata when index exists and meta doesn't
     ([e665146](https://git.alanpearce.eu/searchix/commit/?id=e6651469b9e934cb4dc65f760277111a79e9ae2d))
