@@ -44,7 +44,7 @@ buildGoApplication {
     "-s"
     "-w"
     "-X"
-    "searchix/internal/config.Version=${version}"
+    "go.alanpearce.eu/searchix/internal/config.Version=${version}"
   ];
 
   modules = ../gomod2nix.toml;
