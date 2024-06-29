@@ -7,11 +7,12 @@ import (
 	"os"
 	"os/exec"
 	"path"
-	"searchix/internal/config"
-	"searchix/internal/index"
 	"strconv"
 	"strings"
 	"time"
+
+	"go.alanpearce.eu/searchix/internal/config"
+	"go.alanpearce.eu/searchix/internal/index"
 
 	"github.com/pkg/errors"
 )

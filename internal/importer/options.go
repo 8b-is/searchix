@@ -5,8 +5,9 @@ import (
 	"io"
 	"log/slog"
 	"reflect"
-	"searchix/internal/config"
-	"searchix/internal/nix"
+
+	"go.alanpearce.eu/searchix/internal/config"
+	"go.alanpearce.eu/searchix/internal/nix"
 
 	"github.com/bcicen/jstream"
 	"github.com/mitchellh/mapstructure"

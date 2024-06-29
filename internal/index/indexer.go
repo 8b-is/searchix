@@ -10,9 +10,10 @@ import (
 	"math"
 	"os"
 	"path"
-	"searchix/internal/file"
-	"searchix/internal/nix"
 	"slices"
+
+	"go.alanpearce.eu/searchix/internal/file"
+	"go.alanpearce.eu/searchix/internal/nix"
 
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"

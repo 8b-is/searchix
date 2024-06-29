@@ -4,8 +4,8 @@ import (
 	"log/slog"
 	"net/http"
 
-	"searchix/internal/components"
-	"searchix/internal/config"
+	"go.alanpearce.eu/searchix/internal/components"
+	"go.alanpearce.eu/searchix/internal/config"
 )
 
 func createErrorHandler(

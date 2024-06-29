@@ -8,10 +8,10 @@ import (
 	"sync"
 	"time"
 
-	"searchix/internal/config"
-	"searchix/internal/importer"
-	"searchix/internal/index"
-	"searchix/internal/server"
+	"go.alanpearce.eu/searchix/internal/config"
+	"go.alanpearce.eu/searchix/internal/importer"
+	"go.alanpearce.eu/searchix/internal/index"
+	"go.alanpearce.eu/searchix/internal/server"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/pelletier/go-toml/v2"

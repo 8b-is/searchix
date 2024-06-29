@@ -1,10 +1,10 @@
 package components
 
 import (
-	"searchix/frontend"
-	"searchix/internal/config"
-	search "searchix/internal/index"
-	"searchix/internal/nix"
+	"go.alanpearce.eu/searchix/frontend"
+	"go.alanpearce.eu/searchix/internal/config"
+	search "go.alanpearce.eu/searchix/internal/index"
+	"go.alanpearce.eu/searchix/internal/nix"
 
 	"github.com/blevesearch/bleve/v2"
 )

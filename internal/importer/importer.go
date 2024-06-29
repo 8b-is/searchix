@@ -3,9 +3,10 @@ package importer
 import (
 	"context"
 	"log/slog"
-	"searchix/internal/index"
-	"searchix/internal/nix"
 	"sync"
+
+	"go.alanpearce.eu/searchix/internal/index"
+	"go.alanpearce.eu/searchix/internal/nix"
 )
 
 type Importer interface {

@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"log/slog"
 	"os/exec"
-	"searchix/internal/config"
-	"searchix/internal/fetcher"
-	"searchix/internal/index"
 	"slices"
 	"strings"
 	"time"
+
+	"go.alanpearce.eu/searchix/internal/config"
+	"go.alanpearce.eu/searchix/internal/fetcher"
+	"go.alanpearce.eu/searchix/internal/index"
 
 	"github.com/pkg/errors"
 )

@@ -11,8 +11,8 @@ import (
 
 	"badc0de.net/pkg/flagutil"
 
-	"searchix"
-	"searchix/internal/config"
+	"go.alanpearce.eu/searchix"
+	"go.alanpearce.eu/searchix/internal/config"
 )
 
 var (

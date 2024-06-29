@@ -2,7 +2,8 @@ package nix
 
 import (
 	"encoding/gob"
-	"searchix/internal/config"
+
+	"go.alanpearce.eu/searchix/internal/config"
 )
 
 type Importable interface {

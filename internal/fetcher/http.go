@@ -6,9 +6,10 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
-	"searchix/internal/config"
 	"strings"
 	"time"
+
+	"go.alanpearce.eu/searchix/internal/config"
 
 	"github.com/andybalholm/brotli"
 	"github.com/pkg/errors"

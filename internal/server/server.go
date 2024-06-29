@@ -5,10 +5,11 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
-	"searchix/internal/config"
-	"searchix/internal/index"
 	"strconv"
 	"time"
+
+	"go.alanpearce.eu/searchix/internal/config"
+	"go.alanpearce.eu/searchix/internal/index"
 
 	"github.com/pkg/errors"
 	"golang.org/x/net/http2"

@@ -2,9 +2,10 @@ package importer
 
 import (
 	"log/slog"
-	"searchix/internal/config"
-	"searchix/internal/index"
 	"testing"
+
+	"go.alanpearce.eu/searchix/internal/config"
+	"go.alanpearce.eu/searchix/internal/index"
 )
 
 var cfg = config.DefaultConfig

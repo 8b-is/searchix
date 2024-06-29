@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"log/slog"
 	"os"
-	"searchix/internal/file"
 	"time"
+
+	"go.alanpearce.eu/searchix/internal/file"
 
 	"github.com/pkg/errors"
 )

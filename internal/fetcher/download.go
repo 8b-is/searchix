@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"log/slog"
 	"net/url"
-	"searchix/internal/config"
-	"searchix/internal/index"
+
+	"go.alanpearce.eu/searchix/internal/config"
+	"go.alanpearce.eu/searchix/internal/index"
 
 	"github.com/pkg/errors"
 )

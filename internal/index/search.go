@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
-	"searchix/internal/config"
-	"searchix/internal/nix"
+
+	"go.alanpearce.eu/searchix/internal/config"
+	"go.alanpearce.eu/searchix/internal/nix"
 
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/standard"

@@ -14,11 +14,11 @@ import (
 	"strconv"
 	"time"
 
-	"searchix/frontend"
-	"searchix/internal/components"
-	"searchix/internal/config"
-	search "searchix/internal/index"
-	"searchix/internal/opensearch"
+	"go.alanpearce.eu/searchix/frontend"
+	"go.alanpearce.eu/searchix/internal/components"
+	"go.alanpearce.eu/searchix/internal/config"
+	search "go.alanpearce.eu/searchix/internal/index"
+	"go.alanpearce.eu/searchix/internal/opensearch"
 
 	sentryhttp "github.com/getsentry/sentry-go/http"
 	"github.com/osdevisnot/sorvor/pkg/livereload"

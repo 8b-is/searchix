@@ -1,4 +1,4 @@
-module searchix
+module go.alanpearce.eu/searchix
 
 go 1.22.2
 

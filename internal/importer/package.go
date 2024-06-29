@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 	"io"
 	"reflect"
-	"searchix/internal/config"
-	"searchix/internal/nix"
 	"strings"
+
+	"go.alanpearce.eu/searchix/internal/config"
+	"go.alanpearce.eu/searchix/internal/nix"
 
 	"github.com/bcicen/jstream"
 	"github.com/mitchellh/mapstructure"
