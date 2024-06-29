@@ -31,7 +31,9 @@ precommit:
 	nix-build -A pre-commit-check
 
 changelog:
-	convco changelog | prettier --stdin-filepath CHANGELOG.md > CHANGELOG.md
+	convco changelog -u $(convco version --bump) | \
+		sd -F HEAD $(convco version --print-prefix --bump) | \
+		prettier --stdin-filepath CHANGELOG.md > CHANGELOG.md
 
 dev:
 	modd
