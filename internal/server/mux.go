@@ -120,6 +120,8 @@ func NewMux(
 					}
 					slog.Error("search error", "error", err)
 					errorHandler(w, r, err.Error(), http.StatusInternalServerError)
+
+					return
 				}
 
 				tdata := components.ResultData{
