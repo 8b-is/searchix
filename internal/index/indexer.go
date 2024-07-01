@@ -5,8 +5,6 @@ import (
 	"context"
 	"encoding/gob"
 	"io/fs"
-	"log"
-	"log/slog"
 	"math"
 	"os"
 	"path"
@@ -14,6 +12,8 @@ import (
 
 	"go.alanpearce.eu/searchix/internal/file"
 	"go.alanpearce.eu/searchix/internal/nix"
+	"go.alanpearce.eu/x/log"
+	"go.uber.org/zap"
 
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
@@ -30,6 +30,7 @@ import (
 
 type WriteIndex struct {
 	index bleve.Index
+	log   *log.Logger
 	Meta  *Meta
 }
 
@@ -190,6 +191,7 @@ func deleteIndex(dataRoot string) error {
 
 type Options struct {
 	LowMemory bool
+	Logger    *log.Logger
 }
 
 func OpenOrCreate(
@@ -198,7 +200,7 @@ func OpenOrCreate(
 	options *Options,
 ) (*ReadIndex, *WriteIndex, bool, error) {
 	var err error
-	bleve.SetLog(log.Default())
+	bleve.SetLog(zap.NewStdLog(options.Logger.Named("bleve").GetLogger()))
 
 	indexPath := path.Join(dataRoot, indexBaseName)
 	metaPath := path.Join(dataRoot, metaBaseName)
@@ -226,7 +228,7 @@ func OpenOrCreate(
 			return nil, nil, false, err
 		}
 
-		meta, err = createMeta(metaPath)
+		meta, err = createMeta(metaPath, options.Logger)
 		if err != nil {
 			return nil, nil, false, err
 		}
@@ -237,7 +239,7 @@ func OpenOrCreate(
 			return nil, nil, exists, errors.WithMessagef(err, "could not open index at path %s", indexPath)
 		}
 
-		meta, err = openMeta(metaPath)
+		meta, err = openMeta(metaPath, options.Logger)
 		if err != nil {
 			return nil, nil, exists, err
 		}
@@ -248,12 +250,14 @@ func OpenOrCreate(
 	}
 
 	return &ReadIndex{
-			idx,
-			meta,
+			index: idx,
+			log:   options.Logger,
+			meta:  meta,
 		},
 		&WriteIndex{
-			idx,
-			meta,
+			index: idx,
+			log:   options.Logger,
+			Meta:  meta,
 		},
 		exists,
 		nil
@@ -280,7 +284,7 @@ func (i *WriteIndex) Import(
 		for obj := range objects {
 			select {
 			case <-ctx.Done():
-				slog.Warn("import aborted")
+				i.log.Warn("import aborted")
 
 				break outer
 			default:
@@ -305,7 +309,7 @@ func (i *WriteIndex) Import(
 			field := document.NewTextFieldWithIndexingOptions("_data", nil, data.Bytes(), indexAPI.StoreField)
 			newDoc := doc.AddField(field)
 
-			// slog.Debug("adding object to index", "name", opt.Name)
+			// log.Debug("adding object to index", "name", opt.Name)
 			err = batch.IndexAdvanced(newDoc)
 
 			if err != nil {
@@ -340,7 +344,7 @@ func (i *WriteIndex) Flush(batch *bleve.Batch) error {
 			error: errors.New("no documents to flush"),
 		}
 	}
-	slog.Debug("flushing batch", "size", size)
+	i.log.Debug("flushing batch", "size", size)
 
 	err := i.index.Batch(batch)
 	if err != nil {

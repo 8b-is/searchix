@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"log/slog"
 	"net"
 	"net/http"
 	"strconv"
@@ -10,6 +9,7 @@ import (
 
 	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/index"
+	"go.alanpearce.eu/x/log"
 
 	"github.com/pkg/errors"
 	"golang.org/x/net/http2"
@@ -18,18 +18,25 @@ import (
 
 type Server struct {
 	cfg      *config.Config
+	log      *log.Logger
 	server   *http.Server
 	listener net.Listener
 }
 
-func New(conf *config.Config, index *index.ReadIndex, liveReload bool) (*Server, error) {
-	mux, err := NewMux(conf, index, liveReload)
+func New(
+	conf *config.Config,
+	index *index.ReadIndex,
+	log *log.Logger,
+	liveReload bool,
+) (*Server, error) {
+	mux, err := NewMux(conf, index, log, liveReload)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Server{
 		cfg: conf,
+		log: log,
 		server: &http.Server{
 			Handler: http.MaxBytesHandler(
 				h2c.NewHandler(mux, &http2.Server{
@@ -56,7 +63,7 @@ func (s *Server) Start() error {
 	s.listener = l
 
 	if s.cfg.Web.Environment == "development" {
-		slog.Info(
+		s.log.Info(
 			"server listening on",
 			"url",
 			s.cfg.Web.BaseURL.String(),
@@ -71,19 +78,19 @@ func (s *Server) Start() error {
 }
 
 func (s *Server) Stop() chan struct{} {
-	slog.Debug("stop called")
+	s.log.Debug("stop called")
 
 	idleConnsClosed := make(chan struct{})
 
 	go func() {
-		slog.Debug("shutting down server")
+		s.log.Debug("shutting down server")
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 		err := s.server.Shutdown(ctx)
-		slog.Debug("server shut down")
+		s.log.Debug("server shut down")
 		if err != nil {
 			// Error from closing listeners, or context timeout:
-			slog.Error("error shutting down server", "error", err)
+			s.log.Error("error shutting down server", "error", err)
 		}
 		s.listener.Close()
 		close(idleConnsClosed)

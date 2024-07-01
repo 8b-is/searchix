@@ -3,37 +3,41 @@ package server
 import (
 	"fmt"
 	"io/fs"
-	"log/slog"
 	"os"
 	"path/filepath"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/pkg/errors"
+	"go.alanpearce.eu/x/log"
 )
 
 type FileWatcher struct {
-	*fsnotify.Watcher
+	watcher *fsnotify.Watcher
+	log     *log.Logger
 }
 
-func NewFileWatcher() (*FileWatcher, error) {
+func NewFileWatcher(log *log.Logger) (*FileWatcher, error) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return nil, errors.WithMessage(err, "could not create watcher")
 	}
 
-	return &FileWatcher{watcher}, nil
+	return &FileWatcher{
+		watcher,
+		log,
+	}, nil
 }
 
-func (watcher FileWatcher) AddRecursive(from string) error {
-	slog.Debug(fmt.Sprintf("watching files under %s", from))
+func (i FileWatcher) AddRecursive(from string) error {
+	i.log.Debug(fmt.Sprintf("watching files under %s", from))
 	err := filepath.WalkDir(from, func(path string, entry fs.DirEntry, err error) error {
 		if err != nil {
 			return errors.WithMessagef(err, "could not walk directory %s", path)
 		}
 		if entry.IsDir() {
-			slog.Debug(fmt.Sprintf("adding directory %s to watcher", path))
-			if err = watcher.Add(path); err != nil {
+			i.log.Debug(fmt.Sprintf("adding directory %s to watcher", path))
+			if err = i.watcher.Add(path); err != nil {
 				return errors.WithMessagef(err, "could not add directory %s to watcher", path)
 			}
 		}
@@ -44,18 +48,18 @@ func (watcher FileWatcher) AddRecursive(from string) error {
 	return errors.WithMessage(err, "error walking directory tree")
 }
 
-func (watcher FileWatcher) Start(callback func(string)) {
+func (i FileWatcher) Start(callback func(string)) {
 	for {
 		select {
-		case event := <-watcher.Events:
+		case event := <-i.watcher.Events:
 			if event.Has(fsnotify.Create) || event.Has(fsnotify.Rename) {
 				f, err := os.Stat(event.Name)
 				if err != nil {
-					slog.Error(fmt.Sprintf("error handling %s event: %v", event.Op.String(), err))
+					i.log.Error(fmt.Sprintf("error handling %s event: %v", event.Op.String(), err))
 				} else if f.IsDir() {
-					err = watcher.Add(event.Name)
+					err = i.watcher.Add(event.Name)
 					if err != nil {
-						slog.Error(fmt.Sprintf("error adding new folder to watcher: %v", err))
+						i.log.Error(fmt.Sprintf("error adding new folder to watcher: %v", err))
 					}
 				}
 			}
@@ -63,8 +67,8 @@ func (watcher FileWatcher) Start(callback func(string)) {
 				callback(event.Name)
 				time.Sleep(500 * time.Millisecond)
 			}
-		case err := <-watcher.Errors:
-			slog.Error(fmt.Sprintf("error in watcher: %v", err))
+		case err := <-i.watcher.Errors:
+			i.log.Error(fmt.Sprintf("error in watcher: %v", err))
 		}
 	}
 }

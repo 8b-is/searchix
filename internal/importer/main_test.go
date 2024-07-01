@@ -1,26 +1,27 @@
 package importer
 
 import (
-	"log/slog"
 	"testing"
 
 	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/index"
+	"go.alanpearce.eu/x/log"
 )
 
 var cfg = config.DefaultConfig
 
 func BenchmarkImporterLowMemory(b *testing.B) {
 	tmp := b.TempDir()
-	cfg.LogLevel = slog.LevelDebug
+	logger := log.Configure(false)
 	_, write, _, err := index.OpenOrCreate(tmp, false, &index.Options{
 		LowMemory: true,
+		Logger:    logger.Named("index"),
 	})
 	if err != nil {
 		b.Fatal(err)
 	}
 
-	err = Start(&cfg, write, false, &[]string{"nixpkgs"})
+	err = Start(&cfg, logger.Named("importer"), write, false, &[]string{"nixpkgs"})
 	if err != nil {
 		b.Fatal(err)
 	}

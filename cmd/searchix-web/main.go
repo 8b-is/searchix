@@ -4,8 +4,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"log"
-	"log/slog"
 	"os"
 	"os/signal"
 
@@ -13,6 +11,7 @@ import (
 
 	"go.alanpearce.eu/searchix"
 	"go.alanpearce.eu/searchix/internal/config"
+	"go.alanpearce.eu/x/log"
 )
 
 var (
@@ -22,10 +21,10 @@ var (
 		false,
 		"print default configuration and exit",
 	)
-	liveReload = flag.Bool("live", false, "whether to enable live reloading (development)")
-	replace    = flag.Bool("replace", false, "replace existing index and exit")
-	update     = flag.Bool("update", false, "update index and exit")
-	version    = flag.Bool("version", false, "print version information")
+	dev     = flag.Bool("dev", false, "enable live reloading and nicer logging")
+	replace = flag.Bool("replace", false, "replace existing index and exit")
+	update  = flag.Bool("update", false, "update index and exit")
+	version = flag.Bool("version", false, "print version information")
 )
 
 func main() {
@@ -45,23 +44,28 @@ func main() {
 		os.Exit(0)
 	}
 
-	cfg, err := config.GetConfig(*configFile)
+	logger := log.Configure(!*dev)
+
+	cfg, err := config.GetConfig(*configFile, logger)
 	if err != nil {
-		// only use log functions after the config file has been read successfully
-		log.Fatalf("Failed to parse config file: %v", err)
+		logger.Fatal("Failed to parse config file", "error", err)
 	}
-	s, err := searchix.New(cfg)
+
+	log.SetLevel(cfg.LogLevel)
+
+	s, err := searchix.New(cfg, logger)
 	if err != nil {
-		log.Fatalf("Failed to initialise searchix: %v", err)
+		logger.Fatal("Failed to initialise searchix", "error", err)
 	}
 
 	err = s.SetupIndex(&searchix.IndexOptions{
 		Update:    *update,
 		Replace:   *replace,
 		LowMemory: cfg.Importer.LowMemory,
+		Logger:    logger,
 	})
 	if err != nil {
-		log.Fatalf("Failed to setup index: %v", err)
+		logger.Fatal("Failed to setup index", "error", err)
 	}
 
 	if *replace || *update {
@@ -72,15 +76,15 @@ func main() {
 	defer cancel()
 
 	go func() {
-		err = s.Start(ctx, *liveReload)
+		err = s.Start(ctx, *dev)
 		if err != nil {
 			// Error starting or closing listener:
-			log.Fatalf("error: %v", err)
+			logger.Fatal("error", "error", err)
 		}
 	}()
 
 	<-ctx.Done()
-	slog.Debug("calling stop")
+	logger.Debug("calling stop")
 	s.Stop()
-	slog.Debug("done")
+	logger.Debug("done")
 }

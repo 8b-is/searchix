@@ -7,6 +7,7 @@ import (
 
 	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/nix"
+	"go.alanpearce.eu/x/log"
 
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/standard"
@@ -29,6 +30,7 @@ type Result struct {
 
 type ReadIndex struct {
 	index bleve.Index
+	log   *log.Logger
 	meta  *Meta
 }
 

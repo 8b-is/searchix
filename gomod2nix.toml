@@ -4,6 +4,9 @@ schema = 3
   [mod."badc0de.net/pkg/flagutil"]
     version = "v1.0.1"
     hash = "sha256-0LRWL5DUHW3gXQhPAhUCxnUCN7HN1qKI2yZp8MrDN6M="
+  [mod."github.com/Code-Hex/dd"]
+    version = "v1.1.0"
+    hash = "sha256-9aoekzjMXuJmR0/7bfu4y3SfcWBgdfYybB7gt4sNKfk="
   [mod."github.com/RoaringBitmap/roaring"]
     version = "v1.9.4"
     hash = "sha256-OKOLQ/PsH6630Vb5/9yG28TLIPGxdG9WDbAZxgK8EcI="
@@ -115,18 +118,30 @@ schema = 3
   [mod."github.com/pkg/errors"]
     version = "v0.9.1"
     hash = "sha256-mNfQtcrQmu3sNg/7IwiieKWOgFQOVVe2yXgKBpe/wZw="
-  [mod."github.com/shengyanli1982/law"]
-    version = "v0.1.16"
-    hash = "sha256-UsO5qqKiREvwlz3JDKFAJFmXEu3JHYZOXibGgcgPNGY="
   [mod."github.com/stoewer/go-strcase"]
     version = "v1.3.0"
     hash = "sha256-X0ilcefeqVQ44B9WT6euCMcigs7oLFypOQaGI33kGr8="
+  [mod."github.com/sykesm/zap-logfmt"]
+    version = "v0.0.4"
+    hash = "sha256-KXVFtOU54chusK8AhZrzrvbbNmzq1mNrhs/7OmO+huE="
+  [mod."github.com/thessem/zap-prettyconsole"]
+    version = "v0.5.0"
+    hash = "sha256-bOhManZjabZYHZwsaobaM9aPW+sUeqIfV+UnQLMaz54="
   [mod."github.com/yuin/goldmark"]
     version = "v1.7.2"
     hash = "sha256-0rjUJP5WJy6227Epkgm/UHU9xzvrOAvYW+Y3EC+MkTE="
+  [mod."go.alanpearce.eu/x"]
+    version = "v0.0.0-20240701200753-a70ddb349b02"
+    hash = "sha256-TRQgdPye/Q9LiM1XCDgxNrHTZKtSzuJ7lbNbWjkZvU4="
   [mod."go.etcd.io/bbolt"]
     version = "v1.3.10"
     hash = "sha256-uEnz6jmmgT+hlwdZ8ns5NCJSbZcB4i123FF2cn2CbQA="
+  [mod."go.uber.org/multierr"]
+    version = "v1.11.0"
+    hash = "sha256-Lb6rHHfR62Ozg2j2JZy3MKOMKdsfzd1IYTR57r3Mhp0="
+  [mod."go.uber.org/zap"]
+    version = "v1.27.0"
+    hash = "sha256-8655KDrulc4Das3VRduO9MjCn8ZYD5WkULjCvruaYsU="
   [mod."golang.org/x/net"]
     version = "v0.26.0"
     hash = "sha256-WfY33QERNbcIiDkH3+p2XGrAVqvWBQfc8neUt6TH6dQ="
@@ -139,3 +154,6 @@ schema = 3
   [mod."google.golang.org/protobuf"]
     version = "v1.34.2"
     hash = "sha256-nMTlrDEE2dbpWz50eQMPBQXCyQh4IdjrTIccaU0F3m0="
+  [mod."moul.io/zapfilter"]
+    version = "v1.7.0"
+    hash = "sha256-H6j5h8w123Y7d0zvKGkL5jiRYICtjmgzd2P/eeNaLrs="

@@ -47,7 +47,7 @@ dev:
 	modd
 
 reindex:
-	wgo run --exit ./cmd/searchix-web --config config.toml --replace
+	wgo run --exit ./cmd/searchix-web --config config.toml --replace --dev
 
 update:
-	wgo run --exit ./cmd/searchix-web --config config.toml --update
+	wgo run --exit ./cmd/searchix-web --config config.toml --update --dev

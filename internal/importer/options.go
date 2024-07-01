@@ -3,11 +3,11 @@ package importer
 import (
 	"context"
 	"io"
-	"log/slog"
 	"reflect"
 
 	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/nix"
+	"go.alanpearce.eu/x/log"
 
 	"github.com/bcicen/jstream"
 	"github.com/mitchellh/mapstructure"
@@ -35,7 +35,7 @@ type nixOptionJSON struct {
 	Type            string
 }
 
-func convertValue(nj *nixValueJSON) *nix.Value {
+func (i *OptionIngester) convertValue(nj *nixValueJSON) *nix.Value {
 	if nj == nil {
 		return nil
 	}
@@ -49,7 +49,7 @@ func convertValue(nj *nixValueJSON) *nix.Value {
 			Markdown: nix.Markdown(nj.Text),
 		}
 	default:
-		slog.Warn("got unexpected Value type", "type", nj.Type, "text", nj.Text)
+		i.log.Warn("got unexpected Value type", "type", nj.Type, "text", nj.Text)
 
 		return nil
 	}
@@ -58,14 +58,20 @@ func convertValue(nj *nixValueJSON) *nix.Value {
 type OptionIngester struct {
 	dec     *jstream.Decoder
 	ms      *mapstructure.Decoder
+	log     *log.Logger
 	optJSON nixOptionJSON
 	infile  io.ReadCloser
 	source  *config.Source
 }
 
-func NewOptionProcessor(infile io.ReadCloser, source *config.Source) (*OptionIngester, error) {
+func NewOptionProcessor(
+	infile io.ReadCloser,
+	source *config.Source,
+	log *log.Logger,
+) (*OptionIngester, error) {
 	i := OptionIngester{
 		dec:     jstream.NewDecoder(infile, 1).EmitKV(),
+		log:     log,
 		optJSON: nixOptionJSON{},
 		infile:  infile,
 		source:  source,
@@ -163,14 +169,14 @@ func (i *OptionIngester) Process(ctx context.Context) (<-chan nix.Importable, <-
 				decs[i] = nix.Link(d)
 			}
 
-			// slog.Debug("sending option", "name", kv.Key)
+			// log.Debug("sending option", "name", kv.Key)
 			results <- nix.Option{
 				Name:            kv.Key,
 				Source:          i.source.Key,
 				Declarations:    decs,
-				Default:         convertValue(i.optJSON.Default),
+				Default:         i.convertValue(i.optJSON.Default),
 				Description:     nix.Markdown(i.optJSON.Description),
-				Example:         convertValue(i.optJSON.Example),
+				Example:         i.convertValue(i.optJSON.Example),
 				RelatedPackages: nix.Markdown(i.optJSON.RelatedPackages),
 				Loc:             i.optJSON.Loc,
 				Type:            i.optJSON.Type,

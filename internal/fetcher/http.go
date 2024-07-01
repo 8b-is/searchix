@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -13,6 +12,7 @@ import (
 
 	"github.com/andybalholm/brotli"
 	"github.com/pkg/errors"
+	"go.alanpearce.eu/x/log"
 )
 
 type brotliReadCloser struct {
@@ -33,6 +33,7 @@ func (r *brotliReadCloser) Close() error {
 
 func fetchFileIfNeeded(
 	ctx context.Context,
+	log *log.Logger,
 	mtime time.Time,
 	url string,
 ) (body io.ReadCloser, newMtime time.Time, err error) {
@@ -68,7 +69,7 @@ func fetchFileIfNeeded(
 	case http.StatusOK:
 		newMtime, err = time.Parse(time.RFC1123, res.Header.Get("Last-Modified"))
 		if err != nil {
-			slog.Warn(
+			log.Warn(
 				"could not parse Last-Modified header from response",
 				"value",
 				res.Header.Get("Last-Modified"),
@@ -78,7 +79,7 @@ func fetchFileIfNeeded(
 
 		switch ce := res.Header.Get("Content-Encoding"); ce {
 		case "br":
-			slog.Debug("using brotli encoding")
+			log.Debug("using brotli encoding")
 			body = newBrotliReader(res.Body)
 		case "", "identity", "gzip":
 			body = res.Body

@@ -2,16 +2,11 @@ package components
 
 import (
 	"strconv"
-	"log/slog"
 	"go.alanpearce.eu/searchix/internal/nix"
 )
 
 func convertMatch[I nix.Importable](m nix.Importable) *I {
-	i, ok := m.(I)
-	if !ok {
-		slog.Warn("Converting match failed", "match", m)
-		return nil
-	}
+	i := m.(I)
 	return &i
 }
 

@@ -2,8 +2,6 @@ package searchix
 
 import (
 	"context"
-	"log"
-	"log/slog"
 	"slices"
 	"sync"
 	"time"
@@ -12,6 +10,7 @@ import (
 	"go.alanpearce.eu/searchix/internal/importer"
 	"go.alanpearce.eu/searchix/internal/index"
 	"go.alanpearce.eu/searchix/internal/server"
+	"go.alanpearce.eu/x/log"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/pelletier/go-toml/v2"
@@ -42,6 +41,7 @@ type IndexOptions struct {
 	Update    bool
 	Replace   bool
 	LowMemory bool
+	Logger    *log.Logger
 }
 
 func (s *Server) SetupIndex(options *IndexOptions) error {
@@ -58,6 +58,7 @@ func (s *Server) SetupIndex(options *IndexOptions) error {
 		options.Replace,
 		&index.Options{
 			LowMemory: options.LowMemory,
+			Logger:    options.Logger.Named("index"),
 		},
 	)
 	if err != nil {
@@ -67,7 +68,7 @@ func (s *Server) SetupIndex(options *IndexOptions) error {
 	s.writeIndex = write
 
 	if !exists || options.Replace || options.Update {
-		slog.Info(
+		s.log.Info(
 			"Starting build job",
 			"new",
 			!exists,
@@ -76,7 +77,13 @@ func (s *Server) SetupIndex(options *IndexOptions) error {
 			"update",
 			options.Update,
 		)
-		err = importer.Start(s.cfg, write, options.Replace || options.Update, nil)
+		err = importer.Start(
+			s.cfg,
+			s.log.Named("importer"),
+			write,
+			options.Replace || options.Update,
+			nil,
+		)
 		if err != nil {
 			return errors.Wrap(err, "Failed to build index")
 		}
@@ -97,14 +104,14 @@ func (s *Server) SetupIndex(options *IndexOptions) error {
 				return slices.Contains(cfgEnabledSources, s)
 			})
 			if len(newSources) > 0 {
-				slog.Info("adding new sources", "sources", newSources)
-				err := importer.Start(s.cfg, write, false, &newSources)
+				s.log.Info("adding new sources", "sources", newSources)
+				err := importer.Start(s.cfg, options.Logger.Named("importer"), write, false, &newSources)
 				if err != nil {
 					return errors.Wrap(err, "Failed to update index with new sources")
 				}
 			}
 			if len(retiredSources) > 0 {
-				slog.Info("removing retired sources", "sources", retiredSources)
+				s.log.Info("removing retired sources", "sources", retiredSources)
 				for _, s := range retiredSources {
 					err := write.DeleteBySource(s)
 					if err != nil {
@@ -122,19 +129,13 @@ type Server struct {
 	sv         *server.Server
 	wg         *sync.WaitGroup
 	cfg        *config.Config
+	log        *log.Logger
 	sentryHub  *sentry.Hub
 	readIndex  *index.ReadIndex
 	writeIndex *index.WriteIndex
 }
 
-func New(cfg *config.Config) (*Server, error) {
-	slog.SetLogLoggerLevel(cfg.LogLevel)
-	if cfg.Web.Environment == "production" {
-		log.SetFlags(0)
-	} else {
-		log.SetFlags(log.LstdFlags)
-	}
-
+func New(cfg *config.Config, log *log.Logger) (*Server, error) {
 	err := sentry.Init(sentry.ClientOptions{
 		EnableTracing:    true,
 		TracesSampleRate: 0.01,
@@ -142,11 +143,12 @@ func New(cfg *config.Config) (*Server, error) {
 		Environment:      cfg.Web.Environment,
 	})
 	if err != nil {
-		slog.Warn("could not initialise sentry", "error", err)
+		log.Warn("could not initialise sentry", "error", err)
 	}
 
 	return &Server{
 		cfg:       cfg,
+		log:       log,
 		sentryHub: sentry.CurrentHub(),
 	}, nil
 }
@@ -170,27 +172,27 @@ func (s *Server) startUpdateTimer(
 		s.wg.Add(1)
 		nextRun := nextOccurrenceOfLocalTime(s.cfg.Importer.UpdateAt.LocalTime)
 		for {
-			slog.Debug("scheduling next run", "next-run", nextRun)
+			s.log.Debug("scheduling next run", "next-run", nextRun)
 			select {
 			case <-ctx.Done():
-				slog.Debug("stopping scheduler")
+				s.log.Debug("stopping scheduler")
 				s.wg.Done()
 
 				return
 			case <-time.After(time.Until(nextRun)):
 			}
 			s.wg.Add(1)
-			slog.Info("updating index")
+			s.log.Info("updating index")
 
 			eventID := localHub.CaptureCheckIn(&sentry.CheckIn{
 				MonitorSlug: monitorSlug,
 				Status:      sentry.CheckInStatusInProgress,
 			}, monitorConfig)
 
-			err = importer.Start(s.cfg, s.writeIndex, false, nil)
+			err = importer.Start(s.cfg, s.log.Named("importer"), s.writeIndex, false, nil)
 			s.wg.Done()
 			if err != nil {
-				slog.Warn("error updating index", "error", err)
+				s.log.Warn("error updating index", "error", err)
 
 				localHub.CaptureException(err)
 				localHub.CaptureCheckIn(&sentry.CheckIn{
@@ -199,7 +201,7 @@ func (s *Server) startUpdateTimer(
 					Status:      sentry.CheckInStatusError,
 				}, monitorConfig)
 			} else {
-				slog.Info("update complete")
+				s.log.Info("update complete")
 
 				localHub.CaptureCheckIn(&sentry.CheckIn{
 					ID:          *eventID,
@@ -214,7 +216,7 @@ func (s *Server) startUpdateTimer(
 
 func (s *Server) Start(ctx context.Context, liveReload bool) error {
 	var err error
-	s.sv, err = server.New(s.cfg, s.readIndex, liveReload)
+	s.sv, err = server.New(s.cfg, s.readIndex, s.log.Named("server"), liveReload)
 	if err != nil {
 		return errors.Wrap(err, "error setting up server")
 	}

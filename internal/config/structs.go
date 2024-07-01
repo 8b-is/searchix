@@ -5,14 +5,15 @@ package config
 
 import (
 	"fmt"
-	"log/slog"
+
+	"go.uber.org/zap/zapcore"
 )
 
 type Config struct {
-	DataPath string     `comment:"Path to store index data."`
-	LogLevel slog.Level `comment:"How much information to log, one of 'debug', 'info', 'warn', 'error'."`
-	Web      *Web       `comment:"Settings for the web server"`
-	Importer *Importer  `comment:"Settings for the import job"`
+	DataPath string        `comment:"Path to store index data."`
+	LogLevel zapcore.Level `comment:"How much information to log, one of 'debug', 'info', 'warn', 'error', 'panic', 'fatal'."`
+	Web      *Web          `comment:"Settings for the web server"`
+	Importer *Importer     `comment:"Settings for the import job"`
 }
 
 type Web struct {

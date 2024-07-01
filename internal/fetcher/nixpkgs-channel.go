@@ -3,18 +3,18 @@ package fetcher
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"net/url"
 
 	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/index"
 
 	"github.com/pkg/errors"
+	"go.alanpearce.eu/x/log"
 )
 
 type NixpkgsChannelFetcher struct {
 	Source *config.Source
-	Logger *slog.Logger
+	Logger *log.Logger
 }
 
 func makeChannelURL(channel string, subPath string) (string, error) {
@@ -25,7 +25,7 @@ func makeChannelURL(channel string, subPath string) (string, error) {
 
 func NewNixpkgsChannelFetcher(
 	source *config.Source,
-	logger *slog.Logger,
+	logger *log.Logger,
 ) (*NixpkgsChannelFetcher, error) {
 	switch source.Importer {
 	case config.Options, config.Packages:
@@ -66,7 +66,7 @@ func (i *NixpkgsChannelFetcher) FetchIfNeeded(
 		}
 
 		i.Logger.Debug("attempting to fetch file", "url", fetchURL)
-		body, mtime, err := fetchFileIfNeeded(ctx, sourceMeta.Updated, fetchURL)
+		body, mtime, err := fetchFileIfNeeded(ctx, i.Logger, sourceMeta.Updated, fetchURL)
 		if err != nil {
 			i.Logger.Warn("failed to fetch file", "url", fetchURL, "error", err)
 

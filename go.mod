@@ -1,6 +1,6 @@
 module go.alanpearce.eu/searchix
 
-go 1.22.2
+go 1.22.3
 
 require (
 	badc0de.net/pkg/flagutil v1.0.1
@@ -16,13 +16,15 @@ require (
 	github.com/osdevisnot/sorvor v0.4.4
 	github.com/pelletier/go-toml/v2 v2.2.2
 	github.com/pkg/errors v0.9.1
-	github.com/shengyanli1982/law v0.1.16
 	github.com/stoewer/go-strcase v1.3.0
 	github.com/yuin/goldmark v1.7.2
+	go.alanpearce.eu/x v0.0.0-20240701200753-a70ddb349b02
+	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.26.0
 )
 
 require (
+	github.com/Code-Hex/dd v1.1.0 // indirect
 	github.com/RoaringBitmap/roaring v1.9.4 // indirect
 	github.com/bits-and-blooms/bitset v1.13.0 // indirect
 	github.com/blevesearch/geo v0.1.20 // indirect
@@ -48,8 +50,12 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/mschoch/smat v0.2.0 // indirect
+	github.com/sykesm/zap-logfmt v0.0.4 // indirect
+	github.com/thessem/zap-prettyconsole v0.5.0 // indirect
 	go.etcd.io/bbolt v1.3.10 // indirect
+	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/sys v0.21.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
+	moul.io/zapfilter v1.7.0 // indirect
 )

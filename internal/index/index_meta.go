@@ -2,11 +2,11 @@ package index
 
 import (
 	"encoding/json"
-	"log/slog"
 	"os"
 	"time"
 
 	"go.alanpearce.eu/searchix/internal/file"
+	"go.alanpearce.eu/x/log"
 
 	"github.com/pkg/errors"
 )
@@ -26,10 +26,11 @@ type data struct {
 
 type Meta struct {
 	path string
+	log  *log.Logger
 	data
 }
 
-func createMeta(path string) (*Meta, error) {
+func createMeta(path string, log *log.Logger) (*Meta, error) {
 	exists, err := file.Exists(path)
 	if err != nil {
 		return nil, errors.WithMessage(err, "could not check for existence of index metadata")
@@ -40,19 +41,20 @@ func createMeta(path string) (*Meta, error) {
 
 	return &Meta{
 		path: path,
+		log:  log,
 		data: data{
 			SchemaVersion: CurrentSchemaVersion,
 		},
 	}, nil
 }
 
-func openMeta(path string) (*Meta, error) {
+func openMeta(path string, log *log.Logger) (*Meta, error) {
 	exists, err := file.Exists(path)
 	if err != nil {
 		return nil, errors.WithMessage(err, "could not check for existence of index metadata")
 	}
 	if !exists {
-		return createMeta(path)
+		return createMeta(path, log)
 	}
 
 	j, err := os.ReadFile(path)
@@ -61,6 +63,7 @@ func openMeta(path string) (*Meta, error) {
 	}
 	meta := Meta{
 		path: path,
+		log:  log,
 	}
 	err = json.Unmarshal(j, &meta.data)
 	if err != nil {
@@ -74,7 +77,7 @@ func openMeta(path string) (*Meta, error) {
 
 func (i *Meta) checkSchemaVersion() {
 	if i.SchemaVersion < CurrentSchemaVersion {
-		slog.Warn(
+		i.log.Warn(
 			"Index schema version out of date, suggest re-indexing",
 			"schema_version",
 			i.SchemaVersion,
@@ -90,7 +93,7 @@ func (i *Meta) Save() error {
 	if err != nil {
 		return errors.WithMessage(err, "could not prepare index metadata for saving")
 	}
-	slog.Debug("saving index metadata", "path", i.path)
+	i.log.Debug("saving index metadata", "path", i.path)
 	err = os.WriteFile(i.path, j, 0o600)
 	if err != nil {
 		return errors.WithMessage(err, "could not save index metadata")

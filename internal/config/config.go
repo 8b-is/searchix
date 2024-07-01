@@ -1,7 +1,6 @@
 package config
 
 import (
-	"log/slog"
 	"maps"
 	"net/url"
 	"os"
@@ -9,6 +8,7 @@ import (
 
 	"github.com/pelletier/go-toml/v2"
 	"github.com/pkg/errors"
+	"go.alanpearce.eu/x/log"
 )
 
 var Version string
@@ -102,10 +102,10 @@ func mustLocalTime(in string) (time LocalTime) {
 	return
 }
 
-func GetConfig(filename string) (*Config, error) {
+func GetConfig(filename string, log *log.Logger) (*Config, error) {
 	config := DefaultConfig
 	if filename != "" {
-		slog.Debug("reading config", "filename", filename)
+		log.Debug("reading config", "filename", filename)
 		f, err := os.Open(filename)
 		if err != nil {
 			return nil, errors.Wrap(err, "reading config failed")

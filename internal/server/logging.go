@@ -1,11 +1,10 @@
 package server
 
 import (
-	"fmt"
-	"io"
 	"net/http"
 
 	"github.com/pkg/errors"
+	"go.alanpearce.eu/x/log"
 )
 
 type LoggingResponseWriter struct {
@@ -42,7 +41,7 @@ func NewLoggingResponseWriter(w http.ResponseWriter) *LoggingResponseWriter {
 
 type wrappedHandlerOptions struct {
 	defaultHostname string
-	logger          io.Writer
+	logger          *log.Logger
 }
 
 func wrapHandlerWithLogging(wrappedHandler http.Handler, opts wrappedHandlerOptions) http.Handler {
@@ -54,13 +53,17 @@ func wrapHandlerWithLogging(wrappedHandler http.Handler, opts wrappedHandlerOpti
 		lw := NewLoggingResponseWriter(w)
 		wrappedHandler.ServeHTTP(lw, r)
 		statusCode := lw.statusCode
-		fmt.Fprintf(
-			opts.logger,
-			"%s %s %d %s %s\n",
+		opts.logger.Info(
+			"http request",
+			"scheme",
 			scheme,
+			"method",
 			r.Method,
+			"code",
 			statusCode,
+			"path",
 			r.URL.Path,
+			"location",
 			lw.Header().Get("Location"),
 		)
 	})

@@ -3,10 +3,10 @@ package fetcher
 import (
 	"context"
 	"io"
-	"log/slog"
 
 	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/index"
+	"go.alanpearce.eu/x/log"
 
 	"github.com/pkg/errors"
 )
@@ -23,7 +23,7 @@ type Fetcher interface {
 
 func New(
 	source *config.Source,
-	logger *slog.Logger,
+	logger *log.Logger,
 ) (fetcher Fetcher, err error) {
 	switch source.Fetcher {
 	case config.ChannelNixpkgs:

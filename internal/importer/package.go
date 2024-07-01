@@ -9,6 +9,7 @@ import (
 
 	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/nix"
+	"go.alanpearce.eu/x/log"
 
 	"github.com/bcicen/jstream"
 	"github.com/mitchellh/mapstructure"
@@ -40,6 +41,7 @@ type maintainerJSON struct {
 type PackageIngester struct {
 	dec    *jstream.Decoder
 	ms     *mapstructure.Decoder
+	log    *log.Logger
 	pkg    packageJSON
 	infile io.ReadCloser
 	source *config.Source
@@ -60,9 +62,14 @@ func makeAdhocPlatform(v any) string {
 	return string(s)
 }
 
-func NewPackageProcessor(infile io.ReadCloser, source *config.Source) (*PackageIngester, error) {
+func NewPackageProcessor(
+	infile io.ReadCloser,
+	source *config.Source,
+	log *log.Logger,
+) (*PackageIngester, error) {
 	i := &PackageIngester{
 		dec:    jstream.NewDecoder(infile, 2).EmitKV(),
+		log:    log,
 		pkg:    packageJSON{},
 		infile: infile,
 		source: source,

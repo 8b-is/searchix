@@ -3,7 +3,6 @@ package fetcher
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"os"
 	"os/exec"
 	"path"
@@ -13,6 +12,7 @@ import (
 
 	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/index"
+	"go.alanpearce.eu/x/log"
 
 	"github.com/pkg/errors"
 )
@@ -20,12 +20,12 @@ import (
 type ChannelFetcher struct {
 	Source     *config.Source
 	SourceFile string
-	Logger     *slog.Logger
+	Logger     *log.Logger
 }
 
 func NewChannelFetcher(
 	source *config.Source,
-	logger *slog.Logger,
+	logger *log.Logger,
 ) (*ChannelFetcher, error) {
 	switch source.Importer {
 	case config.Options:

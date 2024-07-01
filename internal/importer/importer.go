@@ -2,11 +2,11 @@ package importer
 
 import (
 	"context"
-	"log/slog"
 	"sync"
 
 	"go.alanpearce.eu/searchix/internal/index"
 	"go.alanpearce.eu/searchix/internal/nix"
+	"go.alanpearce.eu/x/log"
 )
 
 type Importer interface {
@@ -21,7 +21,7 @@ func process(
 	ctx context.Context,
 	indexer *index.WriteIndex,
 	processor Processor,
-	logger *slog.Logger,
+	logger *log.Logger,
 ) (bool, error) {
 	wg := sync.WaitGroup{}
 

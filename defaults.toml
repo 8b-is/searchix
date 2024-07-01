@@ -1,7 +1,7 @@
 # Path to store index data.
 DataPath = './data'
-# How much information to log, one of 'debug', 'info', 'warn', 'error'.
-LogLevel = 'INFO'
+# How much information to log, one of 'debug', 'info', 'warn', 'error', 'panic', 'fatal'.
+LogLevel = 'info'
 
 # Settings for the web server
 [Web]

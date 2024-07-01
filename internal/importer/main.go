@@ -3,7 +3,6 @@ package importer
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"os/exec"
 	"slices"
 	"strings"
@@ -12,18 +11,20 @@ import (
 	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/fetcher"
 	"go.alanpearce.eu/searchix/internal/index"
+	"go.alanpearce.eu/x/log"
 
 	"github.com/pkg/errors"
 )
 
 func createSourceImporter(
 	parent context.Context,
+	log *log.Logger,
 	meta *index.Meta,
 	indexer *index.WriteIndex,
 	forceUpdate bool,
 ) func(*config.Source) error {
 	return func(source *config.Source) error {
-		logger := slog.With(
+		logger := log.With(
 			"name",
 			source.Key,
 			"fetcher",
@@ -94,9 +95,17 @@ func createSourceImporter(
 			switch source.Importer {
 			case config.Options:
 				logger.Debug("processor created", "file", fmt.Sprintf("%T", files.Options))
-				processor, err = NewOptionProcessor(files.Options, source)
+				processor, err = NewOptionProcessor(
+					files.Options,
+					source,
+					logger.Named("processor"),
+				)
 			case config.Packages:
-				processor, err = NewPackageProcessor(files.Packages, source)
+				processor, err = NewPackageProcessor(
+					files.Packages,
+					source,
+					logger.Named("processor"),
+				)
 			}
 			if err != nil {
 				return errors.WithMessagef(err, "failed to create processor")
@@ -123,17 +132,18 @@ func createSourceImporter(
 
 func Start(
 	cfg *config.Config,
+	log *log.Logger,
 	indexer *index.WriteIndex,
 	forceUpdate bool,
 	onlyUpdateSources *[]string,
 ) error {
 	if len(cfg.Importer.Sources) == 0 {
-		slog.Info("No sources enabled")
+		log.Info("No sources enabled")
 
 		return nil
 	}
 
-	slog.Debug("starting importer", "timeout", cfg.Importer.Timeout.Duration)
+	log.Debug("starting importer", "timeout", cfg.Importer.Timeout.Duration)
 	importCtx, cancelImport := context.WithTimeout(
 		context.Background(),
 		cfg.Importer.Timeout.Duration,
@@ -144,7 +154,7 @@ func Start(
 
 	meta := indexer.Meta
 
-	importSource := createSourceImporter(importCtx, meta, indexer, forceUpdate)
+	importSource := createSourceImporter(importCtx, log, meta, indexer, forceUpdate)
 	for name, source := range cfg.Importer.Sources {
 		if onlyUpdateSources != nil && len(*onlyUpdateSources) > 0 {
 			if !slices.Contains(*onlyUpdateSources, name) {
@@ -153,7 +163,7 @@ func Start(
 		}
 		err := importSource(source)
 		if err != nil {
-			slog.Error("import failed", "source", name, "error", err)
+			log.Error("import failed", "source", name, "error", err)
 		}
 	}
 

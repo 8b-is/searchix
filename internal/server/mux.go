@@ -4,12 +4,9 @@ import (
 	"context"
 	"encoding/xml"
 	"fmt"
-	"io"
-	"log/slog"
 	"math"
 	"net/http"
 	"net/url"
-	"os"
 	"path"
 	"strconv"
 	"time"
@@ -19,11 +16,11 @@ import (
 	"go.alanpearce.eu/searchix/internal/config"
 	search "go.alanpearce.eu/searchix/internal/index"
 	"go.alanpearce.eu/searchix/internal/opensearch"
+	"go.alanpearce.eu/x/log"
 
 	sentryhttp "github.com/getsentry/sentry-go/http"
 	"github.com/osdevisnot/sorvor/pkg/livereload"
 	"github.com/pkg/errors"
-	"github.com/shengyanli1982/law"
 )
 
 type HTTPError struct {
@@ -57,6 +54,7 @@ func sortSources(ss map[string]*config.Source) {
 func NewMux(
 	cfg *config.Config,
 	index *search.ReadIndex,
+	log *log.Logger,
 	liveReload bool,
 ) (*http.ServeMux, error) {
 	if cfg == nil {
@@ -70,7 +68,7 @@ func NewMux(
 	})
 	sortSources(cfg.Importer.Sources)
 
-	errorHandler := createErrorHandler(cfg)
+	errorHandler := createErrorHandler(cfg, log)
 
 	top := http.NewServeMux()
 	mux := http.NewServeMux()
@@ -118,7 +116,7 @@ func NewMux(
 
 						return
 					}
-					slog.Error("search error", "error", err)
+					log.Error("search error", "error", err)
 					errorHandler(w, r, err.Error(), http.StatusInternalServerError)
 
 					return
@@ -177,7 +175,7 @@ func NewMux(
 					err = components.ResultsPage(tdata).Render(r.Context(), w)
 				}
 				if err != nil {
-					slog.Error("template error", "template", importerType, "error", err)
+					log.Error("template error", "template", importerType, "error", err)
 					errorHandler(w, r, err.Error(), http.StatusInternalServerError)
 				}
 			} else {
@@ -258,7 +256,7 @@ func NewMux(
 				err = components.DetailPage(tdata.TemplateData, *doc).Render(r.Context(), w)
 			}
 			if err != nil {
-				slog.Error("template error", "template", importerSingular, "error", err)
+				log.Error("template error", "template", importerSingular, "error", err)
 				errorHandler(w, r, err.Error(), http.StatusInternalServerError)
 			}
 		}
@@ -332,7 +330,7 @@ func NewMux(
 		liveReload := livereload.New()
 		liveReload.Start()
 		top.Handle("/livereload", liveReload)
-		fw, err := NewFileWatcher()
+		fw, err := NewFileWatcher(log.Named("watcher"))
 		if err != nil {
 			return nil, errors.WithMessage(err, "could not create file watcher")
 		}
@@ -341,29 +339,23 @@ func NewMux(
 			return nil, errors.WithMessage(err, "could not add directory to file watcher")
 		}
 		go fw.Start(func(filename string) {
-			slog.Debug(fmt.Sprintf("got filename %s", filename))
+			log.Debug(fmt.Sprintf("got filename %s", filename))
 			if match, _ := path.Match("frontend/static/*", filename); match {
 				err := frontend.Rehash()
 				if err != nil {
-					slog.Error("failed to re-hash frontend assets", "error", err)
+					log.Error("failed to re-hash frontend assets", "error", err)
 				}
 			}
 			liveReload.Reload()
 		})
 	}
 
-	var logWriter io.Writer
-	if cfg.Web.Environment == "production" {
-		logWriter = law.NewWriteAsyncer(os.Stdout, nil)
-	} else {
-		logWriter = os.Stdout
-	}
 	top.Handle("/",
 		AddHeadersMiddleware(
 			sentryHandler.Handle(
 				wrapHandlerWithLogging(mux, wrappedHandlerOptions{
 					defaultHostname: cfg.Web.BaseURL.Hostname(),
-					logger:          logWriter,
+					logger:          log,
 				}),
 			),
 			cfg,

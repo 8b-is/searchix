@@ -3,24 +3,24 @@ package fetcher
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"net/url"
 
 	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/index"
 
 	"github.com/pkg/errors"
+	"go.alanpearce.eu/x/log"
 )
 
 type DownloadFetcher struct {
 	Source     *config.Source
 	SourceFile string
-	Logger     *slog.Logger
+	Logger     *log.Logger
 }
 
 func NewDownloadFetcher(
 	source *config.Source,
-	logger *slog.Logger,
+	logger *log.Logger,
 ) (*DownloadFetcher, error) {
 	switch source.Importer {
 	case config.Options:
@@ -59,7 +59,7 @@ func (i *DownloadFetcher) FetchIfNeeded(
 
 		i.Logger.Debug("preparing to fetch URL", "url", fetchURL)
 
-		body, mtime, err := fetchFileIfNeeded(ctx, sourceUpdated, fetchURL)
+		body, mtime, err := fetchFileIfNeeded(ctx, i.Logger, sourceUpdated, fetchURL)
 		if err != nil {
 			i.Logger.Warn("failed to fetch file", "url", fetchURL, "error", err)
 

@@ -1,15 +1,16 @@
 package server
 
 import (
-	"log/slog"
 	"net/http"
 
 	"go.alanpearce.eu/searchix/internal/components"
 	"go.alanpearce.eu/searchix/internal/config"
+	"go.alanpearce.eu/x/log"
 )
 
 func createErrorHandler(
 	config *config.Config,
+	log *log.Logger,
 ) func(http.ResponseWriter, *http.Request, string, int) {
 	return func(w http.ResponseWriter, r *http.Request, message string, code int) {
 		var err error
@@ -31,7 +32,7 @@ func createErrorHandler(
 			err = components.ErrorPage(indexData).Render(r.Context(), w)
 		}
 		if err != nil {
-			slog.Error(
+			log.Error(
 				"error rendering error page template",
 				"error",
 				err,
