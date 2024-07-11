@@ -6,7 +6,10 @@ import (
 )
 
 func convertMatch[I nix.Importable](m nix.Importable) *I {
-	i := m.(I)
+	i, ok := m.(I)
+	if !ok {
+		return nil
+	}
 	return &i
 }
 
