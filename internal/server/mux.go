@@ -295,7 +295,7 @@ func NewMux(
 						source.Importer.String(),
 						source.Key,
 						"search",
-					).AddQuery("query", "{searchTerms}"),
+					).AddRawQuery("query", "{searchTerms}"),
 				},
 			}
 			enc := xml.NewEncoder(w)

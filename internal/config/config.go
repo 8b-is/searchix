@@ -35,10 +35,8 @@ func (u *URL) JoinPath(elems ...string) *URL {
 	return &URL{u.URL.JoinPath(elems...)}
 }
 
-func (u *URL) AddQuery(key, value string) *URL {
-	q := u.URL.Query()
-	q.Add(key, value)
-	u.RawQuery = q.Encode()
+func (u *URL) AddRawQuery(key, value string) *URL {
+	u.RawQuery = key + "=" + value
 
 	return u
 }
