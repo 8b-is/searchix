@@ -4,7 +4,6 @@ import (
 	"go.alanpearce.eu/searchix/frontend"
 	"go.alanpearce.eu/searchix/internal/config"
 	search "go.alanpearce.eu/searchix/internal/index"
-	"go.alanpearce.eu/searchix/internal/nix"
 
 	"github.com/blevesearch/bleve/v2"
 )
@@ -27,10 +26,4 @@ type ResultData struct {
 	Results        *search.Result
 	Prev           string
 	Next           string
-}
-
-type DocumentData struct {
-	TemplateData
-	Document *nix.Importable
-	Children *search.Result
 }

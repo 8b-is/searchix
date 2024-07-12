@@ -245,20 +245,17 @@ func NewMux(
 				return
 			}
 
-			tdata := components.DocumentData{
-				TemplateData: components.TemplateData{
-					ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
-					Source:        source,
-					Sources:       sources,
-					Assets:        frontend.Assets,
-				},
-				Document: doc,
+			tdata := components.TemplateData{
+				ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
+				Source:        source,
+				Sources:       sources,
+				Assets:        frontend.Assets,
 			}
 			if r.Header.Get("Fetch") == "true" {
 				w.Header().Add("Content-Type", "text/html; charset=utf-8")
 				err = components.Detail(*doc).Render(r.Context(), w)
 			} else {
-				err = components.DetailPage(tdata.TemplateData, *doc).Render(r.Context(), w)
+				err = components.DetailPage(tdata, *doc).Render(r.Context(), w)
 			}
 			if err != nil {
 				log.Error("template error", "template", importerSingular, "error", err)
