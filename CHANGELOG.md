@@ -1,13 +1,31 @@
 # Changelog
 
-## [v0.1.7](https://git.alanpearce.eu/searchix/diff/?id=v0.1.6&id2=v0.1.7) (2024-06-29)
+## [v0.1.8](https://git.alanpearce.eu/searchix/diff/?id=v0.1.7&id2=v0.1.8) (2024-07-12)
 
 ### Features
+
+-   enable combined search
+    ([39df3cc](https://git.alanpearce.eu/searchix/commit/?id=39df3cce6bff6c5910261c0fb9fd8b3f5cfdffa5))
+-   more structured logging
+    ([94b21b2](https://git.alanpearce.eu/searchix/commit/?id=94b21b286edff37496a2fe481963625ac01c30a1))
+
+### Fixes
+
+-   opensearch searches not using input query
+    ([86d82b8](https://git.alanpearce.eu/searchix/commit/?id=86d82b8c85b8917c8339bd1e678c679ad4d4f103))
+-   extra data after error parsing query string
+    ([20f234a](https://git.alanpearce.eu/searchix/commit/?id=20f234ae3cbc1644416fd42f20f3594b8f705175))
+-   panic on search error
+    ([f076b5b](https://git.alanpearce.eu/searchix/commit/?id=f076b5bd6cb82edd99be50f3dbdd39bb9be2c44e))
+
+### [v0.1.7](https://git.alanpearce.eu/searchix/diff/?id=v0.1.6&id2=v0.1.7) (2024-06-29)
+
+#### Features
 
 -   add message for users with javascript disabled
     ([e500a10](https://git.alanpearce.eu/searchix/commit/?id=e500a1089797eee1b027d5237b2e4f140004098c))
 
-### Fixes
+#### Fixes
 
 -   blank modal when using browser navigation
     ([8ef4bc9](https://git.alanpearce.eu/searchix/commit/?id=8ef4bc9b1f16dd6395d0e0daa85ada9b8db12015))
