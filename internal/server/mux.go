@@ -107,6 +107,8 @@ func NewMux(
 					page, err = strconv.ParseUint(pg, 10, 64)
 					if err != nil || page == 0 {
 						errorHandler(w, r, "Bad query string", http.StatusBadRequest)
+
+						return
 					}
 				}
 				results, err := index.Search(ctx, source, qs, (page-1)*search.ResultsPerPage)
