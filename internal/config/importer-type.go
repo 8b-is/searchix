@@ -9,13 +9,16 @@ import (
 type ImporterType int
 
 const (
-	UnknownType = iota
+	All = iota - 1
+	UnknownType
 	Packages
 	Options
 )
 
 func (i ImporterType) String() string {
 	switch i {
+	case All:
+		return "combined"
 	case Packages:
 		return "packages"
 	case Options:
@@ -27,6 +30,8 @@ func (i ImporterType) String() string {
 
 func (i ImporterType) Singular() string {
 	switch i {
+	case All:
+		return "combined"
 	case Packages:
 		return "package"
 	case Options:

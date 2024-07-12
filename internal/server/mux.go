@@ -89,11 +89,14 @@ func NewMux(
 	createSearchHandler := func(importerType config.ImporterType) func(http.ResponseWriter, *http.Request) {
 		return func(w http.ResponseWriter, r *http.Request) {
 			var err error
-			source := cfg.Importer.Sources[r.PathValue("source")]
-			if source == nil || importerType != source.Importer {
-				errorHandler(w, r, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+			var source *config.Source
+			if importerType != config.All {
+				source = cfg.Importer.Sources[r.PathValue("source")]
+				if source == nil || importerType != source.Importer {
+					errorHandler(w, r, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 
-				return
+					return
+				}
 			}
 
 			ctx, cancel := context.WithTimeout(r.Context(), searchTimeout)
@@ -127,7 +130,7 @@ func NewMux(
 				tdata := components.ResultData{
 					TemplateData: components.TemplateData{
 						ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
-						Source:        *source,
+						Source:        source,
 						Sources:       sources,
 						Assets:        frontend.Assets,
 						Query:         qs,
@@ -181,19 +184,18 @@ func NewMux(
 					errorHandler(w, r, err.Error(), http.StatusInternalServerError)
 				}
 			} else {
-				sourceResult, err := index.GetSource(ctx, source.Key)
+				sourceResult, err := index.GetSource(ctx, source)
 				if err != nil {
 					errorHandler(w, r, err.Error(), http.StatusInternalServerError)
 
 					return
 				}
-
 				w.Header().Add("Cache-Control", "max-age=14400")
 				err = components.SearchPage(
 					components.TemplateData{
 						ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
 						Sources:       sources,
-						Source:        *source,
+						Source:        source,
 						SourceResult:  sourceResult,
 						Assets:        frontend.Assets,
 					},
@@ -208,6 +210,7 @@ func NewMux(
 		}
 	}
 
+	mux.HandleFunc("/all/search", createSearchHandler(config.All))
 	mux.HandleFunc("/options/{source}/search", createSearchHandler(config.Options))
 	mux.HandleFunc("/packages/{source}/search", createSearchHandler(config.Packages))
 
@@ -245,7 +248,7 @@ func NewMux(
 			tdata := components.DocumentData{
 				TemplateData: components.TemplateData{
 					ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
-					Source:        *source,
+					Source:        source,
 					Sources:       sources,
 					Assets:        frontend.Assets,
 				},
@@ -265,6 +268,8 @@ func NewMux(
 	}
 	mux.HandleFunc("/options/{source}/{id}", createSourceIDHandler(config.Options))
 	mux.HandleFunc("/packages/{source}/{id}", createSourceIDHandler(config.Packages))
+	mux.HandleFunc("/option/{source}/{id}", createSourceIDHandler(config.Options))
+	mux.HandleFunc("/package/{source}/{id}", createSourceIDHandler(config.Packages))
 
 	createOpenSearchXMLHandler := func(importerType config.ImporterType) func(http.ResponseWriter, *http.Request) {
 		return func(w http.ResponseWriter, r *http.Request) {
@@ -312,6 +317,33 @@ func NewMux(
 
 	mux.HandleFunc("/options/{source}/opensearch.xml", createOpenSearchXMLHandler(config.Options))
 	mux.HandleFunc("/packages/{source}/opensearch.xml", createOpenSearchXMLHandler(config.Packages))
+	mux.HandleFunc("/all/opensearch.xml", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Cache-Control", "max-age=604800")
+		w.Header().Set("Content-Type", "application/opensearchdescription+xml")
+		osd := &opensearch.Description{
+			ShortName:   "Searchix Combined",
+			LongName:    "Search nix options and packages with Searchix",
+			Description: "Search nix options and packages with Searchix",
+			SearchForm:  cfg.Web.BaseURL.JoinPath("all/search"),
+			URL: opensearch.URL{
+				Method: "get",
+				Type:   "text/html",
+				Template: cfg.Web.BaseURL.JoinPath("all/search").
+					AddRawQuery("query", "{searchTerms}"),
+			},
+		}
+		enc := xml.NewEncoder(w)
+		enc.Indent("", "    ")
+		err := enc.Encode(osd)
+		if err != nil {
+			// no errorHandler; HTML does not make sense here
+			http.Error(
+				w,
+				fmt.Sprintf("OpenSearch XML encoding error: %v", err),
+				http.StatusInternalServerError,
+			)
+		}
+	})
 
 	mux.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
 		asset, found := frontend.Assets.ByPath[r.URL.Path]

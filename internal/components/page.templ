@@ -18,11 +18,17 @@ templ Page(tdata TemplateData) {
 				<link href={ sheet.URL } rel="stylesheet" integrity={ "sha256-" + sheet.Base64SHA256 }/>
 			}
 			@Unsafe(tdata.ExtraHeadHTML)
+			<link
+				rel="search"
+				type="application/opensearchdescription+xml"
+				title={ "Searchix " + sourceNameAndType(nil) }
+				href={ string(joinPath("/all", "opensearch.xml")) }
+			/>
 			for _, source := range tdata.Sources {
 				<link
 					rel="search"
 					type="application/opensearchdescription+xml"
-					title={ "Searchix " + sourceNameAndType(*source) }
+					title={ "Searchix " + sourceNameAndType(source) }
 					href={ string(joinPath("/", source.Importer.String(), source.Key, "opensearch.xml")) }
 				/>
 			}
@@ -31,9 +37,19 @@ templ Page(tdata TemplateData) {
 			<header>
 				<nav>
 					<h1><a href="/">Searchix</a></h1>
+					<a
+						if tdata.Source == nil {
+							if tdata.SourceResult != nil || tdata.Query != "" {
+								class="current"
+							}
+							href="/all/search"
+						} else {
+							href={ joinPathQuery("/all/search", tdata.Query) }
+						}
+					>All</a>
 					for _, source := range tdata.Sources {
 						<a
-							if tdata.Source.Name == source.Name {
+							if tdata.Source != nil && tdata.Source.Name == source.Name {
 								class="current"
 								href={ joinPath("/", source.Importer.String(), source.Key, "search") }
 							} else {
@@ -65,7 +81,11 @@ func Unsafe(html string) templ.Component {
 	})
 }
 
-func sourceNameAndType(source config.Source) string {
+func sourceNameAndType(source *config.Source) string {
+	if source == nil {
+		return "Combined"
+	}
+
 	switch source.Importer {
 	case config.Options:
 		return source.Name + " " + source.Importer.String()

@@ -11,9 +11,8 @@ import (
 
 type TemplateData struct {
 	Sources       []*config.Source
-	Source        config.Source
+	Source        *config.Source
 	Query         string
-	Results       bool
 	SourceResult  *bleve.SearchResult
 	ExtraHeadHTML string
 	Code          int

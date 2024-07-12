@@ -19,7 +19,7 @@ import (
 const ResultsPerPage = 20
 
 type DocumentMatch struct {
-	search.DocumentMatch
+	*search.DocumentMatch
 	Data nix.Importable
 }
 
@@ -53,9 +53,18 @@ func (index *ReadIndex) GetEnabledSources() ([]string, error) {
 	return enabledSources, nil
 }
 
-func (index *ReadIndex) GetSource(ctx context.Context, name string) (*bleve.SearchResult, error) {
-	query := bleve.NewTermQuery(name)
-	query.SetField("Source")
+func (index *ReadIndex) GetSource(
+	ctx context.Context,
+	source *config.Source,
+) (*bleve.SearchResult, error) {
+	var query query.Query
+	if source == nil {
+		query = bleve.NewMatchAllQuery()
+	} else {
+		tq := bleve.NewTermQuery(source.Name)
+		tq.SetField("Source")
+		query = tq
+	}
 	search := bleve.NewSearchRequest(query)
 
 	result, err := index.index.SearchInContext(ctx, search)
@@ -68,7 +77,7 @@ func (index *ReadIndex) GetSource(ctx context.Context, name string) (*bleve.Sear
 			return nil, errors.WithMessagef(
 				err,
 				"failed to execute search to find source %s in index",
-				name,
+				source,
 			)
 		}
 	}
@@ -89,7 +98,7 @@ func (index *ReadIndex) search(
 	ctx context.Context,
 	request *bleve.SearchRequest,
 ) (*Result, error) {
-	request.Fields = []string{"_data"}
+	request.Fields = []string{"_data", "Source"}
 
 	bleveResult, err := index.index.SearchInContext(ctx, request)
 	select {
@@ -103,6 +112,7 @@ func (index *ReadIndex) search(
 		results := make([]DocumentMatch, min(ResultsPerPage, bleveResult.Total))
 		var buf bytes.Buffer
 		for i, result := range bleveResult.Hits {
+			results[i].DocumentMatch = bleveResult.Hits[i]
 			_, err = buf.WriteString(result.Fields["_data"].(string))
 			if err != nil {
 				return nil, errors.WithMessage(err, "error fetching result data")
@@ -133,36 +143,27 @@ func (index *ReadIndex) Search(
 	userQuery := bleve.NewMatchQuery(keyword)
 	userQuery.Analyzer = "option_name"
 
-	query.AddMust(
-		setField(bleve.NewTermQuery(source.Key), "Source"),
-		userQuery,
-	)
-
-	switch source.Importer {
-	case config.Packages:
-		// ...and boost it if it matches any of these
-		query.AddShould(
-			setField(bleve.NewMatchQuery(keyword), "MainProgram"),
-			setField(bleve.NewMatchQuery(keyword), "Name"),
-			setField(bleve.NewMatchQuery(keyword), "Attribute"),
-		)
-	case config.Options:
-		query.AddShould(
-			setField(bleve.NewMatchQuery(keyword), "Loc"),
-			setField(bleve.NewMatchQuery(keyword), "Name"),
-		)
-		nameLiteralQuery := bleve.NewMatchQuery(keyword)
-		nameLiteralQuery.SetField("Name")
-		nameLiteralQuery.Analyzer = standard.Name
-		query.AddShould(
-			nameLiteralQuery,
-		)
-	default:
-		return nil, errors.Errorf(
-			"unsupported source type for search: %s",
-			source.Importer.String(),
+	if source != nil {
+		query.AddMust(
+			setField(bleve.NewTermQuery(source.Key), "Source"),
+			userQuery,
 		)
 	}
+
+	// ...and boost it if it matches any of these
+	query.AddShould(
+		setField(bleve.NewMatchQuery(keyword), "MainProgram"),
+		setField(bleve.NewMatchQuery(keyword), "Name"),
+		setField(bleve.NewMatchQuery(keyword), "Attribute"),
+	)
+	query.AddShould(
+		setField(bleve.NewMatchQuery(keyword), "Loc"),
+		setField(bleve.NewMatchQuery(keyword), "Name"),
+	)
+	nameLiteralQuery := bleve.NewMatchQuery(keyword)
+	nameLiteralQuery.SetField("Name")
+	nameLiteralQuery.Analyzer = standard.Name
+	query.AddShould(nameLiteralQuery)
 
 	search := bleve.NewSearchRequest(query)
 	search.Size = ResultsPerPage

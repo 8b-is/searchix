@@ -3,6 +3,7 @@ package components
 import (
 	"strconv"
 	"go.alanpearce.eu/searchix/internal/nix"
+	"go.alanpearce.eu/searchix/internal/config"
 )
 
 func convertMatch[I nix.Importable](m nix.Importable) *I {
@@ -16,11 +17,15 @@ func convertMatch[I nix.Importable](m nix.Importable) *I {
 templ Results(r ResultData) {
 	if r.Query != "" {
 		if r.Results != nil && r.Results.Total > 0 {
-			switch r.Results.Hits[0].Data.(type) {
-				case nix.Option:
-					@Options(r.Results)
-				case nix.Package:
-					@Packages(r.Results)
+			if r.Source != nil {
+				switch r.Source.Importer {
+					case config.Options:
+						@Options(r.Results)
+					case config.Packages:
+						@Packages(r.Results)
+				}
+			} else {
+				@Combined(r.Results)
 			}
 			<footer aria-label="pagination">
 				<nav id="pagination">
@@ -49,4 +54,8 @@ templ ResultsPage(r ResultData) {
 
 templ openDialogLink(attr string) {
 	<a class="open-dialog" href={ templ.SafeURL(attr) }>{ attr }</a>
+}
+
+templ openCombinedDialogLink(attr string) {
+	<a class="open-dialog" href={ templ.SafeURL("/" + attr) }>{ attr }</a>
 }
