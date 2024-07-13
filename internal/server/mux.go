@@ -314,7 +314,7 @@ func NewMux(
 
 	mux.HandleFunc("/options/{source}/opensearch.xml", createOpenSearchXMLHandler(config.Options))
 	mux.HandleFunc("/packages/{source}/opensearch.xml", createOpenSearchXMLHandler(config.Packages))
-	mux.HandleFunc("/all/opensearch.xml", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/all/opensearch.xml", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Add("Cache-Control", "max-age=604800")
 		w.Header().Set("Content-Type", "application/opensearchdescription+xml")
 		osd := &opensearch.Description{
