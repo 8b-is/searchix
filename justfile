@@ -38,8 +38,11 @@ changelog:
 		sd -F HEAD $(convco version --print-prefix --bump) | \
 		prettier --stdin-filepath CHANGELOG.md > CHANGELOG.md
 
-release: clean-workdir changelog
-	git add CHANGELOG.md
+update-nix-package-version:
+	sd 'version = "[^"]+"' "version = \"$(convco version --bump)\"" nix/package.nix
+
+release: clean-workdir changelog update-nix-package-version
+	git add CHANGELOG.md nix/package.nix
 	git commit -m "chore: release $(convco version --bump)"
 	git tag $(convco version --bump --print-prefix)
 
