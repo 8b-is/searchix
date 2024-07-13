@@ -3,6 +3,7 @@ package server
 import (
 	"net/http"
 
+	"go.alanpearce.eu/searchix/frontend"
 	"go.alanpearce.eu/searchix/internal/components"
 	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/x/log"
@@ -22,6 +23,7 @@ func createErrorHandler(
 			Sources:       sources,
 			Code:          code,
 			Message:       message,
+			Assets:        frontend.Assets,
 		}
 		w.Header().Set("Cache-Control", "no-store")
 		w.Header().Del("Vary")
