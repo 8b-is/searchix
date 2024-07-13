@@ -1,20 +1,26 @@
 # Changelog
 
-## [v0.1.8](https://git.alanpearce.eu/searchix/diff/?id=v0.1.7&id2=v0.1.8) (2024-07-12)
+## [v0.1.8](https://git.alanpearce.eu/searchix/diff/?id=v0.1.7&id2=v0.1.8) (2024-07-13)
 
 ### Features
 
 -   enable combined search
-    ([39df3cc](https://git.alanpearce.eu/searchix/commit/?id=39df3cce6bff6c5910261c0fb9fd8b3f5cfdffa5))
+    ([6781684](https://git.alanpearce.eu/searchix/commit/?id=6781684647ad7f131054a93e1d13105d865c0e83))
 -   more structured logging
     ([94b21b2](https://git.alanpearce.eu/searchix/commit/?id=94b21b286edff37496a2fe481963625ac01c30a1))
 
 ### Fixes
 
+-   nil panics rendering last page of search results
+    ([b1fd710](https://git.alanpearce.eu/searchix/commit/?id=b1fd7104004b9646f541afbc0add3047dbff59a7))
+-   panic rendering error pages
+    ([ee83dfd](https://git.alanpearce.eu/searchix/commit/?id=ee83dfd741c47bd25eac1ac7139f20875de0452c))
 -   opensearch searches not using input query
-    ([86d82b8](https://git.alanpearce.eu/searchix/commit/?id=86d82b8c85b8917c8339bd1e678c679ad4d4f103))
+    ([a5f58bc](https://git.alanpearce.eu/searchix/commit/?id=a5f58bc7fe205b8ff84f6b654513e40bfbc61ae9))
 -   extra data after error parsing query string
-    ([20f234a](https://git.alanpearce.eu/searchix/commit/?id=20f234ae3cbc1644416fd42f20f3594b8f705175))
+    ([4423458](https://git.alanpearce.eu/searchix/commit/?id=442345898802e93b0b884fd0f1c3492e08c34049))
+-   panic rendering search results
+    ([5a2d54d](https://git.alanpearce.eu/searchix/commit/?id=5a2d54d9c8751935284293b2ffd396fff0a5d202))
 -   panic on search error
     ([f076b5b](https://git.alanpearce.eu/searchix/commit/?id=f076b5bd6cb82edd99be50f3dbdd39bb9be2c44e))
 
