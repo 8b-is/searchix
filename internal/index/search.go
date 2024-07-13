@@ -109,7 +109,7 @@ func (index *ReadIndex) search(
 			return nil, errors.WithMessage(err, "failed to execute search query")
 		}
 
-		results := make([]DocumentMatch, min(ResultsPerPage, bleveResult.Total))
+		results := make([]DocumentMatch, bleveResult.Hits.Len())
 		var buf bytes.Buffer
 		for i, result := range bleveResult.Hits {
 			results[i].DocumentMatch = bleveResult.Hits[i]
