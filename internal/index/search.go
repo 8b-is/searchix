@@ -189,5 +189,9 @@ func (index *ReadIndex) GetDocument(
 		return nil, err
 	}
 
+	if result.Total == 0 {
+		return nil, nil
+	}
+
 	return &result.Hits[0].Data, err
 }

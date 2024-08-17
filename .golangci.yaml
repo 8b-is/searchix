@@ -10,7 +10,6 @@ linters:
         - grouper
         - lll
         - nilerr
-        - nilnil
         - nlreturn
         - noctx
         - nosprintfhostport
