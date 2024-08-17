@@ -1,15 +1,24 @@
 # Changelog
 
-## [v0.1.8](https://git.alanpearce.eu/searchix/diff/?id=v0.1.7&id2=v0.1.8) (2024-07-13)
+## [v0.1.9](https://git.alanpearce.eu/searchix/diff/?id=v0.1.8&id2=v0.1.9) (2024-08-17)
 
-### Features
+### Fixes
+
+-   don't error when item not found
+    ([b427c26](https://git.alanpearce.eu/searchix/commit/?id=b427c2657582caa9b2cce8bcfd82624663dda780))
+-   tell browsers not to capitalise search input
+    ([faf4d0e](https://git.alanpearce.eu/searchix/commit/?id=faf4d0e5f21266bdad99c991efef4e83c09da5c6))
+
+### [v0.1.8](https://git.alanpearce.eu/searchix/diff/?id=v0.1.7&id2=v0.1.8) (2024-07-13)
+
+#### Features
 
 -   enable combined search
     ([6781684](https://git.alanpearce.eu/searchix/commit/?id=6781684647ad7f131054a93e1d13105d865c0e83))
 -   more structured logging
     ([94b21b2](https://git.alanpearce.eu/searchix/commit/?id=94b21b286edff37496a2fe481963625ac01c30a1))
 
-### Fixes
+#### Fixes
 
 -   nil panics rendering last page of search results
     ([b1fd710](https://git.alanpearce.eu/searchix/commit/?id=b1fd7104004b9646f541afbc0add3047dbff59a7))
