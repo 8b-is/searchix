@@ -1,8 +1,15 @@
 # Changelog
 
-## [v0.1.9](https://git.alanpearce.eu/searchix/diff/?id=v0.1.8&id2=v0.1.9) (2024-08-17)
+## [v0.1.10](https://git.alanpearce.eu/searchix/diff/?id=v0.1.9&id2=v0.1.10) (2024-11-10)
 
 ### Fixes
+
+-   search all missing expected results
+    ([8656f47](https://git.alanpearce.eu/searchix/commit/?id=8656f47cd62b084a59546c79d437a120869661e3))
+
+### [v0.1.9](https://git.alanpearce.eu/searchix/diff/?id=v0.1.8&id2=v0.1.9) (2024-08-17)
+
+#### Fixes
 
 -   don't error when item not found
     ([b427c26](https://git.alanpearce.eu/searchix/commit/?id=b427c2657582caa9b2cce8bcfd82624663dda780))
