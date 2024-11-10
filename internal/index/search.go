@@ -142,11 +142,11 @@ func (index *ReadIndex) Search(
 	// match the user's query in any field ...
 	userQuery := bleve.NewMatchQuery(keyword)
 	userQuery.Analyzer = "option_name"
+	query.AddMust(userQuery)
 
 	if source != nil {
 		query.AddMust(
 			setField(bleve.NewTermQuery(source.Key), "Source"),
-			userQuery,
 		)
 	}
 
