@@ -61,7 +61,7 @@ var DefaultConfig = Config{
 				Channel:    "nixpkgs",
 				URL:        "https://channels.nixos.org/nixos-unstable/nixexprs.tar.xz",
 				ImportPath: "nixos/release.nix",
-				Attribute:  "options",
+				Attribute:  "docs.optionsJSON",
 				OutputPath: "share/doc/nixos",
 				Timeout:    Duration{5 * time.Minute},
 				Repo:       nixpkgs,
