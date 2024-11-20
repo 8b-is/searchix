@@ -21,6 +21,9 @@ linters:
         - unconvert
         - wrapcheck
 linters-settings:
+    gosec:
+        excludes:
+            - G115
     wrapcheck:
         ignoreSigs:
             - .Errorf(
