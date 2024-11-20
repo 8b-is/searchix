@@ -20,6 +20,7 @@ import (
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/keyword"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/web"
 	"github.com/blevesearch/bleve/v2/analysis/token/camelcase"
+	"github.com/blevesearch/bleve/v2/analysis/token/porter"
 	"github.com/blevesearch/bleve/v2/analysis/tokenizer/letter"
 	"github.com/blevesearch/bleve/v2/analysis/tokenizer/single"
 	"github.com/blevesearch/bleve/v2/document"
@@ -61,6 +62,7 @@ func createIndexMapping() (mapping.IndexMapping, error) {
 		"tokenizer": letter.Name,
 		"token_filters": []string{
 			camelcase.Name,
+			porter.Name,
 		},
 	})
 	if err != nil {
@@ -71,6 +73,7 @@ func createIndexMapping() (mapping.IndexMapping, error) {
 		"tokenizer": letter.Name,
 		"token_filters": []string{
 			camelcase.Name,
+			porter.Name,
 		},
 	})
 	if err != nil {
@@ -79,6 +82,9 @@ func createIndexMapping() (mapping.IndexMapping, error) {
 	err = indexMapping.AddCustomAnalyzer("keyword_single", map[string]interface{}{
 		"type":      keyword.Name,
 		"tokenizer": single.Name,
+		"token_filters": []string{
+			porter.Name,
+		},
 	})
 	if err != nil {
 		return nil, errors.WithMessage(err, "could not add custom analyser")
