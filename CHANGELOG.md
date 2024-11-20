@@ -1,8 +1,15 @@
 # Changelog
 
-## [v0.1.10](https://git.alanpearce.eu/searchix/diff/?id=v0.1.9&id2=v0.1.10) (2024-11-10)
+## [v0.1.11](https://git.alanpearce.eu/searchix/diff/?id=v0.1.10&id2=v0.1.11) (2024-11-20)
 
-### Fixes
+### Features
+
+-   apply stemming to search index terms
+    ([72d56a6](https://git.alanpearce.eu/searchix/commit/?id=72d56a6781e97cde13ba068e8553e9342bd1fa20))
+
+### [v0.1.10](https://git.alanpearce.eu/searchix/diff/?id=v0.1.9&id2=v0.1.10) (2024-11-10)
+
+#### Fixes
 
 -   search all missing expected results
     ([8656f47](https://git.alanpearce.eu/searchix/commit/?id=8656f47cd62b084a59546c79d437a120869661e3))
