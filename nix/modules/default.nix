@@ -1,3 +1,5 @@
+self:
+
 { config
 , lib
 , pkgs
@@ -8,7 +10,7 @@ let
   inherit (builtins) fromTOML readFile;
   cfg = config.services.searchix;
 
-  package = pkgs.callPackage ../.. { };
+  package = self.packages.default;
 
   defaults = fromTOML (readFile ../../defaults.toml);
 
