@@ -49,7 +49,7 @@ var DefaultConfig = Config{
 	Importer: &Importer{
 		LowMemory: false,
 		Timeout:   Duration{30 * time.Minute},
-		UpdateAt:  mustLocalTime("04:00:00"),
+		UpdateAt:  mustLocalTime("03:00:00"),
 		Sources: map[string]*Source{
 			"nixos": {
 				Name:       "NixOS",

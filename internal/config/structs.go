@@ -31,7 +31,7 @@ type Importer struct {
 	Sources   map[string]*Source
 	LowMemory bool      `comment:"Use less memory at the expense of import performance"`
 	Timeout   Duration  `comment:"Abort fetch and import process for all jobs if it takes longer than this value."`
-	UpdateAt  LocalTime `comment:"Local time of day to run fetch/import process"`
+	UpdateAt  LocalTime `comment:"Time of day (UTC) to run fetch/import process"`
 }
 
 type Source struct {

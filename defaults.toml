@@ -64,8 +64,8 @@ x-frame-options = 'DENY'
 LowMemory = false
 # Abort fetch and import process for all jobs if it takes longer than this value.
 Timeout = '30m0s'
-# Local time of day to run fetch/import process
-UpdateAt = '04:00:00'
+# Time of day (UTC) to run fetch/import process
+UpdateAt = '03:00:00'
 
 [Importer.Sources]
 [Importer.Sources.darwin]

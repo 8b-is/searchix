@@ -13,11 +13,10 @@ import (
 	"go.alanpearce.eu/x/log"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/pelletier/go-toml/v2"
 	"github.com/pkg/errors"
 )
 
-func nextOccurrenceOfLocalTime(t toml.LocalTime) time.Time {
+func nextUTCOccurrenceOfTime(t config.LocalTime) time.Time {
 	now := time.Now()
 	dayTime := t
 	nextRun := time.Date(
@@ -28,7 +27,7 @@ func nextOccurrenceOfLocalTime(t toml.LocalTime) time.Time {
 		dayTime.Minute,
 		dayTime.Second,
 		0,
-		time.Local,
+		time.UTC,
 	)
 	if nextRun.Before(now) {
 		return nextRun.AddDate(0, 0, 1)
@@ -170,7 +169,7 @@ func (s *Server) startUpdateTimer(
 		}
 
 		s.wg.Add(1)
-		nextRun := nextOccurrenceOfLocalTime(s.cfg.Importer.UpdateAt.LocalTime)
+		nextRun := nextUTCOccurrenceOfTime(s.cfg.Importer.UpdateAt)
 		for {
 			s.log.Debug("scheduling next run", "next-run", nextRun)
 			select {

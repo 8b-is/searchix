@@ -27,6 +27,9 @@ format:
 fix:
 	go fix .
 
+generate-defaults:
+	wgo run --exit ./cmd/searchix-web --print-default-config > defaults.toml
+
 precommit:
 	nix-build -A pre-commit-check
 
