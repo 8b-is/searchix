@@ -1,8 +1,19 @@
 # Changelog
 
-## [v0.1.11](https://git.alanpearce.eu/searchix/diff/?id=v0.1.10&id2=v0.1.11) (2024-11-20)
+## [v0.1.12](https://git.alanpearce.eu/searchix/diff/?id=v0.1.11&id2=v0.1.12) (2024-12-04)
 
-### Features
+### Fixes
+
+-   use UTC time for fetch/import timer
+    ([c92530b](https://git.alanpearce.eu/searchix/commit/?id=c92530b7940bfd9e0940dd07e4a33b8dc4b575ea))
+-   enable using module in pure evaluation mode
+    ([ec4946e](https://git.alanpearce.eu/searchix/commit/?id=ec4946ee959b2d7d28287e9cd4643a0698833f6b))
+-   enable using module in pure evaluation mode
+    ([174ad04](https://git.alanpearce.eu/searchix/commit/?id=174ad04905da9709e4aef366e14aa438e58e5b0b))
+
+### [v0.1.11](https://git.alanpearce.eu/searchix/diff/?id=v0.1.10&id2=v0.1.11) (2024-11-20)
+
+#### Features
 
 -   apply stemming to search index terms
     ([72d56a6](https://git.alanpearce.eu/searchix/commit/?id=72d56a6781e97cde13ba068e8553e9342bd1fa20))
