@@ -1,10 +1,12 @@
 package components
 
 import (
+	"context"
+	"io"
 	"net/url"
 
-	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/frontend"
+	"go.alanpearce.eu/searchix/internal/config"
 )
 
 templ Page(tdata TemplateData) {
