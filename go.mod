@@ -1,6 +1,6 @@
 module go.alanpearce.eu/searchix
 
-go 1.23.3
+go 1.22.3
 
 require (
 	badc0de.net/pkg/flagutil v1.0.1
