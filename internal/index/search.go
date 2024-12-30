@@ -16,7 +16,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const ResultsPerPage = 20
+const ResultsPerPage = 100
 
 type DocumentMatch struct {
 	*search.DocumentMatch
