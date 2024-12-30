@@ -148,6 +148,12 @@ func (index *ReadIndex) Search(
 		query.AddMust(
 			setField(bleve.NewTermQuery(source.Key), "Source"),
 		)
+	} else {
+		q := bleve.NewTermQuery("nixpkgs")
+		q.SetField("Source")
+		q.SetBoost(-100)
+
+		query.AddShould(q)
 	}
 
 	// ...and boost it if it matches any of these
