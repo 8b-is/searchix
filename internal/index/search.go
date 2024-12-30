@@ -85,10 +85,10 @@ func (index *ReadIndex) GetSource(
 	return result, nil
 }
 
-func setField(
-	q query.FieldableQuery,
+func setField[T query.FieldableQuery](
+	q T,
 	field string,
-) query.FieldableQuery {
+) T {
 	q.SetField(field)
 
 	return q
