@@ -1,8 +1,17 @@
 # Changelog
 
-## [v0.1.12](https://git.alanpearce.eu/searchix/diff/?id=v0.1.11&id2=v0.1.12) (2024-12-04)
+## [v0.1.13](https://git.alanpearce.eu/searchix/diff/?id=v0.1.12&id2=e1787bf0b6dbac3a1601559d2f00ebc4b2df0f29) (2024-12-30)
 
-### Fixes
+### Features
+
+-   increase results per page
+    ([e1787bf](https://git.alanpearce.eu/searchix/commit/?id=e1787bf0b6dbac3a1601559d2f00ebc4b2df0f29))
+-   de-rank packages on 'all' search
+    ([df5db96](https://git.alanpearce.eu/searchix/commit/?id=df5db969262db1382dcd9310d362efdf8f8b6949))
+
+### [v0.1.12](https://git.alanpearce.eu/searchix/diff/?id=v0.1.11&id2=v0.1.12) (2024-12-04)
+
+#### Fixes
 
 -   use UTC time for fetch/import timer
     ([c92530b](https://git.alanpearce.eu/searchix/commit/?id=c92530b7940bfd9e0940dd07e4a33b8dc4b575ea))
