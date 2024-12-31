@@ -12,6 +12,7 @@ import (
 )
 
 var Version string
+var DevMode bool
 
 type URL struct {
 	*url.URL
@@ -126,6 +127,8 @@ func GetConfig(filename string, log *log.Logger) (*Config, error) {
 			return nil, errors.Wrap(err, "config error")
 		}
 	}
+
+	DevMode = config.Web.Environment == "development"
 
 	config.Web.ContentSecurityPolicy.ScriptSrc = append(
 		config.Web.ContentSecurityPolicy.ScriptSrc,

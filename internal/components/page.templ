@@ -15,7 +15,12 @@ templ Page(tdata TemplateData) {
 		<head>
 			<meta charset="utf-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1"/>
-			<title>Searchix</title>
+			<title>
+				Searchix
+				if config.DevMode {
+					(Dev)
+				}
+			</title>
 			for _, sheet := range tdata.Assets.Stylesheets {
 				<link href={ sheet.URL } rel="stylesheet" integrity={ "sha256-" + sheet.Base64SHA256 }/>
 			}

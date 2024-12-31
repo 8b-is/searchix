@@ -1,6 +1,7 @@
 package components
 
 import (
+	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/index"
 	"go.alanpearce.eu/searchix/internal/nix"
 )
@@ -11,19 +12,22 @@ templ Options(result *index.Result) {
 			<tr>
 				<th scope="col">Title</th>
 				<th scope="col">Description</th>
+				if config.DevMode {
+					<th scope="col">Score</th>
+				}
 			</tr>
 		</thead>
 		<tbody>
 			for _, hit := range result.Hits {
 				if m := convertMatch[nix.Option](hit.Data); m != nil {
-					@optionRow(*m)
+					@optionRow(hit, *m)
 				}
 			}
 		</tbody>
 	</table>
 }
 
-templ optionRow(o nix.Option) {
+templ optionRow(hit index.DocumentMatch, o nix.Option) {
 	<tr>
 		<td>
 			@openDialogLink(o.Name)
@@ -32,5 +36,10 @@ templ optionRow(o nix.Option) {
 			@markdown(firstSentence(o.Description))
 			<dialog id={ o.Name }></dialog>
 		</td>
+		if config.DevMode {
+			<td>
+				@score(hit)
+			</td>
+		}
 	</tr>
 }

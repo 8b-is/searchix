@@ -1,6 +1,7 @@
 package components
 
 import (
+	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/index"
 	"go.alanpearce.eu/searchix/internal/nix"
 )
@@ -12,19 +13,22 @@ templ Packages(result *index.Result) {
 				<th scope="col">Attribute</th>
 				<th scope="col">Name</th>
 				<th scope="col">Description</th>
+				if config.DevMode {
+					<th scope="col">Score</th>
+				}
 			</tr>
 		</thead>
 		<tbody>
 			for _, hit := range result.Hits {
 				if m := convertMatch[nix.Package](hit.Data); m != nil {
-					@packageRow(*m)
+					@packageRow(hit, *m)
 				}
 			}
 		</tbody>
 	</table>
 }
 
-templ packageRow(p nix.Package) {
+templ packageRow(hit index.DocumentMatch, p nix.Package) {
 	<tr>
 		<td>
 			@openDialogLink(p.Attribute)
@@ -35,5 +39,10 @@ templ packageRow(p nix.Package) {
 		<td>
 			{ p.Description }
 		</td>
+		if config.DevMode {
+			<td>
+				@score(hit)
+			</td>
+		}
 	</tr>
 }

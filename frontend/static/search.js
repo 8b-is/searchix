@@ -28,9 +28,20 @@ if (window.trustedTypes && trustedTypes.createPolicy) {
   });
 }
 
+function openSiblingDialog(ev) {
+  const dialog = ev.target.nextElementSibling;
+  dialog.showModal();
+  dialog.querySelector("button").addEventListener("click", function () {
+    dialog.close();
+  });
+}
+
 function addOpenDialogListeners(results) {
   results.querySelectorAll("a.open-dialog").forEach(function (element) {
     element.addEventListener("click", handleDialogOpen);
+  });
+  results.querySelectorAll("a.open-sibling-dialog").forEach(function (element) {
+    element.addEventListener("click", openSiblingDialog);
   });
 }
 

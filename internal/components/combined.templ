@@ -1,6 +1,7 @@
 package components
 
 import (
+	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/index"
 	"go.alanpearce.eu/searchix/internal/nix"
 )
@@ -11,6 +12,9 @@ templ Combined(result *index.Result) {
 			<tr>
 				<th scope="col">Attribute</th>
 				<th scope="col">Description</th>
+				if config.DevMode {
+					<th scope="col">Score</th>
+				}
 			</tr>
 		</thead>
 		<tbody>
@@ -31,6 +35,11 @@ templ Combined(result *index.Result) {
 								}
 						}
 					</td>
+					if config.DevMode {
+						<td>
+							@score(hit)
+						</td>
+					}
 				</tr>
 			}
 		</tbody>

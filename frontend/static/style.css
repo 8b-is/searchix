@@ -185,3 +185,8 @@ li {
 p:last-child {
   margin-bottom: unset;
 }
+
+.open-sibling-dialog {
+  cursor: pointer;
+  text-decoration: underline;
+}
