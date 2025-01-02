@@ -1,8 +1,20 @@
 # Changelog
 
-## [v0.1.13](https://git.alanpearce.eu/searchix/diff/?id=v0.1.12&id2=e1787bf0b6dbac3a1601559d2f00ebc4b2df0f29) (2024-12-30)
+## [v0.1.14](https://git.alanpearce.eu/searchix/diff/?id=v0.1.13&id2=797c6e27e18f6c47ceb4266d747a05064365c32d) (2025-01-02)
 
 ### Features
+
+-   show scores in results table in dev mode
+    ([58643f3](https://git.alanpearce.eu/searchix/commit/?id=58643f38bdd62dc538a03865b1f81eb77d957779))
+
+### Fixes
+
+-   boost non-stemmed matches over stemmed matches
+    ([797c6e2](https://git.alanpearce.eu/searchix/commit/?id=797c6e27e18f6c47ceb4266d747a05064365c32d))
+
+### [v0.1.13](https://git.alanpearce.eu/searchix/diff/?id=v0.1.12&id2=v0.1.13) (2024-12-30)
+
+#### Features
 
 -   increase results per page
     ([e1787bf](https://git.alanpearce.eu/searchix/commit/?id=e1787bf0b6dbac3a1601559d2f00ebc4b2df0f29))
