@@ -18,11 +18,11 @@ import (
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/keyword"
+	"github.com/blevesearch/bleve/v2/analysis/analyzer/simple"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/web"
 	"github.com/blevesearch/bleve/v2/analysis/token/camelcase"
 	"github.com/blevesearch/bleve/v2/analysis/token/porter"
 	"github.com/blevesearch/bleve/v2/analysis/tokenizer/letter"
-	"github.com/blevesearch/bleve/v2/analysis/tokenizer/single"
 	"github.com/blevesearch/bleve/v2/document"
 	"github.com/blevesearch/bleve/v2/mapping"
 	indexAPI "github.com/blevesearch/bleve_index_api"
@@ -81,20 +81,19 @@ func createIndexMapping() (mapping.IndexMapping, error) {
 	}
 	err = indexMapping.AddCustomAnalyzer("keyword_single", map[string]interface{}{
 		"type":      keyword.Name,
-		"tokenizer": single.Name,
-		"token_filters": []string{
-			porter.Name,
-		},
+		"tokenizer": letter.Name,
 	})
 	if err != nil {
 		return nil, errors.WithMessage(err, "could not add custom analyser")
 	}
 
+	identityFieldMapping := bleve.NewKeywordFieldMapping()
+
 	keywordFieldMapping := bleve.NewKeywordFieldMapping()
-	keywordFieldMapping.Analyzer = "keyword_single"
+	keywordFieldMapping.Analyzer = simple.Name
 
 	nameMapping := bleve.NewTextFieldMapping()
-	nameMapping.Analyzer = "option_name"
+	nameMapping.Analyzer = simple.Name
 	nameMapping.IncludeTermVectors = true
 	nameMapping.Store = false
 
@@ -110,10 +109,10 @@ func createIndexMapping() (mapping.IndexMapping, error) {
 	optionMapping := bleve.NewDocumentStaticMapping()
 
 	optionMapping.AddFieldMappingsAt("Name", nameMapping)
-	optionMapping.AddFieldMappingsAt("Source", keywordFieldMapping)
+	optionMapping.AddFieldMappingsAt("Source", identityFieldMapping)
 	optionMapping.AddFieldMappingsAt("Loc", locFieldMapping)
 	optionMapping.AddFieldMappingsAt("RelatedPackages", textFieldMapping)
-	optionMapping.AddFieldMappingsAt("Description", textFieldMapping)
+	optionMapping.AddFieldMappingsAt("Description", descriptionFieldMapping)
 
 	optionMapping.AddSubDocumentMapping("Default", nixValueMapping)
 	optionMapping.AddSubDocumentMapping("Example", nixValueMapping)
@@ -123,7 +122,7 @@ func createIndexMapping() (mapping.IndexMapping, error) {
 	packageMapping.AddFieldMappingsAt("Name", nameMapping)
 	packageMapping.AddFieldMappingsAt("Attribute", keywordFieldMapping)
 	packageMapping.AddFieldMappingsAt("Source", keywordFieldMapping)
-	packageMapping.AddFieldMappingsAt("Description", textFieldMapping)
+	packageMapping.AddFieldMappingsAt("Description", descriptionFieldMapping)
 	packageMapping.AddFieldMappingsAt("MainProgram", keywordFieldMapping)
 	packageMapping.AddFieldMappingsAt("PackageSet", keywordFieldMapping)
 	packageMapping.AddFieldMappingsAt("Platforms", keywordFieldMapping)

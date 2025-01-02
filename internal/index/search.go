@@ -10,7 +10,6 @@ import (
 	"go.alanpearce.eu/x/log"
 
 	"github.com/blevesearch/bleve/v2"
-	"github.com/blevesearch/bleve/v2/analysis/analyzer/standard"
 	"github.com/blevesearch/bleve/v2/search"
 	"github.com/blevesearch/bleve/v2/search/query"
 	"github.com/pkg/errors"
@@ -142,7 +141,15 @@ func (index *ReadIndex) Search(
 	// match the user's query in any field ...
 	userQuery := bleve.NewMatchQuery(keyword)
 	userQuery.Analyzer = "option_name"
-	query.AddMust(userQuery)
+
+	userQueryLoc := bleve.NewMatchQuery(keyword)
+	userQueryLoc.Analyzer = "loc"
+	userQueryLoc.SetBoost(2)
+
+	query.AddMust(bleve.NewDisjunctionQuery(
+		userQuery,
+		userQueryLoc,
+	))
 
 	if source != nil {
 		query.AddMust(
@@ -151,27 +158,23 @@ func (index *ReadIndex) Search(
 	} else {
 		q := bleve.NewTermQuery("nixpkgs")
 		q.SetField("Source")
-		q.SetBoost(-100)
+		q.SetBoost(-150)
 
 		query.AddShould(q)
 	}
 
-	// ...and boost it if it matches any of these
-	query.AddShould(
-		setField(bleve.NewMatchQuery(keyword), "MainProgram"),
-		setField(bleve.NewMatchQuery(keyword), "Name"),
-		setField(bleve.NewMatchQuery(keyword), "Attribute"),
-	)
-	query.AddShould(
-		setField(bleve.NewMatchQuery(keyword), "Loc"),
-		setField(bleve.NewMatchQuery(keyword), "Name"),
-	)
+	attrQuery := bleve.NewMatchQuery(keyword)
+	attrQuery.SetField("Attribute")
+	attrQuery.Analyzer = "keyword_single"
+	query.AddShould(attrQuery)
+
 	nameLiteralQuery := bleve.NewMatchQuery(keyword)
 	nameLiteralQuery.SetField("Name")
-	nameLiteralQuery.Analyzer = standard.Name
+	nameLiteralQuery.Analyzer = "keyword_single"
 	query.AddShould(nameLiteralQuery)
 
 	search := bleve.NewSearchRequest(query)
+	search.Explain = config.DevMode
 	search.Size = ResultsPerPage
 
 	if from != 0 {
