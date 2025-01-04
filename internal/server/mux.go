@@ -16,6 +16,7 @@ import (
 	"go.alanpearce.eu/searchix/internal/config"
 	search "go.alanpearce.eu/searchix/internal/index"
 	"go.alanpearce.eu/searchix/internal/opensearch"
+	"go.alanpearce.eu/searchix/internal/pagination"
 	"go.alanpearce.eu/x/log"
 
 	sentryhttp "github.com/getsentry/sentry-go/http"
@@ -104,17 +105,19 @@ func NewMux(
 
 			if r.URL.Query().Has("query") {
 				qs := r.URL.Query().Get("query")
-				pg := r.URL.Query().Get("page")
-				var page uint64 = 1
-				if pg != "" {
-					page, err = strconv.ParseUint(pg, 10, 64)
-					if err != nil || page == 0 {
+
+				var pageSize int = search.DefaultPageSize
+				var pageNumber = 1
+				if pg := r.URL.Query().Get("page"); pg != "" {
+					pageNumber, err = strconv.Atoi(pg)
+					if err != nil || pageNumber <= 0 || pageNumber > math.MaxInt {
 						errorHandler(w, r, "Bad query string", http.StatusBadRequest)
 
 						return
 					}
 				}
-				results, err := index.Search(ctx, source, qs, (page-1)*search.ResultsPerPage)
+				page := pagination.New(pageNumber, pageSize)
+				results, err := index.Search(ctx, source, qs, page.From, page.Size)
 				if err != nil {
 					if err == context.DeadlineExceeded {
 						errorHandler(w, r, "Search timed out", http.StatusInternalServerError)
@@ -135,13 +138,25 @@ func NewMux(
 						Assets:        frontend.Assets,
 						Query:         qs,
 					},
-					ResultsPerPage: search.ResultsPerPage,
-					Query:          qs,
-					Results:        results,
+					Query:   qs,
+					Results: results,
 				}
 
-				hits := uint64(len(results.Hits))
-				if results.Total > hits {
+				page.SetResults(results.Total)
+				log.Debug(
+					"pag",
+					"needed",
+					page.Needed,
+					"current",
+					page.Current,
+					"total",
+					results.Total,
+					"next",
+					page.Next,
+					"prev",
+					page.Prev,
+				)
+				if page.Needed {
 					q, err := url.ParseQuery(r.URL.RawQuery)
 					if err != nil {
 						errorHandler(w, r, "Query string error", http.StatusBadRequest)
@@ -149,23 +164,16 @@ func NewMux(
 						return
 					}
 
-					if page > uint64(math.Ceil(float64(results.Total)/search.ResultsPerPage)) {
-						errorHandler(w, r, "Not found", http.StatusNotFound)
-
-						return
-					}
-
-					if page*search.ResultsPerPage < results.Total {
-						q.Set("page", strconv.FormatUint(page+1, 10))
+					if page.Next != 0 {
+						q.Set("page", strconv.Itoa(page.Next))
 						tdata.Next = "search?" + q.Encode()
 					}
 
-					if page > 1 {
-						p := page - 1
-						if p == 1 {
+					if page.Prev != 0 {
+						if page.Prev == 1 {
 							q.Del("page")
 						} else {
-							q.Set("page", strconv.FormatUint(p, 10))
+							q.Set("page", strconv.Itoa(page.Prev))
 						}
 						tdata.Prev = "search?" + q.Encode()
 					}

@@ -21,9 +21,8 @@ type TemplateData struct {
 
 type ResultData struct {
 	TemplateData
-	Query          string
-	ResultsPerPage int
-	Results        *search.Result
-	Prev           string
-	Next           string
+	Query   string
+	Results *search.Result
+	Prev    string
+	Next    string
 }

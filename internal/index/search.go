@@ -15,7 +15,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const ResultsPerPage = 100
+const DefaultPageSize = 100
 
 type DocumentMatch struct {
 	*search.DocumentMatch
@@ -134,7 +134,8 @@ func (index *ReadIndex) Search(
 	ctx context.Context,
 	source *config.Source,
 	keyword string,
-	from uint64,
+	from int,
+	pageSize int,
 ) (*Result, error) {
 	query := bleve.NewBooleanQuery()
 
@@ -175,10 +176,10 @@ func (index *ReadIndex) Search(
 
 	search := bleve.NewSearchRequest(query)
 	search.Explain = config.DevMode
-	search.Size = ResultsPerPage
+	search.Size = pageSize
 
 	if from != 0 {
-		search.From = int(from)
+		search.From = from
 	}
 
 	return index.search(ctx, search)
