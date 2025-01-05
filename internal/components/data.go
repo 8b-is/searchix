@@ -25,4 +25,5 @@ type ResultData struct {
 	Results *search.Result
 	Prev    string
 	Next    string
+	All     string
 }

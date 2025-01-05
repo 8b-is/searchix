@@ -14,6 +14,8 @@ import (
 var Version string
 var DevMode bool
 
+const MaxResultsShowAll = 10_000
+
 type URL struct {
 	*url.URL
 }

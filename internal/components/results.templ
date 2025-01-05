@@ -1,9 +1,9 @@
 package components
 
 import (
-	"strconv"
-	"go.alanpearce.eu/searchix/internal/nix"
 	"go.alanpearce.eu/searchix/internal/config"
+	"go.alanpearce.eu/searchix/internal/nix"
+	"strconv"
 )
 
 func convertMatch[I nix.Importable](m nix.Importable) *I {
@@ -37,6 +37,9 @@ templ Results(r ResultData) {
 					}
 				</nav>
 				<span role="status">{ strconv.FormatUint(r.Results.Total, 10) } results</span>
+				if r.Next != r.Prev && r.Results.Total < config.MaxResultsShowAll {
+					<a href={ templ.SafeURL(r.All) }>Show All</a>
+				}
 			</footer>
 		} else {
 			<span role="status">Nothing found</span>

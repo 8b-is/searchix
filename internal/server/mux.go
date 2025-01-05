@@ -110,10 +110,14 @@ func NewMux(
 				var pageNumber = 1
 				if pg := r.URL.Query().Get("page"); pg != "" {
 					pageNumber, err = strconv.Atoi(pg)
-					if err != nil || pageNumber <= 0 || pageNumber > math.MaxInt {
+					if err != nil || pageNumber > math.MaxInt {
 						errorHandler(w, r, "Bad query string", http.StatusBadRequest)
 
 						return
+					}
+					if pageNumber == 0 {
+						pageNumber = 1
+						pageSize = math.MaxInt
 					}
 				}
 				page := pagination.New(pageNumber, pageSize)
@@ -129,6 +133,9 @@ func NewMux(
 
 					return
 				}
+				if pageSize == math.MaxInt && results.Total > config.MaxResultsShowAll {
+					errorHandler(w, r, "Too many results, use pagination", http.StatusBadRequest)
+				}
 
 				tdata := components.ResultData{
 					TemplateData: components.TemplateData{
@@ -143,19 +150,6 @@ func NewMux(
 				}
 
 				page.SetResults(results.Total)
-				log.Debug(
-					"pag",
-					"needed",
-					page.Needed,
-					"current",
-					page.Current,
-					"total",
-					results.Total,
-					"next",
-					page.Next,
-					"prev",
-					page.Prev,
-				)
 				if page.Needed {
 					q, err := url.ParseQuery(r.URL.RawQuery)
 					if err != nil {
@@ -177,6 +171,9 @@ func NewMux(
 						}
 						tdata.Prev = "search?" + q.Encode()
 					}
+
+					q.Set("page", "0")
+					tdata.All = "search?" + q.Encode()
 				}
 
 				w.Header().Add("Cache-Control", "max-age=300")
