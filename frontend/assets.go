@@ -86,10 +86,12 @@ func hashStyles() error {
 }
 
 func Rehash() (err error) {
+	Assets.Scripts = []*Asset{}
 	err = hashScripts()
 	if err != nil {
 		return err
 	}
+	Assets.Stylesheets = []*Asset{}
 	err = hashStyles()
 	if err != nil {
 		return err
