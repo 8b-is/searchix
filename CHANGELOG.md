@@ -1,13 +1,25 @@
 # Changelog
 
-## [v0.1.14](https://git.alanpearce.eu/searchix/diff/?id=v0.1.13&id2=797c6e27e18f6c47ceb4266d747a05064365c32d) (2025-01-02)
+## [v0.1.15](https://git.alanpearce.eu/searchix/diff/?id=v0.1.14&id2=920764211064521930441b96ed914034302a7470) (2025-01-05)
 
 ### Features
+
+-   offer to show all results on one page (if < 10000)
+    ([9207642](https://git.alanpearce.eu/searchix/commit/?id=920764211064521930441b96ed914034302a7470))
+
+### Fixes
+
+-   **dev:** overwrite previous asset hash on change
+    ([d289e54](https://git.alanpearce.eu/searchix/commit/?id=d289e54af28de6b21cbe49cebc262c4e3ca9f6d2))
+
+### [v0.1.14](https://git.alanpearce.eu/searchix/diff/?id=v0.1.13&id2=v0.1.14) (2025-01-02)
+
+#### Features
 
 -   show scores in results table in dev mode
     ([58643f3](https://git.alanpearce.eu/searchix/commit/?id=58643f38bdd62dc538a03865b1f81eb77d957779))
 
-### Fixes
+#### Fixes
 
 -   boost non-stemmed matches over stemmed matches
     ([797c6e2](https://git.alanpearce.eu/searchix/commit/?id=797c6e27e18f6c47ceb4266d747a05064365c32d))
