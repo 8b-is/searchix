@@ -40,6 +40,7 @@ func applyDevModeOverrides(cfg *config.Config) {
 	}
 	cfg.Web.ContentSecurityPolicy.ScriptSrc = append(
 		cfg.Web.ContentSecurityPolicy.ScriptSrc,
+		cfg.Web.BaseURL.JoinPath("_templ/reload/script.js").String(),
 		"http://localhost:7331",
 		"'unsafe-inline'",
 	)
