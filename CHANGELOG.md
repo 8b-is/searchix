@@ -1,13 +1,25 @@
 # Changelog
 
-## [v0.1.15](https://git.alanpearce.eu/searchix/diff/?id=v0.1.14&id2=920764211064521930441b96ed914034302a7470) (2025-01-05)
+## [v0.1.16](https://git.alanpearce.eu/searchix/diff/?id=v0.1.15&id2=7aea6aa210a8939ac208fb7540d1b46ba69a995f) (2025-01-15)
 
 ### Features
+
+-   enable searching via program names for multi-program packages
+    ([7aea6aa](https://git.alanpearce.eu/searchix/commit/?id=7aea6aa210a8939ac208fb7540d1b46ba69a995f))
+
+### Fixes
+
+-   **dev:** fix CSP not working in dev mode behind reverse proxy
+    ([b26ddba](https://git.alanpearce.eu/searchix/commit/?id=b26ddba432f8bde78022d2fc8837f0ffb25448b1))
+
+### [v0.1.15](https://git.alanpearce.eu/searchix/diff/?id=v0.1.14&id2=v0.1.15) (2025-01-05)
+
+#### Features
 
 -   offer to show all results on one page (if < 10000)
     ([9207642](https://git.alanpearce.eu/searchix/commit/?id=920764211064521930441b96ed914034302a7470))
 
-### Fixes
+#### Fixes
 
 -   **dev:** overwrite previous asset hash on change
     ([d289e54](https://git.alanpearce.eu/searchix/commit/?id=d289e54af28de6b21cbe49cebc262c4e3ca9f6d2))
