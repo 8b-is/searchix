@@ -48,6 +48,12 @@ type Source struct {
 	Timeout    Duration     `comment:"Abort import if it takes longer than this."`
 	OutputPath string       `comment:"(Fetcher=channel) Path under ./result symlink to folder containing {options,packages}.json."`
 	Repo       Repository   `comment:"Used to generate declaration/definition links"`
+	Programs   ProgramsDB   `comment:"Used to enable searching for programs in multi-program packages"`
+}
+
+type ProgramsDB struct {
+	Enable    bool   `comment:"Enable searching for programs in multi-program packages"`
+	Attribute string `comment:"Nix attribute name (i.e. nix-instantiate) that builds a programs.sqlite file"`
 }
 
 func (source *Source) String() string {

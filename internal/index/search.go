@@ -164,6 +164,11 @@ func (index *ReadIndex) Search(
 		query.AddShould(q)
 	}
 
+	programsQuery := bleve.NewMatchQuery(keyword)
+	programsQuery.SetField("Programs")
+	programsQuery.Analyzer = "keyword_single"
+	query.AddShould(programsQuery)
+
 	attrQuery := bleve.NewMatchQuery(keyword)
 	attrQuery.SetField("Attribute")
 	attrQuery.Analyzer = "keyword_single"

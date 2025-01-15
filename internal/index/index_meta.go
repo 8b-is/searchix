@@ -11,12 +11,13 @@ import (
 	"github.com/pkg/errors"
 )
 
-const CurrentSchemaVersion = 2
+const CurrentSchemaVersion = 3
 
 type SourceMeta struct {
-	Updated time.Time
-	Path    string
-	Rev     string
+	Updated      time.Time
+	Path         string
+	Rev          string
+	ProgramsPath string
 }
 
 type data struct {

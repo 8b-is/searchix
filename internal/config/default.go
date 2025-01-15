@@ -113,8 +113,12 @@ var DefaultConfig = Config{
 				Fetcher:    ChannelNixpkgs,
 				Channel:    "nixos-unstable",
 				OutputPath: "packages.json.br",
-				Timeout:    Duration{5 * time.Minute},
+				Timeout:    Duration{15 * time.Minute},
 				Repo:       nixpkgs,
+				Programs: ProgramsDB{
+					Enable:    true,
+					Attribute: "programs.sqlite",
+				},
 			},
 		},
 	},

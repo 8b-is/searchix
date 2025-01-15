@@ -11,6 +11,7 @@ import (
 	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/fetcher"
 	"go.alanpearce.eu/searchix/internal/index"
+	"go.alanpearce.eu/searchix/internal/programs"
 	"go.alanpearce.eu/x/log"
 
 	"github.com/pkg/errors"
@@ -78,6 +79,17 @@ func createSourceImporter(
 		)
 
 		if sourceMeta.Updated.After(previousUpdate) || forceUpdate {
+			var pdb *programs.DB
+
+			if source.Programs.Enable {
+				pdb, err = programs.Instantiate(ctx, source, log.Named("programs"))
+				if err != nil {
+					logger.Warn("programs database instantiation failed", "error", err)
+				}
+				if pdb.Path != sourceMeta.ProgramsPath {
+					sourceMeta.ProgramsPath = pdb.Path
+				}
+			}
 
 			err = setRepoRevision(files.Revision, source)
 			if err != nil {
@@ -105,6 +117,7 @@ func createSourceImporter(
 					files.Packages,
 					source,
 					logger.Named("processor"),
+					pdb,
 				)
 			}
 			if err != nil {

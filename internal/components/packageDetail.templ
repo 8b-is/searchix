@@ -1,8 +1,6 @@
 package components
 
-import (
-	"go.alanpearce.eu/searchix/internal/nix"
-)
+import "go.alanpearce.eu/searchix/internal/nix"
 
 func licenseName(l nix.License) string {
 	if l.FullName != "" {
@@ -30,6 +28,18 @@ templ PackageDetail(pkg nix.Package) {
 			<dt>Main Program</dt>
 			<dd>
 				<code>{ pkg.MainProgram }</code>
+			</dd>
+		}
+		if len(pkg.Programs) > 0 {
+			<dt>Programs</dt>
+			<dd>
+				<ul>
+					for _, p := range pkg.Programs {
+						<li>
+							<code>{ p }</code>
+						</li>
+					}
+				</ul>
 			</dd>
 		}
 		if len(pkg.Homepages) > 0 {

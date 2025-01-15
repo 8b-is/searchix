@@ -9,6 +9,7 @@ import (
 
 	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/nix"
+	"go.alanpearce.eu/searchix/internal/programs"
 	"go.alanpearce.eu/x/log"
 
 	"github.com/bcicen/jstream"
@@ -39,12 +40,13 @@ type maintainerJSON struct {
 }
 
 type PackageIngester struct {
-	dec    *jstream.Decoder
-	ms     *mapstructure.Decoder
-	log    *log.Logger
-	pkg    packageJSON
-	infile io.ReadCloser
-	source *config.Source
+	dec      *jstream.Decoder
+	ms       *mapstructure.Decoder
+	log      *log.Logger
+	pkg      packageJSON
+	infile   io.ReadCloser
+	source   *config.Source
+	programs *programs.DB
 }
 
 func makeAdhocLicense(name string) nix.License {
@@ -66,13 +68,15 @@ func NewPackageProcessor(
 	infile io.ReadCloser,
 	source *config.Source,
 	log *log.Logger,
+	programsDB *programs.DB,
 ) (*PackageIngester, error) {
 	i := &PackageIngester{
-		dec:    jstream.NewDecoder(infile, 2).EmitKV(),
-		log:    log,
-		pkg:    packageJSON{},
-		infile: infile,
-		source: source,
+		dec:      jstream.NewDecoder(infile, 2).EmitKV(),
+		log:      log,
+		pkg:      packageJSON{},
+		infile:   infile,
+		source:   source,
+		programs: programsDB,
 	}
 
 	ms, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
@@ -116,6 +120,14 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 	results := make(chan nix.Importable)
 	errs := make(chan error)
 
+	if i.programs != nil {
+		err := i.programs.Open()
+		if err != nil {
+			errs <- errors.WithMessage(err, "could not open programs database")
+			i.programs = nil
+		}
+	}
+
 	go func() {
 		defer i.infile.Close()
 		defer close(results)
@@ -124,6 +136,7 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 	outer:
 		for mv := range i.dec.Stream() {
 			var err error
+			var programs []string
 			select {
 			case <-ctx.Done():
 				break outer
@@ -216,6 +229,13 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 				continue
 			}
 
+			if i.programs != nil {
+				programs, err = i.programs.GetPackagePrograms(ctx, kv.Key)
+				if err != nil {
+					errs <- errors.WithMessagef(err, "failed to get programs for package %s", i.pkg.Name)
+				}
+			}
+
 			maintainers := make([]nix.Maintainer, len(i.pkg.Meta.Maintainers))
 			for i, m := range i.pkg.Meta.Maintainers {
 				maintainers[i] = nix.Maintainer{
@@ -250,7 +270,12 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 				Licenses:        licenses,
 				Maintainers:     maintainers,
 				Definition:      url,
+				Programs:        programs,
 			}
+		}
+
+		if i.programs != nil {
+			i.programs.Close()
 		}
 	}()
 

@@ -11,6 +11,7 @@ type Package struct {
 	Licenses        []License
 	LongDescription Markdown
 	MainProgram     string
+	Programs        []string
 	Maintainers     []Maintainer
 	PackageSet      string
 	Platforms       []string
