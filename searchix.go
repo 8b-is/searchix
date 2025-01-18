@@ -2,6 +2,7 @@ package searchix
 
 import (
 	"context"
+	"math"
 	"slices"
 	"sync"
 	"time"
@@ -154,6 +155,7 @@ func New(cfg *config.Config, log *log.Logger) (*Server, error) {
 
 func (s *Server) startUpdateTimer(
 	ctx context.Context,
+	cfg *config.Config,
 	localHub *sentry.Hub,
 ) {
 	const monitorSlug = "import"
@@ -161,9 +163,8 @@ func (s *Server) startUpdateTimer(
 		var err error
 		scope.SetContext("monitor", sentry.Context{"slug": monitorSlug})
 		monitorConfig := &sentry.MonitorConfig{
-			Schedule: sentry.IntervalSchedule(1, sentry.MonitorScheduleUnitDay),
-			// minutes
-			MaxRuntime:    10,
+			Schedule:      sentry.IntervalSchedule(1, sentry.MonitorScheduleUnitDay),
+			MaxRuntime:    int64(math.Ceil(cfg.Importer.Timeout.Minutes())),
 			CheckInMargin: 5,
 			Timezone:      time.Local.String(),
 		}
@@ -221,7 +222,7 @@ func (s *Server) Start(ctx context.Context, liveReload bool) error {
 	}
 
 	s.wg = &sync.WaitGroup{}
-	go s.startUpdateTimer(ctx, sentry.CurrentHub().Clone())
+	go s.startUpdateTimer(ctx, s.cfg, sentry.CurrentHub().Clone())
 
 	s.wg.Add(1)
 	err = s.sv.Start()
