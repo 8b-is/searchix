@@ -138,7 +138,7 @@ type Server struct {
 func New(cfg *config.Config, log *log.Logger) (*Server, error) {
 	err := sentry.Init(sentry.ClientOptions{
 		EnableTracing:    true,
-		TracesSampleRate: 0.01,
+		TracesSampleRate: 0.1,
 		Dsn:              cfg.Web.SentryDSN,
 		Environment:      cfg.Web.Environment,
 	})
