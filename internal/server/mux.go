@@ -17,9 +17,9 @@ import (
 	search "go.alanpearce.eu/searchix/internal/index"
 	"go.alanpearce.eu/searchix/internal/opensearch"
 	"go.alanpearce.eu/searchix/internal/pagination"
+	"go.alanpearce.eu/searchix/internal/sentryhttp"
 	"go.alanpearce.eu/x/log"
 
-	sentryhttp "github.com/getsentry/sentry-go/http"
 	"github.com/osdevisnot/sorvor/pkg/livereload"
 	"github.com/pkg/errors"
 )
@@ -65,15 +65,12 @@ func NewMux(
 	if index == nil {
 		return nil, errors.New("index is nil")
 	}
-	sentryHandler := sentryhttp.New(sentryhttp.Options{
-		Repanic: true,
-	})
 	sortSources(cfg.Importer.Sources)
 
 	errorHandler := createErrorHandler(cfg, log)
 
 	top := http.NewServeMux()
-	mux := http.NewServeMux()
+	mux := sentryhttp.NewServeMux()
 	mux.HandleFunc("/{$}", func(w http.ResponseWriter, r *http.Request) {
 		indexData := components.TemplateData{
 			ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
@@ -389,12 +386,10 @@ func NewMux(
 
 	top.Handle("/",
 		AddHeadersMiddleware(
-			sentryHandler.Handle(
-				wrapHandlerWithLogging(mux, wrappedHandlerOptions{
-					defaultHostname: cfg.Web.BaseURL.Hostname(),
-					logger:          log,
-				}),
-			),
+			wrapHandlerWithLogging(mux, wrappedHandlerOptions{
+				defaultHostname: cfg.Web.BaseURL.Hostname(),
+				logger:          log,
+			}),
 			cfg,
 		),
 	)
