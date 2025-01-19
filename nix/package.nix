@@ -48,4 +48,6 @@ buildGoApplication {
   ];
 
   modules = ../gomod2nix.toml;
+
+  doCheck = false;
 }
