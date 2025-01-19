@@ -1,13 +1,22 @@
 # Changelog
 
-## [v0.1.16](https://git.alanpearce.eu/searchix/diff/?id=v0.1.15&id2=7aea6aa210a8939ac208fb7540d1b46ba69a995f) (2025-01-15)
+## [v0.1.17](https://git.alanpearce.eu/searchix/diff/?id=v0.1.16&id2=fb0ab22c9a8ca1784477e64b03d5cb62d607bc9f) (2025-01-19)
 
-### Features
+### Fixes
+
+-   **sentry:** report correct HTTP path in traces
+    ([eece88d](https://git.alanpearce.eu/searchix/commit/?id=eece88d32b1b613aba7ec2f11bcfeb10163616b1))
+-   use importer configured timeout for sentry check-ins
+    ([b706b5a](https://git.alanpearce.eu/searchix/commit/?id=b706b5a3d09983637ea6d5af515733d77b674bdb))
+
+### [v0.1.16](https://git.alanpearce.eu/searchix/diff/?id=v0.1.15&id2=v0.1.16) (2025-01-15)
+
+#### Features
 
 -   enable searching via program names for multi-program packages
     ([7aea6aa](https://git.alanpearce.eu/searchix/commit/?id=7aea6aa210a8939ac208fb7540d1b46ba69a995f))
 
-### Fixes
+#### Fixes
 
 -   **dev:** fix CSP not working in dev mode behind reverse proxy
     ([b26ddba](https://git.alanpearce.eu/searchix/commit/?id=b26ddba432f8bde78022d2fc8837f0ffb25448b1))
