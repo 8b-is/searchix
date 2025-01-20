@@ -1,8 +1,17 @@
 # Changelog
 
-## [v0.1.17](https://git.alanpearce.eu/searchix/diff/?id=v0.1.16&id2=fb0ab22c9a8ca1784477e64b03d5cb62d607bc9f) (2025-01-19)
+## [v0.1.18](https://git.alanpearce.eu/searchix/diff/?id=v0.1.17&id2=584d295c25697c19ffd369d22281f7d53a139f18) (2025-01-20)
 
-### Fixes
+### Features
+
+-   allow HTTP request logging to be disabled
+    ([584d295](https://git.alanpearce.eu/searchix/commit/?id=584d295c25697c19ffd369d22281f7d53a139f18))
+-   **sentry:** trace all transactions
+    ([19d8046](https://git.alanpearce.eu/searchix/commit/?id=19d8046f99d9f395f8529886f37292d99dc1a4d9))
+
+### [v0.1.17](https://git.alanpearce.eu/searchix/diff/?id=v0.1.16&id2=v0.1.17) (2025-01-19)
+
+#### Fixes
 
 -   **sentry:** report correct HTTP path in traces
     ([eece88d](https://git.alanpearce.eu/searchix/commit/?id=eece88d32b1b613aba7ec2f11bcfeb10163616b1))
