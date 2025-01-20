@@ -389,6 +389,7 @@ func NewMux(
 			wrapHandlerWithLogging(mux, wrappedHandlerOptions{
 				defaultHostname: cfg.Web.BaseURL.Hostname(),
 				logger:          log,
+				enabled:         cfg.Web.LogRequests,
 			}),
 			cfg,
 		),

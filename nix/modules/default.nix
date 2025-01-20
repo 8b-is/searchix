@@ -130,6 +130,12 @@ in
                   default = "";
                 };
 
+                logRequests = mkOption {
+                  type = types.bool;
+                  description = "Whether to log HTTP requests";
+                  default = false;
+                };
+
                 contentSecurityPolicy = mkOption {
                   type = types.submodule {
                     freeformType = settingsFormat.type;

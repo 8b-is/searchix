@@ -17,6 +17,8 @@ SentryDSN = ''
 Environment = 'development'
 # Content to add to HTML <head>. Can be used to override styling, add scripts, etc.
 ExtraHeadHTML = ''
+# Whether to log incoming HTTP requests
+LogRequests = true
 
 # Content-Security-Policy header to send with requests. Should only need changing if ExtraHeadHTML is used.
 [Web.ContentSecurityPolicy]

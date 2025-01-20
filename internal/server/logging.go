@@ -42,9 +42,14 @@ func NewLoggingResponseWriter(w http.ResponseWriter) *LoggingResponseWriter {
 type wrappedHandlerOptions struct {
 	defaultHostname string
 	logger          *log.Logger
+	enabled         bool
 }
 
 func wrapHandlerWithLogging(wrappedHandler http.Handler, opts wrappedHandlerOptions) http.Handler {
+	if !opts.enabled {
+		return wrappedHandler
+	}
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		scheme := r.Header.Get("X-Forwarded-Proto")
 		if scheme == "" {
