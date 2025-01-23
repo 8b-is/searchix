@@ -53,12 +53,15 @@ func main() {
 
 	log.SetLevel(cfg.LogLevel)
 
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer cancel()
+
 	s, err := searchix.New(cfg, logger)
 	if err != nil {
 		logger.Fatal("Failed to initialise searchix", "error", err)
 	}
 
-	err = s.SetupIndex(&searchix.IndexOptions{
+	err = s.SetupIndex(ctx, &searchix.IndexOptions{
 		Update:    *update,
 		Replace:   *replace,
 		LowMemory: cfg.Importer.LowMemory,
@@ -69,11 +72,8 @@ func main() {
 	}
 
 	if *replace || *update {
-		os.Exit(0)
+		return
 	}
-
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
-	defer cancel()
 
 	go func() {
 		err = s.Start(ctx, *dev)

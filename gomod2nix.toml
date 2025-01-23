@@ -139,6 +139,9 @@ schema = 3
   [mod."github.com/stoewer/go-strcase"]
     version = "v1.3.0"
     hash = "sha256-X0ilcefeqVQ44B9WT6euCMcigs7oLFypOQaGI33kGr8="
+  [mod."github.com/stretchr/testify"]
+    version = "v1.10.0"
+    hash = "sha256-fJ4gnPr0vnrOhjQYQwJ3ARDKPsOtA7d4olQmQWR+wpI="
   [mod."github.com/sykesm/zap-logfmt"]
     version = "v0.0.4"
     hash = "sha256-KXVFtOU54chusK8AhZrzrvbbNmzq1mNrhs/7OmO+huE="

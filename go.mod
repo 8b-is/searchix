@@ -57,6 +57,7 @@ require (
 	github.com/mschoch/smat v0.2.0 // indirect
 	github.com/ncruces/go-strftime v0.1.9 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
+	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/sykesm/zap-logfmt v0.0.4 // indirect
 	github.com/thessem/zap-prettyconsole v0.5.2 // indirect
 	go.etcd.io/bbolt v1.3.11 // indirect

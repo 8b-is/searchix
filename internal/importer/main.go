@@ -144,6 +144,7 @@ func createSourceImporter(
 }
 
 func Start(
+	ctx context.Context,
 	cfg *config.Config,
 	log *log.Logger,
 	indexer *index.WriteIndex,
@@ -158,7 +159,7 @@ func Start(
 
 	log.Debug("starting importer", "timeout", cfg.Importer.Timeout.Duration)
 	importCtx, cancelImport := context.WithTimeout(
-		context.Background(),
+		ctx,
 		cfg.Importer.Timeout.Duration,
 	)
 	defer cancelImport()

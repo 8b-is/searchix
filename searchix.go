@@ -44,7 +44,7 @@ type IndexOptions struct {
 	Logger    *log.Logger
 }
 
-func (s *Server) SetupIndex(options *IndexOptions) error {
+func (s *Server) SetupIndex(ctx context.Context, options *IndexOptions) error {
 	var i uint
 	cfgEnabledSources := make([]string, len(s.cfg.Importer.Sources))
 	for key := range s.cfg.Importer.Sources {
@@ -78,6 +78,7 @@ func (s *Server) SetupIndex(options *IndexOptions) error {
 			options.Update,
 		)
 		err = importer.Start(
+			ctx,
 			s.cfg,
 			s.log.Named("importer"),
 			write,
@@ -105,7 +106,14 @@ func (s *Server) SetupIndex(options *IndexOptions) error {
 			})
 			if len(newSources) > 0 {
 				s.log.Info("adding new sources", "sources", newSources)
-				err := importer.Start(s.cfg, options.Logger.Named("importer"), write, false, &newSources)
+				err := importer.Start(
+					ctx,
+					s.cfg,
+					options.Logger.Named("importer"),
+					write,
+					false,
+					&newSources,
+				)
 				if err != nil {
 					return errors.Wrap(err, "Failed to update index with new sources")
 				}
@@ -189,7 +197,7 @@ func (s *Server) startUpdateTimer(
 				Status:      sentry.CheckInStatusInProgress,
 			}, monitorConfig)
 
-			err = importer.Start(s.cfg, s.log.Named("importer"), s.writeIndex, false, nil)
+			err = importer.Start(ctx, s.cfg, s.log.Named("importer"), s.writeIndex, false, nil)
 			s.wg.Done()
 			if err != nil {
 				s.log.Warn("error updating index", "error", err)

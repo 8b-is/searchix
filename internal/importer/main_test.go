@@ -1,6 +1,7 @@
 package importer
 
 import (
+	"context"
 	"testing"
 
 	"go.alanpearce.eu/searchix/internal/config"
@@ -21,7 +22,14 @@ func BenchmarkImporterLowMemory(b *testing.B) {
 		b.Fatal(err)
 	}
 
-	err = Start(&cfg, logger.Named("importer"), write, false, &[]string{"nixpkgs"})
+	err = Start(
+		context.Background(),
+		&cfg,
+		logger.Named("importer"),
+		write,
+		false,
+		&[]string{"nixpkgs"},
+	)
 	if err != nil {
 		b.Fatal(err)
 	}
