@@ -1,8 +1,15 @@
 # Changelog
 
-## [v0.1.18](https://git.alanpearce.eu/searchix/diff/?id=v0.1.17&id2=584d295c25697c19ffd369d22281f7d53a139f18) (2025-01-20)
+## [v0.1.19](https://git.alanpearce.eu/searchix/diff/?id=v0.1.18&id2=1e5045349f93298b4c021c96c7c9c5a188489f2e) (2025-01-24)
 
-### Features
+### Fixes
+
+-   import slowdown when querying programs database
+    ([1e50453](https://git.alanpearce.eu/searchix/commit/?id=1e5045349f93298b4c021c96c7c9c5a188489f2e))
+
+### [v0.1.18](https://git.alanpearce.eu/searchix/diff/?id=v0.1.17&id2=v0.1.18) (2025-01-20)
+
+#### Features
 
 -   allow HTTP request logging to be disabled
     ([584d295](https://git.alanpearce.eu/searchix/commit/?id=584d295c25697c19ffd369d22281f7d53a139f18))
