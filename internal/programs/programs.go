@@ -54,7 +54,8 @@ func Instantiate(
 }
 
 func (p *DB) Open() error {
-	db, err := sql.Open("sqlite", p.Path)
+	var err error
+	p.db, err = sql.Open("sqlite", p.Path)
 	if err != nil {
 		return errors.WithMessage(err, "failed to open sqlite database")
 	}
