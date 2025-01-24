@@ -1,8 +1,15 @@
 # Changelog
 
-## [v0.1.19](https://git.alanpearce.eu/searchix/diff/?id=v0.1.18&id2=1e5045349f93298b4c021c96c7c9c5a188489f2e) (2025-01-24)
+## [v0.1.20](https://git.alanpearce.eu/searchix/diff/?id=v0.1.19&id2=2d6315fa9386aaecbc1a7fc6a7ffcceb0ae09c35) (2025-01-24)
 
 ### Fixes
+
+-   build failure (bad rebase)
+    ([2d6315f](https://git.alanpearce.eu/searchix/commit/?id=2d6315fa9386aaecbc1a7fc6a7ffcceb0ae09c35))
+
+### [v0.1.19](https://git.alanpearce.eu/searchix/diff/?id=v0.1.18&id2=v0.1.19) (2025-01-24)
+
+#### Fixes
 
 -   import slowdown when querying programs database
     ([1e50453](https://git.alanpearce.eu/searchix/commit/?id=1e5045349f93298b4c021c96c7c9c5a188489f2e))
