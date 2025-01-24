@@ -19,9 +19,14 @@ type DB struct {
 
 	logger *log.Logger
 	db     *sql.DB
+	stmt   *sql.Stmt
 }
 
-func Instantiate(ctx context.Context, source *config.Source, logger *log.Logger) (*DB, error) {
+func Instantiate(
+	ctx context.Context,
+	source *config.Source,
+	logger *log.Logger,
+) (*DB, error) {
 	// nix-instantiate --eval --json -I nixpkgs=channel:nixos-unstable --expr 'toString <nixpkgs/programs.sqlite>'
 	args := []string{
 		"--eval",
@@ -53,7 +58,39 @@ func (p *DB) Open() error {
 	if err != nil {
 		return errors.WithMessage(err, "failed to open sqlite database")
 	}
-	p.db = db
+	p.logger.Debug("opened sqlite database")
+
+	_, err = p.db.Exec("ATTACH DATABASE ':memory:' AS mem")
+	if err != nil {
+		return errors.WithMessage(err, "failed to attach in-memory database")
+	}
+
+	_, err = p.db.Exec(`
+CREATE TABLE mem.programs AS
+SELECT name, package
+FROM main.Programs
+GROUP BY name, package
+`)
+	if err != nil {
+		return errors.WithMessage(err, "failed to create programs table")
+	}
+	p.logger.Debug("created programs table")
+
+	_, err = p.db.Exec(`CREATE INDEX mem.idx_package ON programs(package)`)
+	if err != nil {
+		return errors.WithMessage(err, "failed to create idx_package index")
+	}
+	p.logger.Debug("created idx_package index")
+
+	p.stmt, err = p.db.Prepare(`
+SELECT name
+FROM mem.programs
+WHERE package = ?
+`)
+	if err != nil {
+		return errors.WithMessage(err, "failed to prepare statement")
+	}
+	p.logger.Debug("prepared statement")
 
 	return nil
 }
@@ -70,11 +107,7 @@ func (p *DB) GetPackagePrograms(ctx context.Context, pkg string) (programs []str
 	if p.db == nil {
 		return nil, errors.New("database not open")
 	}
-	rows, err := p.db.QueryContext(ctx, `
-SELECT name
-FROM Programs
-WHERE package = ?
-GROUP BY name, package`, pkg)
+	rows, err := p.stmt.QueryContext(ctx, pkg)
 	if err != nil {
 		return nil, errors.WithMessage(err, "failed to execute query")
 	}
