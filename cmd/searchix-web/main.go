@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"runtime/pprof"
 
 	"badc0de.net/pkg/flagutil"
 
@@ -21,10 +22,11 @@ var (
 		false,
 		"print default configuration and exit",
 	)
-	dev     = flag.Bool("dev", false, "enable live reloading and nicer logging")
-	replace = flag.Bool("replace", false, "replace existing index and exit")
-	update  = flag.Bool("update", false, "update index and exit")
-	version = flag.Bool("version", false, "print version information")
+	dev        = flag.Bool("dev", false, "enable live reloading and nicer logging")
+	replace    = flag.Bool("replace", false, "replace existing index and exit")
+	update     = flag.Bool("update", false, "update index and exit")
+	version    = flag.Bool("version", false, "print version information")
+	cpuprofile = flag.String("cpuprofile", "", "enable CPU profiling and save to `file`")
 )
 
 func main() {
@@ -42,6 +44,17 @@ func main() {
 			panic("can't write to standard output?!")
 		}
 		os.Exit(0)
+	}
+	if *cpuprofile != "" {
+		f, err := os.Create(*cpuprofile)
+		if err != nil {
+			panic("can't create CPU profile: " + err.Error())
+		}
+		err = pprof.StartCPUProfile(f)
+		if err != nil {
+			panic("can't start CPU profile: " + err.Error())
+		}
+		defer pprof.StopCPUProfile()
 	}
 
 	logger := log.Configure(!*dev)
