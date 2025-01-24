@@ -52,8 +52,8 @@ release: clean-workdir changelog update-nix-package-version
 dev:
 	modd
 
-reindex:
-	wgo run --exit ./cmd/searchix-web --config config.toml --replace --dev
+reindex *flags:
+	wgo run --exit ./cmd/searchix-web --config config.toml --replace --dev {{ flags }}
 
-update:
-	wgo run --exit ./cmd/searchix-web --config config.toml --update --dev
+update *flags:
+	wgo run --exit ./cmd/searchix-web --config config.toml --update --dev {{ flags }}
