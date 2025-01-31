@@ -169,6 +169,7 @@ var expectedDataFiles = []string{
 	metaBaseName,
 	indexBaseName,
 	"sources",
+	"nixpkgs-programs.db",
 }
 
 func deleteIndex(dataRoot string) error {
