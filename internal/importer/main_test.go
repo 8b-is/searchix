@@ -22,11 +22,9 @@ func BenchmarkImporterLowMemory(b *testing.B) {
 		b.Fatal(err)
 	}
 
-	err = Start(
+	imp := New(&cfg, logger.Named("importer"), write)
+	err = imp.Start(
 		context.Background(),
-		&cfg,
-		logger.Named("importer"),
-		write,
 		false,
 		&[]string{"nixpkgs"},
 	)

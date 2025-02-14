@@ -77,11 +77,9 @@ func (s *Server) SetupIndex(ctx context.Context, options *IndexOptions) error {
 			"update",
 			options.Update,
 		)
-		err = importer.Start(
+		imp := importer.New(s.cfg, s.log.Named("importer"), write)
+		err = imp.Start(
 			ctx,
-			s.cfg,
-			s.log.Named("importer"),
-			write,
 			options.Replace || options.Update,
 			nil,
 		)
@@ -106,11 +104,9 @@ func (s *Server) SetupIndex(ctx context.Context, options *IndexOptions) error {
 			})
 			if len(newSources) > 0 {
 				s.log.Info("adding new sources", "sources", newSources)
-				err := importer.Start(
+				imp := importer.New(s.cfg, options.Logger.Named("importer"), write)
+				err := imp.Start(
 					ctx,
-					s.cfg,
-					options.Logger.Named("importer"),
-					write,
 					false,
 					&newSources,
 				)
@@ -197,7 +193,8 @@ func (s *Server) startUpdateTimer(
 				Status:      sentry.CheckInStatusInProgress,
 			}, monitorConfig)
 
-			err = importer.Start(ctx, s.cfg, s.log.Named("importer"), s.writeIndex, false, nil)
+			imp := importer.New(s.cfg, s.log.Named("importer"), s.writeIndex)
+			err = imp.Start(ctx, false, nil)
 			s.wg.Done()
 			if err != nil {
 				s.log.Warn("error updating index", "error", err)

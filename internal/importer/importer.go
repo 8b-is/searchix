@@ -9,10 +9,6 @@ import (
 	"go.alanpearce.eu/x/log"
 )
 
-type Importer interface {
-	Import(context.Context, *index.WriteIndex) (bool, error)
-}
-
 type Processor interface {
 	Process(context.Context) (<-chan nix.Importable, <-chan error)
 }

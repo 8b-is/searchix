@@ -143,33 +143,48 @@ func createSourceImporter(
 	}
 }
 
-func Start(
-	ctx context.Context,
+type Importer struct {
+	config  *config.Config
+	log     *log.Logger
+	indexer *index.WriteIndex
+}
+
+func New(
 	cfg *config.Config,
 	log *log.Logger,
 	indexer *index.WriteIndex,
+) *Importer {
+	return &Importer{
+		config:  cfg,
+		log:     log,
+		indexer: indexer,
+	}
+}
+
+func (imp *Importer) Start(
+	ctx context.Context,
 	forceUpdate bool,
 	onlyUpdateSources *[]string,
 ) error {
-	if len(cfg.Importer.Sources) == 0 {
-		log.Info("No sources enabled")
+	if len(imp.config.Importer.Sources) == 0 {
+		imp.log.Info("No sources enabled")
 
 		return nil
 	}
 
-	log.Debug("starting importer", "timeout", cfg.Importer.Timeout.Duration)
+	imp.log.Debug("starting importer", "timeout", imp.config.Importer.Timeout.Duration)
 	importCtx, cancelImport := context.WithTimeout(
 		ctx,
-		cfg.Importer.Timeout.Duration,
+		imp.config.Importer.Timeout.Duration,
 	)
 	defer cancelImport()
 
 	forceUpdate = forceUpdate || (onlyUpdateSources != nil && len(*onlyUpdateSources) > 0)
 
-	meta := indexer.Meta
+	meta := imp.indexer.Meta
 
-	importSource := createSourceImporter(importCtx, log, meta, indexer, forceUpdate)
-	for name, source := range cfg.Importer.Sources {
+	importSource := createSourceImporter(importCtx, imp.log, meta, imp.indexer, forceUpdate)
+	for name, source := range imp.config.Importer.Sources {
 		if onlyUpdateSources != nil && len(*onlyUpdateSources) > 0 {
 			if !slices.Contains(*onlyUpdateSources, name) {
 				continue
@@ -177,11 +192,11 @@ func Start(
 		}
 		err := importSource(source)
 		if err != nil {
-			log.Error("import failed", "source", name, "error", err)
+			imp.log.Error("import failed", "source", name, "error", err)
 		}
 	}
 
-	err := indexer.SaveMeta()
+	err := imp.indexer.SaveMeta()
 	if err != nil {
 		return errors.Wrap(err, "failed to save metadata")
 	}
