@@ -103,18 +103,18 @@ func (i *Meta) Save() error {
 	return nil
 }
 
-func (i *Meta) GetSourceMeta(source string) SourceMeta {
+func (i *Meta) GetSourceMeta(source string) *SourceMeta {
 	sourceMeta := i.data.Sources[source]
 	if sourceMeta == nil {
-		return SourceMeta{}
+		return &SourceMeta{}
 	}
 
-	return *sourceMeta
+	return sourceMeta
 }
 
-func (i *Meta) SetSourceMeta(source string, meta SourceMeta) {
+func (i *Meta) SetSourceMeta(source string, meta *SourceMeta) {
 	if i.data.Sources == nil {
 		i.data.Sources = make(map[string]*SourceMeta)
 	}
-	i.data.Sources[source] = &meta
+	i.data.Sources[source] = meta
 }

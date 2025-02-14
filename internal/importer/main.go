@@ -47,7 +47,7 @@ func createSourceImporter(
 		previousUpdate := sourceMeta.Updated
 		ctx, cancel := context.WithTimeout(parent, source.Timeout.Duration)
 		defer cancel()
-		files, err := fetcher.FetchIfNeeded(ctx, &sourceMeta)
+		files, err := fetcher.FetchIfNeeded(ctx, sourceMeta)
 
 		if err != nil {
 			var exerr *exec.ExitError
