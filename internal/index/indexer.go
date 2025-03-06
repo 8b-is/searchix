@@ -16,7 +16,6 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/blevesearch/bleve/v2"
-	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/keyword"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/simple"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/web"
@@ -57,17 +56,7 @@ func createIndexMapping() (mapping.IndexMapping, error) {
 	descriptionFieldMapping.Store = false
 	descriptionFieldMapping.Analyzer = web.Name
 
-	err := indexMapping.AddCustomAnalyzer("option_name", map[string]interface{}{
-		"type":      custom.Name,
-		"tokenizer": letter.Name,
-		"token_filters": []string{
-			camelcase.Name,
-			porter.Name,
-		},
-	})
-	if err != nil {
-		return nil, errors.WithMessage(err, "could not add custom analyser")
-	}
+	var err error
 	err = indexMapping.AddCustomAnalyzer("loc", map[string]interface{}{
 		"type":      keyword.Name,
 		"tokenizer": letter.Name,
