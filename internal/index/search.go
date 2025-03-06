@@ -140,16 +140,11 @@ func (index *ReadIndex) Search(
 	query := bleve.NewBooleanQuery()
 
 	// match the user's query in any field ...
-	userQuery := bleve.NewMatchQuery(keyword)
-	userQuery.Analyzer = "option_name"
-
-	userQueryLoc := bleve.NewMatchQuery(keyword)
-	userQueryLoc.Analyzer = "loc"
-	userQueryLoc.SetBoost(2)
-
 	query.AddMust(bleve.NewDisjunctionQuery(
-		userQuery,
-		userQueryLoc,
+		bleve.NewTermQuery(keyword),
+		bleve.NewPrefixQuery(keyword),
+		bleve.NewMatchPhraseQuery(keyword),
+		bleve.NewMatchQuery(keyword),
 	))
 
 	if source != nil {
@@ -166,17 +161,14 @@ func (index *ReadIndex) Search(
 
 	programsQuery := bleve.NewMatchQuery(keyword)
 	programsQuery.SetField("Programs")
-	programsQuery.Analyzer = "keyword_single"
 	query.AddShould(programsQuery)
 
 	attrQuery := bleve.NewMatchQuery(keyword)
 	attrQuery.SetField("Attribute")
-	attrQuery.Analyzer = "keyword_single"
 	query.AddShould(attrQuery)
 
 	nameLiteralQuery := bleve.NewMatchQuery(keyword)
 	nameLiteralQuery.SetField("Name")
-	nameLiteralQuery.Analyzer = "keyword_single"
 	query.AddShould(nameLiteralQuery)
 
 	search := bleve.NewSearchRequest(query)

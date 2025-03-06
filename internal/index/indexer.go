@@ -19,6 +19,7 @@ import (
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/keyword"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/simple"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/web"
+	"github.com/blevesearch/bleve/v2/analysis/lang/en"
 	"github.com/blevesearch/bleve/v2/analysis/token/camelcase"
 	"github.com/blevesearch/bleve/v2/analysis/token/porter"
 	"github.com/blevesearch/bleve/v2/analysis/tokenizer/letter"
@@ -82,7 +83,7 @@ func createIndexMapping() (mapping.IndexMapping, error) {
 	keywordFieldMapping.Analyzer = simple.Name
 
 	nameMapping := bleve.NewTextFieldMapping()
-	nameMapping.Analyzer = simple.Name
+	nameMapping.Analyzer = en.AnalyzerName
 	nameMapping.IncludeTermVectors = true
 	nameMapping.Store = false
 
