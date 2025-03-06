@@ -1,8 +1,22 @@
 # Changelog
 
-## [v0.1.20](https://git.alanpearce.eu/searchix/diff/?id=v0.1.19&id2=2d6315fa9386aaecbc1a7fc6a7ffcceb0ae09c35) (2025-01-24)
+## [v0.1.21](https://git.alanpearce.eu/searchix/diff/?id=v0.1.20&id2=6c9a3a93f0c55f65539230c4c979816df8e77c1b) (2025-03-06)
+
+### Features
+
+-   prioritise exact matches on programs/attr/name field
+    ([6c9a3a9](https://git.alanpearce.eu/searchix/commit/?id=6c9a3a93f0c55f65539230c4c979816df8e77c1b))
+-   improve relevance with compound words
+    ([24e3fc9](https://git.alanpearce.eu/searchix/commit/?id=24e3fc96ce2c96401155b86c6bfb6a6fb2e322f8))
 
 ### Fixes
+
+-   re-index refusing to delete data directory with programs.db
+    ([3ee8248](https://git.alanpearce.eu/searchix/commit/?id=3ee8248656c089594ea8a3be41945c408ab39aa4))
+
+### [v0.1.20](https://git.alanpearce.eu/searchix/diff/?id=v0.1.19&id2=v0.1.20) (2025-01-24)
+
+#### Fixes
 
 -   build failure (bad rebase)
     ([2d6315f](https://git.alanpearce.eu/searchix/commit/?id=2d6315fa9386aaecbc1a7fc6a7ffcceb0ae09c35))
