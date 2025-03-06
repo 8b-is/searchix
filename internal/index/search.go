@@ -161,14 +161,17 @@ func (index *ReadIndex) Search(
 
 	programsQuery := bleve.NewMatchQuery(keyword)
 	programsQuery.SetField("Programs")
+	programsQuery.SetBoost(2)
 	query.AddShould(programsQuery)
 
 	attrQuery := bleve.NewMatchQuery(keyword)
 	attrQuery.SetField("Attribute")
+	attrQuery.SetBoost(2)
 	query.AddShould(attrQuery)
 
 	nameLiteralQuery := bleve.NewMatchQuery(keyword)
 	nameLiteralQuery.SetField("Name")
+	nameLiteralQuery.SetBoost(2)
 	query.AddShould(nameLiteralQuery)
 
 	search := bleve.NewSearchRequest(query)
