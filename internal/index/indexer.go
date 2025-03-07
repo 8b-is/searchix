@@ -58,7 +58,7 @@ func createIndexMapping() (mapping.IndexMapping, error) {
 	descriptionFieldMapping.Analyzer = web.Name
 
 	var err error
-	err = indexMapping.AddCustomAnalyzer("loc", map[string]interface{}{
+	err = indexMapping.AddCustomAnalyzer("loc", map[string]any{
 		"type":      keyword.Name,
 		"tokenizer": letter.Name,
 		"token_filters": []string{
@@ -69,7 +69,7 @@ func createIndexMapping() (mapping.IndexMapping, error) {
 	if err != nil {
 		return nil, errors.WithMessage(err, "could not add custom analyser")
 	}
-	err = indexMapping.AddCustomAnalyzer("keyword_single", map[string]interface{}{
+	err = indexMapping.AddCustomAnalyzer("keyword_single", map[string]any{
 		"type":      keyword.Name,
 		"tokenizer": letter.Name,
 	})
@@ -129,9 +129,9 @@ func createIndex(indexPath string, options *Options) (bleve.Index, error) {
 	if err != nil {
 		return nil, err
 	}
-	kvconfig := make(map[string]interface{})
+	kvconfig := make(map[string]any)
 	if options.LowMemory {
-		kvconfig = map[string]interface{}{
+		kvconfig = map[string]any{
 			"PersisterNapTimeMSec":      1000,
 			"PersisterNapUnderNumFiles": 500,
 		}
