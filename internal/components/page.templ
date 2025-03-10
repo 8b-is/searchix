@@ -29,7 +29,7 @@ templ Page(tdata TemplateData) {
 				rel="search"
 				type="application/opensearchdescription+xml"
 				title={ "Searchix " + sourceNameAndType(nil) }
-				href={ string(joinPath("/all", "opensearch.xml")) }
+				href={ string(joinPath("opensearch.xml")) }
 			/>
 			for _, source := range tdata.Sources {
 				<link
@@ -49,9 +49,9 @@ templ Page(tdata TemplateData) {
 							if tdata.SourceResult != nil || tdata.Query != "" {
 								class="current"
 							}
-							href="/all/search"
+							href="/"
 						} else {
-							href={ joinPathQuery("/all/search", tdata.Query) }
+							href={ joinPathQuery("/", tdata.Query) }
 						}
 					>All</a>
 					for _, source := range tdata.Sources {
@@ -71,6 +71,7 @@ templ Page(tdata TemplateData) {
 			</main>
 			<footer>
 				Made by <a href="https://alanpearce.eu">Alan Pearce</a>.
+				<a href="https://git.sr.ht/~alanpearce/searchix">Source code</a>
 				<a href="https://todo.sr.ht/~alanpearce/searchix">Report issues</a>
 			</footer>
 		</body>

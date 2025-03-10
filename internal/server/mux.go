@@ -71,18 +71,6 @@ func NewMux(
 
 	top := http.NewServeMux()
 	mux := sentryhttp.NewServeMux()
-	mux.HandleFunc("/{$}", func(w http.ResponseWriter, r *http.Request) {
-		indexData := components.TemplateData{
-			ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
-			Sources:       sources,
-			Assets:        frontend.Assets,
-		}
-		w.Header().Add("Cache-Control", "max-age=86400")
-		err := components.Homepage(indexData).Render(r.Context(), w)
-		if err != nil {
-			errorHandler(w, r, err.Error(), http.StatusInternalServerError)
-		}
-	})
 
 	const searchTimeout = 1 * time.Second
 	createSearchHandler := func(importerType config.ImporterType) func(http.ResponseWriter, *http.Request) {
@@ -213,9 +201,11 @@ func NewMux(
 		}
 	}
 
-	mux.HandleFunc("/all/search", createSearchHandler(config.All))
+	mux.HandleFunc("/{$}", createSearchHandler(config.All))
 	mux.HandleFunc("/options/{source}/search", createSearchHandler(config.Options))
 	mux.HandleFunc("/packages/{source}/search", createSearchHandler(config.Packages))
+
+	mux.Handle("/all/search", http.RedirectHandler("/", http.StatusFound))
 
 	createSourceIDHandler := func(importerType config.ImporterType) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
@@ -317,18 +307,19 @@ func NewMux(
 
 	mux.HandleFunc("/options/{source}/opensearch.xml", createOpenSearchXMLHandler(config.Options))
 	mux.HandleFunc("/packages/{source}/opensearch.xml", createOpenSearchXMLHandler(config.Packages))
-	mux.HandleFunc("/all/opensearch.xml", func(w http.ResponseWriter, _ *http.Request) {
+	mux.Handle("/all/opensearch.xml", http.RedirectHandler("/opensearch.xml", http.StatusFound))
+	mux.HandleFunc("/opensearch.xml", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Add("Cache-Control", "max-age=604800")
 		w.Header().Set("Content-Type", "application/opensearchdescription+xml")
 		osd := &opensearch.Description{
 			ShortName:   "Searchix Combined",
 			LongName:    "Search nix options and packages with Searchix",
 			Description: "Search nix options and packages with Searchix",
-			SearchForm:  cfg.Web.BaseURL.JoinPath("all/search"),
+			SearchForm:  cfg.Web.BaseURL.JoinPath(),
 			URL: opensearch.URL{
 				Method: "get",
 				Type:   "text/html",
-				Template: cfg.Web.BaseURL.JoinPath("all/search").
+				Template: cfg.Web.BaseURL.JoinPath().
 					AddRawQuery("query", "{searchTerms}"),
 			},
 		}

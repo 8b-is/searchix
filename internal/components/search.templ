@@ -23,6 +23,9 @@ templ Search(tdata TemplateData, r ResultData) {
 
 templ SearchPage(tdata TemplateData, r ResultData) {
 	@Page(tdata) {
+		<p>
+			Search Nix packages and options from NixOS, Darwin and Home-Manager
+		</p>
 		@script(tdata.Assets.ByPath["/static/search.js"])
 		@Search(tdata, r)
 		<section id="results" role="list" aria-label="search results">
@@ -36,5 +39,6 @@ templ SearchPage(tdata TemplateData, r ResultData) {
 				Everything should work fine without JavaScript. If that is not the case, <a href="https://todo.sr.ht/~alanpearce/searchix">report an issue</a>
 			</p>
 		</noscript>
+		<a href="https://git.sr.ht/~alanpearce/searchix">Source code</a>
 	}
 }
