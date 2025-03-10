@@ -1,8 +1,15 @@
 # Changelog
 
-## [v0.1.22](https://git.alanpearce.eu/searchix/diff/?id=v0.1.21&id2=05a32bda78911772cb8b09f37bacbcf851a4ddba) (2025-03-10)
+## [v0.1.23](https://git.alanpearce.eu/searchix/diff/?id=v0.1.22&id2=1fe30ce514535c37ca668a0e426aa48362f0bdbf) (2025-03-10)
 
-### Features
+### Fixes
+
+-   remove duplicate link to source code
+    ([1fe30ce](https://git.alanpearce.eu/searchix/commit/?id=1fe30ce514535c37ca668a0e426aa48362f0bdbf))
+
+### [v0.1.22](https://git.alanpearce.eu/searchix/diff/?id=v0.1.21&id2=v0.1.22) (2025-03-10)
+
+#### Features
 
 -   default to combined search on root path
     ([05a32bd](https://git.alanpearce.eu/searchix/commit/?id=05a32bda78911772cb8b09f37bacbcf851a4ddba))
