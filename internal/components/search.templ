@@ -24,7 +24,8 @@ templ Search(tdata TemplateData, r ResultData) {
 templ SearchPage(tdata TemplateData, r ResultData) {
 	@Page(tdata) {
 		<p>
-			Search Nix packages and options from NixOS, Darwin and Home-Manager
+			Search Nix packages and options from <a href="https://nixos.org">NixOS</a>, <a href="https://github.com/LnL7/nix-darwin">nix-darwin</a>
+			and <a href="https://github.com/nix-community/home-manager">home-manager</a>
 		</p>
 		@script(tdata.Assets.ByPath["/static/search.js"])
 		@Search(tdata, r)
