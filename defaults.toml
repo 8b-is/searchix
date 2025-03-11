@@ -88,7 +88,7 @@ Channel = 'darwin'
 # (Fetcher=channel) Remote URL for channel, (Fetcher=download) Path containing files named 'revision' and 'options.json'.
 URL = 'https://github.com/LnL7/nix-darwin/archive/master.tar.gz'
 # (Fetcher=channel) Nix attribute name (i.e. nix-build -A) that builds an {options,packages}.json
-Attribute = 'options'
+Attribute = 'docs.optionsJSON'
 # (Fetcher=channel) Sub-path of imported channel which contains the attribute above, e.g. release.nix
 ImportPath = 'release.nix'
 # Abort import if it takes longer than this.
@@ -168,7 +168,7 @@ Channel = 'nixpkgs'
 # (Fetcher=channel) Remote URL for channel, (Fetcher=download) Path containing files named 'revision' and 'options.json'.
 URL = 'https://channels.nixos.org/nixos-unstable/nixexprs.tar.xz'
 # (Fetcher=channel) Nix attribute name (i.e. nix-build -A) that builds an {options,packages}.json
-Attribute = 'docs.optionsJSON'
+Attribute = 'options'
 # (Fetcher=channel) Sub-path of imported channel which contains the attribute above, e.g. release.nix
 ImportPath = 'nixos/release.nix'
 # Abort import if it takes longer than this.

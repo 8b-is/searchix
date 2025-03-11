@@ -62,7 +62,7 @@ var DefaultConfig = Config{
 				Channel:    "nixpkgs",
 				URL:        "https://channels.nixos.org/nixos-unstable/nixexprs.tar.xz",
 				ImportPath: "nixos/release.nix",
-				Attribute:  "docs.optionsJSON",
+				Attribute:  "options",
 				OutputPath: "share/doc/nixos",
 				Timeout:    Duration{5 * time.Minute},
 				Repo:       nixpkgs,
@@ -77,7 +77,7 @@ var DefaultConfig = Config{
 				Channel:    "darwin",
 				URL:        "https://github.com/LnL7/nix-darwin/archive/master.tar.gz",
 				ImportPath: "release.nix",
-				Attribute:  "options",
+				Attribute:  "docs.optionsJSON",
 				OutputPath: "share/doc/darwin",
 				Timeout:    Duration{5 * time.Minute},
 				Repo: Repository{
