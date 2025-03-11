@@ -1,8 +1,15 @@
 # Changelog
 
-## [v0.1.23](https://git.alanpearce.eu/searchix/diff/?id=v0.1.22&id2=1fe30ce514535c37ca668a0e426aa48362f0bdbf) (2025-03-10)
+## [v0.1.24](https://git.alanpearce.eu/searchix/diff/?id=v0.1.23&id2=598b1f24aa5f20eb8ab47fd5bb73aae55779c1b2) (2025-03-11)
 
 ### Fixes
+
+-   **js:** switching source after reset uses old query
+    ([12947e5](https://git.alanpearce.eu/searchix/commit/?id=12947e5a912ddcd6bb82cbaab2811d02de703871))
+
+### [v0.1.23](https://git.alanpearce.eu/searchix/diff/?id=v0.1.22&id2=v0.1.23) (2025-03-10)
+
+#### Fixes
 
 -   remove duplicate link to source code
     ([1fe30ce](https://git.alanpearce.eu/searchix/commit/?id=1fe30ce514535c37ca668a0e426aa48362f0bdbf))
