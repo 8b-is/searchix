@@ -1,10 +1,10 @@
 module go.alanpearce.eu/searchix
 
-go 1.22.3
+go 1.23.6
 
 require (
 	badc0de.net/pkg/flagutil v1.0.1
-	github.com/a-h/templ v0.2.793
+	github.com/a-h/templ v0.3.833
 	github.com/andybalholm/brotli v1.1.1
 	github.com/bcicen/jstream v1.0.1
 	github.com/blevesearch/bleve/v2 v2.4.4

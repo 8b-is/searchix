@@ -11,8 +11,8 @@ schema = 3
     version = "v1.9.4"
     hash = "sha256-OKOLQ/PsH6630Vb5/9yG28TLIPGxdG9WDbAZxgK8EcI="
   [mod."github.com/a-h/templ"]
-    version = "v0.2.793"
-    hash = "sha256-WThPVkb56osTrMJZf0WIoqbsM9DHGaZsG47MS0eoseA="
+    version = "v0.3.833"
+    hash = "sha256-OSGAJDVPYqgb72DZXeemLp37aGrrxMt+PQNKW5voKQ0="
   [mod."github.com/andybalholm/brotli"]
     version = "v1.1.1"
     hash = "sha256-kCt+irK1gvz2lGQUeEolYa5+FbLsfWlJMCd5hm+RPgQ="
