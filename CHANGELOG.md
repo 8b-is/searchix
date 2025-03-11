@@ -1,13 +1,20 @@
 # Changelog
 
-## [v0.1.25](https://git.alanpearce.eu/searchix/diff/?id=v0.1.24&id2=d99fb7b6585837a02f43d1c3f37ed172baa1bf5d) (2025-03-11)
+## [v0.1.26](https://git.alanpearce.eu/searchix/diff/?id=v0.1.25&id2=5cdcac9f7a09b7cfd2fa699550092065b4d9a6c4) (2025-03-11)
 
-### Features
+### Fixes
+
+-   nixos import fails with default settings
+    ([5cdcac9](https://git.alanpearce.eu/searchix/commit/?id=5cdcac9f7a09b7cfd2fa699550092065b4d9a6c4))
+
+### [v0.1.25](https://git.alanpearce.eu/searchix/diff/?id=v0.1.24&id2=v0.1.25) (2025-03-11)
+
+#### Features
 
 -   link to referenced projects
     ([cb37af4](https://git.alanpearce.eu/searchix/commit/?id=cb37af4c87525bffc9b6f045b85e78aab18bf49d))
 
-### Fixes
+#### Fixes
 
 -   panic when source order > number of sources
     ([d99fb7b](https://git.alanpearce.eu/searchix/commit/?id=d99fb7b6585837a02f43d1c3f37ed172baa1bf5d))
