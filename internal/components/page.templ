@@ -46,7 +46,7 @@ templ Page(tdata TemplateData) {
 					<h1><a href="/">Searchix</a></h1>
 					<a
 						if tdata.Source == nil {
-							if tdata.SourceResult != nil || tdata.Query != "" {
+							if tdata.Query != "" {
 								class="current"
 							}
 							href="/"

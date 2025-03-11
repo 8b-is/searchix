@@ -52,38 +52,6 @@ func (index *ReadIndex) GetEnabledSources() ([]string, error) {
 	return enabledSources, nil
 }
 
-func (index *ReadIndex) GetSource(
-	ctx context.Context,
-	source *config.Source,
-) (*bleve.SearchResult, error) {
-	var query query.Query
-	if source == nil {
-		query = bleve.NewMatchAllQuery()
-	} else {
-		tq := bleve.NewTermQuery(source.Name)
-		tq.SetField("Source")
-		query = tq
-	}
-	search := bleve.NewSearchRequest(query)
-
-	result, err := index.index.SearchInContext(ctx, search)
-
-	select {
-	case <-ctx.Done():
-		return nil, ctx.Err()
-	default:
-		if err != nil {
-			return nil, errors.WithMessagef(
-				err,
-				"failed to execute search to find source %s in index",
-				source,
-			)
-		}
-	}
-
-	return result, nil
-}
-
 func setField[T query.FieldableQuery](
 	q T,
 	field string,

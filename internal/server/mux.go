@@ -175,19 +175,12 @@ func NewMux(
 					errorHandler(w, r, err.Error(), http.StatusInternalServerError)
 				}
 			} else {
-				sourceResult, err := index.GetSource(ctx, source)
-				if err != nil {
-					errorHandler(w, r, err.Error(), http.StatusInternalServerError)
-
-					return
-				}
 				w.Header().Add("Cache-Control", "max-age=14400")
 				err = components.SearchPage(
 					components.TemplateData{
 						ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
 						Sources:       sources,
 						Source:        source,
-						SourceResult:  sourceResult,
 						Assets:        frontend.Assets,
 					},
 					components.ResultData{},
