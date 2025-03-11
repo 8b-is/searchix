@@ -133,6 +133,11 @@ document.querySelector("a.current").addEventListener("click", function (ev) {
   state.results = "";
   history.pushState(state, null, ev.target.href);
   ev.preventDefault();
+  document.querySelectorAll("nav > a:not(.current)").forEach(function (node) {
+    const u = new URL(node.href);
+    u.search = "";
+    node.href = u.toString();
+  });
   queryInput.value = "";
 });
 
