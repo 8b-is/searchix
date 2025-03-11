@@ -210,6 +210,7 @@ in
       description = "Searchix Nix option search";
       wantedBy = [ "multi-user.target" ];
       path = with pkgs; [ nix ];
+      inherit (cfg) environment;
       serviceConfig = defaultServiceConfig // {
         ExecStart = "${package}/bin/searchix-web --config ${(settingsFormat.generate "searchix-config.toml" cfg.settings)}";
       } // lib.optionalAttrs (cfg.settings.web.port < 1024) {
