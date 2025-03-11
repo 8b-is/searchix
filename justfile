@@ -42,7 +42,10 @@ changelog:
 		prettier --stdin-filepath CHANGELOG.md > CHANGELOG.md
 
 update-nix-package-version:
-	sd 'version = "[^"]+"' "version = \"$(convco version --bump)\"" nix/package.nix
+	#!/usr/bin/env bash
+	VER=$(convco version --bump)
+	sd 'version = "[^"]+"' "version = \"$VER\"" nix/package.nix
+	sd 'h=v.+$' "h=v$VER" nix/modules/default.nix
 
 release: clean-workdir changelog update-nix-package-version
 	git add CHANGELOG.md nix/package.nix
