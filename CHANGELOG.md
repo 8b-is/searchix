@@ -1,8 +1,20 @@
 # Changelog
 
-## [v0.1.24](https://git.alanpearce.eu/searchix/diff/?id=v0.1.23&id2=598b1f24aa5f20eb8ab47fd5bb73aae55779c1b2) (2025-03-11)
+## [v0.1.25](https://git.alanpearce.eu/searchix/diff/?id=v0.1.24&id2=d99fb7b6585837a02f43d1c3f37ed172baa1bf5d) (2025-03-11)
+
+### Features
+
+-   link to referenced projects
+    ([cb37af4](https://git.alanpearce.eu/searchix/commit/?id=cb37af4c87525bffc9b6f045b85e78aab18bf49d))
 
 ### Fixes
+
+-   panic when source order > number of sources
+    ([d99fb7b](https://git.alanpearce.eu/searchix/commit/?id=d99fb7b6585837a02f43d1c3f37ed172baa1bf5d))
+
+### [v0.1.24](https://git.alanpearce.eu/searchix/diff/?id=v0.1.23&id2=v0.1.24) (2025-03-11)
+
+#### Fixes
 
 -   **js:** switching source after reset uses old query
     ([12947e5](https://git.alanpearce.eu/searchix/commit/?id=12947e5a912ddcd6bb82cbaab2811d02de703871))
