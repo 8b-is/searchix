@@ -49,6 +49,8 @@ release: clean-workdir changelog update-nix-package-version
 	git commit -m "chore: release $(convco version --bump)"
 	git tag $(convco version --bump --print-prefix)
 
+run: dev
+
 dev:
 	modd
 
