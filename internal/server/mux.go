@@ -1,14 +1,18 @@
 package server
 
 import (
+	"cmp"
 	"context"
 	"encoding/xml"
 	"fmt"
+	"maps"
 	"math"
 	"net/http"
 	"net/url"
 	"path"
+	"slices"
 	"strconv"
+	"strings"
 	"time"
 
 	"go.alanpearce.eu/searchix/frontend"
@@ -47,10 +51,13 @@ func applyDevModeOverrides(cfg *config.Config) {
 }
 
 func sortSources(ss map[string]*config.Source) {
-	sources = make([]*config.Source, len(ss))
-	for _, v := range ss {
-		sources[v.Order] = v
-	}
+	sources = slices.SortedFunc(maps.Values(ss), func(a, b *config.Source) int {
+		return cmp.Or(
+			cmp.Compare(a.Order, b.Order),
+			strings.Compare(a.Key, b.Key),
+			strings.Compare(a.Name, b.Name),
+		)
+	})
 }
 
 func NewMux(
