@@ -154,7 +154,7 @@ in
           };
 
           importer = mkOption {
-            default = { };
+            default = defaults.Importer;
             type = types.submodule {
               freeformType = settingsFormat.type;
 
@@ -180,7 +180,10 @@ in
                     attrsOf (submodule (import ./source-options.nix {
                       inherit cfg settingsFormat;
                     }));
-                  default = defaults.Importer.Sources;
+                  default = {
+                    nixos.enable = true;
+                    nixpkgs.enable = true;
+                  };
                   description = "Declarative specification of options sources for searchix.";
                 };
               };
