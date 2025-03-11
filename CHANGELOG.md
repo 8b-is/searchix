@@ -1,8 +1,15 @@
 # Changelog
 
-## [v0.1.26](https://git.alanpearce.eu/searchix/diff/?id=v0.1.25&id2=5cdcac9f7a09b7cfd2fa699550092065b4d9a6c4) (2025-03-11)
+## [v0.1.27](https://git.alanpearce.eu/searchix/diff/?id=v0.1.26&id2=cd6c7a1bcf654882fee3ae8a955df9cf7928094b) (2025-03-11)
 
 ### Fixes
+
+-   sources disabled by default in NixOS module
+    ([333bd2f](https://git.alanpearce.eu/searchix/commit/?id=333bd2fbd16fc12c36e1b1d5b5bffdf065585fa8))
+
+### [v0.1.26](https://git.alanpearce.eu/searchix/diff/?id=v0.1.25&id2=v0.1.26) (2025-03-11)
+
+#### Fixes
 
 -   nixos import fails with default settings
     ([5cdcac9](https://git.alanpearce.eu/searchix/commit/?id=5cdcac9f7a09b7cfd2fa699550092065b4d9a6c4))
