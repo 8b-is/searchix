@@ -22,9 +22,7 @@
     nix develop
     ```
 
-3. Optional: install and set up lorri and use `lorri shell` instead of `nix develop`
-
-4. Optional: install direnv, integrate it with your shell and then run
+3. Optional: install direnv, integrate it with your shell and then run
 
     ```shell-session
     ln -s .envrc.sample .envrc
