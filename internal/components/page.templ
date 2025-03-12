@@ -46,9 +46,7 @@ templ Page(tdata TemplateData) {
 					<h1><a href="/">Searchix</a></h1>
 					<a
 						if tdata.Source == nil {
-							if tdata.Query != "" {
-								class="current"
-							}
+							class="current"
 							href="/"
 						} else {
 							href={ joinPathQuery("/", tdata.Query) }
