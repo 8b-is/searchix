@@ -14,7 +14,7 @@ import (
 	"go.alanpearce.eu/x/log"
 
 	"github.com/getsentry/sentry-go"
-	"github.com/pkg/errors"
+	"gitlab.com/tozd/go/errors"
 )
 
 func nextUTCOccurrenceOfTime(t config.LocalTime) time.Time {
@@ -44,7 +44,7 @@ type IndexOptions struct {
 	Logger    *log.Logger
 }
 
-func (s *Server) SetupIndex(ctx context.Context, options *IndexOptions) error {
+func (s *Server) SetupIndex(ctx context.Context, options *IndexOptions) errors.E {
 	var i uint
 	cfgEnabledSources := make([]string, len(s.cfg.Importer.Sources))
 	for key := range s.cfg.Importer.Sources {
@@ -139,7 +139,7 @@ type Server struct {
 	writeIndex *index.WriteIndex
 }
 
-func New(cfg *config.Config, log *log.Logger) (*Server, error) {
+func New(cfg *config.Config, log *log.Logger) (*Server, errors.E) {
 	err := sentry.Init(sentry.ClientOptions{
 		EnableTracing:    true,
 		TracesSampleRate: 1.0,
@@ -164,7 +164,7 @@ func (s *Server) startUpdateTimer(
 ) {
 	const monitorSlug = "import"
 	localHub.WithScope(func(scope *sentry.Scope) {
-		var err error
+		var err errors.E
 		scope.SetContext("monitor", sentry.Context{"slug": monitorSlug})
 		monitorConfig := &sentry.MonitorConfig{
 			Schedule:      sentry.IntervalSchedule(1, sentry.MonitorScheduleUnitDay),
@@ -219,8 +219,8 @@ func (s *Server) startUpdateTimer(
 	})
 }
 
-func (s *Server) Start(ctx context.Context, liveReload bool) error {
-	var err error
+func (s *Server) Start(ctx context.Context, liveReload bool) errors.E {
+	var err errors.E
 	s.sv, err = server.New(s.cfg, s.readIndex, s.log.Named("server"), liveReload)
 	if err != nil {
 		return errors.Wrap(err, "error setting up server")

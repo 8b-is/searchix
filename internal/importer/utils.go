@@ -10,7 +10,7 @@ import (
 	"go.alanpearce.eu/searchix/internal/nix"
 
 	"github.com/bcicen/jstream"
-	"github.com/pkg/errors"
+	"gitlab.com/tozd/go/errors"
 )
 
 func ValueTypeToString(valueType jstream.ValueType) string {
@@ -34,7 +34,7 @@ func ValueTypeToString(valueType jstream.ValueType) string {
 	return "very strange"
 }
 
-func makeRepoURL(repo config.Repository, subPath string, line string) (string, error) {
+func makeRepoURL(repo config.Repository, subPath string, line string) (string, errors.E) {
 	switch repo.Type {
 	case config.GitHub:
 		ref := repo.Revision
@@ -55,7 +55,7 @@ func makeRepoURL(repo config.Repository, subPath string, line string) (string, e
 	}
 }
 
-func MakeChannelLink(repo config.Repository, subPath string) (*nix.Link, error) {
+func MakeChannelLink(repo config.Repository, subPath string) (*nix.Link, errors.E) {
 	url, err := makeRepoURL(repo, subPath, "")
 	if err != nil {
 		return nil, err
@@ -67,7 +67,7 @@ func MakeChannelLink(repo config.Repository, subPath string) (*nix.Link, error) 
 	}, nil
 }
 
-func setRepoRevision(file io.ReadCloser, source *config.Source) error {
+func setRepoRevision(file io.ReadCloser, source *config.Source) errors.E {
 	if file != nil {
 		defer file.Close()
 		var str strings.Builder

@@ -2,13 +2,12 @@ package fetcher
 
 import (
 	"context"
-	"fmt"
 	"net/url"
 
 	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/index"
 
-	"github.com/pkg/errors"
+	"gitlab.com/tozd/go/errors"
 	"go.alanpearce.eu/x/log"
 )
 
@@ -21,7 +20,7 @@ type DownloadFetcher struct {
 func NewDownloadFetcher(
 	source *config.Source,
 	logger *log.Logger,
-) (*DownloadFetcher, error) {
+) (*DownloadFetcher, errors.E) {
 	switch source.Importer {
 	case config.Options:
 		return &DownloadFetcher{
@@ -29,7 +28,7 @@ func NewDownloadFetcher(
 			Logger: logger,
 		}, nil
 	default:
-		return nil, fmt.Errorf("unsupported importer type %s", source.Importer)
+		return nil, errors.Errorf("unsupported importer type %s", source.Importer)
 	}
 }
 
@@ -41,20 +40,18 @@ var files = map[string]string{
 func (i *DownloadFetcher) FetchIfNeeded(
 	ctx context.Context,
 	sourceMeta *index.SourceMeta,
-) (f FetchedFiles, err error) {
-	var fetchURL string
+) (*FetchedFiles, errors.E) {
+	f := &FetchedFiles{}
 	sourceUpdated := sourceMeta.Updated
 	for key, filename := range files {
-		fetchURL, err = url.JoinPath(i.Source.URL, filename)
-		if err != nil {
-			err = errors.WithMessagef(
-				err,
+		fetchURL, baseErr := url.JoinPath(i.Source.URL, filename)
+		if baseErr != nil {
+			return nil, errors.WithMessagef(
+				baseErr,
 				"could not build URL with elements %s and %s",
 				i.Source.URL,
 				filename,
 			)
-
-			return
 		}
 
 		i.Logger.Debug("preparing to fetch URL", "url", fetchURL)
@@ -63,7 +60,7 @@ func (i *DownloadFetcher) FetchIfNeeded(
 		if err != nil {
 			i.Logger.Warn("failed to fetch file", "url", fetchURL, "error", err)
 
-			return f, err
+			return nil, err
 		}
 		// don't bother to issue requests for the later files
 		if mtime.Before(sourceUpdated) {
@@ -81,5 +78,5 @@ func (i *DownloadFetcher) FetchIfNeeded(
 		}
 	}
 
-	return
+	return f, nil
 }

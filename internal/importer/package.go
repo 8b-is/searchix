@@ -14,7 +14,7 @@ import (
 
 	"github.com/bcicen/jstream"
 	"github.com/mitchellh/mapstructure"
-	"github.com/pkg/errors"
+	"gitlab.com/tozd/go/errors"
 )
 
 type packageJSON struct {
@@ -69,7 +69,7 @@ func NewPackageProcessor(
 	source *config.Source,
 	log *log.Logger,
 	programsDB *programs.DB,
-) (*PackageIngester, error) {
+) (*PackageIngester, errors.E) {
 	i := &PackageIngester{
 		dec:      jstream.NewDecoder(infile, 2).EmitKV(),
 		log:      log,
@@ -116,9 +116,9 @@ func convertToLicense(in map[string]any) *nix.License {
 	return l
 }
 
-func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <-chan error) {
+func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <-chan errors.E) {
 	results := make(chan nix.Importable)
-	errs := make(chan error)
+	errs := make(chan errors.E)
 
 	if i.programs != nil {
 		err := i.programs.Open()
@@ -135,7 +135,7 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 
 	outer:
 		for mv := range i.dec.Stream() {
-			var err error
+			var err errors.E
 			var programs []string
 			select {
 			case <-ctx.Done():
@@ -222,8 +222,7 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 			}
 
 			i.pkg = packageJSON{}
-			err = i.ms.Decode(x) // stores in i.pkg
-			if err != nil {
+			if err := i.ms.Decode(x); err != nil { // stores in i.pkg
 				errs <- errors.WithMessagef(err, "failed to decode package %#v", x)
 
 				continue

@@ -4,13 +4,14 @@ import (
 	"context"
 	"sync"
 
+	"gitlab.com/tozd/go/errors"
 	"go.alanpearce.eu/searchix/internal/index"
 	"go.alanpearce.eu/searchix/internal/nix"
 	"go.alanpearce.eu/x/log"
 )
 
 type Processor interface {
-	Process(context.Context) (<-chan nix.Importable, <-chan error)
+	Process(context.Context) (<-chan nix.Importable, <-chan errors.E)
 }
 
 func process(
@@ -18,7 +19,7 @@ func process(
 	indexer *index.WriteIndex,
 	processor Processor,
 	logger *log.Logger,
-) (bool, error) {
+) (bool, errors.E) {
 	wg := sync.WaitGroup{}
 
 	wg.Add(1)
@@ -28,7 +29,7 @@ func process(
 	iErrs := indexer.Import(ctx, objects)
 
 	var hadObjectErrors bool
-	var criticalError error
+	var criticalError errors.E
 	go func() {
 		for {
 			select {

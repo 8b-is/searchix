@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/pkg/errors"
+	"gitlab.com/tozd/go/errors"
 	"go.alanpearce.eu/x/log"
 )
 
@@ -17,7 +17,7 @@ type FileWatcher struct {
 	log     *log.Logger
 }
 
-func NewFileWatcher(log *log.Logger) (*FileWatcher, error) {
+func NewFileWatcher(log *log.Logger) (*FileWatcher, errors.E) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return nil, errors.WithMessage(err, "could not create watcher")
@@ -29,7 +29,7 @@ func NewFileWatcher(log *log.Logger) (*FileWatcher, error) {
 	}, nil
 }
 
-func (i FileWatcher) AddRecursive(from string) error {
+func (i FileWatcher) AddRecursive(from string) errors.E {
 	i.log.Debug(fmt.Sprintf("watching files under %s", from))
 	err := filepath.WalkDir(from, func(path string, entry fs.DirEntry, err error) error {
 		if err != nil {

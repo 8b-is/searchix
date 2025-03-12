@@ -11,7 +11,7 @@ import (
 	"go.alanpearce.eu/searchix/internal/config"
 
 	"github.com/andybalholm/brotli"
-	"github.com/pkg/errors"
+	"gitlab.com/tozd/go/errors"
 	"go.alanpearce.eu/x/log"
 )
 
@@ -36,17 +36,20 @@ func fetchFileIfNeeded(
 	log *log.Logger,
 	mtime time.Time,
 	url string,
-) (body io.ReadCloser, newMtime time.Time, err error) {
+) (io.ReadCloser, time.Time, errors.E) {
+	var newMtime time.Time
 	var ifModifiedSince string
 	if !mtime.IsZero() {
 		ifModifiedSince = strings.Replace(mtime.UTC().Format(time.RFC1123), "UTC", "GMT", 1)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "GET", url, http.NoBody)
-	if err != nil {
-		err = errors.WithMessagef(err, "could not create HTTP request for %s", url)
-
-		return
+	req, baseErr := http.NewRequestWithContext(ctx, "GET", url, http.NoBody)
+	if baseErr != nil {
+		return nil, newMtime, errors.WithMessagef(
+			baseErr,
+			"could not create HTTP request for %s",
+			url,
+		)
 	}
 
 	req.Header.Set("User-Agent", fmt.Sprintf("Searchix %s", config.Version))
@@ -54,21 +57,22 @@ func fetchFileIfNeeded(
 	if ifModifiedSince != "" {
 		req.Header.Set("If-Modified-Since", ifModifiedSince)
 	}
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		err = errors.WithMessagef(err, "could not make HTTP request to %s", url)
-
-		return
+	res, baseErr := http.DefaultClient.Do(req)
+	if baseErr != nil {
+		return nil, newMtime, errors.WithMessagef(baseErr, "could not make HTTP request to %s", url)
 	}
 
+	var body io.ReadCloser
+	var err errors.E
 	switch res.StatusCode {
 	case http.StatusNotModified:
 		newMtime = mtime
 
-		return
+		return nil, newMtime, nil
 	case http.StatusOK:
-		newMtime, err = time.Parse(time.RFC1123, res.Header.Get("Last-Modified"))
-		if err != nil {
+		var baseErr error
+		newMtime, baseErr = time.Parse(time.RFC1123, res.Header.Get("Last-Modified"))
+		if baseErr != nil {
 			log.Warn(
 				"could not parse Last-Modified header from response",
 				"value",
@@ -84,11 +88,11 @@ func fetchFileIfNeeded(
 		case "", "identity", "gzip":
 			body = res.Body
 		default:
-			err = fmt.Errorf("cannot handle a body with content-encoding %s", ce)
+			err = errors.Errorf("cannot handle a body with content-encoding %s", ce)
 		}
 	default:
-		err = fmt.Errorf("got response code %d, don't know what to do", res.StatusCode)
+		err = errors.Errorf("got response code %d, don't know what to do", res.StatusCode)
 	}
 
-	return
+	return body, newMtime, err
 }

@@ -15,9 +15,9 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/osdevisnot/sorvor v0.4.4
 	github.com/pelletier/go-toml/v2 v2.2.3
-	github.com/pkg/errors v0.9.1
 	github.com/stoewer/go-strcase v1.3.0
 	github.com/yuin/goldmark v1.7.8
+	gitlab.com/tozd/go/errors v0.10.0
 	go.alanpearce.eu/x v0.0.0-20241203124832-a29434dba11a
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.33.0
@@ -56,6 +56,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/mschoch/smat v0.2.0 // indirect
 	github.com/ncruces/go-strftime v0.1.9 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/sykesm/zap-logfmt v0.0.4 // indirect

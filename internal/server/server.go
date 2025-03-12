@@ -11,7 +11,7 @@ import (
 	"go.alanpearce.eu/searchix/internal/index"
 	"go.alanpearce.eu/x/log"
 
-	"github.com/pkg/errors"
+	"gitlab.com/tozd/go/errors"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )
@@ -28,7 +28,7 @@ func New(
 	index *index.ReadIndex,
 	log *log.Logger,
 	liveReload bool,
-) (*Server, error) {
+) (*Server, errors.E) {
 	mux, err := NewMux(conf, index, log, liveReload)
 	if err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func New(
 	}, nil
 }
 
-func (s *Server) Start() error {
+func (s *Server) Start() errors.E {
 	listenAddress := net.JoinHostPort(s.cfg.Web.ListenAddress, strconv.Itoa(s.cfg.Web.Port))
 	l, err := net.Listen("tcp", listenAddress)
 	if err != nil {

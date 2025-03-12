@@ -8,7 +8,7 @@ import (
 	"go.alanpearce.eu/searchix/internal/index"
 	"go.alanpearce.eu/x/log"
 
-	"github.com/pkg/errors"
+	"gitlab.com/tozd/go/errors"
 )
 
 type FetchedFiles struct {
@@ -18,13 +18,13 @@ type FetchedFiles struct {
 }
 
 type Fetcher interface {
-	FetchIfNeeded(context.Context, *index.SourceMeta) (FetchedFiles, error)
+	FetchIfNeeded(context.Context, *index.SourceMeta) (*FetchedFiles, errors.E)
 }
 
 func New(
 	source *config.Source,
 	logger *log.Logger,
-) (fetcher Fetcher, err error) {
+) (fetcher Fetcher, err errors.E) {
 	switch source.Fetcher {
 	case config.ChannelNixpkgs:
 		fetcher, err = NewNixpkgsChannelFetcher(source, logger)

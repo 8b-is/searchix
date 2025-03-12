@@ -81,7 +81,7 @@ templ script(s *frontend.Asset) {
 }
 
 func Unsafe(html string) templ.Component {
-	return templ.ComponentFunc(func(_ context.Context, w io.Writer) (err error) {
+	return templ.ComponentFunc(func(_ context.Context, w io.Writer) (err errors.E) {
 		_, err = io.WriteString(w, html)
 		return
 	})

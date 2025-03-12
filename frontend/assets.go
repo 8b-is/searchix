@@ -8,7 +8,7 @@ import (
 	"io"
 	"io/fs"
 
-	"github.com/pkg/errors"
+	"gitlab.com/tozd/go/errors"
 )
 
 var Assets = &AssetCollection{
@@ -30,7 +30,7 @@ type AssetCollection struct {
 	ByPath      map[string]*Asset
 }
 
-func newAsset(filename string) (*Asset, error) {
+func newAsset(filename string) (*Asset, errors.E) {
 	file, err := Files.Open(filename)
 	if err != nil {
 		return nil, errors.WithMessagef(err, "could not open file %s", filename)
@@ -51,7 +51,7 @@ func newAsset(filename string) (*Asset, error) {
 	}, nil
 }
 
-func hashScripts() error {
+func hashScripts() errors.E {
 	scripts, err := fs.Glob(Files, "static/**.js")
 	if err != nil {
 		return errors.WithMessage(err, "could not glob files")
@@ -68,7 +68,7 @@ func hashScripts() error {
 	return nil
 }
 
-func hashStyles() error {
+func hashStyles() errors.E {
 	styles, err := fs.Glob(Files, "static/**.css")
 	if err != nil {
 		return errors.WithMessage(err, "could not glob files")
@@ -85,7 +85,7 @@ func hashStyles() error {
 	return nil
 }
 
-func Rehash() (err error) {
+func Rehash() (err errors.E) {
 	Assets.Scripts = []*Asset{}
 	err = hashScripts()
 	if err != nil {

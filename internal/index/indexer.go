@@ -26,7 +26,7 @@ import (
 	"github.com/blevesearch/bleve/v2/document"
 	"github.com/blevesearch/bleve/v2/mapping"
 	indexAPI "github.com/blevesearch/bleve_index_api"
-	"github.com/pkg/errors"
+	"gitlab.com/tozd/go/errors"
 )
 
 type WriteIndex struct {
@@ -36,16 +36,16 @@ type WriteIndex struct {
 }
 
 type BatchError struct {
-	error
+	errors.E
 }
 
 func (e *BatchError) Error() string {
-	return e.error.Error()
+	return e.E.Error()
 }
 
 var batchSize = 10_000
 
-func createIndexMapping() (mapping.IndexMapping, error) {
+func createIndexMapping() (mapping.IndexMapping, errors.E) {
 	indexMapping := bleve.NewIndexMapping()
 	indexMapping.StoreDynamic = false
 	indexMapping.IndexDynamic = false
@@ -124,7 +124,7 @@ func createIndexMapping() (mapping.IndexMapping, error) {
 	return indexMapping, nil
 }
 
-func createIndex(indexPath string, options *Options) (bleve.Index, error) {
+func createIndex(indexPath string, options *Options) (bleve.Index, errors.E) {
 	indexMapping, err := createIndexMapping()
 	if err != nil {
 		return nil, err
@@ -136,15 +136,15 @@ func createIndex(indexPath string, options *Options) (bleve.Index, error) {
 			"PersisterNapUnderNumFiles": 500,
 		}
 	}
-	idx, err := bleve.NewUsing(
+	idx, baseErr := bleve.NewUsing(
 		indexPath,
 		indexMapping,
 		bleve.Config.DefaultIndexType,
 		bleve.Config.DefaultKVStore,
 		kvconfig,
 	)
-	if err != nil {
-		return nil, errors.WithMessagef(err, "unable to create index at path %s", indexPath)
+	if baseErr != nil {
+		return nil, errors.WithMessagef(baseErr, "unable to create index at path %s", indexPath)
 	}
 
 	return idx, nil
@@ -162,7 +162,7 @@ var expectedDataFiles = []string{
 	"nixpkgs-programs.db",
 }
 
-func deleteIndex(dataRoot string) error {
+func deleteIndex(dataRoot string) errors.E {
 	dir, err := os.ReadDir(dataRoot)
 	if err != nil {
 		return errors.WithMessagef(err, "could not read data directory %s", dataRoot)
@@ -195,8 +195,8 @@ func OpenOrCreate(
 	dataRoot string,
 	force bool,
 	options *Options,
-) (*ReadIndex, *WriteIndex, bool, error) {
-	var err error
+) (*ReadIndex, *WriteIndex, bool, errors.E) {
+	var err errors.E
 	bleve.SetLog(zap.NewStdLog(options.Logger.Named("bleve").GetLogger()))
 
 	indexPath := path.Join(dataRoot, indexBaseName)
@@ -231,9 +231,10 @@ func OpenOrCreate(
 		}
 
 	} else {
-		idx, err = bleve.Open(indexPath)
-		if err != nil {
-			return nil, nil, exists, errors.WithMessagef(err, "could not open index at path %s", indexPath)
+		var baseErr error
+		idx, baseErr = bleve.Open(indexPath)
+		if baseErr != nil {
+			return nil, nil, exists, errors.WithMessagef(baseErr, "could not open index at path %s", indexPath)
 		}
 
 		meta, err = openMeta(metaPath, options.Logger)
@@ -260,16 +261,16 @@ func OpenOrCreate(
 		nil
 }
 
-func (i *WriteIndex) SaveMeta() error {
+func (i *WriteIndex) SaveMeta() errors.E {
 	return i.Meta.Save()
 }
 
 func (i *WriteIndex) Import(
 	ctx context.Context,
 	objects <-chan nix.Importable,
-) <-chan error {
-	var err error
-	errs := make(chan error)
+) <-chan errors.E {
+	var err errors.E
+	errs := make(chan errors.E)
 
 	go func() {
 		defer close(errs)
@@ -288,8 +289,7 @@ func (i *WriteIndex) Import(
 			}
 
 			doc := document.NewDocument(nix.GetKey(obj))
-			err = indexMapping.MapDocument(doc, obj)
-			if err != nil {
+			if err := indexMapping.MapDocument(doc, obj); err != nil {
 				errs <- errors.WithMessagef(err, "could not map document for object: %s", obj.GetName())
 
 				continue
@@ -297,8 +297,7 @@ func (i *WriteIndex) Import(
 
 			var data bytes.Buffer
 			enc := gob.NewEncoder(&data)
-			err = enc.Encode(&obj)
-			if err != nil {
+			if err := enc.Encode(&obj); err != nil {
 				errs <- errors.WithMessage(err, "could not store object in search index")
 
 				continue
@@ -307,9 +306,7 @@ func (i *WriteIndex) Import(
 			newDoc := doc.AddField(field)
 
 			// log.Debug("adding object to index", "name", opt.Name)
-			err = batch.IndexAdvanced(newDoc)
-
-			if err != nil {
+			if err := batch.IndexAdvanced(newDoc); err != nil {
 				errs <- errors.WithMessagef(err, "could not index object %s", obj.GetName())
 
 				continue
@@ -334,11 +331,11 @@ func (i *WriteIndex) Import(
 	return errs
 }
 
-func (i *WriteIndex) Flush(batch *bleve.Batch) error {
+func (i *WriteIndex) Flush(batch *bleve.Batch) errors.E {
 	size := batch.Size()
 	if size == 0 {
 		return &BatchError{
-			error: errors.New("no documents to flush"),
+			E: errors.New("no documents to flush"),
 		}
 	}
 	i.log.Debug("flushing batch", "size", size)
@@ -346,7 +343,7 @@ func (i *WriteIndex) Flush(batch *bleve.Batch) error {
 	err := i.index.Batch(batch)
 	if err != nil {
 		return &BatchError{
-			error: errors.WithMessagef(err, "could not flush batch"),
+			E: errors.WithMessagef(err, "could not flush batch"),
 		}
 	}
 
@@ -355,7 +352,7 @@ func (i *WriteIndex) Flush(batch *bleve.Batch) error {
 	return nil
 }
 
-func (i *WriteIndex) Close() (err error) {
+func (i *WriteIndex) Close() (err errors.E) {
 	if e := i.Meta.Save(); e != nil {
 		// index needs to be closed anyway
 		err = errors.WithMessage(e, "could not save metadata")
@@ -368,7 +365,7 @@ func (i *WriteIndex) Close() (err error) {
 	return err
 }
 
-func (i *WriteIndex) DeleteBySource(source string) error {
+func (i *WriteIndex) DeleteBySource(source string) errors.E {
 	query := bleve.NewTermQuery(source)
 	search := bleve.NewSearchRequest(query)
 	search.Size = math.MaxInt
@@ -392,7 +389,7 @@ func (i *WriteIndex) DeleteBySource(source string) error {
 	}
 	err = i.Flush(batch)
 	if err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 
 	if uint64(search.Size) < results.Total {

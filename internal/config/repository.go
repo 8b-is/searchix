@@ -3,6 +3,8 @@ package config
 import (
 	"fmt"
 	"strings"
+
+	"gitlab.com/tozd/go/errors"
 )
 
 type RepoType int
@@ -28,12 +30,12 @@ func (f RepoType) String() string {
 	}
 }
 
-func parseRepoType(name string) (RepoType, error) {
+func parseRepoType(name string) (RepoType, errors.E) {
 	switch strings.ToLower(name) {
 	case "github":
 		return GitHub, nil
 	default:
-		return UnknownRepoType, fmt.Errorf("unsupported repo type %s", name)
+		return UnknownRepoType, errors.Errorf("unsupported repo type %s", name)
 	}
 }
 

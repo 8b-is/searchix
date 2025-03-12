@@ -5,9 +5,9 @@ import (
 
 	"go.alanpearce.eu/searchix/internal/nix"
 
+	"context"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
-	"context"
 	"io"
 )
 
@@ -27,7 +27,7 @@ func firstSentence[T ~string](text T) T {
 }
 
 func markdown(text nix.Markdown) templ.Component {
-	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) error {
+	return templ.ComponentFunc(func(ctx context.Context, w io.Writer) errors.E {
 		err := md.Convert([]byte(text), w)
 
 		return err

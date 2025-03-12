@@ -8,7 +8,7 @@ import (
 	"go.alanpearce.eu/searchix/internal/file"
 	"go.alanpearce.eu/x/log"
 
-	"github.com/pkg/errors"
+	"gitlab.com/tozd/go/errors"
 )
 
 const CurrentSchemaVersion = 3
@@ -31,7 +31,7 @@ type Meta struct {
 	data
 }
 
-func createMeta(path string, log *log.Logger) (*Meta, error) {
+func createMeta(path string, log *log.Logger) (*Meta, errors.E) {
 	exists, err := file.Exists(path)
 	if err != nil {
 		return nil, errors.WithMessage(err, "could not check for existence of index metadata")
@@ -49,7 +49,7 @@ func createMeta(path string, log *log.Logger) (*Meta, error) {
 	}, nil
 }
 
-func openMeta(path string, log *log.Logger) (*Meta, error) {
+func openMeta(path string, log *log.Logger) (*Meta, errors.E) {
 	exists, err := file.Exists(path)
 	if err != nil {
 		return nil, errors.WithMessage(err, "could not check for existence of index metadata")
@@ -58,16 +58,16 @@ func openMeta(path string, log *log.Logger) (*Meta, error) {
 		return createMeta(path, log)
 	}
 
-	j, err := os.ReadFile(path)
-	if err != nil {
-		return nil, errors.WithMessage(err, "could not open index metadata file")
+	j, baseErr := os.ReadFile(path)
+	if baseErr != nil {
+		return nil, errors.WithMessage(baseErr, "could not open index metadata file")
 	}
 	meta := Meta{
 		path: path,
 		log:  log,
 	}
-	err = json.Unmarshal(j, &meta.data)
-	if err != nil {
+
+	if err := json.Unmarshal(j, &meta.data); err != nil {
 		return nil, errors.WithMessage(err, "index metadata is corrupt, try replacing the index")
 	}
 
@@ -88,7 +88,7 @@ func (i *Meta) checkSchemaVersion() {
 	}
 }
 
-func (i *Meta) Save() error {
+func (i *Meta) Save() errors.E {
 	i.SchemaVersion = CurrentSchemaVersion
 	j, err := json.Marshal(i.data)
 	if err != nil {

@@ -11,7 +11,7 @@ import (
 
 	"github.com/bcicen/jstream"
 	"github.com/mitchellh/mapstructure"
-	"github.com/pkg/errors"
+	"gitlab.com/tozd/go/errors"
 )
 
 type nixValueJSON struct {
@@ -68,7 +68,7 @@ func NewOptionProcessor(
 	infile io.ReadCloser,
 	source *config.Source,
 	log *log.Logger,
-) (*OptionIngester, error) {
+) (*OptionIngester, errors.E) {
 	i := OptionIngester{
 		dec:     jstream.NewDecoder(infile, 1).EmitKV(),
 		log:     log,
@@ -94,9 +94,9 @@ func NewOptionProcessor(
 	return &i, nil
 }
 
-func (i *OptionIngester) Process(ctx context.Context) (<-chan nix.Importable, <-chan error) {
+func (i *OptionIngester) Process(ctx context.Context) (<-chan nix.Importable, <-chan errors.E) {
 	results := make(chan nix.Importable)
-	errs := make(chan error)
+	errs := make(chan errors.E)
 
 	go func() {
 		defer i.infile.Close()

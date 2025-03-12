@@ -2,13 +2,12 @@ package fetcher
 
 import (
 	"context"
-	"fmt"
 	"net/url"
 
 	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/index"
 
-	"github.com/pkg/errors"
+	"gitlab.com/tozd/go/errors"
 	"go.alanpearce.eu/x/log"
 )
 
@@ -17,7 +16,7 @@ type NixpkgsChannelFetcher struct {
 	Logger *log.Logger
 }
 
-func makeChannelURL(channel string, subPath string) (string, error) {
+func makeChannelURL(channel string, subPath string) (string, errors.E) {
 	url, err := url.JoinPath("https://channels.nixos.org/", channel, subPath)
 
 	return url, errors.WithMessagef(err, "error creating URL")
@@ -26,7 +25,7 @@ func makeChannelURL(channel string, subPath string) (string, error) {
 func NewNixpkgsChannelFetcher(
 	source *config.Source,
 	logger *log.Logger,
-) (*NixpkgsChannelFetcher, error) {
+) (*NixpkgsChannelFetcher, errors.E) {
 	switch source.Importer {
 	case config.Options, config.Packages:
 		return &NixpkgsChannelFetcher{
@@ -34,7 +33,7 @@ func NewNixpkgsChannelFetcher(
 			Logger: logger,
 		}, nil
 	default:
-		return nil, fmt.Errorf("unsupported importer type %s", source.Importer)
+		return nil, errors.Errorf("unsupported importer type %s", source.Importer)
 	}
 }
 
@@ -47,7 +46,7 @@ const (
 func (i *NixpkgsChannelFetcher) FetchIfNeeded(
 	ctx context.Context,
 	sourceMeta *index.SourceMeta,
-) (f FetchedFiles, err error) {
+) (f *FetchedFiles, err errors.E) {
 
 	filesToFetch := make([]string, 2)
 	filesToFetch[0] = revisionFilename

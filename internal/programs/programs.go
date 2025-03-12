@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/pkg/errors"
+	"gitlab.com/tozd/go/errors"
 	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/x/log"
 	_ "modernc.org/sqlite" //nolint:blank-imports // sqlite driver needed for database/sql
@@ -26,7 +26,7 @@ func Instantiate(
 	ctx context.Context,
 	source *config.Source,
 	logger *log.Logger,
-) (*DB, error) {
+) (*DB, errors.E) {
 	// nix-instantiate --eval --json -I nixpkgs=channel:nixos-unstable --expr 'toString <nixpkgs/programs.sqlite>'
 	args := []string{
 		"--eval",
@@ -53,7 +53,7 @@ func Instantiate(
 	}, nil
 }
 
-func (p *DB) Open() error {
+func (p *DB) Open() errors.E {
 	var err error
 	p.db, err = sql.Open("sqlite", p.Path)
 	if err != nil {
@@ -96,7 +96,7 @@ WHERE package = ?
 	return nil
 }
 
-func (p *DB) Close() error {
+func (p *DB) Close() errors.E {
 	if err := p.db.Close(); err != nil {
 		return errors.WithMessage(err, "failed to close sqlite database")
 	}
@@ -104,7 +104,8 @@ func (p *DB) Close() error {
 	return nil
 }
 
-func (p *DB) GetPackagePrograms(ctx context.Context, pkg string) (programs []string, err error) {
+func (p *DB) GetPackagePrograms(ctx context.Context, pkg string) ([]string, errors.E) {
+	programs := make([]string, 10)
 	if p.db == nil {
 		return nil, errors.New("database not open")
 	}
@@ -127,5 +128,5 @@ func (p *DB) GetPackagePrograms(ctx context.Context, pkg string) (programs []str
 		return nil, errors.WithMessage(rerr, "sql error")
 	}
 
-	return
+	return programs, nil
 }

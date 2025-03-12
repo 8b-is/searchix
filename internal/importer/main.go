@@ -14,7 +14,7 @@ import (
 	"go.alanpearce.eu/searchix/internal/programs"
 	"go.alanpearce.eu/x/log"
 
-	"github.com/pkg/errors"
+	"gitlab.com/tozd/go/errors"
 )
 
 func createSourceImporter(
@@ -23,8 +23,8 @@ func createSourceImporter(
 	meta *index.Meta,
 	indexer *index.WriteIndex,
 	forceUpdate bool,
-) func(*config.Source) error {
-	return func(source *config.Source) error {
+) func(*config.Source) errors.E {
+	return func(source *config.Source) errors.E {
 		logger := log.With(
 			"name",
 			source.Key,
@@ -165,7 +165,7 @@ func (imp *Importer) Start(
 	ctx context.Context,
 	forceUpdate bool,
 	onlyUpdateSources *[]string,
-) error {
+) errors.E {
 	if len(imp.config.Importer.Sources) == 0 {
 		imp.log.Info("No sources enabled")
 

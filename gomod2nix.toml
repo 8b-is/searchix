@@ -151,6 +151,9 @@ schema = 3
   [mod."github.com/yuin/goldmark"]
     version = "v1.7.8"
     hash = "sha256-SNJMPPiXkRDLVOldrHN0ErC3bUB2VoWaLDkd9zmMATw="
+  [mod."gitlab.com/tozd/go/errors"]
+    version = "v0.10.0"
+    hash = "sha256-oW37KsieVKJOWk9ZXbGuQvuU4nyJCZzgYrTZHFkoCs4="
   [mod."go.alanpearce.eu/x"]
     version = "v0.0.0-20241203124832-a29434dba11a"
     hash = "sha256-ojqWkz3VqeAOevFxOTO5S3acRItCA4pUrTaul887+x8="

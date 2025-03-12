@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/pelletier/go-toml/v2"
-	"github.com/pkg/errors"
+	"gitlab.com/tozd/go/errors"
 	"go.alanpearce.eu/x/log"
 )
 
@@ -103,7 +103,7 @@ func mustLocalTime(in string) (time LocalTime) {
 	return
 }
 
-func GetConfig(filename string, log *log.Logger) (*Config, error) {
+func GetConfig(filename string, log *log.Logger) (*Config, errors.E) {
 	config := DefaultConfig
 	if filename != "" {
 		log.Debug("reading config", "filename", filename)

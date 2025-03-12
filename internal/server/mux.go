@@ -25,7 +25,7 @@ import (
 	"go.alanpearce.eu/x/log"
 
 	"github.com/osdevisnot/sorvor/pkg/livereload"
-	"github.com/pkg/errors"
+	"gitlab.com/tozd/go/errors"
 )
 
 type HTTPError struct {
@@ -65,7 +65,7 @@ func NewMux(
 	index *search.ReadIndex,
 	log *log.Logger,
 	liveReload bool,
-) (*http.ServeMux, error) {
+) (*http.ServeMux, errors.E) {
 	if cfg == nil {
 		return nil, errors.New("cfg is nil")
 	}
@@ -171,15 +171,16 @@ func NewMux(
 
 				w.Header().Add("Cache-Control", "max-age=300")
 				w.Header().Add("Vary", "Fetch")
+				var baseErr error
 				if r.Header.Get("Fetch") == "true" {
 					w.Header().Add("Content-Type", "text/html; charset=utf-8")
-					err = components.Results(tdata).Render(r.Context(), w)
+					baseErr = components.Results(tdata).Render(r.Context(), w)
 				} else {
-					err = components.ResultsPage(tdata).Render(r.Context(), w)
+					baseErr = components.ResultsPage(tdata).Render(r.Context(), w)
 				}
-				if err != nil {
-					log.Error("template error", "template", importerType, "error", err)
-					errorHandler(w, r, err.Error(), http.StatusInternalServerError)
+				if baseErr != nil {
+					log.Error("template error", "template", importerType, "error", baseErr)
+					errorHandler(w, r, baseErr.Error(), http.StatusInternalServerError)
 				}
 			} else {
 				w.Header().Add("Cache-Control", "max-age=14400")
@@ -244,15 +245,16 @@ func NewMux(
 				Sources:       sources,
 				Assets:        frontend.Assets,
 			}
+			var baseErr error
 			if r.Header.Get("Fetch") == "true" {
 				w.Header().Add("Content-Type", "text/html; charset=utf-8")
-				err = components.Detail(*doc).Render(r.Context(), w)
+				baseErr = components.Detail(*doc).Render(r.Context(), w)
 			} else {
-				err = components.DetailPage(tdata, *doc).Render(r.Context(), w)
+				baseErr = components.DetailPage(tdata, *doc).Render(r.Context(), w)
 			}
-			if err != nil {
-				log.Error("template error", "template", importerSingular, "error", err)
-				errorHandler(w, r, err.Error(), http.StatusInternalServerError)
+			if baseErr != nil {
+				log.Error("template error", "template", importerSingular, "error", baseErr)
+				errorHandler(w, r, baseErr.Error(), http.StatusInternalServerError)
 			}
 		}
 	}

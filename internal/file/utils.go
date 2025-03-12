@@ -5,10 +5,10 @@ import (
 	"io/fs"
 	"os"
 
-	"github.com/pkg/errors"
+	"gitlab.com/tozd/go/errors"
 )
 
-func Mkdirp(dir string) error {
+func Mkdirp(dir string) errors.E {
 	err := os.MkdirAll(dir, os.ModeDir|os.ModePerm)
 	if err != nil {
 		return errors.WithMessagef(err, "could not create directory %s", dir)
@@ -17,27 +17,27 @@ func Mkdirp(dir string) error {
 	return nil
 }
 
-func NeedNotExist(err error) error {
+func NeedNotExist(err error) errors.E {
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
-		return err
+		return errors.WithStack(err)
 	}
 
 	return nil
 }
 
-func StatIfExists(file string) (fs.FileInfo, error) {
+func StatIfExists(file string) (fs.FileInfo, errors.E) {
 	stat, err := os.Stat(file)
 
 	return stat, NeedNotExist(err)
 }
 
-func Exists(file string) (bool, error) {
+func Exists(file string) (bool, errors.E) {
 	stat, err := StatIfExists(file)
 
 	return stat != nil, err
 }
 
-func WriteToFile(path string, body io.Reader) error {
+func WriteToFile(path string, body io.Reader) errors.E {
 	file, err := os.Create(path)
 	if err != nil {
 		return errors.WithMessagef(err, "error creating file at %s", path)

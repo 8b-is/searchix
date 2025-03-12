@@ -3,7 +3,7 @@ package server
 import (
 	"net/http"
 
-	"github.com/pkg/errors"
+	"gitlab.com/tozd/go/errors"
 	"go.alanpearce.eu/x/log"
 )
 

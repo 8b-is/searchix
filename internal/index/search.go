@@ -12,7 +12,7 @@ import (
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/search"
 	"github.com/blevesearch/bleve/v2/search/query"
-	"github.com/pkg/errors"
+	"gitlab.com/tozd/go/errors"
 )
 
 const DefaultPageSize = 100
@@ -33,7 +33,7 @@ type ReadIndex struct {
 	meta  *Meta
 }
 
-func (index *ReadIndex) GetEnabledSources() ([]string, error) {
+func (index *ReadIndex) GetEnabledSources() ([]string, errors.E) {
 	facet := bleve.NewFacetRequest("Source", 100)
 	query := bleve.NewMatchAllQuery()
 	search := bleve.NewSearchRequest(query)
@@ -64,13 +64,13 @@ func setField[T query.FieldableQuery](
 func (index *ReadIndex) search(
 	ctx context.Context,
 	request *bleve.SearchRequest,
-) (*Result, error) {
+) (*Result, errors.E) {
 	request.Fields = []string{"_data", "Source"}
 
 	bleveResult, err := index.index.SearchInContext(ctx, request)
 	select {
 	case <-ctx.Done():
-		return nil, ctx.Err()
+		return nil, errors.WithStack(ctx.Err())
 	default:
 		if err != nil {
 			return nil, errors.WithMessage(err, "failed to execute search query")
@@ -104,7 +104,7 @@ func (index *ReadIndex) Search(
 	keyword string,
 	from int,
 	pageSize int,
-) (*Result, error) {
+) (*Result, errors.E) {
 	query := bleve.NewBooleanQuery()
 
 	// match the user's query in any field ...
@@ -157,7 +157,7 @@ func (index *ReadIndex) GetDocument(
 	ctx context.Context,
 	source *config.Source,
 	id string,
-) (*nix.Importable, error) {
+) (*nix.Importable, errors.E) {
 	key := nix.MakeKey(source, id)
 	query := bleve.NewDocIDQuery([]string{key})
 	search := bleve.NewSearchRequest(query)
