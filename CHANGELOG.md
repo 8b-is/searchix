@@ -1,8 +1,15 @@
 # Changelog
 
-## [v0.1.27](https://git.alanpearce.eu/searchix/diff/?id=v0.1.26&id2=cd6c7a1bcf654882fee3ae8a955df9cf7928094b) (2025-03-11)
+## [v0.1.28](https://git.alanpearce.eu/searchix/diff/?id=v0.1.27&id2=9af2747a1168f41b39b446bfe3ecab6c7b25ff99) (2025-03-12)
 
 ### Fixes
+
+-   js error due to missing class on nav menu item
+    ([9af2747](https://git.alanpearce.eu/searchix/commit/?id=9af2747a1168f41b39b446bfe3ecab6c7b25ff99))
+
+### [v0.1.27](https://git.alanpearce.eu/searchix/diff/?id=v0.1.26&id2=v0.1.27) (2025-03-11)
+
+#### Fixes
 
 -   sources disabled by default in NixOS module
     ([333bd2f](https://git.alanpearce.eu/searchix/commit/?id=333bd2fbd16fc12c36e1b1d5b5bffdf065585fa8))
