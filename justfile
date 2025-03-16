@@ -27,6 +27,9 @@ format:
 fix:
 	go fix .
 
+build:
+	nix build .#
+
 generate-defaults:
 	wgo run --exit ./cmd/searchix-web --print-default-config > defaults.toml
 
