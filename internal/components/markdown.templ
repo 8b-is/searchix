@@ -1,14 +1,15 @@
 package components
 
 import (
+	"context"
+	"io"
 	"regexp"
 
-	"go.alanpearce.eu/searchix/internal/nix"
-
-	"context"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
-	"io"
+	"gitlab.com/tozd/go/errors"
+
+	"go.alanpearce.eu/searchix/internal/nix"
 )
 
 var (
