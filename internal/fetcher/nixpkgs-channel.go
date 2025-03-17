@@ -47,6 +47,7 @@ func (i *NixpkgsChannelFetcher) FetchIfNeeded(
 	ctx context.Context,
 	sourceMeta *index.SourceMeta,
 ) (f *FetchedFiles, err errors.E) {
+	f = &FetchedFiles{}
 
 	filesToFetch := make([]string, 2)
 	filesToFetch[0] = revisionFilename
