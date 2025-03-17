@@ -194,7 +194,7 @@ in
       description = ''
         Configuration for searchix.
 
-        See https://git.alanpearce.eu/searchix/tree/defaults.toml?h=v0.1.28
+        See https://git.alanpearce.eu/searchix/tree/defaults.toml?h=v0.1.29
       '';
     };
   };

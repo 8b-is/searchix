@@ -1,8 +1,19 @@
 # Changelog
 
-## [v0.1.28](https://git.alanpearce.eu/searchix/diff/?id=v0.1.27&id2=9af2747a1168f41b39b446bfe3ecab6c7b25ff99) (2025-03-12)
+## [v0.1.29](https://git.alanpearce.eu/searchix/diff/?id=v0.1.28&id2=573e24bf30e5e8b8f5b82e848258b70eea9f3a74) (2025-03-17)
 
 ### Fixes
+
+-   nil pointer deference in nixpkgs-channel fetcher
+    ([573e24b](https://git.alanpearce.eu/searchix/commit/?id=573e24bf30e5e8b8f5b82e848258b70eea9f3a74))
+-   build error (incomplete commit)
+    ([d5e1147](https://git.alanpearce.eu/searchix/commit/?id=d5e11478bf3771623a0d181e6cede3145b3563e0))
+-   build error caused by incomplete commit
+    ([f775db9](https://git.alanpearce.eu/searchix/commit/?id=f775db95d59a56feeafa6a4e147885c814bf5fb7))
+
+### [v0.1.28](https://git.alanpearce.eu/searchix/diff/?id=v0.1.27&id2=v0.1.28) (2025-03-12)
+
+#### Fixes
 
 -   js error due to missing class on nav menu item
     ([9af2747](https://git.alanpearce.eu/searchix/commit/?id=9af2747a1168f41b39b446bfe3ecab6c7b25ff99))
