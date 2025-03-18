@@ -16,13 +16,15 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/blevesearch/bleve/v2"
+	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/keyword"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/simple"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/web"
-	"github.com/blevesearch/bleve/v2/analysis/lang/en"
 	"github.com/blevesearch/bleve/v2/analysis/token/camelcase"
+	"github.com/blevesearch/bleve/v2/analysis/token/ngram"
 	"github.com/blevesearch/bleve/v2/analysis/token/porter"
 	"github.com/blevesearch/bleve/v2/analysis/tokenizer/letter"
+	"github.com/blevesearch/bleve/v2/analysis/tokenizer/unicode"
 	"github.com/blevesearch/bleve/v2/document"
 	"github.com/blevesearch/bleve/v2/mapping"
 	indexAPI "github.com/blevesearch/bleve_index_api"
@@ -58,6 +60,28 @@ func createIndexMapping() (mapping.IndexMapping, errors.E) {
 	descriptionFieldMapping.Analyzer = web.Name
 
 	var err error
+
+	err = indexMapping.AddCustomTokenFilter("ngram", map[string]any{
+		"type": ngram.Name,
+		"min":  3.0,
+		"max":  25.0,
+	})
+	if err != nil {
+		return nil, errors.WithMessage(err, "failed to add ngram token filter")
+	}
+
+	err = indexMapping.AddCustomAnalyzer("c_name", map[string]any{
+		"type":      custom.Name,
+		"tokenizer": unicode.Name,
+		"token_filters": []string{
+			camelcase.Name,
+			"ngram",
+		},
+	})
+	if err != nil {
+		return nil, errors.WithMessage(err, "could not add custom analyser")
+	}
+
 	err = indexMapping.AddCustomAnalyzer("loc", map[string]any{
 		"type":      keyword.Name,
 		"tokenizer": letter.Name,
@@ -83,7 +107,7 @@ func createIndexMapping() (mapping.IndexMapping, errors.E) {
 	keywordFieldMapping.Analyzer = simple.Name
 
 	nameMapping := bleve.NewTextFieldMapping()
-	nameMapping.Analyzer = en.AnalyzerName
+	nameMapping.Analyzer = "c_name"
 	nameMapping.IncludeTermVectors = true
 	nameMapping.Store = false
 
@@ -110,7 +134,7 @@ func createIndexMapping() (mapping.IndexMapping, errors.E) {
 	packageMapping := bleve.NewDocumentStaticMapping()
 
 	packageMapping.AddFieldMappingsAt("Name", nameMapping)
-	packageMapping.AddFieldMappingsAt("Attribute", keywordFieldMapping)
+	packageMapping.AddFieldMappingsAt("Attribute", nameMapping)
 	packageMapping.AddFieldMappingsAt("Source", keywordFieldMapping)
 	packageMapping.AddFieldMappingsAt("Description", descriptionFieldMapping)
 	packageMapping.AddFieldMappingsAt("MainProgram", keywordFieldMapping)
