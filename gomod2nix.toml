@@ -10,9 +10,6 @@ schema = 3
   [mod."github.com/RoaringBitmap/roaring"]
     version = "v1.9.4"
     hash = "sha256-OKOLQ/PsH6630Vb5/9yG28TLIPGxdG9WDbAZxgK8EcI="
-  [mod."github.com/a-h/templ"]
-    version = "v0.3.833"
-    hash = "sha256-OSGAJDVPYqgb72DZXeemLp37aGrrxMt+PQNKW5voKQ0="
   [mod."github.com/andybalholm/brotli"]
     version = "v1.1.1"
     hash = "sha256-kCt+irK1gvz2lGQUeEolYa5+FbLsfWlJMCd5hm+RPgQ="
@@ -154,6 +151,9 @@ schema = 3
   [mod."gitlab.com/tozd/go/errors"]
     version = "v0.10.0"
     hash = "sha256-oW37KsieVKJOWk9ZXbGuQvuU4nyJCZzgYrTZHFkoCs4="
+  [mod."go.alanpearce.eu/gomponents"]
+    version = "v1.2.0"
+    hash = "sha256-pF+3We63loSMwhTUafgIdmBYc4cj5yVIVQRyaX1sWB4="
   [mod."go.alanpearce.eu/x"]
     version = "v0.0.0-20241203124832-a29434dba11a"
     hash = "sha256-ojqWkz3VqeAOevFxOTO5S3acRItCA4pUrTaul887+x8="
@@ -175,6 +175,9 @@ schema = 3
   [mod."golang.org/x/text"]
     version = "v0.21.0"
     hash = "sha256-QaMwddBRnoS2mv9Y86eVC2x2wx/GZ7kr2zAJvwDeCPc="
+  [mod."golang.org/x/tools"]
+    version = "v0.24.0"
+    hash = "sha256-2LBEW//aW8qrHc26F6Ma7CsYJRaCALfi0xQl2KgWems="
   [mod."google.golang.org/protobuf"]
     version = "v1.36.0"
     hash = "sha256-7LfDxB2/x6sSzJdQ3sixWMaY0WZ/juwuz3rPBJxNzXQ="

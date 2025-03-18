@@ -4,38 +4,10 @@ rec {
   hooks = {
     gotest.enable = false;
     golangci-lint.enable = true;
-    staticcheck =
-      let
-        wrapper = pkgs.symlinkJoin {
-          name = "staticcheck-wrapped";
-          paths = [ pkgs.go-tools ];
-          nativeBuildInputs = [ pkgs.makeWrapper ];
-          postBuild = ''
-            wrapProgram $out/bin/staticcheck \
-              --prefix PATH : ${pkgs.lib.makeBinPath [ pkgs.go ]}
-          '';
-        };
-      in
-      {
-        enable = true;
-        package = wrapper;
-        entry =
-          let
-            script = pkgs.writeShellScript "precommit-staticcheck" ''
-              err=0
-              for dir in $(echo "$@" | xargs -n1 dirname | sort -u); do
-                ${hooks.staticcheck.package}/bin/staticcheck ./"$dir"
-                code="$?"
-                if [[ "$err" -eq 0 ]]; then
-                  err="$code"
-                fi
-              done
-              exit $err
-            '';
-          in
-          builtins.toString script;
-      };
 
+    staticcheck = {
+      enable = true;
+    };
     statix = {
       enable = true;
       # ignore is a glob
@@ -57,7 +29,7 @@ rec {
     check-symlinks.enable = true;
     editorconfig-checker = {
       enable = true;
-      excludes = [ "\.md$" ];
+      excludes = [ "\.md$" "\.ya?ml$" ];
     };
     prettier = {
       enable = true;

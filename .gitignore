@@ -25,6 +25,3 @@ go.work
 /frontend/static/base.css
 /data/
 /config.toml
-
-*_templ.go
-*_templ.txt

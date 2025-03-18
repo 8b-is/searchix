@@ -4,7 +4,6 @@ go 1.23.6
 
 require (
 	badc0de.net/pkg/flagutil v1.0.1
-	github.com/a-h/templ v0.3.833
 	github.com/andybalholm/brotli v1.1.1
 	github.com/bcicen/jstream v1.0.1
 	github.com/blevesearch/bleve/v2 v2.4.4
@@ -18,6 +17,7 @@ require (
 	github.com/stoewer/go-strcase v1.3.0
 	github.com/yuin/goldmark v1.7.8
 	gitlab.com/tozd/go/errors v0.10.0
+	go.alanpearce.eu/gomponents v1.2.0
 	go.alanpearce.eu/x v0.0.0-20241203124832-a29434dba11a
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.33.0
@@ -65,6 +65,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
+	golang.org/x/tools v0.24.0 // indirect
 	google.golang.org/protobuf v1.36.0 // indirect
 	modernc.org/gc/v3 v3.0.0-20240107210532-573471604cb6 // indirect
 	modernc.org/libc v1.55.3 // indirect

@@ -44,8 +44,6 @@ func applyDevModeOverrides(cfg *config.Config) {
 	}
 	cfg.Web.ContentSecurityPolicy.ScriptSrc = append(
 		cfg.Web.ContentSecurityPolicy.ScriptSrc,
-		cfg.Web.BaseURL.JoinPath("_templ/reload/script.js").String(),
-		"http://localhost:7331",
 		"'unsafe-inline'",
 	)
 }
@@ -174,9 +172,9 @@ func NewMux(
 				var baseErr error
 				if r.Header.Get("Fetch") == "true" {
 					w.Header().Add("Content-Type", "text/html; charset=utf-8")
-					baseErr = components.Results(tdata).Render(r.Context(), w)
+					baseErr = components.Results(tdata).Render(w)
 				} else {
-					baseErr = components.ResultsPage(tdata).Render(r.Context(), w)
+					baseErr = components.ResultsPage(tdata).Render(w)
 				}
 				if baseErr != nil {
 					log.Error("template error", "template", importerType, "error", baseErr)
@@ -192,7 +190,7 @@ func NewMux(
 						Assets:        frontend.Assets,
 					},
 					components.ResultData{},
-				).Render(r.Context(), w)
+				).Render(w)
 				if err != nil {
 					errorHandler(w, r, err.Error(), http.StatusInternalServerError)
 
@@ -248,9 +246,9 @@ func NewMux(
 			var baseErr error
 			if r.Header.Get("Fetch") == "true" {
 				w.Header().Add("Content-Type", "text/html; charset=utf-8")
-				baseErr = components.Detail(*doc).Render(r.Context(), w)
+				baseErr = components.Detail(*doc).Render(w)
 			} else {
-				baseErr = components.DetailPage(tdata, *doc).Render(r.Context(), w)
+				baseErr = components.DetailPage(tdata, *doc).Render(w)
 			}
 			if baseErr != nil {
 				log.Error("template error", "template", importerSingular, "error", baseErr)

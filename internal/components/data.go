@@ -4,6 +4,7 @@ import (
 	"go.alanpearce.eu/searchix/frontend"
 	"go.alanpearce.eu/searchix/internal/config"
 	search "go.alanpearce.eu/searchix/internal/index"
+	"go.alanpearce.eu/searchix/internal/nix"
 )
 
 type TemplateData struct {
@@ -23,4 +24,13 @@ type ResultData struct {
 	Prev    string
 	Next    string
 	All     string
+}
+
+func convertMatch[I nix.Importable](m nix.Importable) *I {
+	i, ok := m.(I)
+	if !ok {
+		return nil
+	}
+
+	return &i
 }

@@ -12,7 +12,6 @@ mkShell {
     goEnv
 
     sd
-    templ
     modd
     brotli
     bleve

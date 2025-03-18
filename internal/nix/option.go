@@ -1,5 +1,13 @@
 package nix
 
+import (
+	"io"
+
+	"github.com/yuin/goldmark"
+	"github.com/yuin/goldmark/extension"
+	"gitlab.com/tozd/go/errors"
+)
+
 type Markdown string
 
 type Value struct {
@@ -34,4 +42,13 @@ func (p Option) GetName() string {
 
 func (p Option) GetSource() string {
 	return p.Source
+}
+
+var md = goldmark.New(
+	goldmark.WithExtensions(extension.NewLinkify()),
+)
+
+// implements gomponent.Node
+func (text Markdown) Render(w io.Writer) error {
+	return errors.WithStack(md.Convert([]byte(text), w))
 }

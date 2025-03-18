@@ -36,3 +36,8 @@ linters-settings:
             - .WithMessagef(
             - .WithStack(
             - (context.Context).Err(
+issues:
+    exclude-rules:
+        - linters: [revive]
+          path: internal/components
+          text: "dot-imports"

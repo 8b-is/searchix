@@ -29,9 +29,9 @@ func createErrorHandler(
 		w.Header().Del("Vary")
 		w.WriteHeader(code)
 		if r.Header.Get("Fetch") == "true" {
-			err = components.Error(indexData).Render(r.Context(), w)
+			err = components.Error(indexData).Render(w)
 		} else {
-			err = components.ErrorPage(indexData).Render(r.Context(), w)
+			err = components.ErrorPage(indexData).Render(w)
 		}
 		if err != nil {
 			log.Error(
