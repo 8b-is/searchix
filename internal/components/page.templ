@@ -68,6 +68,12 @@ templ Page(tdata TemplateData) {
 				{ children... }
 			</main>
 			<footer>
+				if config.Version != "" {
+					Searchix
+					<a href={ templ.SafeURL("https://git.sr.ht/~alanpearce/searchix/refs/" + config.Version) }>
+						{ config.Version }
+					</a>
+				}
 				Made by <a href="https://alanpearce.eu">Alan Pearce</a>.
 				<a href="https://git.sr.ht/~alanpearce/searchix">Source code</a>
 				<a href="https://todo.sr.ht/~alanpearce/searchix">Report issues</a>
