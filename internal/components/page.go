@@ -100,6 +100,7 @@ func Page(tdata TemplateData, children ...g.Node) g.Node {
 					A(Href("https://alanpearce.eu"), g.Text("Alan Pearce")),
 					g.Text(". "),
 					A(Href("https://git.sr.ht/~alanpearce/searchix"), g.Text("Source code")),
+					g.Text(" "),
 					A(Href("https://todo.sr.ht/~alanpearce/searchix"), g.Text("Report issues")),
 				),
 			),
