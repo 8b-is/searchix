@@ -93,6 +93,7 @@ func Page(tdata TemplateData, children ...g.Node) g.Node {
 								Href("https://git.sr.ht/~alanpearce/searchix/refs/"+config.Version),
 								g.Text(config.Version),
 							),
+							g.Text(" "),
 						}),
 					),
 					g.Text("Made by "),
