@@ -45,6 +45,7 @@ func Results(r ResultData) g.Node {
 				Role("status"),
 				g.Textf("%d results", r.Results.Total),
 			),
+			g.Text(" "),
 			g.If(r.Next != r.Prev && r.Results.Total < config.MaxResultsShowAll,
 				A(Href(r.All), g.Text("Show All")),
 			),

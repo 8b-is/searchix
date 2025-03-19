@@ -82,7 +82,9 @@ func NewMux(
 		return func(w http.ResponseWriter, r *http.Request) {
 			var err error
 			var source *config.Source
+			var urlBase string
 			if importerType != config.All {
+				urlBase = "search"
 				source = cfg.Importer.Sources[r.PathValue("source")]
 				if source == nil || importerType != source.Importer {
 					errorHandler(w, r, http.StatusText(http.StatusNotFound), http.StatusNotFound)
@@ -151,7 +153,7 @@ func NewMux(
 
 					if page.Next != 0 {
 						q.Set("page", strconv.Itoa(page.Next))
-						tdata.Next = "search?" + q.Encode()
+						tdata.Next = urlBase + "?" + q.Encode()
 					}
 
 					if page.Prev != 0 {
@@ -160,11 +162,11 @@ func NewMux(
 						} else {
 							q.Set("page", strconv.Itoa(page.Prev))
 						}
-						tdata.Prev = "search?" + q.Encode()
+						tdata.Prev = urlBase + "?" + q.Encode()
 					}
 
 					q.Set("page", "0")
-					tdata.All = "search?" + q.Encode()
+					tdata.All = urlBase + "?" + q.Encode()
 				}
 
 				w.Header().Add("Cache-Control", "max-age=300")
