@@ -1,18 +1,20 @@
 # Searchix
 
+[![Build Status](https://ci.alanpearce.eu/badge/searchix.svg)](https://ci.alanpearce.eu/jobs/searchix)
+
 A search tool to find options and packages in the NixOS ecosystem. Aims to be like [search.nixos.org](https://search.nixos.org/) with more sources:
 
--   NixOS options
--   Nix packages
--   [Nix darwin](https://github.com/LnL7/nix-darwin) options
--   [Home manager](https://github.com/nix-community/home-manager) options.
+- NixOS options
+- Nix packages
+- [Nix darwin](https://github.com/LnL7/nix-darwin) options
+- [Home manager](https://github.com/nix-community/home-manager) options.
 
 There is an instance running at [searchix.alanpearce.eu](https://searchix.alanpearce.eu/), which uses the following channels, with updates attempted daily:
 
--   nixos-options: nixos-unstable
--   nixpkgs: nixos-unstable
--   darwin: master
--   home-manager: master
+- nixos-options: nixos-unstable
+- nixpkgs: nixos-unstable
+- darwin: master
+- home-manager: master
 
 You can also [run it yourself](./docs/running.md), if you're feeling bold. It's very light-weight!
 
@@ -34,13 +36,13 @@ Also, I wanted to learn Go!
 
 ## Goals
 
--   Lean/simple
--   Responsive (i.e. low latency)
--   Minimal JavaScript for progressive enhancement
--   Quickly switch between (options) sources with the same query
--   Querying "git" should give relevant results:
-    -   Options: programs.git.{enable,package}
-    -   Packages: git/gitMinimal/gitFull...
+- Lean/simple
+- Responsive (i.e. low latency)
+- Minimal JavaScript for progressive enhancement
+- Quickly switch between (options) sources with the same query
+- Querying "git" should give relevant results:
+    - Options: programs.git.{enable,package}
+    - Packages: git/gitMinimal/gitFull...
 
 ### Future
 
