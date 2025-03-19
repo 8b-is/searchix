@@ -152,8 +152,8 @@ schema = 3
     version = "v0.10.0"
     hash = "sha256-oW37KsieVKJOWk9ZXbGuQvuU4nyJCZzgYrTZHFkoCs4="
   [mod."go.alanpearce.eu/gomponents"]
-    version = "v1.2.0"
-    hash = "sha256-pF+3We63loSMwhTUafgIdmBYc4cj5yVIVQRyaX1sWB4="
+    version = "v1.3.0"
+    hash = "sha256-rZz5rJdm58axukN6RlaVKSJ9v2TPngIHt3P1APpXSxY="
   [mod."go.alanpearce.eu/x"]
     version = "v0.0.0-20241203124832-a29434dba11a"
     hash = "sha256-ojqWkz3VqeAOevFxOTO5S3acRItCA4pUrTaul887+x8="

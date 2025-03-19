@@ -17,7 +17,7 @@ require (
 	github.com/stoewer/go-strcase v1.3.0
 	github.com/yuin/goldmark v1.7.8
 	gitlab.com/tozd/go/errors v0.10.0
-	go.alanpearce.eu/gomponents v1.2.0
+	go.alanpearce.eu/gomponents v1.3.0
 	go.alanpearce.eu/x v0.0.0-20241203124832-a29434dba11a
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.33.0

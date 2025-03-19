@@ -7,10 +7,9 @@ import (
 	. "go.alanpearce.eu/gomponents/html"
 )
 
-func Search(tdata TemplateData, r ResultData) g.Node {
-	return Form(
+func SearchForm(tdata TemplateData, r ResultData) g.Node {
+	return Search(Form(
 		ID("search"),
-		Role("search"),
 		FieldSet(
 			Legend(
 				ID("legend"),
@@ -28,7 +27,7 @@ func Search(tdata TemplateData, r ResultData) g.Node {
 			),
 			Button(g.Text("Search")),
 		),
-	)
+	))
 }
 
 func SearchPage(tdata TemplateData, r ResultData, children ...g.Node) g.Node {
@@ -77,7 +76,7 @@ func SearchPage(tdata TemplateData, r ResultData, children ...g.Node) g.Node {
 			),
 		),
 		script(tdata.Assets.ByPath["/static/search.js"]),
-		Search(tdata, r),
+		SearchForm(tdata, r),
 		Section(
 			ID("results"),
 			Role("list"),
