@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"go.alanpearce.eu/searchix/internal/components"
 	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/importer"
 	"go.alanpearce.eu/searchix/internal/index"
@@ -125,6 +126,7 @@ func (s *Server) SetupIndex(ctx context.Context, options *IndexOptions) errors.E
 			}
 		}
 	}
+	components.SetLastUpdated(read.LastUpdated())
 
 	return nil
 }
@@ -175,6 +177,7 @@ func (s *Server) startUpdateTimer(
 
 		s.wg.Add(1)
 		nextRun := nextUTCOccurrenceOfTime(s.cfg.Importer.UpdateAt)
+		components.SetNextRun(nextRun)
 		for {
 			s.log.Debug("scheduling next run", "next-run", nextRun)
 			select {
@@ -192,6 +195,7 @@ func (s *Server) startUpdateTimer(
 				MonitorSlug: monitorSlug,
 				Status:      sentry.CheckInStatusInProgress,
 			}, monitorConfig)
+			components.MarkIndexingStarted()
 
 			imp := importer.New(s.cfg, s.log.Named("importer"), s.writeIndex)
 			err = imp.Start(ctx, false, nil)
@@ -215,6 +219,7 @@ func (s *Server) startUpdateTimer(
 				}, monitorConfig)
 			}
 			nextRun = nextRun.AddDate(0, 0, 1)
+			components.MarkIndexingFinished(nextRun)
 		}
 	})
 }

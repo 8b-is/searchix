@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
+	"time"
 
 	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/nix"
@@ -31,6 +32,10 @@ type ReadIndex struct {
 	index bleve.Index
 	log   *log.Logger
 	meta  *Meta
+}
+
+func (index *ReadIndex) LastUpdated() time.Time {
+	return index.meta.LastUpdated()
 }
 
 func (index *ReadIndex) GetEnabledSources() ([]string, errors.E) {

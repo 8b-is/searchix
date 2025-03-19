@@ -118,3 +118,14 @@ func (i *Meta) SetSourceMeta(source string, meta *SourceMeta) {
 	}
 	i.data.Sources[source] = meta
 }
+
+func (i *Meta) LastUpdated() time.Time {
+	var last time.Time
+	for _, sourceMeta := range i.data.Sources {
+		if sourceMeta.Updated.After(last) {
+			last = sourceMeta.Updated
+		}
+	}
+
+	return last
+}
