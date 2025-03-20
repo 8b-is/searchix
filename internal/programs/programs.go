@@ -105,7 +105,7 @@ func (p *DB) Close() errors.E {
 }
 
 func (p *DB) GetPackagePrograms(ctx context.Context, pkg string) ([]string, errors.E) {
-	programs := make([]string, 10)
+	var programs []string
 	if p.db == nil {
 		return nil, errors.New("database not open")
 	}
