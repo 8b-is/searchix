@@ -74,6 +74,12 @@ in
       description = "Home directory for searchix user";
     };
 
+    environment = mkOption {
+      type = with types; attrsOf (nullOr (oneOf [ str path package ]));
+      default = { };
+      description = "Environment variables passed to the service process.";
+    };
+
     settings = mkOption {
       default = { };
       type = types.submodule {
