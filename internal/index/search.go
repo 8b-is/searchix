@@ -66,6 +66,12 @@ func setField[T query.FieldableQuery](
 	return q
 }
 
+func setBoost[T query.BoostableQuery](q T, boost float64) T {
+	q.SetBoost(boost)
+
+	return q
+}
+
 func (index *ReadIndex) search(
 	ctx context.Context,
 	request *bleve.SearchRequest,
@@ -125,9 +131,10 @@ func (index *ReadIndex) Search(
 			setField(bleve.NewTermQuery(source.Key), "Source"),
 		)
 	} else {
-		q := bleve.NewTermQuery("nixpkgs")
-		q.SetField("Source")
-		q.SetBoost(-150)
+		q := bleve.NewDisjunctionQuery(
+			setBoost(setField(bleve.NewTermQuery("nixpkgs"), "Source"), -150),
+			setBoost(setField(bleve.NewTermQuery("nur"), "Source"), -200),
+		)
 
 		query.AddShould(q)
 	}
