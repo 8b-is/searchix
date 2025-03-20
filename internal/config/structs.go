@@ -50,6 +50,7 @@ type Source struct {
 	OutputPath string       `comment:"(Fetcher=channel) Path under ./result symlink to folder containing {options,packages}.json."`
 	Repo       Repository   `comment:"Used to generate declaration/definition links"`
 	Programs   ProgramsDB   `comment:"Used to enable searching for programs in multi-program packages"`
+	JSONDepth  int          `comment:"Depth at which packages/object object is to be found"`
 }
 
 type ProgramsDB struct {

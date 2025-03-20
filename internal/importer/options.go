@@ -70,7 +70,7 @@ func NewOptionProcessor(
 	log *log.Logger,
 ) (*OptionIngester, errors.E) {
 	i := OptionIngester{
-		dec:     jstream.NewDecoder(infile, 1).EmitKV(),
+		dec:     jstream.NewDecoder(infile, source.JSONDepth).EmitKV(),
 		log:     log,
 		optJSON: nixOptionJSON{},
 		infile:  infile,

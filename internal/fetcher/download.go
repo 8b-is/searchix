@@ -22,7 +22,7 @@ func NewDownloadFetcher(
 	logger *log.Logger,
 ) (*DownloadFetcher, errors.E) {
 	switch source.Importer {
-	case config.Options:
+	case config.Options, config.Packages:
 		return &DownloadFetcher{
 			Source: source,
 			Logger: logger,
@@ -35,6 +35,7 @@ func NewDownloadFetcher(
 var files = map[string]string{
 	"revision": "revision",
 	"options":  "options.json",
+	"packages": "packages.json",
 }
 
 func (i *DownloadFetcher) FetchIfNeeded(
@@ -43,7 +44,17 @@ func (i *DownloadFetcher) FetchIfNeeded(
 ) (*FetchedFiles, errors.E) {
 	f := &FetchedFiles{}
 	sourceUpdated := sourceMeta.Updated
-	for key, filename := range files {
+
+	filesToFetch := make([]string, 2)
+	filesToFetch[0] = files["revision"]
+	switch i.Source.Importer {
+	case config.Packages:
+		filesToFetch[1] = files["packages"]
+	case config.Options:
+		filesToFetch[1] = files["options"]
+	}
+
+	for _, filename := range filesToFetch {
 		fetchURL, baseErr := url.JoinPath(i.Source.URL, filename)
 		if baseErr != nil {
 			return nil, errors.WithMessagef(
@@ -68,13 +79,15 @@ func (i *DownloadFetcher) FetchIfNeeded(
 		}
 		sourceMeta.Updated = mtime
 
-		switch key {
-		case "revision":
+		switch filename {
+		case files["revision"]:
 			f.Revision = body
-		case "options":
+		case files["options"]:
 			f.Options = body
+		case files["packages"]:
+			f.Packages = body
 		default:
-			return f, errors.Errorf("unknown file kind %s", key)
+			return f, errors.Errorf("unknown filename %s", filename)
 		}
 	}
 

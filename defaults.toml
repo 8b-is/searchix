@@ -95,6 +95,8 @@ ImportPath = 'release.nix'
 Timeout = '5m0s'
 # (Fetcher=channel) Path under ./result symlink to folder containing {options,packages}.json.
 OutputPath = 'share/doc/darwin'
+# Depth at which packages/object object is to be found
+JSONDepth = 1
 
 # Used to generate declaration/definition links
 [Importer.Sources.darwin.Repo]
@@ -135,6 +137,8 @@ ImportPath = 'default.nix'
 Timeout = '5m0s'
 # (Fetcher=channel) Path under ./result symlink to folder containing {options,packages}.json.
 OutputPath = 'share/doc/home-manager'
+# Depth at which packages/object object is to be found
+JSONDepth = 1
 
 # Used to generate declaration/definition links
 [Importer.Sources.home-manager.Repo]
@@ -175,6 +179,8 @@ ImportPath = 'nixos/release.nix'
 Timeout = '5m0s'
 # (Fetcher=channel) Path under ./result symlink to folder containing {options,packages}.json.
 OutputPath = 'share/doc/nixos'
+# Depth at which packages/object object is to be found
+JSONDepth = 1
 
 # Used to generate declaration/definition links
 [Importer.Sources.nixos.Repo]
@@ -215,6 +221,8 @@ ImportPath = ''
 Timeout = '15m0s'
 # (Fetcher=channel) Path under ./result symlink to folder containing {options,packages}.json.
 OutputPath = 'packages.json.br'
+# Depth at which packages/object object is to be found
+JSONDepth = 2
 
 # Used to generate declaration/definition links
 [Importer.Sources.nixpkgs.Repo]
@@ -229,3 +237,45 @@ Repo = 'nixpkgs'
 Enable = true
 # Nix attribute name (i.e. nix-instantiate) that builds a programs.sqlite file
 Attribute = 'programs.sqlite'
+
+[Importer.Sources.nur]
+# Human-readable name of source for generating links
+Name = 'NUR'
+# Order in which to show source in web interface.
+Order = 4
+# Machine-readable name of source. Must be URL- and path-safe.
+Key = 'nur'
+# Controls whether to show in the web interface and to run fetch/import jobs.
+Enable = false
+# How to fetch options.json. One of 'channel', 'channel-nixpkgs' or 'download'.
+Fetcher = 'download'
+# Kind of data available from source. Currently supports 'packages' and 'options'.
+Importer = 'packages'
+# (Fetcher=channel) Local name for channel, (Fetcher=channel-nixpkgs) Remote name of channel.
+Channel = ''
+# (Fetcher=channel) Remote URL for channel, (Fetcher=download) Path containing files named 'revision' and 'options.json'.
+URL = 'https://alanpearce.github.io/nix-options/nur'
+# (Fetcher=channel) Nix attribute name (i.e. nix-build -A) that builds an {options,packages}.json
+Attribute = ''
+# (Fetcher=channel) Sub-path of imported channel which contains the attribute above, e.g. release.nix
+ImportPath = ''
+# Abort import if it takes longer than this.
+Timeout = '5m0s'
+# (Fetcher=channel) Path under ./result symlink to folder containing {options,packages}.json.
+OutputPath = ''
+# Depth at which packages/object object is to be found
+JSONDepth = 1
+
+# Used to generate declaration/definition links
+[Importer.Sources.nur.Repo]
+# Currently only 'github' is supported.
+Type = 'github'
+Owner = 'nix-community'
+Repo = 'nur'
+
+# Used to enable searching for programs in multi-program packages
+[Importer.Sources.nur.Programs]
+# Enable searching for programs in multi-program packages
+Enable = false
+# Nix attribute name (i.e. nix-instantiate) that builds a programs.sqlite file
+Attribute = ''

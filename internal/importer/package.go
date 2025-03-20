@@ -71,7 +71,7 @@ func NewPackageProcessor(
 	programsDB *programs.DB,
 ) (*PackageIngester, errors.E) {
 	i := &PackageIngester{
-		dec:      jstream.NewDecoder(infile, 2).EmitKV(),
+		dec:      jstream.NewDecoder(infile, source.JSONDepth).EmitKV(),
 		log:      log,
 		pkg:      packageJSON{},
 		infile:   infile,
@@ -192,18 +192,27 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 
 			if meta["platforms"] != nil {
 				var plats = make([]any, len(meta["platforms"].([]any)))
-				for i, plat := range meta["platforms"].([]interface{}) {
+				i := 0
+				for _, plat := range meta["platforms"].([]interface{}) {
 					switch v := reflect.ValueOf(plat); v.Kind() {
 					case reflect.String:
 						plats[i] = v.String()
 					case reflect.Map:
 						plats[i] = makeAdhocPlatform(v.Interface())
+					case reflect.Slice:
+						ps := make([]any, v.Len())
+						for j, item := range v.Slice(0, v.Len()).Interface().([]any) {
+							ps[j] = item.(string)
+						}
+						plats = append(plats, ps...)
 					default:
 						errs <- errors.Errorf(
-							"don't know how to convert platform type %s",
+							"don't know how to convert platform type %s: %v",
 							v.Kind().String(),
+							v.Interface(),
 						)
 					}
+					i++
 				}
 				meta["platforms"] = plats
 			}
@@ -219,6 +228,43 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 						v.Kind().String(),
 					)
 				}
+			}
+
+			var maints []nix.Maintainer
+			if meta["maintainers"] != nil {
+				switch maint := reflect.ValueOf(meta["maintainers"]); maint.Kind() {
+				case reflect.String:
+					maints = []nix.Maintainer{nix.Maintainer{Name: maint.String(), Github: maint.String()}}
+				case reflect.Slice, reflect.Array:
+					maints = make([]nix.Maintainer, maint.Len())
+					for i, val := range maint.Slice(0, maint.Len()).Interface().([]any) {
+						switch v := reflect.ValueOf(val); v.Kind() {
+						case reflect.String:
+							maints[i] = nix.Maintainer{Name: v.String(), Github: v.String()}
+						case reflect.Map:
+							m := v.Interface().(map[string]any)
+							maints[i] = nix.Maintainer{}
+							if m["name"] != nil && m["name"].(string) != "" {
+								maints[i].Name = m["name"].(string)
+							}
+							if m["github"] != nil && m["github"].(string) != "" {
+								maints[i].Github = m["github"].(string)
+							}
+						default:
+							errs <- errors.Errorf(
+								"don't know how to handle maintainer entry of type %s: %v",
+								v.Kind().String(),
+								v,
+							)
+						}
+					}
+				default:
+					errs <- errors.Errorf(
+						"don't know how to interpret maintainers type %s'",
+						maint.Kind().String(),
+					)
+				}
+				meta["maintainers"] = maints
 			}
 
 			i.pkg = packageJSON{}
@@ -250,13 +296,19 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 				pkgSet = ""
 			}
 
-			url, err := makeRepoURL(i.source.Repo, subpath, line)
-			if err != nil {
-				errs <- err
+			var url string
+			if meta["position"] != nil {
+				url = meta["position"].(string)
+			} else {
+				url, err = makeRepoURL(i.source.Repo, subpath, line)
+				if err != nil {
+					errs <- err
+				}
 			}
+
 			results <- &nix.Package{
 				Name:            i.pkg.Name,
-				Attribute:       kv.Key,
+				Attribute:       strings.TrimPrefix(kv.Key, "nur.repos."),
 				Source:          i.source.Key,
 				PackageSet:      pkgSet,
 				Version:         i.pkg.Version,

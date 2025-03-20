@@ -66,6 +66,7 @@ var DefaultConfig = Config{
 				OutputPath: "share/doc/nixos",
 				Timeout:    Duration{5 * time.Minute},
 				Repo:       nixpkgs,
+				JSONDepth:  1,
 			},
 			"darwin": {
 				Name:       "Darwin",
@@ -85,6 +86,7 @@ var DefaultConfig = Config{
 					Owner: "LnL7",
 					Repo:  "nix-darwin",
 				},
+				JSONDepth: 1,
 			},
 			"home-manager": {
 				Name:       "Home Manager",
@@ -104,6 +106,7 @@ var DefaultConfig = Config{
 					Owner: "nix-community",
 					Repo:  "home-manager",
 				},
+				JSONDepth: 1,
 			},
 			"nixpkgs": {
 				Name:       "Nix Packages",
@@ -120,6 +123,23 @@ var DefaultConfig = Config{
 					Enable:    true,
 					Attribute: "programs.sqlite",
 				},
+				JSONDepth: 2,
+			},
+			"nur": {
+				Name:     "NUR",
+				Order:    4,
+				Key:      "nur",
+				Enable:   false,
+				Importer: Packages,
+				Fetcher:  Download,
+				URL:      "https://alanpearce.github.io/nix-options/nur",
+				Timeout:  Duration{5 * time.Minute},
+				Repo: Repository{
+					Type:  GitHub,
+					Owner: "nix-community",
+					Repo:  "nur",
+				},
+				JSONDepth: 1,
 			},
 		},
 	},
