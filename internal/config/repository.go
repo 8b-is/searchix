@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 
 	"gitlab.com/tozd/go/errors"
@@ -19,6 +20,20 @@ type Repository struct {
 	Owner    string
 	Repo     string
 	Revision string `toml:"-"`
+}
+
+func (r *Repository) String() string {
+	switch r.Type {
+	case GitHub:
+		u, err := url.JoinPath("https://github.com/", r.Owner, r.Repo)
+		if err != nil {
+			panic(err)
+		}
+
+		return u
+	default:
+		panic("need repository string implementation for type " + r.Type.String())
+	}
 }
 
 func (f RepoType) String() string {

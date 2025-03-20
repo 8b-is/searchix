@@ -5,6 +5,7 @@ import (
 
 	g "go.alanpearce.eu/gomponents"
 	. "go.alanpearce.eu/gomponents/html"
+	"go.alanpearce.eu/searchix/internal/config"
 )
 
 func SearchForm(tdata TemplateData, r ResultData) g.Node {
@@ -35,11 +36,9 @@ func SearchPage(tdata TemplateData, r ResultData, children ...g.Node) g.Node {
 		tdata,
 		P(
 			g.Text("Search Nix packages and options from "),
-			A(Href("https://nixos.org"), g.Text("NixOS")),
-			g.Text(", "),
-			A(Href("https://github.com/LnL7/nix-darwin"), g.Text("nix-darwin")),
-			g.Text(" and "),
-			A(Href("https://github.com/nix-community/home-manager"), g.Text("home-manager")),
+			MapCommaList(tdata.Sources, func(source *config.Source) g.Node {
+				return A(Href(source.Repo.String()), g.Text(source.Name))
+			}),
 		),
 		g.If(Indexing.InProgress,
 			P(Class("notice"),
@@ -95,4 +94,24 @@ func SearchPage(tdata TemplateData, r ResultData, children ...g.Node) g.Node {
 			),
 		),
 	)
+}
+
+func MapCommaList[T any](items []T, fn func(T) g.Node) g.Node {
+	out := make([]g.Node, (len(items) * 2))
+	j := 0
+	last := len(items) - 2
+	for i := range items {
+		out[j] = fn(items[i])
+		j++
+		if i <= last {
+			if i == last {
+				out[j] = g.Text(" and ")
+			} else {
+				out[j] = g.Text(", ")
+			}
+		}
+		j++
+	}
+
+	return g.Group(out)
 }
