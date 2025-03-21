@@ -22,7 +22,7 @@ func Packages(result *index.Result) g.Node {
 			),
 		),
 		TBody(
-			g.Map(result.Hits, func(hit index.DocumentMatch) g.Node {
+			g.MapIter(result.Hits, func(hit index.DocumentMatch) g.Node {
 				if m := convertMatch[nix.Package](hit.Data); m != nil {
 					return packageRow(hit, *m)
 				}

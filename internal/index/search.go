@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
+	"iter"
 	"time"
 
 	"go.alanpearce.eu/searchix/internal/config"
@@ -25,7 +26,7 @@ type DocumentMatch struct {
 
 type Result struct {
 	*bleve.SearchResult
-	Hits []DocumentMatch
+	Hits iter.Seq[DocumentMatch]
 }
 
 type ReadIndex struct {
@@ -87,24 +88,31 @@ func (index *ReadIndex) search(
 			return nil, errors.WithMessage(err, "failed to execute search query")
 		}
 
-		results := make([]DocumentMatch, bleveResult.Hits.Len())
-		var buf bytes.Buffer
-		for i, result := range bleveResult.Hits {
-			results[i].DocumentMatch = bleveResult.Hits[i]
-			_, err = buf.WriteString(result.Fields["_data"].(string))
-			if err != nil {
-				return nil, errors.WithMessage(err, "error fetching result data")
+		hits := func(yield func(DocumentMatch) bool) {
+			var buf bytes.Buffer
+			for _, match := range bleveResult.Hits {
+				hit := DocumentMatch{
+					DocumentMatch: match,
+					Data:          nil,
+				}
+				_, err := buf.WriteString(match.Fields["_data"].(string))
+				if err != nil {
+					index.log.Warn("error fetching result data", "error", err)
+				}
+				err = gob.NewDecoder(&buf).Decode(&hit.Data)
+				if err != nil {
+					index.log.Warn("error decoding gob data", "error", err, "data", buf.String())
+				}
+				buf.Reset()
+				if !yield(hit) {
+					return
+				}
 			}
-			err = gob.NewDecoder(&buf).Decode(&results[i].Data)
-			if err != nil {
-				return nil, errors.WithMessagef(err, "error decoding gob data: %s", buf.String())
-			}
-			buf.Reset()
 		}
 
 		return &Result{
 			SearchResult: bleveResult,
-			Hits:         results,
+			Hits:         hits,
 		}, nil
 	}
 }
@@ -188,6 +196,7 @@ func (index *ReadIndex) GetDocument(
 	key := nix.MakeKey(source, id)
 	query := bleve.NewDocIDQuery([]string{key})
 	search := bleve.NewSearchRequest(query)
+	search.Size = 1
 
 	result, err := index.search(ctx, search)
 	if err != nil {
@@ -198,5 +207,11 @@ func (index *ReadIndex) GetDocument(
 		return nil, nil
 	}
 
-	return &result.Hits[0].Data, err
+	for hit := range result.Hits {
+		if hit.ID == key {
+			return &hit.Data, err
+		}
+	}
+
+	return nil, err
 }

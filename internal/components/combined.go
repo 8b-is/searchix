@@ -36,7 +36,7 @@ func Combined(result *index.Result) g.Node {
 			),
 		),
 		TBody(
-			g.Map(result.Hits, func(hit index.DocumentMatch) g.Node {
+			g.MapIter(result.Hits, func(hit index.DocumentMatch) g.Node {
 				return Tr(
 					Td(
 						openCombinedDialogLink(nix.GetKey(hit.Data)),
