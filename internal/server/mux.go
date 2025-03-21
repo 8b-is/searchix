@@ -93,9 +93,6 @@ func NewMux(
 				}
 			}
 
-			ctx, cancel := context.WithTimeout(r.Context(), searchTimeout)
-			defer cancel()
-
 			if r.URL.Query().Has("query") {
 				qs := r.URL.Query().Get("query")
 
@@ -114,7 +111,11 @@ func NewMux(
 					}
 				}
 				page := pagination.New(pageNumber, pageSize)
+
+				ctx, cancel := context.WithTimeout(r.Context(), searchTimeout)
 				results, err := index.Search(ctx, source, qs, page.From, page.Size)
+				cancel()
+
 				if err != nil {
 					if err == context.DeadlineExceeded {
 						errorHandler(w, r, "Search timed out", http.StatusInternalServerError)
@@ -219,9 +220,9 @@ func NewMux(
 			importerSingular := importerType.Singular()
 
 			ctx, cancel := context.WithTimeout(r.Context(), searchTimeout)
-			defer cancel()
-
 			doc, err := index.GetDocument(ctx, source, r.PathValue("id"))
+			cancel()
+
 			if err != nil {
 				errorHandler(
 					w,
