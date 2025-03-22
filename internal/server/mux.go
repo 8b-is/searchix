@@ -107,7 +107,7 @@ func NewMux(
 					}
 					if pageNumber == 0 {
 						pageNumber = 1
-						pageSize = math.MaxInt
+						pageSize = config.MaxResultsShowAll
 					}
 				}
 				page := pagination.New(pageNumber, pageSize)
@@ -127,7 +127,8 @@ func NewMux(
 
 					return
 				}
-				if pageSize == math.MaxInt && results.Total > config.MaxResultsShowAll {
+				if pageSize == config.MaxResultsShowAll &&
+					results.Total > config.MaxResultsShowAll {
 					errorHandler(w, r, "Too many results, use pagination", http.StatusBadRequest)
 				}
 
