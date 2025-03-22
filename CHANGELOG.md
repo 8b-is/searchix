@@ -1,8 +1,46 @@
 # Changelog
 
-## [v0.1.30](https://git.alanpearce.eu/searchix/diff/?id=v0.1.29&id2=5762645aedc4d39a9e6caeb227410ca9bae2d2b5) (2025-03-18)
+## [v0.1.31](https://git.alanpearce.eu/searchix/diff/?id=v0.1.30&id2=d4ec6e5beecd549114dafd0b7c3b4a9d910388fb) (2025-03-21)
 
 ### Features
+
+- **nixos-module:** allow setting environment variables
+  ([e8fbdf3](https://git.alanpearce.eu/searchix/commit/?id=e8fbdf3bd12c8920a6e9bd84b34e787764b11eaf))
+- **nixos-module:** allow setting environment variables
+  ([78fc3e6](https://git.alanpearce.eu/searchix/commit/?id=78fc3e6cd43e6df90e17067fe0eb52b9badf9a75))
+- demote NUR results in combined search
+  ([782b636](https://git.alanpearce.eu/searchix/commit/?id=782b636c6ba9ebccecf46c7a1e5583e8108baf9a))
+- promote results with literal or prefix name matches
+  ([49a07fb](https://git.alanpearce.eu/searchix/commit/?id=49a07fb0b513dcaeb6241f4d87c160b9e0119260))
+- make list of source links dynamic
+  ([7247322](https://git.alanpearce.eu/searchix/commit/?id=7247322a386f065c643dc58f0ae5b57ad7ec1cc1))
+- enable NUR package import
+  ([2705e97](https://git.alanpearce.eu/searchix/commit/?id=2705e97ce1cf7d6a399c5f0175c36562fdef3352))
+- wrap search form in semantic <search> element
+  ([ff1e953](https://git.alanpearce.eu/searchix/commit/?id=ff1e9539fca1f011cfd52d0309a373f211c3fd10))
+- show last/next/current indexing run time
+  ([383ee78](https://git.alanpearce.eu/searchix/commit/?id=383ee780613116e78db9114a39a2d6127533463c))
+- shorten shutdown timeout in development
+  ([49e3004](https://git.alanpearce.eu/searchix/commit/?id=49e3004d33bf84aa081460e4a6d89a8d84cc12b0))
+- Convert templ components to gomponents
+  ([896d844](https://git.alanpearce.eu/searchix/commit/?id=896d844cac976afd0ee8aa73dd2fb28e15e7ac79))
+
+### Fixes
+
+- remove rendering from search timeout restriction
+  ([d4ec6e5](https://git.alanpearce.eu/searchix/commit/?id=d4ec6e5beecd549114dafd0b7c3b4a9d910388fb))
+- package programs displayed off-centre
+  ([de98780](https://git.alanpearce.eu/searchix/commit/?id=de987806cd030e85a22e11b35835a3524068adb7))
+- footer spacing
+  ([c0c02ac](https://git.alanpearce.eu/searchix/commit/?id=c0c02ac768a144f4417edfba967a4f7857a150b9))
+- detach version from rest of footer text
+  ([6b342b8](https://git.alanpearce.eu/searchix/commit/?id=6b342b83cedec82d240fc820d9696d3bb3eda8a2))
+- wrong pagination links for combined results
+  ([9102aef](https://git.alanpearce.eu/searchix/commit/?id=9102aef53c5fb73585359306a518e726a3623731))
+
+### [v0.1.30](https://git.alanpearce.eu/searchix/diff/?id=v0.1.29&id2=v0.1.30) (2025-03-18)
+
+#### Features
 
 - show version number and link in footer
   ([5762645](https://git.alanpearce.eu/searchix/commit/?id=5762645aedc4d39a9e6caeb227410ca9bae2d2b5))
