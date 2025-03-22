@@ -90,7 +90,10 @@ func Page(tdata TemplateData, children ...g.Node) g.Node {
 						g.Group([]g.Node{
 							g.Text("Searchix "),
 							A(
-								Href("https://git.sr.ht/~alanpearce/searchix/refs/"+config.Version),
+								Href(
+									"https://git.sr.ht/~alanpearce/searchix/tree/"+config.Version+"/CHANGELOG.md",
+								),
+								TitleAttr("View changelog"),
 								g.Text(config.Version),
 							),
 							g.Text(" "),
