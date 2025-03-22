@@ -33,11 +33,13 @@ if (window.trustedTypes && trustedTypes.createPolicy) {
  * @param {MouseEvent} ev
  */
 function openSiblingDialog(ev) {
-  const dialog = ev.target.nextElementSibling;
-  dialog.showModal();
-  dialog.querySelector("button").addEventListener("click", function () {
-    dialog.close();
-  });
+  if (!(ev.shiftKey || ev.altKey || ev.ctrlKey || ev.metaKey)) {
+    const dialog = ev.target.nextElementSibling;
+    dialog.showModal();
+    dialog.querySelector("button").addEventListener("click", function () {
+      dialog.close();
+    });
+  }
 }
 
 /**
@@ -210,8 +212,10 @@ async function getDetail(url) {
  * @param {MouseEvent} ev
  */
 function handleDialogOpen(ev) {
-  getDetail(new URL(ev.target.href));
-  ev.preventDefault();
+  if (!(ev.ctrlKey || ev.metaKey || ev.shiftKey || ev.altKey)) {
+    getDetail(new URL(ev.target.href));
+    ev.preventDefault();
+  }
 }
 
 if (state.opened.length > 0) {
