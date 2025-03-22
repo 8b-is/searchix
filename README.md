@@ -7,20 +7,22 @@ A search tool to find options and packages in the NixOS ecosystem. Aims to be li
 - NixOS options
 - Nix packages
 - [Nix darwin](https://github.com/LnL7/nix-darwin) options
-- [Home manager](https://github.com/nix-community/home-manager) options.
+- [Home manager](https://github.com/nix-community/home-manager) options
+- [Nix User Repository](https://github.com/nix-community/NUR) packages
 
 There is an instance running at [searchix.alanpearce.eu](https://searchix.alanpearce.eu/), which uses the following channels, with updates attempted daily:
 
 - nixos-options: nixos-unstable
 - nixpkgs: nixos-unstable
-- darwin: master
-- home-manager: master
+- darwin: master branch
+- home-manager: master branch
+- nur: main branch
 
-You can also [run it yourself](./docs/running.md), if you're feeling bold. It's very light-weight!
+You can also [run it yourself](./docs/running.md), if you're feeling bold. It's quite lightweight!
 
 ## Status
 
-**Alpha**
+**Beta**
 
 Expect breakage. Search results are not expected to match the quality of [search.nixos.org](https://search.nixos.org/), the priority is more on having multiple sources in one location.
 
