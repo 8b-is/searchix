@@ -28,6 +28,10 @@ if (window.trustedTypes && trustedTypes.createPolicy) {
   });
 }
 
+/**
+ *
+ * @param {MouseEvent} ev
+ */
 function openSiblingDialog(ev) {
   const dialog = ev.target.nextElementSibling;
   dialog.showModal();
@@ -36,6 +40,10 @@ function openSiblingDialog(ev) {
   });
 }
 
+/**
+ *
+ * @param {HTMLElement} results
+ */
 function addOpenDialogListeners(results) {
   results.querySelectorAll("a.open-dialog").forEach(function (element) {
     element.addEventListener("click", handleDialogOpen);
@@ -45,12 +53,20 @@ function addOpenDialogListeners(results) {
   });
 }
 
+/**
+ *
+ * @param {MouseEvent} ev
+ */
 function paginationLinkClicked(ev) {
   const url = new URL(ev.target.href);
   getResults(url);
   ev.preventDefault();
 }
 
+/**
+ *
+ * @param {HTMLElement} pagination
+ */
 function addPaginationEventListeners(pagination) {
   Array.from(pagination.children).forEach((child) =>
     child.addEventListener("click", paginationLinkClicked),
@@ -70,6 +86,10 @@ function renderResults(html) {
   }
 }
 
+/**
+ *
+ * @param {URL} url
+ */
 async function getResults(url) {
   try {
     state.url = url.toJSON();
@@ -141,6 +161,10 @@ document.querySelector("a.current").addEventListener("click", function (ev) {
   queryInput.value = "";
 });
 
+/**
+ *
+ * @param {string} html
+ */
 function renderDetails(html) {
   const fragment = detailsRange.createContextualFragment(
     escapePolicy !== null ? escapePolicy.createHTML(html) : html,
@@ -157,6 +181,10 @@ dialog.querySelector("button").addEventListener("click", function () {
   dialog.close();
 });
 
+/**
+ *
+ * @param {URL} url
+ */
 async function getDetail(url) {
   try {
     state.url = url.toJSON();
@@ -178,6 +206,9 @@ async function getDetail(url) {
   }
 }
 
+/**
+ * @param {MouseEvent} ev
+ */
 function handleDialogOpen(ev) {
   getDetail(new URL(ev.target.href));
   ev.preventDefault();
