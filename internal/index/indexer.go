@@ -8,6 +8,7 @@ import (
 	"math"
 	"os"
 	"path"
+	"path/filepath"
 	"slices"
 
 	"go.alanpearce.eu/searchix/internal/file"
@@ -89,13 +90,6 @@ func createIndexMapping() (mapping.IndexMapping, errors.E) {
 			camelcase.Name,
 			porter.Name,
 		},
-	})
-	if err != nil {
-		return nil, errors.WithMessage(err, "could not add custom analyser")
-	}
-	err = indexMapping.AddCustomAnalyzer("keyword_single", map[string]any{
-		"type":      keyword.Name,
-		"tokenizer": letter.Name,
 	})
 	if err != nil {
 		return nil, errors.WithMessage(err, "could not add custom analyser")
@@ -222,6 +216,13 @@ func OpenOrCreate(
 ) (*ReadIndex, *WriteIndex, bool, errors.E) {
 	var err errors.E
 	bleve.SetLog(zap.NewStdLog(options.Logger.Named("bleve").GetLogger()))
+	if !filepath.IsAbs(dataRoot) {
+		wd, err := os.Getwd()
+		if err != nil {
+			return nil, nil, false, errors.WithMessagef(err, "could not get working directory")
+		}
+		dataRoot = filepath.Join(wd, dataRoot)
+	}
 
 	indexPath := path.Join(dataRoot, indexBaseName)
 	metaPath := path.Join(dataRoot, metaBaseName)

@@ -128,8 +128,8 @@ func (index *ReadIndex) Search(
 
 	// match the user's query in any field ...
 	query.AddMust(bleve.NewDisjunctionQuery(
-		bleve.NewTermQuery(keyword),
-		bleve.NewPrefixQuery(keyword),
+		setBoost(bleve.NewTermQuery(keyword), 50),
+		setBoost(bleve.NewPrefixQuery(keyword), 25),
 		bleve.NewMatchPhraseQuery(keyword),
 		bleve.NewMatchQuery(keyword),
 	))
@@ -140,12 +140,22 @@ func (index *ReadIndex) Search(
 		)
 	} else {
 		q := bleve.NewDisjunctionQuery(
-			setBoost(setField(bleve.NewTermQuery("nixpkgs"), "Source"), -150),
-			setBoost(setField(bleve.NewTermQuery("nur"), "Source"), -200),
+			setBoost(setField(bleve.NewTermQuery("nixpkgs"), "Source"), -1000),
+			setBoost(setField(bleve.NewTermQuery("nur"), "Source"), -5000),
 		)
 
 		query.AddShould(q)
 	}
+
+	mainProgramQuery := bleve.NewMatchQuery(keyword)
+	mainProgramQuery.SetField("MainProgram")
+	mainProgramQuery.SetBoost(50)
+	query.AddShould(mainProgramQuery)
+
+	mainProgramLiteralQuery := bleve.NewTermQuery(keyword)
+	mainProgramLiteralQuery.SetField("MainProgram")
+	mainProgramLiteralQuery.SetBoost(100)
+	query.AddShould(mainProgramLiteralQuery)
 
 	programsQuery := bleve.NewMatchQuery(keyword)
 	programsQuery.SetField("Programs")
@@ -214,4 +224,13 @@ func (index *ReadIndex) GetDocument(
 	}
 
 	return nil, err
+}
+
+func (index *ReadIndex) Close() error {
+	err := index.index.Close()
+	if err != nil {
+		return errors.WithStack(err)
+	}
+
+	return nil
 }

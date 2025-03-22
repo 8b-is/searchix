@@ -21,6 +21,8 @@ linters:
         - unconvert
         - wrapcheck
 linters-settings:
+    paralleltest:
+        ignore-missing: true
     gosec:
         excludes:
             - G115
