@@ -2,7 +2,7 @@
   --sans-font: -apple-system, BlinkMacSystemFont, sans-serif;
   --standard-border-radius: 0;
   --preformatted: var(--code);
-  --min-width: 60rem;
+  --min-width: 80rem;
   --accent-error: #ffe0e0;
 }
 
