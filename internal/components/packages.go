@@ -15,9 +15,9 @@ func Packages(result *index.Result) g.Node {
 			Tr(
 				Th(Scope("col"), g.Text("Attribute")),
 				Th(Scope("col"), g.Text("Name")),
-				Th(Scope("col"), g.Text("Description")),
+				Th(Scope("col"), Class("description"), g.Text("Description")),
 				g.If(config.DevMode,
-					Th(Scope("col"), g.Text("Score")),
+					Th(Scope("col"), Class("score"), g.Text("Score")),
 				),
 			),
 		),
@@ -41,7 +41,7 @@ func packageRow(hit index.DocumentMatch, p nix.Package) g.Node {
 		Td(
 			g.Text(p.Name),
 		),
-		Td(
+		Td(Class("description"),
 			g.Text(p.Description),
 		),
 		g.If(config.DevMode,

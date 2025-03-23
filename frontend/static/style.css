@@ -162,13 +162,39 @@ dialog > h2 {
 }
 
 table {
-  width: 100%;
   margin-top: 0;
+  width: 100%;
+  table-layout: fixed;
+  white-space: nowrap;
+}
+
+th.description {
+  width: 50%;
+}
+
+th.score {
+  width: 8ex;
 }
 
 td,
 th {
   padding: 0.25rem 0.5rem;
+  text-overflow: ellipsis;
+  overflow: clip;
+}
+
+tr {
+  height: 1.5rem;
+}
+
+td.description > * {
+  max-width: 100%;
+  text-overflow: ellipsis;
+  overflow: clip;
+}
+
+td.description > *:not(:first-child) {
+  display: none;
 }
 
 ul:only-child {

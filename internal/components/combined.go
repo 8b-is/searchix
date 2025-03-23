@@ -31,7 +31,7 @@ func Combined(result *index.Result) g.Node {
 				Th(Scope("col"), g.Text("Attribute")),
 				Th(Scope("col"), g.Text("Description")),
 				g.If(config.DevMode,
-					Th(Scope("col"), g.Text("Score")),
+					Th(Scope("col"), Class("score"), g.Text("Score")),
 				),
 			),
 		),
@@ -41,7 +41,7 @@ func Combined(result *index.Result) g.Node {
 					Td(
 						openCombinedDialogLink(nix.GetKey(hit.Data)),
 					),
-					Td(
+					Td(Class("description"),
 						CombinedData(hit.Data),
 					),
 					g.If(config.DevMode,

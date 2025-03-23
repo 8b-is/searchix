@@ -14,9 +14,9 @@ func Options(result *index.Result) g.Node {
 		THead(
 			Tr(
 				Th(Scope("col"), g.Text("Title")),
-				Th(Scope("col"), g.Text("Description")),
+				Th(Scope("col"), Class("description"), g.Text("Description")),
 				g.If(config.DevMode,
-					Th(Scope("col"), g.Text("Score")),
+					Th(Scope("col"), Class("score"), g.Text("Score")),
 				),
 			),
 		),
@@ -37,7 +37,7 @@ func optionRow(hit index.DocumentMatch, o nix.Option) g.Node {
 		Td(
 			openDialogLink(o.Name),
 		),
-		Td(
+		Td(Class("description"),
 			firstSentence(o.Description),
 			Dialog(ID(o.Name)),
 		),
