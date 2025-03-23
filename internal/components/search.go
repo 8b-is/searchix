@@ -45,7 +45,7 @@ func SearchPage(tdata TemplateData, r ResultData, children ...g.Node) g.Node {
 				g.Text("Indexing in progress, started "),
 				Time(
 					DateTime(Indexing.StartedAt.Format(time.RFC3339)),
-					Title(Indexing.StartedAt.Format(time.RFC3339)),
+					Title(Indexing.StartedAt.Format(time.DateTime)),
 					g.Text(time.Since(Indexing.StartedAt).Round(time.Second).String()),
 				),
 				g.Text(" ago. "),
@@ -53,7 +53,7 @@ func SearchPage(tdata TemplateData, r ResultData, children ...g.Node) g.Node {
 					g.Text("Last run took "),
 					Time(
 						DateTime(Indexing.FinishedAt.Format(time.RFC3339)),
-						Title(Indexing.FinishedAt.Format(time.RFC3339)),
+						Title(Indexing.FinishedAt.Format(time.DateTime)),
 						g.Text(time.Since(Indexing.FinishedAt).Round(time.Minute).String()),
 					),
 				),
@@ -62,14 +62,14 @@ func SearchPage(tdata TemplateData, r ResultData, children ...g.Node) g.Node {
 				g.Text("Indexing last ran "),
 				Time(
 					DateTime(Indexing.FinishedAt.Format(time.RFC3339)),
-					Title(Indexing.FinishedAt.Format(time.RFC3339)),
-					g.Text(time.Since(Indexing.FinishedAt).Round(time.Minute).String()),
+					Title(Indexing.FinishedAt.Format(time.DateTime)),
+					g.Textf("%.0f hours ago", time.Since(Indexing.FinishedAt).Hours()),
 				),
-				g.Text(" ago, will run again in "),
+				g.Text(", will run again in "),
 				Time(
 					DateTime(Indexing.NextRun.Format(time.RFC3339)),
-					Title(Indexing.NextRun.Format(time.RFC3339)),
-					g.Text(time.Until(Indexing.NextRun).Round(time.Minute).String()),
+					Title(Indexing.NextRun.Format(time.DateTime)),
+					g.Textf("%.0f hours", time.Until(Indexing.NextRun).Hours()),
 				),
 				g.Text("."),
 			),
