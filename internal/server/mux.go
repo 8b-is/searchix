@@ -96,6 +96,12 @@ func NewMux(
 			if r.URL.Query().Has("query") {
 				qs := r.URL.Query().Get("query")
 
+				if len(qs) < 2 {
+					errorHandler(w, r, "Query too short", http.StatusBadRequest)
+
+					return
+				}
+
 				var pageSize int = search.DefaultPageSize
 				var pageNumber = 1
 				if pg := r.URL.Query().Get("page"); pg != "" {

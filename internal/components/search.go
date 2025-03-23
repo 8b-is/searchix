@@ -19,6 +19,7 @@ func SearchForm(tdata TemplateData, r ResultData) g.Node {
 			Input(
 				ID("query"),
 				Aria("labelledby", "legend"),
+				MinLength("2"),
 				Name("query"),
 				Type("search"),
 				Value(r.Query),
