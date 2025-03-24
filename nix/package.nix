@@ -24,10 +24,10 @@ buildGoApplication {
       (unions [
         ../go.mod
         ../go.sum
-        ../searchix.go
         ../internal
         ../frontend
         ../cmd
+        ../web
       ])
       (maybeMissing ../frontend/static/base.css);
   };
