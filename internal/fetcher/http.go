@@ -94,5 +94,5 @@ func fetchFileIfNeeded(
 		err = errors.Errorf("got response code %d, don't know what to do", res.StatusCode)
 	}
 
-	return body, newMtime, err
+	return NewReadCloser(body), newMtime, err
 }
