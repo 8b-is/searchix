@@ -13,7 +13,7 @@
 , css
 }:
 let
-  version = "0.1.31";
+  version = "0.1.32";
 in
 buildGoApplication {
   pname = "searchix";

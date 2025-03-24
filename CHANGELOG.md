@@ -1,8 +1,34 @@
 # Changelog
 
-## [v0.1.31](https://git.alanpearce.eu/searchix/diff/?id=v0.1.30&id2=d4ec6e5beecd549114dafd0b7c3b4a9d910388fb) (2025-03-21)
+## [v0.1.32](https://git.alanpearce.eu/searchix/diff/?id=v0.1.31&id2=0a2289ae1b3046be29d6dccb92dc871a2090fe7a) (2025-03-24)
 
 ### Features
+
+- improve handling of long option descriptions
+  ([4fa3ceb](https://git.alanpearce.eu/searchix/commit/?id=4fa3ceb5ac040a84f2da405c46e4af1231d22f17))
+- widen body
+  ([1c56ff7](https://git.alanpearce.eu/searchix/commit/?id=1c56ff7fc392f2d7992e53add5bd76bc8855d4a6))
+- improve display of indexing times and durations
+  ([297a7a2](https://git.alanpearce.eu/searchix/commit/?id=297a7a2096a12e6ac50d7b2077f2d75a7026fae4))
+- link directly to version changelog in footer
+  ([7d4ff28](https://git.alanpearce.eu/searchix/commit/?id=7d4ff28794fcc8d7dd8c87f300ce6a6235f87cc5))
+- **js:** allow opening details in new tab/window
+  ([03fa0eb](https://git.alanpearce.eu/searchix/commit/?id=03fa0eb00aef448bec05280a121c659a600fc13f))
+- promote prefix/exact name/attr matches
+  ([1328df9](https://git.alanpearce.eu/searchix/commit/?id=1328df9c5ca44e903a052c9bfc9a67dd34e25704))
+
+### Fixes
+
+- missing content of last index run time
+  ([0dc2635](https://git.alanpearce.eu/searchix/commit/?id=0dc2635e199591b917c8cc8ff40df3c3da6f9ec6))
+- block single-character queries
+  ([0cd9a24](https://git.alanpearce.eu/searchix/commit/?id=0cd9a2446413e9050c24ccd409bc8f97ad18076a))
+- don't attempt to load more than configured number of results
+  ([d39204e](https://git.alanpearce.eu/searchix/commit/?id=d39204eadf673b6c7ae940203fd75c0805245a96))
+
+### [v0.1.31](https://git.alanpearce.eu/searchix/diff/?id=v0.1.30&id2=v0.1.31) (2025-03-22)
+
+#### Features
 
 - **nixos-module:** allow setting environment variables
   ([e8fbdf3](https://git.alanpearce.eu/searchix/commit/?id=e8fbdf3bd12c8920a6e9bd84b34e787764b11eaf))
@@ -25,7 +51,7 @@
 - Convert templ components to gomponents
   ([896d844](https://git.alanpearce.eu/searchix/commit/?id=896d844cac976afd0ee8aa73dd2fb28e15e7ac79))
 
-### Fixes
+#### Fixes
 
 - remove rendering from search timeout restriction
   ([d4ec6e5](https://git.alanpearce.eu/searchix/commit/?id=d4ec6e5beecd549114dafd0b7c3b4a9d910388fb))
