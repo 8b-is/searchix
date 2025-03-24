@@ -51,9 +51,12 @@ update-nix-package-version:
 	sd 'h=v.+$' "h=v$VER" nix/modules/default.nix
 
 release: clean-workdir changelog update-nix-package-version
+	#!/bin/sh
+	VERSION=$(convco version --bump --print-prefix)
 	git add CHANGELOG.md nix/package.nix nix/modules/default.nix
-	git commit -m "chore: release $(convco version --bump)"
-	git tag $(convco version --bump --print-prefix)
+	git commit -m "chore: release ${VERSION}"
+	git tag "${VERSION}"
+	git push origin main "${VERSION}"
 
 run: dev
 
