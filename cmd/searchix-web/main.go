@@ -90,8 +90,9 @@ func main() {
 	}
 
 	imp, err := importer.New(cfg, &importer.Options{
-		LowMemory: cfg.Importer.LowMemory,
-		Logger:    logger.Named("importer"),
+		WriteIndex: write,
+		LowMemory:  cfg.Importer.LowMemory,
+		Logger:     logger.Named("importer"),
 	})
 	if err != nil {
 		logger.Fatal("Failed to create importer", "error", err)
