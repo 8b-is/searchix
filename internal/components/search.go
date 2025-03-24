@@ -44,7 +44,7 @@ func SearchPage(tdata TemplateData, r ResultData, children ...g.Node) g.Node {
 		),
 		g.If(importer.Job.InProgress,
 			P(Class("notice"),
-				g.Text("importer.Indexing in progress, started "),
+				g.Text("Indexing in progress, started "),
 				Time(
 					DateTime(importer.Job.StartedAt.Format(time.RFC3339)),
 					Title(importer.Job.StartedAt.Format(time.DateTime)),
