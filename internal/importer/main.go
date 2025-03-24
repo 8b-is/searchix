@@ -300,7 +300,13 @@ func (imp *Importer) StartUpdateTimer(
 			Timezone:      time.Local.String(),
 		}
 
-		nextRun := nextUTCOccurrenceOfTime(imp.config.Importer.UpdateAt)
+		var nextRun time.Time
+		if Job.FinishedAt.Before(time.Now().Add(-24 * time.Hour)) {
+			imp.log.Info("indexing last ran more than 24 hours ago, scheduling immediate update")
+			nextRun = time.Now()
+		} else {
+			nextRun = nextUTCOccurrenceOfTime(imp.config.Importer.UpdateAt)
+		}
 		SetNextRun(nextRun)
 		for {
 			imp.log.Debug("scheduling next run", "next-run", nextRun)
@@ -338,7 +344,7 @@ func (imp *Importer) StartUpdateTimer(
 					Status:      sentry.CheckInStatusOK,
 				}, monitorConfig)
 			}
-			nextRun = nextRun.AddDate(0, 0, 1)
+			nextRun = nextUTCOccurrenceOfTime(imp.config.Importer.UpdateAt)
 			MarkIndexingFinished(nextRun)
 		}
 	})
