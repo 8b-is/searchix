@@ -244,7 +244,6 @@ func New(
 func (imp *Importer) EnsureSourcesIndexed(
 	ctx context.Context,
 	read *index.ReadIndex,
-	write *index.WriteIndex,
 ) errors.E {
 	cfgEnabledSources := slices.Collect(maps.Keys(imp.config.Importer.Sources))
 	slices.Sort(cfgEnabledSources)
@@ -275,7 +274,7 @@ func (imp *Importer) EnsureSourcesIndexed(
 		if len(retiredSources) > 0 {
 			imp.log.Info("removing retired sources", "sources", retiredSources)
 			for _, s := range retiredSources {
-				err := write.DeleteBySource(s)
+				err := imp.indexer.DeleteBySource(s)
 				if err != nil {
 					return errors.Wrapf(err, "Failed to remove retired source %s", s)
 				}

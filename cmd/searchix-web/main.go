@@ -107,7 +107,7 @@ func main() {
 		return
 	}
 
-	err = imp.EnsureSourcesIndexed(ctx, read, write)
+	err = imp.EnsureSourcesIndexed(ctx, read)
 	if err != nil {
 		logger.Fatal("Failed to setup index", "error", err)
 	}
