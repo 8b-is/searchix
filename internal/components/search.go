@@ -51,12 +51,14 @@ func SearchPage(tdata TemplateData, r ResultData, children ...g.Node) g.Node {
 				),
 				g.Text(" ago. "),
 				g.If(!Indexing.FinishedAt.IsZero(),
-					g.Text("Last run took "),
-					Time(
-						DateTime(Indexing.FinishedAt.Format(time.RFC3339)),
-						Title(Indexing.FinishedAt.Format(time.DateTime)),
-						g.Text(time.Since(Indexing.FinishedAt).Round(time.Minute).String()),
-					),
+					g.Group([]g.Node{
+						g.Text("Last run took "),
+						Time(
+							DateTime(Indexing.FinishedAt.Format(time.RFC3339)),
+							Title(Indexing.FinishedAt.Format(time.DateTime)),
+							g.Text(time.Since(Indexing.FinishedAt).Round(time.Minute).String()),
+						),
+					}),
 				),
 			),
 			P(
