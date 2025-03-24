@@ -10,8 +10,9 @@ import (
 
 	"badc0de.net/pkg/flagutil"
 
-	"go.alanpearce.eu/searchix"
 	"go.alanpearce.eu/searchix/internal/config"
+	"go.alanpearce.eu/searchix/internal/importer"
+	"go.alanpearce.eu/searchix/web"
 	"go.alanpearce.eu/x/log"
 )
 
@@ -69,12 +70,12 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
-	s, err := searchix.New(cfg, logger)
+	s, err := web.New(cfg, logger)
 	if err != nil {
 		logger.Fatal("Failed to initialise searchix", "error", err)
 	}
 
-	err = s.SetupIndex(ctx, &searchix.IndexOptions{
+	err = importer.SetupIndex(ctx, cfg, &importer.Options{
 		Update:    *update,
 		Replace:   *replace,
 		LowMemory: cfg.Importer.LowMemory,

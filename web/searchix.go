@@ -1,13 +1,11 @@
-package searchix
+package web
 
 import (
 	"context"
 	"math"
-	"slices"
 	"sync"
 	"time"
 
-	"go.alanpearce.eu/searchix/internal/components"
 	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/importer"
 	"go.alanpearce.eu/searchix/internal/index"
@@ -18,9 +16,8 @@ import (
 	"gitlab.com/tozd/go/errors"
 )
 
-func nextUTCOccurrenceOfTime(t config.LocalTime) time.Time {
+func nextUTCOccurrenceOfTime(dayTime config.LocalTime) time.Time {
 	now := time.Now()
-	dayTime := t
 	nextRun := time.Date(
 		now.Year(),
 		now.Month(),
@@ -36,99 +33,6 @@ func nextUTCOccurrenceOfTime(t config.LocalTime) time.Time {
 	}
 
 	return nextRun
-}
-
-type IndexOptions struct {
-	Update    bool
-	Replace   bool
-	LowMemory bool
-	Logger    *log.Logger
-}
-
-func (s *Server) SetupIndex(ctx context.Context, options *IndexOptions) errors.E {
-	var i uint
-	cfgEnabledSources := make([]string, len(s.cfg.Importer.Sources))
-	for key := range s.cfg.Importer.Sources {
-		cfgEnabledSources[i] = key
-		i++
-	}
-	slices.Sort(cfgEnabledSources)
-
-	read, write, exists, err := index.OpenOrCreate(
-		s.cfg.DataPath,
-		options.Replace,
-		&index.Options{
-			LowMemory: options.LowMemory,
-			Logger:    options.Logger.Named("index"),
-		},
-	)
-	if err != nil {
-		return errors.Wrap(err, "Failed to open or create index")
-	}
-	s.readIndex = read
-	s.writeIndex = write
-
-	if !exists || options.Replace || options.Update {
-		s.log.Info(
-			"Starting build job",
-			"new",
-			!exists,
-			"replace",
-			options.Replace,
-			"update",
-			options.Update,
-		)
-		imp := importer.New(s.cfg, s.log.Named("importer"), write)
-		err = imp.Start(
-			ctx,
-			options.Replace || options.Update,
-			nil,
-		)
-		if err != nil {
-			return errors.Wrap(err, "Failed to build index")
-		}
-		if options.Replace || options.Update {
-			return nil
-		}
-	} else {
-		indexedSources, err := read.GetEnabledSources()
-		if err != nil {
-			return errors.Wrap(err, "Failed to get enabled sources from index")
-		}
-		slices.Sort(indexedSources)
-		if !slices.Equal(cfgEnabledSources, indexedSources) {
-			newSources := slices.DeleteFunc(slices.Clone(cfgEnabledSources), func(s string) bool {
-				return slices.Contains(indexedSources, s)
-			})
-			retiredSources := slices.DeleteFunc(slices.Clone(indexedSources), func(s string) bool {
-				return slices.Contains(cfgEnabledSources, s)
-			})
-			if len(newSources) > 0 {
-				s.log.Info("adding new sources", "sources", newSources)
-				imp := importer.New(s.cfg, options.Logger.Named("importer"), write)
-				err := imp.Start(
-					ctx,
-					false,
-					&newSources,
-				)
-				if err != nil {
-					return errors.Wrap(err, "Failed to update index with new sources")
-				}
-			}
-			if len(retiredSources) > 0 {
-				s.log.Info("removing retired sources", "sources", retiredSources)
-				for _, s := range retiredSources {
-					err := write.DeleteBySource(s)
-					if err != nil {
-						return errors.Wrapf(err, "Failed to remove retired source %s", s)
-					}
-				}
-			}
-		}
-	}
-	components.SetLastUpdated(read.LastUpdated())
-
-	return nil
 }
 
 type Server struct {
@@ -177,7 +81,7 @@ func (s *Server) startUpdateTimer(
 
 		s.wg.Add(1)
 		nextRun := nextUTCOccurrenceOfTime(s.cfg.Importer.UpdateAt)
-		components.SetNextRun(nextRun)
+		importer.SetNextRun(nextRun)
 		for {
 			s.log.Debug("scheduling next run", "next-run", nextRun)
 			select {
@@ -195,7 +99,7 @@ func (s *Server) startUpdateTimer(
 				MonitorSlug: monitorSlug,
 				Status:      sentry.CheckInStatusInProgress,
 			}, monitorConfig)
-			components.MarkIndexingStarted()
+			importer.MarkIndexingStarted()
 
 			imp := importer.New(s.cfg, s.log.Named("importer"), s.writeIndex)
 			err = imp.Start(ctx, false, nil)
@@ -219,7 +123,7 @@ func (s *Server) startUpdateTimer(
 				}, monitorConfig)
 			}
 			nextRun = nextRun.AddDate(0, 0, 1)
-			components.MarkIndexingFinished(nextRun)
+			importer.MarkIndexingFinished(nextRun)
 		}
 	})
 }

@@ -32,6 +32,11 @@ import (
 	"gitlab.com/tozd/go/errors"
 )
 
+type Options struct {
+	LowMemory bool
+	Logger    *log.Logger
+}
+
 type WriteIndex struct {
 	index bleve.Index
 	log   *log.Logger
@@ -202,11 +207,6 @@ func deleteIndex(dataRoot string) errors.E {
 	}
 
 	return nil
-}
-
-type Options struct {
-	LowMemory bool
-	Logger    *log.Logger
 }
 
 func OpenOrCreate(

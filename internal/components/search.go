@@ -6,6 +6,7 @@ import (
 	g "go.alanpearce.eu/gomponents"
 	. "go.alanpearce.eu/gomponents/html"
 	"go.alanpearce.eu/searchix/internal/config"
+	"go.alanpearce.eu/searchix/internal/importer"
 )
 
 func SearchForm(tdata TemplateData, r ResultData) g.Node {
@@ -41,38 +42,38 @@ func SearchPage(tdata TemplateData, r ResultData, children ...g.Node) g.Node {
 				return A(Href(source.Repo.String()), g.Text(source.Name))
 			}),
 		),
-		g.If(Indexing.InProgress,
+		g.If(importer.Job.InProgress,
 			P(Class("notice"),
-				g.Text("Indexing in progress, started "),
+				g.Text("importer.Indexing in progress, started "),
 				Time(
-					DateTime(Indexing.StartedAt.Format(time.RFC3339)),
-					Title(Indexing.StartedAt.Format(time.DateTime)),
-					g.Text(time.Since(Indexing.StartedAt).Round(time.Second).String()),
+					DateTime(importer.Job.StartedAt.Format(time.RFC3339)),
+					Title(importer.Job.StartedAt.Format(time.DateTime)),
+					g.Text(time.Since(importer.Job.StartedAt).Round(time.Second).String()),
 				),
 				g.Text(" ago. "),
-				g.If(!Indexing.FinishedAt.IsZero(),
+				g.If(!importer.Job.FinishedAt.IsZero(),
 					g.Group([]g.Node{
 						g.Text("Last run took "),
 						Time(
-							DateTime(Indexing.FinishedAt.Format(time.RFC3339)),
-							Title(Indexing.FinishedAt.Format(time.DateTime)),
-							g.Text(time.Since(Indexing.FinishedAt).Round(time.Minute).String()),
+							DateTime(importer.Job.FinishedAt.Format(time.RFC3339)),
+							Title(importer.Job.FinishedAt.Format(time.DateTime)),
+							g.Text(time.Since(importer.Job.FinishedAt).Round(time.Minute).String()),
 						),
 					}),
 				),
 			),
 			P(
-				g.Text("Indexing last ran "),
+				g.Text("importer.Indexing last ran "),
 				Time(
-					DateTime(Indexing.FinishedAt.Format(time.RFC3339)),
-					Title(Indexing.FinishedAt.Format(time.DateTime)),
-					g.Textf("%.0f hours ago", time.Since(Indexing.FinishedAt).Hours()),
+					DateTime(importer.Job.FinishedAt.Format(time.RFC3339)),
+					Title(importer.Job.FinishedAt.Format(time.DateTime)),
+					g.Textf("%.0f hours ago", time.Since(importer.Job.FinishedAt).Hours()),
 				),
 				g.Text(", will run again in "),
 				Time(
-					DateTime(Indexing.NextRun.Format(time.RFC3339)),
-					Title(Indexing.NextRun.Format(time.DateTime)),
-					g.Textf("%.0f hours", time.Until(Indexing.NextRun).Hours()),
+					DateTime(importer.Job.NextRun.Format(time.RFC3339)),
+					Title(importer.Job.NextRun.Format(time.DateTime)),
+					g.Textf("%.0f hours", time.Until(importer.Job.NextRun).Hours()),
 				),
 				g.Text("."),
 			),
