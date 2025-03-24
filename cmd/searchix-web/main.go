@@ -7,11 +7,14 @@ import (
 	"os"
 	"os/signal"
 	"runtime/pprof"
+	"sync"
 
 	"badc0de.net/pkg/flagutil"
+	"github.com/getsentry/sentry-go"
 
 	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/importer"
+	"go.alanpearce.eu/searchix/internal/index"
 	"go.alanpearce.eu/searchix/web"
 	"go.alanpearce.eu/x/log"
 )
@@ -70,35 +73,65 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
-	s, err := web.New(cfg, logger)
+	read, write, exists, err := index.OpenOrCreate(
+		cfg.DataPath,
+		*replace,
+		&index.Options{
+			LowMemory: cfg.Importer.LowMemory,
+			Logger:    logger.Named("index"),
+		},
+	)
 	if err != nil {
-		logger.Fatal("Failed to initialise searchix", "error", err)
+		logger.Fatal("Failed to open or create index", "error", err)
 	}
 
-	err = importer.SetupIndex(ctx, cfg, &importer.Options{
-		Update:    *update,
-		Replace:   *replace,
+	s, err := web.New(cfg, logger, read)
+	if err != nil {
+		logger.Fatal("Failed to initialise searchix-web", "error", err)
+	}
+
+	imp, err := importer.New(cfg, &importer.Options{
 		LowMemory: cfg.Importer.LowMemory,
-		Logger:    logger,
+		Logger:    logger.Named("importer"),
 	})
+	if err != nil {
+		logger.Fatal("Failed to create importer", "error", err)
+	}
+
+	if !exists || *replace || *update {
+		err := imp.Start(ctx, true, nil)
+		if err != nil {
+			logger.Fatal("Failed to start importer", "error", err)
+		}
+
+		return
+	}
+
+	err = imp.EnsureSourcesIndexed(ctx, read, write)
 	if err != nil {
 		logger.Fatal("Failed to setup index", "error", err)
 	}
 
-	if *replace || *update {
-		return
-	}
-
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
 	go func() {
-		err = s.Start(ctx, *dev)
+		defer wg.Done()
+		err := s.Start(*dev)
 		if err != nil {
 			// Error starting or closing listener:
 			logger.Fatal("error", "error", err)
 		}
 	}()
 
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		imp.StartUpdateTimer(ctx, sentry.CurrentHub().Clone())
+	}()
+
 	<-ctx.Done()
 	logger.Debug("calling stop")
 	s.Stop()
+	wg.Wait()
 	logger.Debug("done")
 }

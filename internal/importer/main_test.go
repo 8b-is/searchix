@@ -22,7 +22,15 @@ func BenchmarkImporterLowMemory(b *testing.B) {
 		b.Fatal(err)
 	}
 
-	imp := New(&cfg, logger.Named("importer"), write)
+	imp, err := New(&cfg, &Options{
+		Logger:     logger.Named("importer"),
+		LowMemory:  true,
+		WriteIndex: write,
+	})
+	if err != nil {
+		b.Fatal(err)
+	}
+
 	err = imp.Start(
 		context.Background(),
 		false,
