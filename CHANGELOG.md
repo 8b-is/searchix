@@ -1,8 +1,26 @@
 # Changelog
 
-## [v0.1.33](https://git.alanpearce.eu/searchix/diff/?id=v0.1.32&id2=34bc16d3e3d12d4d14b9306baef8e5ecf600ebac) (2025-03-24)
+## [v0.1.34](https://git.alanpearce.eu/searchix/diff/?id=v0.1.33&id2=abf819db104560670cdc388a584d09968aac7bbb) (2025-03-24)
+
+### Features
+
+- buffer fetched HTTP bodies
+  ([abf819d](https://git.alanpearce.eu/searchix/commit/?id=abf819db104560670cdc388a584d09968aac7bbb))
+- re-index on startup if last run > 24 hours ago
+  ([6984d4d](https://git.alanpearce.eu/searchix/commit/?id=6984d4d32ab506494394f8a6a8aa18041c45b9e8))
 
 ### Fixes
+
+- another typo in search markup
+  ([efaaf3f](https://git.alanpearce.eu/searchix/commit/?id=efaaf3f5296807eec377b19d4733fd360c8c655f))
+- typo in indexing status
+  ([fecc84f](https://git.alanpearce.eu/searchix/commit/?id=fecc84fab93bb3228be5fee4160820751195feec))
+- nil pointer panic in importer
+  ([0fb48cf](https://git.alanpearce.eu/searchix/commit/?id=0fb48cf6dd934778584120ebbc9e568c8b80b80e))
+
+### [v0.1.33](https://git.alanpearce.eu/searchix/diff/?id=v0.1.32&id2=v0.1.33) (2025-03-24)
+
+#### Fixes
 
 - build failure due to outdated file reference
   ([dd58d99](https://git.alanpearce.eu/searchix/commit/?id=dd58d9925b68c7cd639c5e217782709c1936497f))
