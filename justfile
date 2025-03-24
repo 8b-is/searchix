@@ -62,6 +62,3 @@ dev:
 
 reindex *flags:
 	wgo run --exit ./cmd/searchix-web --config config.toml --replace --dev {{ flags }}
-
-update *flags:
-	wgo run --exit ./cmd/searchix-web --config config.toml --update --dev {{ flags }}
