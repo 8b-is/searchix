@@ -1,7 +1,6 @@
 ### https://raw.github.com/github/gitignore/4488915eec0b3a45b5c63ead28f286819c0917de/Go.gitignore
 
 # Binaries for programs and plugins
-/*
 *.exe
 *.exe~
 *.dll
@@ -19,7 +18,7 @@
 # Go workspace file
 go.work
 
-!justfile
+/result
 /.env
 /.envrc
 /.pre-commit-config.yaml
