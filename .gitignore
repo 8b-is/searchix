@@ -19,6 +19,7 @@
 # Go workspace file
 go.work
 
+!justfile
 /.env
 /.envrc
 /.pre-commit-config.yaml
