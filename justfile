@@ -52,6 +52,7 @@ update-nix-package-version:
 
 release: clean-workdir changelog update-nix-package-version
 	#!/bin/sh
+	set -eu
 	VERSION=$(convco version --bump --print-prefix)
 	git add CHANGELOG.md nix/package.nix nix/modules/default.nix
 	git commit -m "chore: release ${VERSION}"
