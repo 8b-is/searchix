@@ -63,7 +63,7 @@ func SearchPage(tdata TemplateData, r ResultData, children ...g.Node) g.Node {
 				),
 			),
 			P(
-				g.Text("importer.Indexing last ran "),
+				g.Text("Indexing last ran "),
 				Time(
 					DateTime(importer.Job.FinishedAt.Format(time.RFC3339)),
 					Title(importer.Job.FinishedAt.Format(time.DateTime)),
