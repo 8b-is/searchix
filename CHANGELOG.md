@@ -1,8 +1,15 @@
 # Changelog
 
-## [v0.1.32](https://git.alanpearce.eu/searchix/diff/?id=v0.1.31&id2=0a2289ae1b3046be29d6dccb92dc871a2090fe7a) (2025-03-24)
+## [v0.1.33](https://git.alanpearce.eu/searchix/diff/?id=v0.1.32&id2=34bc16d3e3d12d4d14b9306baef8e5ecf600ebac) (2025-03-24)
 
-### Features
+### Fixes
+
+- build failure due to outdated file reference
+  ([dd58d99](https://git.alanpearce.eu/searchix/commit/?id=dd58d9925b68c7cd639c5e217782709c1936497f))
+
+### [v0.1.32](https://git.alanpearce.eu/searchix/diff/?id=v0.1.31&id2=v0.1.32) (2025-03-24)
+
+#### Features
 
 - improve handling of long option descriptions
   ([4fa3ceb](https://git.alanpearce.eu/searchix/commit/?id=4fa3ceb5ac040a84f2da405c46e4af1231d22f17))
@@ -17,7 +24,7 @@
 - promote prefix/exact name/attr matches
   ([1328df9](https://git.alanpearce.eu/searchix/commit/?id=1328df9c5ca44e903a052c9bfc9a67dd34e25704))
 
-### Fixes
+#### Fixes
 
 - missing content of last index run time
   ([0dc2635](https://git.alanpearce.eu/searchix/commit/?id=0dc2635e199591b917c8cc8ff40df3c3da6f9ec6))
