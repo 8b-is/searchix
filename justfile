@@ -2,7 +2,7 @@ default:
 	@just --list --justfile {{ justfile() }} --unsorted
 
 prepare:
-	nix build .#css -o frontend/static/base.css
+	cp -f $(nix build --print-out-paths .#css) frontend/static/base.css
 
 update-go-dependencies:
 	go get -u all
