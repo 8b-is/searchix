@@ -105,6 +105,18 @@ func PackageDetail(pkg nix.Package) g.Node {
 					),
 				}),
 			),
+			g.If(len(pkg.Platforms) > 0,
+				g.Group([]g.Node{
+					Dt(g.Text("Platforms")),
+					Dd(
+						Ul(
+							g.Map(pkg.Platforms, func(plat string) g.Node {
+								return Li(g.Text(plat))
+							}),
+						),
+					),
+				}),
+			),
 			g.If(pkg.Definition != "",
 				g.Group([]g.Node{
 					Dt(g.Text("Defined")),
