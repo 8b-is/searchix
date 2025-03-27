@@ -286,7 +286,7 @@ func (imp *Importer) EnsureSourcesIndexed(
 }
 
 func (imp *Importer) StartUpdateTimer(
-	ctx context.Context,
+	parentCtx context.Context,
 	localHub *sentry.Hub,
 ) {
 	const monitorSlug = "import"
@@ -311,7 +311,7 @@ func (imp *Importer) StartUpdateTimer(
 		for {
 			imp.log.Debug("scheduling next run", "next-run", nextRun)
 			select {
-			case <-ctx.Done():
+			case <-parentCtx.Done():
 				imp.log.Debug("stopping scheduler")
 
 				return
@@ -325,7 +325,10 @@ func (imp *Importer) StartUpdateTimer(
 			}, monitorConfig)
 			MarkIndexingStarted()
 
+			ctx, cancel := context.WithTimeout(parentCtx, imp.config.Importer.Timeout.Duration)
 			err = imp.Start(ctx, false, nil)
+			cancel()
+
 			if err != nil {
 				imp.log.Warn("error updating index", "error", err)
 
