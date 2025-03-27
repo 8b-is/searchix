@@ -49,6 +49,7 @@ var DefaultConfig = Config{
 	},
 	Importer: &Importer{
 		LowMemory: false,
+		BatchSize: 10_000,
 		Timeout:   Duration{30 * time.Minute},
 		UpdateAt:  mustLocalTime("03:00:00"),
 		Sources: map[string]*Source{

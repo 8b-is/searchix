@@ -16,6 +16,7 @@ func BenchmarkImporterLowMemory(b *testing.B) {
 	logger := log.Configure(false)
 	_, write, _, err := index.OpenOrCreate(tmp, false, &index.Options{
 		LowMemory: true,
+		BatchSize: cfg.Importer.BatchSize,
 		Logger:    logger.Named("index"),
 	})
 	if err != nil {

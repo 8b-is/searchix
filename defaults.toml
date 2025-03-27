@@ -64,6 +64,8 @@ x-frame-options = 'DENY'
 [Importer]
 # Use less memory at the expense of import performance
 LowMemory = false
+# Number of items to process in each batch (affects memory usage).
+BatchSize = 10000
 # Abort fetch and import process for all jobs if it takes longer than this value.
 Timeout = '30m0s'
 # Time of day (UTC) to run fetch/import process

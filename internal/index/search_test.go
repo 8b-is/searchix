@@ -22,6 +22,7 @@ func TestSearchGitPackagesFirst(t *testing.T) {
 
 	read, _, exists, err := index.OpenOrCreate(dataRoot, false, &index.Options{
 		Logger:    log.Named("index"),
+		BatchSize: cfg.Importer.BatchSize,
 		LowMemory: false,
 	})
 	defer read.Close()

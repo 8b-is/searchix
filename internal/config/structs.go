@@ -31,6 +31,7 @@ type Web struct {
 type Importer struct {
 	Sources   map[string]*Source
 	LowMemory bool      `comment:"Use less memory at the expense of import performance"`
+	BatchSize int       `comment:"Number of items to process in each batch (affects memory usage)."`
 	Timeout   Duration  `comment:"Abort fetch and import process for all jobs if it takes longer than this value."`
 	UpdateAt  LocalTime `comment:"Time of day (UTC) to run fetch/import process"`
 }

@@ -77,6 +77,7 @@ func main() {
 		*replace,
 		&index.Options{
 			LowMemory: cfg.Importer.LowMemory,
+			BatchSize: cfg.Importer.BatchSize,
 			Logger:    logger.Named("index"),
 		},
 	)

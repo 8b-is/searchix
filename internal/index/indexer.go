@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"slices"
 
+	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/file"
 	"go.alanpearce.eu/searchix/internal/nix"
 	"go.alanpearce.eu/x/log"
@@ -34,13 +35,15 @@ import (
 
 type Options struct {
 	LowMemory bool
+	BatchSize int
 	Logger    *log.Logger
 }
 
 type WriteIndex struct {
-	index bleve.Index
-	log   *log.Logger
-	Meta  *Meta
+	batchSize int
+	index     bleve.Index
+	log       *log.Logger
+	Meta      *Meta
 }
 
 type BatchError struct {
@@ -50,8 +53,6 @@ type BatchError struct {
 func (e *BatchError) Error() string {
 	return e.E.Error()
 }
-
-var batchSize = 10_000
 
 func createIndexMapping() (mapping.IndexMapping, errors.E) {
 	indexMapping := bleve.NewIndexMapping()
@@ -268,8 +269,12 @@ func OpenOrCreate(
 		}
 	}
 
-	if options.LowMemory {
-		batchSize = 1_000
+	if options.BatchSize == 0 {
+		options.BatchSize = config.DefaultConfig.Importer.BatchSize
+	}
+
+	if options.LowMemory && options.BatchSize == config.DefaultConfig.Importer.BatchSize {
+		options.BatchSize = 1_000
 	}
 
 	return &ReadIndex{
@@ -278,9 +283,10 @@ func OpenOrCreate(
 			meta:  meta,
 		},
 		&WriteIndex{
-			index: idx,
-			log:   options.Logger,
-			Meta:  meta,
+			index:     idx,
+			batchSize: options.BatchSize,
+			log:       options.Logger,
+			Meta:      meta,
 		},
 		exists,
 		nil
@@ -337,7 +343,7 @@ func (i *WriteIndex) Import(
 				continue
 			}
 
-			if k++; k%batchSize == 0 {
+			if k++; k%i.batchSize == 0 {
 				err = i.Flush(batch)
 				if err != nil {
 					errs <- err
@@ -405,7 +411,7 @@ func (i *WriteIndex) DeleteBySource(source string) errors.E {
 	var k int
 	for _, hit := range results.Hits {
 		batch.Delete(hit.ID)
-		if k++; k%batchSize == 0 {
+		if k++; k%i.batchSize == 0 {
 			err := i.Flush(batch)
 			if err != nil {
 				return err
