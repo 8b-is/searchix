@@ -309,7 +309,6 @@ func (imp *Importer) StartUpdateTimer(
 		}
 		SetNextRun(nextRun)
 		for {
-			imp.log.Debug("scheduling next run", "next-run", nextRun)
 			select {
 			case <-parentCtx.Done():
 				imp.log.Debug("stopping scheduler")
@@ -349,6 +348,7 @@ func (imp *Importer) StartUpdateTimer(
 			}
 			nextRun = nextUTCOccurrenceOfTime(imp.config.Importer.UpdateAt)
 			MarkIndexingFinished(nextRun)
+			imp.log.Info("scheduling next run", "next-run", nextRun.Format(time.DateTime))
 		}
 	})
 }
