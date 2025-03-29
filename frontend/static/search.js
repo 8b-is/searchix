@@ -18,7 +18,6 @@ let state = history.state || {
   url: urlLocation.toString(),
   input: urlLocation.searchParams.get("query"),
   results: resultsRange.cloneContents().innerHTML || null,
-  opened: [],
 };
 
 let escapePolicy = null;
@@ -105,7 +104,6 @@ async function getResults(url) {
     // render errors sent as HTML as well as OK responses
     if (res.headers.get("content-type").startsWith("text/html")) {
       state.results = await res.text();
-      state.opened = [];
       history.replaceState(state, null, url);
       renderResults(state.results);
     } else {
@@ -155,7 +153,7 @@ document.querySelector("a.current").addEventListener("click", function (ev) {
   state.results = "";
   history.pushState(state, null, ev.target.href);
   ev.preventDefault();
-  document.querySelectorAll("nav > a:not(.current)").forEach(function (node) {
+  nav.querySelectorAll("a:not(.current)").forEach(function (node) {
     const u = new URL(node.href);
     u.search = "";
     node.href = u.toString();
@@ -216,14 +214,6 @@ function handleDialogOpen(ev) {
     getDetail(new URL(ev.target.href));
     ev.preventDefault();
   }
-}
-
-if (state.opened.length > 0) {
-  state.opened.forEach((id) =>
-    document.getElementById(id).setAttribute("open", "open"),
-  );
-} else if (location.hash) {
-  document.getElementById(location.hash.slice(1)).setAttribute("open", "open");
 }
 
 addEventListener("popstate", function (ev) {
