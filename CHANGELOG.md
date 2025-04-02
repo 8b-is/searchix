@@ -1,15 +1,33 @@
 # Changelog
 
-## [v0.1.34](https://git.alanpearce.eu/searchix/diff/?id=v0.1.33&id2=abf819db104560670cdc388a584d09968aac7bbb) (2025-03-24)
+## [v0.1.35](https://git.alanpearce.eu/searchix/diff/?id=v0.1.34&id2=0ceaf8ed86c26ea4cb1c11ce6dfbfab88297a464) (2025-04-02)
 
 ### Features
+
+- enable searching homepages field
+  ([0ceaf8e](https://git.alanpearce.eu/searchix/commit/?id=0ceaf8ed86c26ea4cb1c11ce6dfbfab88297a464))
+- improve logging of next import time
+  ([00b189d](https://git.alanpearce.eu/searchix/commit/?id=00b189dbba42f084ffb94e28b3b709bb3f65d32e))
+- make index batch size configurable
+  ([f38ccb5](https://git.alanpearce.eu/searchix/commit/?id=f38ccb5ec8149072c93a6c3173da06ba1d724c4c))
+- list package platforms in detail view
+  ([f8f4f74](https://git.alanpearce.eu/searchix/commit/?id=f8f4f748c8528b7fe245d1e1f1d55f78b78ede39))
+
+### Fixes
+
+- importer timeout ignored in scheduler
+  ([75c2afd](https://git.alanpearce.eu/searchix/commit/?id=75c2afdf214b0ddc57efe8e621eb172506c0b0f7))
+
+### [v0.1.34](https://git.alanpearce.eu/searchix/diff/?id=v0.1.33&id2=v0.1.34) (2025-03-24)
+
+#### Features
 
 - buffer fetched HTTP bodies
   ([abf819d](https://git.alanpearce.eu/searchix/commit/?id=abf819db104560670cdc388a584d09968aac7bbb))
 - re-index on startup if last run > 24 hours ago
   ([6984d4d](https://git.alanpearce.eu/searchix/commit/?id=6984d4d32ab506494394f8a6a8aa18041c45b9e8))
 
-### Fixes
+#### Fixes
 
 - another typo in search markup
   ([efaaf3f](https://git.alanpearce.eu/searchix/commit/?id=efaaf3f5296807eec377b19d4733fd360c8c655f))
