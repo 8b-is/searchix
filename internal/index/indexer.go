@@ -137,6 +137,7 @@ func createIndexMapping() (mapping.IndexMapping, errors.E) {
 	packageMapping.AddFieldMappingsAt("Attribute", nameMapping)
 	packageMapping.AddFieldMappingsAt("Source", keywordFieldMapping)
 	packageMapping.AddFieldMappingsAt("Description", descriptionFieldMapping)
+	packageMapping.AddFieldMappingsAt("Homepages", keywordFieldMapping)
 	packageMapping.AddFieldMappingsAt("MainProgram", keywordFieldMapping)
 	packageMapping.AddFieldMappingsAt("PackageSet", keywordFieldMapping)
 	packageMapping.AddFieldMappingsAt("Platforms", keywordFieldMapping)
