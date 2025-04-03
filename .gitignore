@@ -21,6 +21,6 @@ go.work
 /.envrc
 /.pre-commit-config.yaml
 /frontend/static/base.css
-/frontent/error.html
+/frontend/error.html
 /data/
 /config.toml
