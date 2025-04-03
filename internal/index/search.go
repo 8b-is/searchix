@@ -149,12 +149,12 @@ func (index *ReadIndex) Search(
 
 	mainProgramQuery := bleve.NewMatchQuery(keyword)
 	mainProgramQuery.SetField("MainProgram")
-	mainProgramQuery.SetBoost(50)
+	mainProgramQuery.SetBoost(10)
 	query.AddShould(mainProgramQuery)
 
 	mainProgramLiteralQuery := bleve.NewTermQuery(keyword)
 	mainProgramLiteralQuery.SetField("MainProgram")
-	mainProgramLiteralQuery.SetBoost(100)
+	mainProgramLiteralQuery.SetBoost(50)
 	query.AddShould(mainProgramLiteralQuery)
 
 	programsQuery := bleve.NewMatchQuery(keyword)
@@ -164,7 +164,7 @@ func (index *ReadIndex) Search(
 
 	programsLiteralQuery := bleve.NewTermQuery(keyword)
 	programsLiteralQuery.SetField("Programs")
-	programsLiteralQuery.SetBoost(50)
+	programsLiteralQuery.SetBoost(100)
 	query.AddShould(programsLiteralQuery)
 
 	attrQuery := bleve.NewMatchQuery(keyword)
@@ -177,6 +177,11 @@ func (index *ReadIndex) Search(
 	attrPrefixQuery.SetBoost(10)
 	query.AddShould(attrPrefixQuery)
 
+	attrTermQuery := bleve.NewTermQuery(keyword)
+	attrTermQuery.SetField("Attribute")
+	attrTermQuery.SetBoost(600)
+	query.AddShould(attrTermQuery)
+
 	nameQuery := bleve.NewMatchQuery(keyword)
 	nameQuery.SetField("Name")
 	nameQuery.SetBoost(2)
@@ -186,6 +191,11 @@ func (index *ReadIndex) Search(
 	namePrefixQuery.SetField("Name")
 	namePrefixQuery.SetBoost(10)
 	query.AddShould(namePrefixQuery)
+
+	nameTermQuery := bleve.NewTermQuery(keyword)
+	nameTermQuery.SetField("Name")
+	nameTermQuery.SetBoost(100)
+	query.AddShould(nameTermQuery)
 
 	search := bleve.NewSearchRequest(query)
 	search.Explain = config.DevMode
