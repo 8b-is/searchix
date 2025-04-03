@@ -1,8 +1,24 @@
 # Changelog
 
-## [v0.1.35](https://git.alanpearce.eu/searchix/diff/?id=v0.1.34&id2=0ceaf8ed86c26ea4cb1c11ce6dfbfab88297a464) (2025-04-02)
+## [v0.1.36](https://git.alanpearce.eu/searchix/diff/?id=v0.1.35&id2=c6bc629f27ab2005c10005587eea1e28c946db55) (2025-04-03)
 
 ### Features
+
+- prioritise whole-phrase matches
+  ([c6bc629](https://git.alanpearce.eu/searchix/commit/?id=c6bc629f27ab2005c10005587eea1e28c946db55))
+- add flag to generate error page for web server
+  ([5127a98](https://git.alanpearce.eu/searchix/commit/?id=5127a98c591d206c0791b3049e8ae30b87ddf2dd))
+
+### Fixes
+
+- prioritise exact attribute matches above all
+  ([c2bbda8](https://git.alanpearce.eu/searchix/commit/?id=c2bbda87df1c708dc8437ef49b296c11ba251355))
+- erroneously running importer on every startup
+  ([e699eaa](https://git.alanpearce.eu/searchix/commit/?id=e699eaa3f57b7c67825aa9d1c507e03254f422be))
+
+### [v0.1.35](https://git.alanpearce.eu/searchix/diff/?id=v0.1.34&id2=v0.1.35) (2025-04-02)
+
+#### Features
 
 - enable searching homepages field
   ([0ceaf8e](https://git.alanpearce.eu/searchix/commit/?id=0ceaf8ed86c26ea4cb1c11ce6dfbfab88297a464))
@@ -13,7 +29,7 @@
 - list package platforms in detail view
   ([f8f4f74](https://git.alanpearce.eu/searchix/commit/?id=f8f4f748c8528b7fe245d1e1f1d55f78b78ede39))
 
-### Fixes
+#### Fixes
 
 - importer timeout ignored in scheduler
   ([75c2afd](https://git.alanpearce.eu/searchix/commit/?id=75c2afdf214b0ddc57efe8e621eb172506c0b0f7))
