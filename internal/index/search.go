@@ -130,7 +130,7 @@ func (index *ReadIndex) Search(
 	query.AddMust(bleve.NewDisjunctionQuery(
 		setBoost(bleve.NewTermQuery(keyword), 50),
 		setBoost(bleve.NewPrefixQuery(keyword), 25),
-		bleve.NewMatchPhraseQuery(keyword),
+		setBoost(bleve.NewMatchPhraseQuery(keyword), 25),
 		bleve.NewMatchQuery(keyword),
 	))
 
