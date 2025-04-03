@@ -300,6 +300,8 @@ func (imp *Importer) StartUpdateTimer(
 			Timezone:      time.Local.String(),
 		}
 
+		Job.FinishedAt = imp.indexer.Meta.LastUpdated()
+
 		var nextRun time.Time
 		if Job.FinishedAt.Before(time.Now().Add(-24 * time.Hour)) {
 			imp.log.Info("indexing last ran more than 24 hours ago, scheduling immediate update")
