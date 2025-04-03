@@ -46,6 +46,12 @@ buildGoApplication {
     "go.alanpearce.eu/searchix/internal/config.Version=v${version}"
   ];
 
+  postInstall = ''
+    install -d -m755 $out/lib/searchix/static
+    cp -r $src/frontend/static $out/lib/searchix
+    $out/bin/searchix-web --generate-error-page > $out/lib/searchix/error.html
+  '';
+
   modules = ../gomod2nix.toml;
 
   doCheck = false;

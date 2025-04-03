@@ -21,11 +21,13 @@ func Page(tdata TemplateData, children ...g.Node) g.Node {
 				TitleEl(g.Text("Searchix"), g.If(config.DevMode, g.Text(" (Dev)"))),
 				g.Map(tdata.Assets.Stylesheets, css),
 				g.Raw(tdata.ExtraHeadHTML),
-				Link(
-					Rel("search"),
-					Type("application/opensearchdescription+xml"),
-					TitleAttr("Searchix "+sourceNameAndType(nil)),
-					Href(joinPath("opensearch.xml")),
+				g.If(len(tdata.Sources) > 0,
+					Link(
+						Rel("search"),
+						Type("application/opensearchdescription+xml"),
+						TitleAttr("Searchix "+sourceNameAndType(nil)),
+						Href(joinPath("opensearch.xml")),
+					),
 				),
 				g.Map(tdata.Sources, func(source *config.Source) g.Node {
 					return Link(
@@ -40,16 +42,18 @@ func Page(tdata TemplateData, children ...g.Node) g.Node {
 				Header(
 					Nav(
 						H1(A(Href("/"), g.Text("Searchix"))),
-						A(
-							c.Classes{
-								"current": tdata.Source == nil,
-							},
-							g.If(
-								tdata.Source == nil,
-								Href("/"),
-								Href(joinPathQuery("/", tdata.Query)),
+						g.If(len(tdata.Sources) > 0,
+							A(
+								c.Classes{
+									"current": tdata.Source == nil,
+								},
+								g.If(
+									tdata.Source == nil,
+									Href("/"),
+									Href(joinPathQuery("/", tdata.Query)),
+								),
+								g.Text("All"),
 							),
-							g.Text("All"),
 						),
 						g.Map(tdata.Sources, func(source *config.Source) g.Node {
 							if tdata.Source != nil && tdata.Source.Name == source.Name {

@@ -12,6 +12,8 @@ import (
 	"badc0de.net/pkg/flagutil"
 	"github.com/getsentry/sentry-go"
 
+	"go.alanpearce.eu/searchix/frontend"
+	"go.alanpearce.eu/searchix/internal/components"
 	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/importer"
 	"go.alanpearce.eu/searchix/internal/index"
@@ -26,10 +28,11 @@ var (
 		false,
 		"print default configuration and exit",
 	)
-	dev        = flag.Bool("dev", false, "enable live reloading and nicer logging")
-	replace    = flag.Bool("replace", false, "replace existing index and exit")
-	version    = flag.Bool("version", false, "print version information")
-	cpuprofile = flag.String("cpuprofile", "", "enable CPU profiling and save to `file`")
+	generateErrorPage = flag.Bool("generate-error-page", false, "generate error page and exit")
+	dev               = flag.Bool("dev", false, "enable live reloading and nicer logging")
+	replace           = flag.Bool("replace", false, "replace existing index and exit")
+	version           = flag.Bool("version", false, "print version information")
+	cpuprofile        = flag.String("cpuprofile", "", "enable CPU profiling and save to `file`")
 )
 
 func main() {
@@ -48,6 +51,22 @@ func main() {
 		}
 		os.Exit(0)
 	}
+	if *generateErrorPage {
+		err := components.ErrorTemplate(components.TemplateData{
+			Source:        nil,
+			Sources:       []*config.Source{},
+			Query:         "",
+			ExtraHeadHTML: "",
+			Code:          0,
+			Message:       `{{placeholder "http.error.status_code"}} {{placeholder "http.error.status_text"}}`,
+			Assets:        frontend.Assets,
+		}).Render(os.Stdout)
+		if err != nil {
+			panic("failed to render error template: " + err.Error())
+		}
+		os.Exit(0)
+	}
+
 	if *cpuprofile != "" {
 		f, err := os.Create(*cpuprofile)
 		if err != nil {

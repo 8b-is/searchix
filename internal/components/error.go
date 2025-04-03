@@ -15,3 +15,10 @@ func Error(tdata TemplateData) g.Node {
 func ErrorPage(tdata TemplateData) g.Node {
 	return Page(tdata, Error(tdata))
 }
+
+func ErrorTemplate(tdata TemplateData) g.Node {
+	return Page(tdata, P(
+		Class("notice error"),
+		g.Raw(tdata.Message),
+	))
+}
