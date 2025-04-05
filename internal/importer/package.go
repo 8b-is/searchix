@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"net/url"
 	"reflect"
 	"strings"
 
@@ -289,20 +290,25 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 				}
 			}
 
-			subpath, line, _ := strings.Cut(i.pkg.Meta.Position, ":")
-
 			pkgSet, _, found := strings.Cut(kv.Key, ".")
 			if !found {
 				pkgSet = ""
 			}
 
-			var url string
-			if meta["position"] != nil {
-				url = meta["position"].(string)
-			} else {
-				url, err = makeRepoURL(i.source.Repo, subpath, line)
+			var definition string
+			if i.pkg.Meta.Position != "" {
+				defURL, err := url.Parse(i.pkg.Meta.Position)
 				if err != nil {
-					errs <- err
+					errs <- errors.WithMessagef(err, "failed to parse source URL %s", definition)
+				}
+				if defURL.IsAbs() {
+					definition = i.pkg.Meta.Position
+				} else {
+					subpath, line, _ := strings.Cut(i.pkg.Meta.Position, ":")
+					definition, err = makeRepoURL(i.source.Repo, subpath, line)
+					if err != nil {
+						errs <- errors.WithMessagef(err, "failed to make repo URL for package %s", i.pkg.Name)
+					}
 				}
 			}
 
@@ -320,7 +326,7 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 				Platforms:       i.pkg.Meta.Platforms,
 				Licenses:        licenses,
 				Maintainers:     maintainers,
-				Definition:      url,
+				Definition:      definition,
 				Programs:        programs,
 			}
 		}
