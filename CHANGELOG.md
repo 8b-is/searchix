@@ -1,15 +1,24 @@
 # Changelog
 
-## [v0.1.36](https://git.alanpearce.eu/searchix/diff/?id=v0.1.35&id2=c6bc629f27ab2005c10005587eea1e28c946db55) (2025-04-03)
+## [v0.1.37](https://git.alanpearce.eu/searchix/diff/?id=v0.1.36&id2=0cceea81794a9c6b0faff85d51d9602f4ac68513) (2025-04-05)
 
-### Features
+### Fixes
+
+- package definition link regressed since v0.1.31
+  ([0cceea8](https://git.alanpearce.eu/searchix/commit/?id=0cceea81794a9c6b0faff85d51d9602f4ac68513))
+- missing base.css in package lib folder
+  ([2b50775](https://git.alanpearce.eu/searchix/commit/?id=2b5077550069013bc51e86bbb41bf6f7dc2cbf71))
+
+### [v0.1.36](https://git.alanpearce.eu/searchix/diff/?id=v0.1.35&id2=v0.1.36) (2025-04-03)
+
+#### Features
 
 - prioritise whole-phrase matches
   ([c6bc629](https://git.alanpearce.eu/searchix/commit/?id=c6bc629f27ab2005c10005587eea1e28c946db55))
 - add flag to generate error page for web server
   ([5127a98](https://git.alanpearce.eu/searchix/commit/?id=5127a98c591d206c0791b3049e8ae30b87ddf2dd))
 
-### Fixes
+#### Fixes
 
 - prioritise exact attribute matches above all
   ([c2bbda8](https://git.alanpearce.eu/searchix/commit/?id=c2bbda87df1c708dc8437ef49b296c11ba251355))
