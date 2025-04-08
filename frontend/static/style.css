@@ -33,10 +33,12 @@ header > nav {
   display: flex;
   align-items: baseline;
   padding: 0.5rem 0;
+  overflow-x: auto;
 }
 header > nav a {
   margin-bottom: unset;
   font-size: 1.15rem;
+  text-wrap: nowrap;
 }
 nav > h1 > a {
   margin-left: unset;
