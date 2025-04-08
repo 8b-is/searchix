@@ -97,7 +97,7 @@ dl {
   align-items: baseline;
   grid-row-gap: 1ch;
   grid-template-rows: 1fr;
-  grid-template-columns: max-content minmax(90%, 1fr);
+  grid-template-columns: max-content 1fr;
 }
 
 pre {
@@ -211,14 +211,43 @@ p:last-child {
 @media only screen and (max-width: 600px) {
   header > nav {
     display: unset;
+    padding: 1ch 0;
+  }
+  td,
+  th {
+    padding: 0.2rem;
   }
   .description,
   .score {
     display: none;
   }
+  dialog {
+    width: 100%;
+    padding: 1rem 1ch;
+  }
+  dialog > button {
+    float: none;
+    display: block;
+    margin-left: auto;
+  }
+  dl {
+    grid-template-columns: 1fr;
+  }
+  dd {
+    margin-inline-start: 0;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+    padding: 1ch;
+  }
 }
 @media only screen and (max-width: 768px) {
+  body {
+    grid-template-columns: 1ch 1fr 1ch;
+  }
   header > nav {
+    width: auto;
     padding: 1ch;
     padding-right: 0;
   }
