@@ -49,17 +49,6 @@ body > header h1 {
   font-size: 1.15rem;
 }
 
-@media only screen and (max-width: 600px) {
-  header > nav {
-    display: unset;
-  }
-}
-@media only screen and (max-width: 720px) {
-  header > nav {
-    padding: 1.5ex 0;
-  }
-}
-
 main {
   padding-top: unset;
 }
@@ -215,4 +204,20 @@ p:last-child {
 .open-sibling-dialog {
   cursor: pointer;
   text-decoration: underline;
+}
+
+@media only screen and (max-width: 600px) {
+  header > nav {
+    display: unset;
+  }
+  .description,
+  .score {
+    display: none;
+  }
+}
+@media only screen and (max-width: 768px) {
+  header > nav {
+    padding: 1ch;
+    padding-right: 0;
+  }
 }

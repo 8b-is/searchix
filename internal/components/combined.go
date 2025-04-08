@@ -29,7 +29,7 @@ func Combined(result *index.Result) g.Node {
 		THead(
 			Tr(
 				Th(Scope("col"), g.Text("Attribute")),
-				Th(Scope("col"), g.Text("Description")),
+				Th(Scope("col"), Class("description"), g.Text("Description")),
 				g.If(config.DevMode,
 					Th(Scope("col"), Class("score"), g.Text("Score")),
 				),
@@ -45,7 +45,7 @@ func Combined(result *index.Result) g.Node {
 						CombinedData(hit.Data),
 					),
 					g.If(config.DevMode,
-						Td(
+						Td(Class("score"),
 							Score(hit),
 						),
 					),

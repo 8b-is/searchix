@@ -42,7 +42,7 @@ func optionRow(hit index.DocumentMatch, o nix.Option) g.Node {
 			Dialog(ID(o.Name)),
 		),
 		g.If(config.DevMode,
-			Td(
+			Td(Class("score"),
 				Score(hit),
 			),
 		),

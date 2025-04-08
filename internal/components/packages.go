@@ -45,7 +45,7 @@ func packageRow(hit index.DocumentMatch, p nix.Package) g.Node {
 			g.Text(p.Description),
 		),
 		g.If(config.DevMode,
-			Td(
+			Td(Class("score"),
 				Score(hit),
 			),
 		),
