@@ -26,7 +26,7 @@ You can also [run it yourself](./docs/running.md), if you're feeling bold. It's 
 
 Expect breakage. Search results are not expected to match the quality of [search.nixos.org](https://search.nixos.org/), the priority is more on having multiple sources in one location.
 
-Feel free to report bugs at [sourcehut](https://todo.sr.ht/~alanpearce/searchix) or open a discussion either on the [mailing list](https://lists.sr.ht/~alanpearce/searchix-discuss) or on [NixOS community forum](https://discourse.nixos.org/).
+Feel free to report bugs at [codeberg](https://codeberg.org/alanpearce/searchix/issues).
 
 ## Motivation
 

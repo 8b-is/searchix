@@ -94,7 +94,10 @@ func SearchPage(tdata TemplateData, r ResultData, children ...g.Node) g.Node {
 			P(
 				Class("notice"),
 				g.Text("Everything should work fine without JavaScript. If that is not the case, "),
-				A(Href("https://todo.sr.ht/~alanpearce/searchix"), g.Text("report an issue")),
+				A(
+					Href("https://codeberg.org/alanpearce/searchix/issues"),
+					g.Text("report an issue"),
+				),
 			),
 		),
 	)
