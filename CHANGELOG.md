@@ -1,8 +1,22 @@
 # Changelog
 
-## [v0.1.37](https://git.alanpearce.eu/searchix/diff/?id=v0.1.36&id2=0cceea81794a9c6b0faff85d51d9602f4ac68513) (2025-04-05)
+## [v0.1.38](https://git.alanpearce.eu/searchix/diff/?id=v0.1.37&id2=8efd1e2eccf9e894926a73b2800dffaf00886f7c) (2025-04-08)
+
+### Features
+
+- improve display on smaller screens
+  ([8efd1e2](https://git.alanpearce.eu/searchix/commit/?id=8efd1e2eccf9e894926a73b2800dffaf00886f7c))
+- hide description table on smaller screens
+  ([1b8b6b5](https://git.alanpearce.eu/searchix/commit/?id=1b8b6b506b0855afc282bc1cc7b631f02e97b8e3))
 
 ### Fixes
+
+- scroll header nav instead of wrapping words on tablets
+  ([8d11809](https://git.alanpearce.eu/searchix/commit/?id=8d118090b0c195ccfe5cec9025274cbf8314e54d))
+
+### [v0.1.37](https://git.alanpearce.eu/searchix/diff/?id=v0.1.36&id2=v0.1.37) (2025-04-06)
+
+#### Fixes
 
 - package definition link regressed since v0.1.31
   ([0cceea8](https://git.alanpearce.eu/searchix/commit/?id=0cceea81794a9c6b0faff85d51d9602f4ac68513))
