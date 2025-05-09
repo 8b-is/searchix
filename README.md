@@ -10,7 +10,7 @@ A search tool to find options and packages in the NixOS ecosystem. Aims to be li
 - [Home manager](https://github.com/nix-community/home-manager) options
 - [Nix User Repository](https://github.com/nix-community/NUR) packages
 
-There is an instance running at [searchix.alanpearce.eu](https://searchix.alanpearce.eu/), which uses the following channels, with updates attempted daily:
+There is an instance running at [searchix.ovh](https://searchix.ovh/), which uses the following channels, with updates attempted daily:
 
 - nixos-options: nixos-unstable
 - nixpkgs: nixos-unstable
