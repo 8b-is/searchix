@@ -1,8 +1,15 @@
 # Changelog
 
-## [v0.1.39](https://codeberg.org/alanpearce/searchix/compare/v0.1.38...aec412a4bd989d0b28a9897e324fa5e76e158787) (2025-05-29)
+## [v0.1.40](https://codeberg.org/alanpearce/searchix/compare/v0.1.39...1f7e995a669eefd259ab773492c3e5a673e2dac6) (2025-05-29)
 
 ### Fixes
+
+- exact/prefix matches for package name/attr not shown
+  ([1f7e995](https://codeberg.org/alanpearce/searchix/commit/1f7e995a669eefd259ab773492c3e5a673e2dac6))
+
+### [v0.1.39](https://codeberg.org/alanpearce/searchix/compare/v0.1.38...v0.1.39) (2025-05-29)
+
+#### Fixes
 
 - match option name prefixes even when len > 25
   ([61f28d3](https://codeberg.org/alanpearce/searchix/commit/61f28d3acb0f3cc7cc37ee384453c9cdfbaa9dbb))
