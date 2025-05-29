@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.1.39](https://codeberg.org/alanpearce/searchix/compare/v0.1.38...aec412a4bd989d0b28a9897e324fa5e76e158787) (2025-05-29)
+
+### Fixes
+
+- match option name prefixes even when len > 25
+  ([61f28d3](https://codeberg.org/alanpearce/searchix/commit/61f28d3acb0f3cc7cc37ee384453c9cdfbaa9dbb))
+
 ### [v0.1.38](https://codeberg.org/alanpearce/searchix/compare/v0.1.37...v0.1.38) (2025-04-13)
 
 #### Features
