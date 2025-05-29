@@ -102,7 +102,7 @@ func NewMux(
 					return
 				}
 
-				var pageSize int = search.DefaultPageSize
+				var pageSize = search.DefaultPageSize
 				var pageNumber = 1
 				if pg := r.URL.Query().Get("page"); pg != "" {
 					pageNumber, err = strconv.Atoi(pg)

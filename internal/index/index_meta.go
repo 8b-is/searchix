@@ -104,7 +104,7 @@ func (i *Meta) Save() errors.E {
 }
 
 func (i *Meta) GetSourceMeta(source string) *SourceMeta {
-	sourceMeta := i.data.Sources[source]
+	sourceMeta := i.Sources[source]
 	if sourceMeta == nil {
 		return &SourceMeta{}
 	}
@@ -113,15 +113,15 @@ func (i *Meta) GetSourceMeta(source string) *SourceMeta {
 }
 
 func (i *Meta) SetSourceMeta(source string, meta *SourceMeta) {
-	if i.data.Sources == nil {
-		i.data.Sources = make(map[string]*SourceMeta)
+	if i.Sources == nil {
+		i.Sources = make(map[string]*SourceMeta)
 	}
-	i.data.Sources[source] = meta
+	i.Sources[source] = meta
 }
 
 func (i *Meta) LastUpdated() time.Time {
 	var last time.Time
-	for _, sourceMeta := range i.data.Sources {
+	for _, sourceMeta := range i.Sources {
 		if sourceMeta.Updated.After(last) {
 			last = sourceMeta.Updated
 		}

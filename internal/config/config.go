@@ -21,7 +21,7 @@ type URL struct {
 }
 
 func (u *URL) MarshalText() ([]byte, error) {
-	return []byte(u.URL.String()), nil
+	return []byte(u.String()), nil
 }
 
 func (u *URL) UnmarshalText(text []byte) (err error) {
@@ -49,7 +49,7 @@ type Duration struct {
 }
 
 func (d *Duration) MarshalText() ([]byte, error) {
-	return []byte(d.Duration.String()), nil
+	return []byte(d.String()), nil
 }
 
 func (d *Duration) UnmarshalText(text []byte) (err error) {
