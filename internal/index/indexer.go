@@ -134,8 +134,10 @@ func createIndexMapping() (mapping.IndexMapping, errors.E) {
 
 	packageMapping := bleve.NewDocumentStaticMapping()
 
-	packageMapping.AddFieldMappingsAt("Name", nameNGramMapping)
-	packageMapping.AddFieldMappingsAt("Attribute", nameNGramMapping)
+	packageMapping.AddFieldMappingsAt("Name", keywordFieldMapping)
+	packageMapping.AddFieldMappingsAt("NameNGram", nameNGramMapping)
+	packageMapping.AddFieldMappingsAt("Attribute", keywordFieldMapping)
+	packageMapping.AddFieldMappingsAt("AttributeNGram", nameNGramMapping)
 	packageMapping.AddFieldMappingsAt("Source", keywordFieldMapping)
 	packageMapping.AddFieldMappingsAt("Description", descriptionFieldMapping)
 	packageMapping.AddFieldMappingsAt("Homepages", keywordFieldMapping)
