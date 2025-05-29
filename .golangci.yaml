@@ -1,8 +1,8 @@
 ---
 # yamllint disable-line rule:line-length
 # yaml-language-server: $schema=https://golangci-lint.run/jsonschema/golangci.jsonschema.json
+version: "2"
 linters:
-    fast: false
     enable:
         - gocritic
         - godox
@@ -20,26 +20,44 @@ linters:
         - sloglint
         - unconvert
         - wrapcheck
-linters-settings:
-    paralleltest:
-        ignore-missing: true
-    gosec:
-        excludes:
-            - G115
-    wrapcheck:
-        ignoreSigs:
-            - .Errorf(
-            - errors.New(
-            - errors.Unwrap(
-            - errors.Join(
-            - .Wrap(
-            - .Wrapf(
-            - .WithMessage(
-            - .WithMessagef(
-            - .WithStack(
-            - (context.Context).Err(
-issues:
-    exclude-rules:
-        - linters: [revive]
-          path: internal/components
-          text: "dot-imports"
+    settings:
+        gosec:
+            excludes:
+                - G115
+        paralleltest:
+            ignore-missing: true
+        wrapcheck:
+            ignore-sigs:
+                - .Errorf(
+                - errors.New(
+                - errors.Unwrap(
+                - errors.Join(
+                - .Wrap(
+                - .Wrapf(
+                - .WithMessage(
+                - .WithMessagef(
+                - .WithStack(
+                - (context.Context).Err(
+    exclusions:
+        generated: lax
+        presets:
+            - comments
+            - common-false-positives
+            - legacy
+            - std-error-handling
+        rules:
+            - linters:
+                  - revive
+              path: internal/components
+              text: dot-imports
+        paths:
+            - third_party$
+            - builtin$
+            - examples$
+formatters:
+    exclusions:
+        generated: lax
+        paths:
+            - third_party$
+            - builtin$
+            - examples$
