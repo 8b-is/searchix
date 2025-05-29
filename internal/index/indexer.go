@@ -106,10 +106,10 @@ func createIndexMapping() (mapping.IndexMapping, errors.E) {
 	keywordFieldMapping := bleve.NewKeywordFieldMapping()
 	keywordFieldMapping.Analyzer = simple.Name
 
-	nameMapping := bleve.NewTextFieldMapping()
-	nameMapping.Analyzer = "c_name"
-	nameMapping.IncludeTermVectors = true
-	nameMapping.Store = false
+	nameNGramMapping := bleve.NewTextFieldMapping()
+	nameNGramMapping.Analyzer = "c_name"
+	nameNGramMapping.IncludeTermVectors = true
+	nameNGramMapping.Store = false
 
 	nixValueMapping := bleve.NewDocumentStaticMapping()
 	nixValueMapping.AddFieldMappingsAt("Text", textFieldMapping)
@@ -122,7 +122,8 @@ func createIndexMapping() (mapping.IndexMapping, errors.E) {
 
 	optionMapping := bleve.NewDocumentStaticMapping()
 
-	optionMapping.AddFieldMappingsAt("Name", nameMapping)
+	optionMapping.AddFieldMappingsAt("Name", identityFieldMapping)
+	optionMapping.AddFieldMappingsAt("NameNGram", nameNGramMapping)
 	optionMapping.AddFieldMappingsAt("Source", identityFieldMapping)
 	optionMapping.AddFieldMappingsAt("Loc", locFieldMapping)
 	optionMapping.AddFieldMappingsAt("RelatedPackages", textFieldMapping)
@@ -133,8 +134,8 @@ func createIndexMapping() (mapping.IndexMapping, errors.E) {
 
 	packageMapping := bleve.NewDocumentStaticMapping()
 
-	packageMapping.AddFieldMappingsAt("Name", nameMapping)
-	packageMapping.AddFieldMappingsAt("Attribute", nameMapping)
+	packageMapping.AddFieldMappingsAt("Name", nameNGramMapping)
+	packageMapping.AddFieldMappingsAt("Attribute", nameNGramMapping)
 	packageMapping.AddFieldMappingsAt("Source", keywordFieldMapping)
 	packageMapping.AddFieldMappingsAt("Description", descriptionFieldMapping)
 	packageMapping.AddFieldMappingsAt("Homepages", keywordFieldMapping)

@@ -172,6 +172,7 @@ func (i *OptionIngester) Process(ctx context.Context) (<-chan nix.Importable, <-
 			// log.Debug("sending option", "name", kv.Key)
 			results <- nix.Option{
 				Name:            kv.Key,
+				NameNGram:       kv.Key,
 				Source:          i.source.Key,
 				Declarations:    decs,
 				Default:         i.convertValue(i.optJSON.Default),

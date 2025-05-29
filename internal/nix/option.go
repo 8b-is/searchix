@@ -22,6 +22,7 @@ type Link struct {
 
 type Option struct {
 	Name            string
+	NameNGram       string
 	Source          string
 	Declarations    []Link
 	Default         *Value `json:",omitempty"`

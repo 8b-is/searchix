@@ -187,6 +187,11 @@ func (index *ReadIndex) Search(
 	nameQuery.SetBoost(2)
 	query.AddShould(nameQuery)
 
+	nameNGramQuery := bleve.NewMatchQuery(keyword)
+	nameNGramQuery.SetField("NameNGram")
+	nameNGramQuery.SetBoost(2)
+	query.AddShould(nameNGramQuery)
+
 	namePrefixQuery := bleve.NewPrefixQuery(keyword)
 	namePrefixQuery.SetField("Name")
 	namePrefixQuery.SetBoost(10)
