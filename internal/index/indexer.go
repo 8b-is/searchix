@@ -13,6 +13,7 @@ import (
 
 	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/file"
+	"go.alanpearce.eu/searchix/internal/index/nixattr"
 	"go.alanpearce.eu/searchix/internal/nix"
 	"go.alanpearce.eu/x/log"
 	"go.uber.org/zap"
@@ -81,7 +82,7 @@ func createIndexMapping() (mapping.IndexMapping, errors.E) {
 		"type":      custom.Name,
 		"tokenizer": unicode.Name,
 		"token_filters": []string{
-			camelcase.Name,
+			nixattr.Name,
 			"ngram",
 		},
 	})
@@ -101,7 +102,21 @@ func createIndexMapping() (mapping.IndexMapping, errors.E) {
 		return nil, errors.WithMessage(err, "could not add custom analyser")
 	}
 
+	err = indexMapping.AddCustomAnalyzer("dotted_keyword", map[string]any{
+		"type":      custom.Name,
+		"tokenizer": unicode.Name,
+		"token_filters": []string{
+			nixattr.Name,
+		},
+	})
+	if err != nil {
+		return nil, errors.WithMessage(err, "could not add custom analyser")
+	}
+
 	identityFieldMapping := bleve.NewKeywordFieldMapping()
+
+	attributeFieldMapping := bleve.NewKeywordFieldMapping()
+	attributeFieldMapping.Analyzer = "dotted_keyword"
 
 	keywordFieldMapping := bleve.NewKeywordFieldMapping()
 	keywordFieldMapping.Analyzer = simple.Name
@@ -122,7 +137,7 @@ func createIndexMapping() (mapping.IndexMapping, errors.E) {
 
 	optionMapping := bleve.NewDocumentStaticMapping()
 
-	optionMapping.AddFieldMappingsAt("Name", identityFieldMapping)
+	optionMapping.AddFieldMappingsAt("Name", attributeFieldMapping)
 	optionMapping.AddFieldMappingsAt("NameNGram", nameNGramMapping)
 	optionMapping.AddFieldMappingsAt("Source", identityFieldMapping)
 	optionMapping.AddFieldMappingsAt("Loc", locFieldMapping)
@@ -136,7 +151,7 @@ func createIndexMapping() (mapping.IndexMapping, errors.E) {
 
 	packageMapping.AddFieldMappingsAt("Name", keywordFieldMapping)
 	packageMapping.AddFieldMappingsAt("NameNGram", nameNGramMapping)
-	packageMapping.AddFieldMappingsAt("Attribute", keywordFieldMapping)
+	packageMapping.AddFieldMappingsAt("Attribute", attributeFieldMapping)
 	packageMapping.AddFieldMappingsAt("AttributeNGram", nameNGramMapping)
 	packageMapping.AddFieldMappingsAt("Source", keywordFieldMapping)
 	packageMapping.AddFieldMappingsAt("Description", descriptionFieldMapping)
