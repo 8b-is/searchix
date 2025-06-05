@@ -124,7 +124,9 @@ func main() {
 			logger.Fatal("Failed to start importer", "error", err)
 		}
 
-		return
+		if *replace {
+			return
+		}
 	}
 
 	err = imp.EnsureSourcesIndexed(ctx, read)
