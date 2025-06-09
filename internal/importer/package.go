@@ -314,9 +314,7 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 
 			results <- &nix.Package{
 				Name:            i.pkg.Name,
-				NameNGram:       i.pkg.Name,
 				Attribute:       strings.TrimPrefix(kv.Key, "nur.repos."),
-				AttributeNGram:  strings.TrimPrefix(kv.Key, "nur.repos."),
 				Source:          i.source.Key,
 				PackageSet:      pkgSet,
 				Version:         i.pkg.Version,

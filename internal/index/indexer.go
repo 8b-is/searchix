@@ -137,8 +137,12 @@ func createIndexMapping() (mapping.IndexMapping, errors.E) {
 
 	optionMapping := bleve.NewDocumentStaticMapping()
 
-	optionMapping.AddFieldMappingsAt("Name", attributeFieldMapping, locFieldMapping)
-	optionMapping.AddFieldMappingsAt("NameNGram", nameNGramMapping)
+	optionMapping.AddFieldMappingsAt(
+		"Name",
+		attributeFieldMapping,
+		locFieldMapping,
+		nameNGramMapping,
+	)
 	optionMapping.AddFieldMappingsAt("Source", identityFieldMapping)
 	optionMapping.AddFieldMappingsAt("Loc", locFieldMapping)
 	optionMapping.AddFieldMappingsAt("RelatedPackages", textFieldMapping)
@@ -149,10 +153,13 @@ func createIndexMapping() (mapping.IndexMapping, errors.E) {
 
 	packageMapping := bleve.NewDocumentStaticMapping()
 
-	packageMapping.AddFieldMappingsAt("Name", keywordFieldMapping, locFieldMapping)
-	packageMapping.AddFieldMappingsAt("NameNGram", nameNGramMapping)
-	packageMapping.AddFieldMappingsAt("Attribute", attributeFieldMapping)
-	packageMapping.AddFieldMappingsAt("AttributeNGram", nameNGramMapping)
+	packageMapping.AddFieldMappingsAt(
+		"Name",
+		keywordFieldMapping,
+		locFieldMapping,
+		nameNGramMapping,
+	)
+	packageMapping.AddFieldMappingsAt("Attribute", attributeFieldMapping, nameNGramMapping)
 	packageMapping.AddFieldMappingsAt("Source", keywordFieldMapping)
 	packageMapping.AddFieldMappingsAt("Description", descriptionFieldMapping)
 	packageMapping.AddFieldMappingsAt("Homepages", keywordFieldMapping)
