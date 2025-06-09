@@ -60,14 +60,7 @@ func createSourceImporter(
 	forceUpdate bool,
 ) func(*config.Source) errors.E {
 	return func(source *config.Source) errors.E {
-		logger := log.With(
-			"name",
-			source.Key,
-			"fetcher",
-			source.Fetcher.String(),
-			"timeout",
-			source.Timeout.Duration,
-		)
+		logger := log.With("name", source.Key)
 		logger.Debug("starting fetcher")
 
 		fetcher, err := fetcher.New(source, logger)
@@ -77,7 +70,7 @@ func createSourceImporter(
 
 		sourceMeta := meta.GetSourceMeta(source.Key)
 		if forceUpdate {
-			sourceMeta.Updated = time.Time{}
+			sourceMeta.Updated = time.Unix(0, 0)
 		}
 		previousUpdate := sourceMeta.Updated
 		ctx, cancel := context.WithTimeout(parent, source.Timeout.Duration)
@@ -91,6 +84,8 @@ func createSourceImporter(
 				for _, line := range lines {
 					logger.Error(
 						"importer fetch failed",
+						"fetcher",
+						source.Fetcher.String(),
 						"stderr",
 						line,
 						"status",
@@ -106,7 +101,7 @@ func createSourceImporter(
 			"previous",
 			previousUpdate,
 			"current",
-			sourceMeta.Updated,
+			sourceMeta.Updated.Format(time.DateTime),
 			"is_updated",
 			sourceMeta.Updated.After(previousUpdate),
 			"update_force",
