@@ -303,10 +303,14 @@ func (imp *Importer) StartUpdateTimer(
 		Job.FinishedAt = imp.indexer.Meta.LastUpdated()
 
 		var nextRun time.Time
-		if Job.FinishedAt.Before(time.Now().Add(-24 * time.Hour)) {
+		switch {
+		case Job.FinishedAt.Before(time.Now().Add(-24 * time.Hour)):
 			imp.log.Info("indexing last ran more than 24 hours ago, scheduling immediate update")
 			nextRun = time.Now()
-		} else {
+		case imp.indexer.Meta.IsSchemaOutdated():
+			imp.log.Info("indexing schema version is out of date, scheduling immediate update")
+			nextRun = time.Now()
+		default:
 			nextRun = nextUTCOccurrenceOfTime(imp.config.Importer.UpdateAt)
 		}
 		SetNextRun(nextRun)

@@ -71,21 +71,11 @@ func openMeta(path string, log *log.Logger) (*Meta, errors.E) {
 		return nil, errors.WithMessage(err, "index metadata is corrupt, try replacing the index")
 	}
 
-	meta.checkSchemaVersion()
-
 	return &meta, nil
 }
 
-func (i *Meta) checkSchemaVersion() {
-	if i.SchemaVersion < CurrentSchemaVersion {
-		i.log.Warn(
-			"Index schema version out of date, suggest re-indexing",
-			"schema_version",
-			i.SchemaVersion,
-			"latest_version",
-			CurrentSchemaVersion,
-		)
-	}
+func (i *Meta) IsSchemaOutdated() bool {
+	return i.SchemaVersion < CurrentSchemaVersion
 }
 
 func (i *Meta) Save() errors.E {
