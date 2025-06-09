@@ -1,8 +1,26 @@
 # Changelog
 
-## [v0.1.40](https://codeberg.org/alanpearce/searchix/compare/v0.1.39...1f7e995a669eefd259ab773492c3e5a673e2dac6) (2025-05-29)
+## [v0.1.41](https://codeberg.org/alanpearce/searchix/compare/v0.1.40...e0e35b1818a49ba006c500e292efe0b356b34a44) (2025-06-09)
+
+### Features
+
+- improve logging of import process
+  ([e0e35b1](https://codeberg.org/alanpearce/searchix/commit/e0e35b1818a49ba006c500e292efe0b356b34a44))
+- enable automatic re-indexing on schema version changes
+  ([1d4eff7](https://codeberg.org/alanpearce/searchix/commit/1d4eff79b408b95f2dde5db8aa3cec0a7f43adb4))
 
 ### Fixes
+
+- matching long prefixes in option names (regression)
+  ([d2bc9be](https://codeberg.org/alanpearce/searchix/commit/d2bc9be6ec207fb06418e56774f64034eee8b57f))
+- don't quit after generating index for first time
+  ([7514e61](https://codeberg.org/alanpearce/searchix/commit/7514e6182832fc7806d2d45d32ea87ad3cdc668c))
+- keep names_with_underscores as single tokens
+  ([87f2c60](https://codeberg.org/alanpearce/searchix/commit/87f2c60692a7ab6a46b969ddd29e1c97e0cd6722))
+
+### [v0.1.40](https://codeberg.org/alanpearce/searchix/compare/v0.1.39...v0.1.40) (2025-05-29)
+
+#### Fixes
 
 - exact/prefix matches for package name/attr not shown
   ([1f7e995](https://codeberg.org/alanpearce/searchix/commit/1f7e995a669eefd259ab773492c3e5a673e2dac6))
