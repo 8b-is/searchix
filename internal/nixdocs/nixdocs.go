@@ -9,6 +9,7 @@ import (
 	"go.alanpearce.eu/searchix/internal/nixdocs/envvar"
 	"go.alanpearce.eu/searchix/internal/nixdocs/option"
 	"go.alanpearce.eu/searchix/internal/nixdocs/optlink"
+	"go.alanpearce.eu/searchix/internal/nixdocs/variable"
 )
 
 func WithNixDocsExtensions() goldmark.Option {
@@ -19,5 +20,6 @@ func WithNixDocsExtensions() goldmark.Option {
 		option.New(),
 		command.New(),
 		envvar.New(),
+		variable.New(),
 	)
 }

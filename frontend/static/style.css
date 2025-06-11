@@ -208,6 +208,11 @@ p:last-child {
   text-decoration: underline;
 }
 
+var {
+  font-style: normal;
+  font-family: var(--mono-font);
+}
+
 @media only screen and (max-width: 600px) {
   header > nav {
     display: unset;
