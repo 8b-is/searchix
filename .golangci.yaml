@@ -50,6 +50,10 @@ linters:
                   - revive
               path: internal/components
               text: dot-imports
+            - linters:
+                  - staticcheck
+              path: internal/components
+              text: dot imports
         paths:
             - third_party$
             - builtin$
