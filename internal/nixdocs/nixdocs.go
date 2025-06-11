@@ -6,6 +6,7 @@ import (
 	"github.com/yuin/goldmark/extension"
 
 	"go.alanpearce.eu/searchix/internal/nixdocs/command"
+	"go.alanpearce.eu/searchix/internal/nixdocs/envvar"
 	"go.alanpearce.eu/searchix/internal/nixdocs/option"
 	"go.alanpearce.eu/searchix/internal/nixdocs/optlink"
 )
@@ -17,5 +18,6 @@ func WithNixDocsExtensions() goldmark.Option {
 		optlink.New(),
 		option.New(),
 		command.New(),
+		envvar.New(),
 	)
 }
