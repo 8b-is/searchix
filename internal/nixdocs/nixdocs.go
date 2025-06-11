@@ -8,6 +8,7 @@ import (
 	"go.alanpearce.eu/searchix/internal/nixdocs/command"
 	"go.alanpearce.eu/searchix/internal/nixdocs/envvar"
 	"go.alanpearce.eu/searchix/internal/nixdocs/filepath"
+	"go.alanpearce.eu/searchix/internal/nixdocs/manpage"
 	"go.alanpearce.eu/searchix/internal/nixdocs/option"
 	"go.alanpearce.eu/searchix/internal/nixdocs/optlink"
 	"go.alanpearce.eu/searchix/internal/nixdocs/variable"
@@ -23,5 +24,6 @@ func WithNixDocsExtensions() goldmark.Option {
 		envvar.New(),
 		variable.New(),
 		filepath.New(),
+		manpage.New(),
 	)
 }
