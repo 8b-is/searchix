@@ -5,6 +5,7 @@ import (
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
 
+	"go.alanpearce.eu/searchix/internal/nixdocs/option"
 	"go.alanpearce.eu/searchix/internal/nixdocs/optlink"
 )
 
@@ -13,5 +14,6 @@ func WithNixDocsExtensions() goldmark.Option {
 		extension.NewLinkify(),
 		&fences.Extender{},
 		optlink.New(),
+		option.New(),
 	)
 }
