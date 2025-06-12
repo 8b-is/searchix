@@ -1,6 +1,7 @@
 package nixdocs
 
 import (
+	fences "github.com/stefanfritsch/goldmark-fences"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
 
@@ -10,6 +11,7 @@ import (
 func WithNixDocsExtensions() goldmark.Option {
 	return goldmark.WithExtensions(
 		extension.NewLinkify(),
+		&fences.Extender{},
 		optlink.New(),
 	)
 }

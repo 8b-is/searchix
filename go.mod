@@ -14,6 +14,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/osdevisnot/sorvor v0.4.4
 	github.com/pelletier/go-toml/v2 v2.2.3
+	github.com/stefanfritsch/goldmark-fences v1.0.0
 	github.com/stoewer/go-strcase v1.3.0
 	github.com/yuin/goldmark v1.7.8
 	gitlab.com/tozd/go/errors v0.10.0
