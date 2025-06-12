@@ -52,15 +52,13 @@ func MarkIndexingFinished(nextRun time.Time) {
 	Job.NextRun = nextRun
 }
 
-func createSourceImporter(
+func (imp *Importer) createSourceImporter(
 	parent context.Context,
-	log *log.Logger,
 	meta *index.Meta,
-	writeIndex *index.WriteIndex,
 	forceUpdate bool,
 ) func(*config.Source) errors.E {
 	return func(source *config.Source) errors.E {
-		logger := log.With("name", source.Key)
+		logger := imp.log.With("name", source.Key)
 		logger.Debug("starting fetcher")
 
 		fetcher, err := fetcher.New(source, logger)
@@ -112,7 +110,7 @@ func createSourceImporter(
 			var pdb *programs.DB
 
 			if source.Programs.Enable {
-				pdb, err = programs.Instantiate(ctx, source, log.Named("programs"))
+				pdb, err = programs.Instantiate(ctx, source, imp.log.Named("programs"))
 				if err != nil {
 					logger.Warn("programs database instantiation failed", "error", err)
 				}
@@ -151,7 +149,7 @@ func createSourceImporter(
 				return errors.WithMessagef(err, "failed to create processor")
 			}
 
-			hadWarnings, err := process(ctx, writeIndex, processor, logger)
+			hadWarnings, err := process(ctx, imp.indexer, processor, logger)
 			if err != nil {
 				return errors.WithMessagef(err, "failed to process source")
 			}
@@ -198,7 +196,7 @@ func (imp *Importer) Start(
 
 	meta := imp.indexer.Meta
 
-	importSource := createSourceImporter(importCtx, imp.log, meta, imp.indexer, forceUpdate)
+	importSource := imp.createSourceImporter(importCtx, meta, forceUpdate)
 	for name, source := range imp.config.Importer.Sources {
 		if onlyUpdateSources != nil && len(*onlyUpdateSources) > 0 {
 			if !slices.Contains(*onlyUpdateSources, name) {
