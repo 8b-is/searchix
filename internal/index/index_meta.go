@@ -11,13 +11,12 @@ import (
 	"gitlab.com/tozd/go/errors"
 )
 
-const CurrentSchemaVersion = 4
+const CurrentSchemaVersion = 5
 
 type SourceMeta struct {
-	Updated      time.Time
-	Path         string
-	Rev          string
-	ProgramsPath string
+	Updated time.Time
+	Path    string
+	Rev     string
 }
 
 type data struct {

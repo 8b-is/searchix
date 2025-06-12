@@ -116,9 +116,6 @@ func createSourceImporter(
 				if err != nil {
 					logger.Warn("programs database instantiation failed", "error", err)
 				}
-				if pdb.Path != sourceMeta.ProgramsPath {
-					sourceMeta.ProgramsPath = pdb.Path
-				}
 			}
 
 			err = setRepoRevision(files.Revision, source)
