@@ -3,7 +3,6 @@ package importer
 import (
 	"fmt"
 	"io"
-	"net/url"
 	"strings"
 
 	"go.alanpearce.eu/searchix/internal/config"
@@ -34,29 +33,8 @@ func ValueTypeToString(valueType jstream.ValueType) string {
 	return "very strange"
 }
 
-func makeRepoURL(repo config.Repository, subPath string, line string) (string, errors.E) {
-	switch repo.Type {
-	case config.GitHub:
-		ref := repo.Revision
-		if ref == "" {
-			ref = "master"
-		}
-		url, _ := url.JoinPath("https://github.com/", repo.Owner, repo.Repo, "blob", ref, subPath)
-		if line != "" {
-			url = url + "#L" + line
-		}
-
-		return url, nil
-	default:
-		return "", errors.Errorf(
-			"don't know how to generate a repository URL for %s",
-			repo.Type.String(),
-		)
-	}
-}
-
 func MakeChannelLink(repo config.Repository, subPath string) (*nix.Link, errors.E) {
-	url, err := makeRepoURL(repo, subPath, "")
+	url, err := repo.GetFileURL(subPath)
 	if err != nil {
 		return nil, err
 	}

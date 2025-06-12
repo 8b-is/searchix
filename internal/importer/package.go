@@ -309,7 +309,7 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 					definition = i.pkg.Meta.Position
 				} else {
 					subpath, line, _ := strings.Cut(i.pkg.Meta.Position, ":")
-					definition, err = makeRepoURL(i.source.Repo, subpath, line)
+					definition, err = i.source.Repo.GetFileURL(subpath, line)
 					if err != nil {
 						errs <- errors.WithMessagef(err, "failed to make repo URL for package %s", i.pkg.Name)
 					}
