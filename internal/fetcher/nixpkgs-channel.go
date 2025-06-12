@@ -5,6 +5,7 @@ import (
 	"net/url"
 
 	"go.alanpearce.eu/searchix/internal/config"
+	"go.alanpearce.eu/searchix/internal/fetcher/http"
 	"go.alanpearce.eu/searchix/internal/index"
 
 	"gitlab.com/tozd/go/errors"
@@ -66,7 +67,7 @@ func (i *NixpkgsChannelFetcher) FetchIfNeeded(
 		}
 
 		i.Logger.Debug("attempting to fetch file", "url", fetchURL)
-		body, mtime, err := fetchFileIfNeeded(ctx, i.Logger, sourceMeta.Updated, fetchURL)
+		body, mtime, err := http.FetchFileIfNeeded(ctx, i.Logger, sourceMeta.Updated, fetchURL)
 		if err != nil {
 			i.Logger.Warn("failed to fetch file", "url", fetchURL, "error", err)
 

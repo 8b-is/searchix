@@ -1,4 +1,4 @@
-package fetcher
+package http
 
 import (
 	"context"
@@ -31,7 +31,7 @@ func (r *brotliReadCloser) Close() error {
 	return errors.Wrap(r.src.Close(), "failed to call close on underlying reader")
 }
 
-func fetchFileIfNeeded(
+func FetchFileIfNeeded(
 	ctx context.Context,
 	log *log.Logger,
 	mtime time.Time,
