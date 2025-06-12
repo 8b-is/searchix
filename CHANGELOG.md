@@ -1,8 +1,15 @@
 # Changelog
 
-## [v0.1.42](https://codeberg.org/alanpearce/searchix/compare/v0.1.41...2f2d86922ba23c4b7f92b115f4e8d26e5058bd23) (2025-06-12)
+## [v0.1.43](https://codeberg.org/alanpearce/searchix/compare/v0.1.42...f608afdaebe0fdbf49b8363ef5adf6f9f0e918cb) (2025-06-12)
 
-### Features
+### Fixes
+
+- first sentence of some descriptions cut off
+  ([f608afd](https://codeberg.org/alanpearce/searchix/commit/f608afdaebe0fdbf49b8363ef5adf6f9f0e918cb))
+
+### [v0.1.42](https://codeberg.org/alanpearce/searchix/compare/v0.1.41...v0.1.42) (2025-06-12)
+
+#### Features
 
 - link man pages like how NixOS does it
   ([2f2d869](https://codeberg.org/alanpearce/searchix/commit/2f2d86922ba23c4b7f92b115f4e8d26e5058bd23))
