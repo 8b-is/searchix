@@ -4,8 +4,9 @@ import (
 	"io"
 
 	"github.com/yuin/goldmark"
-	"github.com/yuin/goldmark/extension"
 	"gitlab.com/tozd/go/errors"
+
+	"go.alanpearce.eu/searchix/internal/nixdocs"
 )
 
 type Markdown string
@@ -45,7 +46,7 @@ func (p Option) GetSource() string {
 }
 
 var md = goldmark.New(
-	goldmark.WithExtensions(extension.NewLinkify()),
+	nixdocs.WithNixDocsExtensions(),
 )
 
 // implements gomponent.Node
