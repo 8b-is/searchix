@@ -134,6 +134,10 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 		defer close(results)
 		defer close(errs)
 
+		if i.programs != nil {
+			defer i.programs.Close()
+		}
+
 	outer:
 		for mv := range i.dec.Stream() {
 			var err errors.E
@@ -329,10 +333,6 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 				Definition:      definition,
 				Programs:        programs,
 			}
-		}
-
-		if i.programs != nil {
-			i.programs.Close()
 		}
 	}()
 
