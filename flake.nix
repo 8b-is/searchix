@@ -36,18 +36,14 @@
               gomod2nix.overlays.default
             ];
           };
-
-          # The current default sdk for macOS fails to compile go projects, so we use a newer one for now.
-          # This has no effect on other platforms.
-          callPackage = pkgs.darwin.apple_sdk_11_0.callPackage or pkgs.callPackage;
         in
         rec {
           packages.css = "${simple-css}";
-          packages.default = callPackage ./nix/package.nix {
+          packages.default = pkgs.callPackage ./nix/package.nix {
             inherit (gomod2nix.legacyPackages.${system}) buildGoApplication;
             css = simple-css;
           };
-          devShells.default = callPackage ./nix/dev-shell.nix {
+          devShells.default = pkgs.callPackage ./nix/dev-shell.nix {
             pre-commit-check = {
               inherit (self.checks.${system}.pre-commit-check)
                 shellHook
