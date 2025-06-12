@@ -9,6 +9,7 @@ import (
 
 	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/index"
+	"go.alanpearce.eu/searchix/internal/manpages"
 	"go.alanpearce.eu/x/log"
 
 	"gitlab.com/tozd/go/errors"
@@ -25,13 +26,18 @@ type Server struct {
 	listener net.Listener
 }
 
+type Options struct {
+	ReadIndex      *index.ReadIndex
+	ManpagesURLMap *manpages.URLMap
+}
+
 func New(
 	conf *config.Config,
-	index *index.ReadIndex,
+	options *Options,
 	log *log.Logger,
 	liveReload bool,
 ) (*Server, errors.E) {
-	mux, err := NewMux(conf, index, log, liveReload)
+	mux, err := NewMux(conf, options, log, liveReload)
 	if err != nil {
 		return nil, err
 	}

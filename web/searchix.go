@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"go.alanpearce.eu/searchix/internal/config"
-	"go.alanpearce.eu/searchix/internal/index"
 	"go.alanpearce.eu/searchix/internal/server"
 	"go.alanpearce.eu/x/log"
 
@@ -17,10 +16,10 @@ type Server struct {
 	cfg       *config.Config
 	log       *log.Logger
 	sentryHub *sentry.Hub
-	readIndex *index.ReadIndex
+	options   *server.Options
 }
 
-func New(cfg *config.Config, log *log.Logger, read *index.ReadIndex) (*Server, errors.E) {
+func New(cfg *config.Config, log *log.Logger, options *server.Options) (*Server, errors.E) {
 	err := sentry.Init(sentry.ClientOptions{
 		EnableTracing:    true,
 		TracesSampleRate: 1.0,
@@ -35,13 +34,13 @@ func New(cfg *config.Config, log *log.Logger, read *index.ReadIndex) (*Server, e
 		cfg:       cfg,
 		log:       log,
 		sentryHub: sentry.CurrentHub(),
-		readIndex: read,
+		options:   options,
 	}, nil
 }
 
 func (s *Server) Start(liveReload bool) errors.E {
 	var err errors.E
-	s.sv, err = server.New(s.cfg, s.readIndex, s.log.Named("server"), liveReload)
+	s.sv, err = server.New(s.cfg, s.options, s.log.Named("server"), liveReload)
 	if err != nil {
 		return errors.Wrap(err, "error setting up server")
 	}

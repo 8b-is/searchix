@@ -114,6 +114,13 @@ Enable = false
 # Nix attribute name (i.e. nix-instantiate) that builds a programs.sqlite file
 Attribute = ''
 
+# Used to enable searching for manpages
+[Importer.Sources.darwin.Manpages]
+# Enable searching for manpages
+Enable = false
+# Path to the manpage-urls.json file from repository root
+Path = ''
+
 [Importer.Sources.home-manager]
 # Human-readable name of source for generating links
 Name = 'Home Manager'
@@ -155,6 +162,13 @@ Repo = 'home-manager'
 Enable = false
 # Nix attribute name (i.e. nix-instantiate) that builds a programs.sqlite file
 Attribute = ''
+
+# Used to enable searching for manpages
+[Importer.Sources.home-manager.Manpages]
+# Enable searching for manpages
+Enable = false
+# Path to the manpage-urls.json file from repository root
+Path = ''
 
 [Importer.Sources.nixos]
 # Human-readable name of source for generating links
@@ -198,6 +212,13 @@ Enable = false
 # Nix attribute name (i.e. nix-instantiate) that builds a programs.sqlite file
 Attribute = ''
 
+# Used to enable searching for manpages
+[Importer.Sources.nixos.Manpages]
+# Enable searching for manpages
+Enable = false
+# Path to the manpage-urls.json file from repository root
+Path = ''
+
 [Importer.Sources.nixpkgs]
 # Human-readable name of source for generating links
 Name = 'Nix Packages'
@@ -240,6 +261,13 @@ Enable = true
 # Nix attribute name (i.e. nix-instantiate) that builds a programs.sqlite file
 Attribute = 'programs.sqlite'
 
+# Used to enable searching for manpages
+[Importer.Sources.nixpkgs.Manpages]
+# Enable searching for manpages
+Enable = true
+# Path to the manpage-urls.json file from repository root
+Path = '/doc/manpage-urls.json'
+
 [Importer.Sources.nur]
 # Human-readable name of source for generating links
 Name = 'NUR'
@@ -281,3 +309,10 @@ Repo = 'nur'
 Enable = false
 # Nix attribute name (i.e. nix-instantiate) that builds a programs.sqlite file
 Attribute = ''
+
+# Used to enable searching for manpages
+[Importer.Sources.nur.Manpages]
+# Enable searching for manpages
+Enable = false
+# Path to the manpage-urls.json file from repository root
+Path = ''

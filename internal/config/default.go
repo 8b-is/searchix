@@ -67,7 +67,11 @@ var DefaultConfig = Config{
 				OutputPath: "share/doc/nixos",
 				Timeout:    Duration{5 * time.Minute},
 				Repo:       nixpkgs,
-				JSONDepth:  1,
+				Manpages: Manpages{
+					Enable: false,
+					Path:   "",
+				},
+				JSONDepth: 1,
 			},
 			"darwin": {
 				Name:       "Darwin",
@@ -86,6 +90,10 @@ var DefaultConfig = Config{
 					Type:  GitHub,
 					Owner: "LnL7",
 					Repo:  "nix-darwin",
+				},
+				Manpages: Manpages{
+					Enable: false,
+					Path:   "",
 				},
 				JSONDepth: 1,
 			},
@@ -107,6 +115,10 @@ var DefaultConfig = Config{
 					Owner: "nix-community",
 					Repo:  "home-manager",
 				},
+				Manpages: Manpages{
+					Enable: false,
+					Path:   "",
+				},
 				JSONDepth: 1,
 			},
 			"nixpkgs": {
@@ -124,6 +136,10 @@ var DefaultConfig = Config{
 					Enable:    true,
 					Attribute: "programs.sqlite",
 				},
+				Manpages: Manpages{
+					Enable: true,
+					Path:   "/doc/manpage-urls.json",
+				},
 				JSONDepth: 2,
 			},
 			"nur": {
@@ -139,6 +155,10 @@ var DefaultConfig = Config{
 					Type:  GitHub,
 					Owner: "nix-community",
 					Repo:  "nur",
+				},
+				Manpages: Manpages{
+					Enable: false,
+					Path:   "",
 				},
 				JSONDepth: 1,
 			},

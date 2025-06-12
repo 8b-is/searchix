@@ -22,6 +22,27 @@ type Repository struct {
 	Revision string `toml:"-"`
 }
 
+func (r *Repository) GetRawFileURL(path string) (string, errors.E) {
+	switch r.Type {
+	case GitHub:
+		ref := r.Revision
+		if ref == "" {
+			ref = "master"
+		}
+		u, err := url.JoinPath("https://github.com/", r.Owner, r.Repo, "raw", ref, path)
+		if err != nil {
+			return "", errors.Wrap(err, "failed to join path")
+		}
+
+		return u, nil
+	default:
+		return "", errors.Errorf(
+			"don't know how to generate a repository URL for %s",
+			r.Type.String(),
+		)
+	}
+}
+
 func (r *Repository) GetFileURL(path string, line ...string) (string, errors.E) {
 	switch r.Type {
 	case GitHub:

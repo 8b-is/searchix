@@ -51,12 +51,18 @@ type Source struct {
 	OutputPath string       `comment:"(Fetcher=channel) Path under ./result symlink to folder containing {options,packages}.json."`
 	Repo       Repository   `comment:"Used to generate declaration/definition links"`
 	Programs   ProgramsDB   `comment:"Used to enable searching for programs in multi-program packages"`
+	Manpages   Manpages     `comment:"Used to enable searching for manpages"`
 	JSONDepth  int          `comment:"Depth at which packages/object object is to be found"`
 }
 
 type ProgramsDB struct {
 	Enable    bool   `comment:"Enable searching for programs in multi-program packages"`
 	Attribute string `comment:"Nix attribute name (i.e. nix-instantiate) that builds a programs.sqlite file"`
+}
+
+type Manpages struct {
+	Enable bool   `comment:"Enable searching for manpages"`
+	Path   string `comment:"Path to the manpage-urls.json file from repository root"`
 }
 
 func (source *Source) String() string {

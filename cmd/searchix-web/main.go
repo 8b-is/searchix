@@ -17,6 +17,8 @@ import (
 	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/importer"
 	"go.alanpearce.eu/searchix/internal/index"
+	"go.alanpearce.eu/searchix/internal/manpages"
+	"go.alanpearce.eu/searchix/internal/server"
 	"go.alanpearce.eu/searchix/web"
 	"go.alanpearce.eu/x/log"
 )
@@ -104,7 +106,12 @@ func main() {
 		logger.Fatal("Failed to open or create index", "error", err)
 	}
 
-	s, err := web.New(cfg, logger, read)
+	mdb := manpages.New(cfg, logger.Named("manpages"))
+
+	s, err := web.New(cfg, logger, &server.Options{
+		ReadIndex:      read,
+		ManpagesURLMap: mdb,
+	})
 	if err != nil {
 		logger.Fatal("Failed to initialise searchix-web", "error", err)
 	}
@@ -113,6 +120,7 @@ func main() {
 		WriteIndex: write,
 		LowMemory:  cfg.Importer.LowMemory,
 		Logger:     logger.Named("importer"),
+		Manpages:   mdb,
 	})
 	if err != nil {
 		logger.Fatal("Failed to create importer", "error", err)

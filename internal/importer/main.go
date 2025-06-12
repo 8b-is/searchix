@@ -14,6 +14,7 @@ import (
 	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/fetcher"
 	"go.alanpearce.eu/searchix/internal/index"
+	"go.alanpearce.eu/searchix/internal/manpages"
 	"go.alanpearce.eu/searchix/internal/programs"
 	"go.alanpearce.eu/x/log"
 
@@ -24,6 +25,7 @@ type Options struct {
 	LowMemory  bool
 	Logger     *log.Logger
 	WriteIndex *index.WriteIndex
+	Manpages   *manpages.URLMap
 }
 
 var Job struct {
@@ -154,6 +156,13 @@ func (imp *Importer) createSourceImporter(
 				return errors.WithMessagef(err, "failed to process source")
 			}
 
+			if source.Manpages.Enable {
+				err = imp.manpages.Update(ctx, source)
+				if err != nil {
+					logger.Warn("manpages database update failed", "error", err)
+				}
+			}
+
 			if hadWarnings {
 				logger.Warn("importer succeeded, but with warnings/errors")
 			} else {
@@ -169,9 +178,10 @@ func (imp *Importer) createSourceImporter(
 }
 
 type Importer struct {
-	config  *config.Config
-	log     *log.Logger
-	indexer *index.WriteIndex
+	config   *config.Config
+	log      *log.Logger
+	indexer  *index.WriteIndex
+	manpages *manpages.URLMap
 }
 
 func (imp *Importer) Start(
@@ -225,9 +235,10 @@ func New(
 ) (*Importer, errors.E) {
 
 	return &Importer{
-		config:  cfg,
-		log:     options.Logger,
-		indexer: options.WriteIndex,
+		config:   cfg,
+		log:      options.Logger,
+		indexer:  options.WriteIndex,
+		manpages: options.Manpages,
 	}, nil
 }
 

@@ -60,16 +60,17 @@ func sortSources(ss map[string]*config.Source) {
 
 func NewMux(
 	cfg *config.Config,
-	index *search.ReadIndex,
+	options *Options,
 	log *log.Logger,
 	liveReload bool,
 ) (*http.ServeMux, errors.E) {
 	if cfg == nil {
 		return nil, errors.New("cfg is nil")
 	}
-	if index == nil {
-		return nil, errors.New("index is nil")
+	if options.ReadIndex == nil {
+		return nil, errors.New("read index is nil")
 	}
+	index := options.ReadIndex
 	sortSources(cfg.Importer.Sources)
 
 	errorHandler := createErrorHandler(cfg, log)
@@ -357,6 +358,25 @@ func NewMux(
 		w.Header().Add("Cache-Control", "public, max-age=86400")
 		w.Header().Add("Cache-Control", "stale-while-revalidate")
 		http.ServeFileFS(w, r, frontend.Files, asset.Filename)
+	})
+
+	mdb := options.ManpagesURLMap
+	err := mdb.Open()
+	if err != nil {
+		return nil, errors.WithMessage(err, "failed to open manpages URL map")
+	}
+	mux.HandleFunc("/man/{section}/{page}", func(w http.ResponseWriter, r *http.Request) {
+		section := r.PathValue("section")
+		page := r.PathValue("page")
+
+		url, ok := mdb.Get(section, page)
+		if !ok {
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+
+			return
+		}
+
+		http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 	})
 
 	if liveReload {

@@ -210,6 +210,7 @@ var expectedDataFiles = []string{
 	indexBaseName,
 	"sources",
 	"nixpkgs-programs.db",
+	"manpage-urls.json",
 }
 
 func deleteIndex(dataRoot string) errors.E {

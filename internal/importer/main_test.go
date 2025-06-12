@@ -6,6 +6,7 @@ import (
 
 	"go.alanpearce.eu/searchix/internal/config"
 	"go.alanpearce.eu/searchix/internal/index"
+	"go.alanpearce.eu/searchix/internal/manpages"
 	"go.alanpearce.eu/x/log"
 )
 
@@ -27,6 +28,7 @@ func BenchmarkImporterLowMemory(b *testing.B) {
 		Logger:     logger.Named("importer"),
 		LowMemory:  true,
 		WriteIndex: write,
+		Manpages:   manpages.New(&cfg, logger.Named("manpages")),
 	})
 	if err != nil {
 		b.Fatal(err)
