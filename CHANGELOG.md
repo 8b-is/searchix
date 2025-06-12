@@ -1,15 +1,38 @@
 # Changelog
 
-## [v0.1.41](https://codeberg.org/alanpearce/searchix/compare/v0.1.40...e0e35b1818a49ba006c500e292efe0b356b34a44) (2025-06-09)
+## [v0.1.42](https://codeberg.org/alanpearce/searchix/compare/v0.1.41...2f2d86922ba23c4b7f92b115f4e8d26e5058bd23) (2025-06-12)
 
 ### Features
+
+- link man pages like how NixOS does it
+  ([2f2d869](https://codeberg.org/alanpearce/searchix/commit/2f2d86922ba23c4b7f92b115f4e8d26e5058bd23))
+- parse {man} in markdown documentation
+  ([813e5a2](https://codeberg.org/alanpearce/searchix/commit/813e5a26b629d4c27b6ce0a8de2e3d04308ef535))
+- parse {file} in markdown documentation
+  ([a4c441f](https://codeberg.org/alanpearce/searchix/commit/a4c441fe30ae008460149a06a5937ca37b4c2d72))
+- parse {var} in markdown documentation
+  ([d296272](https://codeberg.org/alanpearce/searchix/commit/d2962720cfd4b4f022ccd564f39189db1ccfa0b7))
+- parse {env} in markdown documentation
+  ([7ab69fb](https://codeberg.org/alanpearce/searchix/commit/7ab69fb0411fc260e3f3ea519443abd87ace3a7e))
+- parse {command} in markdown documentation
+  ([cb907ad](https://codeberg.org/alanpearce/searchix/commit/cb907ad36521036db199a226f3e357ad3b7b0a1c))
+- parse {option} in markdown documentation
+  ([0ba69e5](https://codeberg.org/alanpearce/searchix/commit/0ba69e50d2d1095db9b42c548c0226739d137a62))
+- enable parsing of markdown fences
+  ([2d958a5](https://codeberg.org/alanpearce/searchix/commit/2d958a53b942e5c47ce58dd14c15a2c9474ca661))
+- create option link parser
+  ([93b800b](https://codeberg.org/alanpearce/searchix/commit/93b800b4862d5c7e0e621647d78b79416a9f3101))
+
+### [v0.1.41](https://codeberg.org/alanpearce/searchix/compare/v0.1.40...v0.1.41) (2025-06-09)
+
+#### Features
 
 - improve logging of import process
   ([e0e35b1](https://codeberg.org/alanpearce/searchix/commit/e0e35b1818a49ba006c500e292efe0b356b34a44))
 - enable automatic re-indexing on schema version changes
   ([1d4eff7](https://codeberg.org/alanpearce/searchix/commit/1d4eff79b408b95f2dde5db8aa3cec0a7f43adb4))
 
-### Fixes
+#### Fixes
 
 - matching long prefixes in option names (regression)
   ([d2bc9be](https://codeberg.org/alanpearce/searchix/commit/d2bc9be6ec207fb06418e56774f64034eee8b57f))
