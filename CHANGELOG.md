@@ -1,8 +1,17 @@
 # Changelog
 
-## [v0.1.43](https://codeberg.org/alanpearce/searchix/compare/v0.1.42...f608afdaebe0fdbf49b8363ef5adf6f9f0e918cb) (2025-06-12)
+## [v0.1.44](https://codeberg.org/alanpearce/searchix/compare/v0.1.43...e7d8aad2ed535ab5e887cd6aac9459696be9b3fe) (2025-06-24)
 
 ### Fixes
+
+- descriptions truncated by one character
+  ([e7d8aad](https://codeberg.org/alanpearce/searchix/commit/e7d8aad2ed535ab5e887cd6aac9459696be9b3fe))
+- remove trailing full-stop from single-sentence descriptions
+  ([c102058](https://codeberg.org/alanpearce/searchix/commit/c102058ee750d770115a47cbeda3116208009fbd))
+
+### [v0.1.43](https://codeberg.org/alanpearce/searchix/compare/v0.1.42...v0.1.43) (2025-06-12)
+
+#### Fixes
 
 - first sentence of some descriptions cut off
   ([f608afd](https://codeberg.org/alanpearce/searchix/commit/f608afdaebe0fdbf49b8363ef5adf6f9f0e918cb))
