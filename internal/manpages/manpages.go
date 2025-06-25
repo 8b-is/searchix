@@ -9,10 +9,10 @@ import (
 	"path/filepath"
 	"time"
 
+	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/fetcher/http"
+	"alin.ovh/x/log"
 	"gitlab.com/tozd/go/errors"
-	"go.alanpearce.eu/searchix/internal/config"
-	"go.alanpearce.eu/searchix/internal/fetcher/http"
-	"go.alanpearce.eu/x/log"
 )
 
 const basename = "manpage-urls.json"

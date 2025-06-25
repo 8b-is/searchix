@@ -5,13 +5,13 @@ import (
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
 
-	"go.alanpearce.eu/searchix/internal/nixdocs/command"
-	"go.alanpearce.eu/searchix/internal/nixdocs/envvar"
-	"go.alanpearce.eu/searchix/internal/nixdocs/filepath"
-	"go.alanpearce.eu/searchix/internal/nixdocs/manpage"
-	"go.alanpearce.eu/searchix/internal/nixdocs/option"
-	"go.alanpearce.eu/searchix/internal/nixdocs/optlink"
-	"go.alanpearce.eu/searchix/internal/nixdocs/variable"
+	"alin.ovh/searchix/internal/nixdocs/command"
+	"alin.ovh/searchix/internal/nixdocs/envvar"
+	"alin.ovh/searchix/internal/nixdocs/filepath"
+	"alin.ovh/searchix/internal/nixdocs/manpage"
+	"alin.ovh/searchix/internal/nixdocs/option"
+	"alin.ovh/searchix/internal/nixdocs/optlink"
+	"alin.ovh/searchix/internal/nixdocs/variable"
 )
 
 func WithNixDocsExtensions() goldmark.Option {

@@ -3,12 +3,12 @@ package components
 import (
 	"net/url"
 
-	"go.alanpearce.eu/searchix/frontend"
-	"go.alanpearce.eu/searchix/internal/config"
+	"alin.ovh/searchix/frontend"
+	"alin.ovh/searchix/internal/config"
 
-	g "go.alanpearce.eu/gomponents"
-	c "go.alanpearce.eu/gomponents/components"
-	. "go.alanpearce.eu/gomponents/html"
+	g "alin.ovh/gomponents"
+	c "alin.ovh/gomponents/components"
+	. "alin.ovh/gomponents/html"
 )
 
 func Page(tdata TemplateData, children ...g.Node) g.Node {

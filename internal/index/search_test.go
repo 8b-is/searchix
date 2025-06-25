@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"go.alanpearce.eu/searchix/internal/config"
-	"go.alanpearce.eu/searchix/internal/index"
-	"go.alanpearce.eu/searchix/internal/nix"
-	"go.alanpearce.eu/x/log"
+	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/index"
+	"alin.ovh/searchix/internal/nix"
+	"alin.ovh/x/log"
 )
 
 const dataRoot = "../../data"

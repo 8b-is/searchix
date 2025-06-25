@@ -6,9 +6,9 @@ import (
 	"os"
 	"time"
 
+	"alin.ovh/x/log"
 	"github.com/pelletier/go-toml/v2"
 	"gitlab.com/tozd/go/errors"
-	"go.alanpearce.eu/x/log"
 )
 
 var Version string

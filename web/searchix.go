@@ -3,9 +3,9 @@ package web
 import (
 	"time"
 
-	"go.alanpearce.eu/searchix/internal/config"
-	"go.alanpearce.eu/searchix/internal/server"
-	"go.alanpearce.eu/x/log"
+	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/server"
+	"alin.ovh/x/log"
 
 	"github.com/getsentry/sentry-go"
 	"gitlab.com/tozd/go/errors"

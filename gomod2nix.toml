@@ -1,6 +1,12 @@
 schema = 3
 
 [mod]
+  [mod."alin.ovh/gomponents"]
+    version = "v1.6.0"
+    hash = "sha256-vJLon9M6x/akEnQu+vK0RuzVyy/9vOnWGzp5DSS6brU="
+  [mod."alin.ovh/x"]
+    version = "v1.0.0"
+    hash = "sha256-9VbqLrFz3dy34Uo62JnDQyVp50wpsoq/pJrbAvbiuM0="
   [mod."badc0de.net/pkg/flagutil"]
     version = "v1.0.1"
     hash = "sha256-0LRWL5DUHW3gXQhPAhUCxnUCN7HN1qKI2yZp8MrDN6M="
@@ -145,12 +151,6 @@ schema = 3
   [mod."gitlab.com/tozd/go/errors"]
     version = "v0.10.0"
     hash = "sha256-oW37KsieVKJOWk9ZXbGuQvuU4nyJCZzgYrTZHFkoCs4="
-  [mod."go.alanpearce.eu/gomponents"]
-    version = "v1.5.0"
-    hash = "sha256-xBJhQWtVA1K9zJvt3RmoEEAnKVdDrITBPr6a+bqRcsE="
-  [mod."go.alanpearce.eu/x"]
-    version = "v0.0.0-20250602210906-0b2a3fe5bcf8"
-    hash = "sha256-twLaHN8futViPvfvUo9lfkOUTYiR7DOu8w5vSiOaEgE="
   [mod."go.etcd.io/bbolt"]
     version = "v1.4.1"
     hash = "sha256-FqKrJJxOOfAnvziKKFzI6VUGDp+ga6IgZmuihHp2I2A="

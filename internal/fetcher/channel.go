@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"go.alanpearce.eu/searchix/internal/config"
-	"go.alanpearce.eu/searchix/internal/index"
-	"go.alanpearce.eu/x/log"
+	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/index"
+	"alin.ovh/x/log"
 
 	"gitlab.com/tozd/go/errors"
 )

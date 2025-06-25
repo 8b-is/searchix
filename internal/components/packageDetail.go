@@ -1,10 +1,10 @@
 package components
 
 import (
-	"go.alanpearce.eu/searchix/internal/nix"
+	"alin.ovh/searchix/internal/nix"
 
-	g "go.alanpearce.eu/gomponents"
-	. "go.alanpearce.eu/gomponents/html"
+	g "alin.ovh/gomponents"
+	. "alin.ovh/gomponents/html"
 )
 
 func licenseName(l nix.License) string {

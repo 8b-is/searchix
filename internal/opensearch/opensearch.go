@@ -3,7 +3,7 @@ package opensearch
 import (
 	"encoding/xml"
 
-	"go.alanpearce.eu/searchix/internal/config"
+	"alin.ovh/searchix/internal/config"
 )
 
 type Description struct {

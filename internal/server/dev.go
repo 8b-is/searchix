@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"time"
 
+	"alin.ovh/x/log"
 	"github.com/fsnotify/fsnotify"
 	"gitlab.com/tozd/go/errors"
-	"go.alanpearce.eu/x/log"
 )
 
 type FileWatcher struct {

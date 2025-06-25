@@ -1,12 +1,12 @@
 package components
 
 import (
-	"go.alanpearce.eu/searchix/internal/config"
-	"go.alanpearce.eu/searchix/internal/index"
-	"go.alanpearce.eu/searchix/internal/nix"
+	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/index"
+	"alin.ovh/searchix/internal/nix"
 
-	g "go.alanpearce.eu/gomponents"
-	. "go.alanpearce.eu/gomponents/html"
+	g "alin.ovh/gomponents"
+	. "alin.ovh/gomponents/html"
 )
 
 func CombinedData(data nix.Importable) g.Node {

@@ -7,9 +7,9 @@ import (
 	"os/exec"
 	"strings"
 
+	"alin.ovh/searchix/internal/config"
+	"alin.ovh/x/log"
 	"gitlab.com/tozd/go/errors"
-	"go.alanpearce.eu/searchix/internal/config"
-	"go.alanpearce.eu/x/log"
 	_ "modernc.org/sqlite" //nolint:blank-imports // sqlite driver needed for database/sql
 )
 

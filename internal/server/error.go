@@ -3,10 +3,10 @@ package server
 import (
 	"net/http"
 
-	"go.alanpearce.eu/searchix/frontend"
-	"go.alanpearce.eu/searchix/internal/components"
-	"go.alanpearce.eu/searchix/internal/config"
-	"go.alanpearce.eu/x/log"
+	"alin.ovh/searchix/frontend"
+	"alin.ovh/searchix/internal/components"
+	"alin.ovh/searchix/internal/config"
+	"alin.ovh/x/log"
 )
 
 func createErrorHandler(

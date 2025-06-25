@@ -12,15 +12,15 @@ import (
 	"badc0de.net/pkg/flagutil"
 	"github.com/getsentry/sentry-go"
 
-	"go.alanpearce.eu/searchix/frontend"
-	"go.alanpearce.eu/searchix/internal/components"
-	"go.alanpearce.eu/searchix/internal/config"
-	"go.alanpearce.eu/searchix/internal/importer"
-	"go.alanpearce.eu/searchix/internal/index"
-	"go.alanpearce.eu/searchix/internal/manpages"
-	"go.alanpearce.eu/searchix/internal/server"
-	"go.alanpearce.eu/searchix/web"
-	"go.alanpearce.eu/x/log"
+	"alin.ovh/searchix/frontend"
+	"alin.ovh/searchix/internal/components"
+	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/importer"
+	"alin.ovh/searchix/internal/index"
+	"alin.ovh/searchix/internal/manpages"
+	"alin.ovh/searchix/internal/server"
+	"alin.ovh/searchix/web"
+	"alin.ovh/x/log"
 )
 
 var (

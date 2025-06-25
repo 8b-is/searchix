@@ -10,13 +10,13 @@ import (
 	"strings"
 	"time"
 
+	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/fetcher"
+	"alin.ovh/searchix/internal/index"
+	"alin.ovh/searchix/internal/manpages"
+	"alin.ovh/searchix/internal/programs"
+	"alin.ovh/x/log"
 	"github.com/getsentry/sentry-go"
-	"go.alanpearce.eu/searchix/internal/config"
-	"go.alanpearce.eu/searchix/internal/fetcher"
-	"go.alanpearce.eu/searchix/internal/index"
-	"go.alanpearce.eu/searchix/internal/manpages"
-	"go.alanpearce.eu/searchix/internal/programs"
-	"go.alanpearce.eu/x/log"
 
 	"gitlab.com/tozd/go/errors"
 )

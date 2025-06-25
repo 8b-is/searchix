@@ -1,8 +1,10 @@
-module go.alanpearce.eu/searchix
+module alin.ovh/searchix
 
 go 1.23.6
 
 require (
+	alin.ovh/gomponents v1.6.0
+	alin.ovh/x v1.0.0
 	badc0de.net/pkg/flagutil v1.0.1
 	github.com/andybalholm/brotli v1.1.1
 	github.com/bcicen/jstream v1.0.1
@@ -18,8 +20,6 @@ require (
 	github.com/stoewer/go-strcase v1.3.0
 	github.com/yuin/goldmark v1.7.12
 	gitlab.com/tozd/go/errors v0.10.0
-	go.alanpearce.eu/gomponents v1.5.0
-	go.alanpearce.eu/x v0.0.0-20250602210906-0b2a3fe5bcf8
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.41.0
 	modernc.org/sqlite v1.38.0

@@ -1,10 +1,10 @@
 package components
 
 import (
-	"go.alanpearce.eu/searchix/frontend"
-	"go.alanpearce.eu/searchix/internal/config"
-	search "go.alanpearce.eu/searchix/internal/index"
-	"go.alanpearce.eu/searchix/internal/nix"
+	"alin.ovh/searchix/frontend"
+	"alin.ovh/searchix/internal/config"
+	search "alin.ovh/searchix/internal/index"
+	"alin.ovh/searchix/internal/nix"
 )
 
 type TemplateData struct {

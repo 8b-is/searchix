@@ -3,7 +3,7 @@ package server
 import (
 	"net/http"
 
-	cfg "go.alanpearce.eu/searchix/internal/config"
+	cfg "alin.ovh/searchix/internal/config"
 )
 
 func AddHeadersMiddleware(next http.Handler, config *cfg.Config) http.Handler {
@@ -12,7 +12,7 @@ func AddHeadersMiddleware(next http.Handler, config *cfg.Config) http.Handler {
 			w.Header().Add(h, v)
 		}
 		w.Header().Add("Content-Security-Policy", config.Web.ContentSecurityPolicy.String())
-		w.Header().Add("Server", "go.alanpearce.eu/searchix/"+cfg.Version)
+		w.Header().Add("Server", "alin.ovh/searchix/"+cfg.Version)
 
 		next.ServeHTTP(w, r)
 	})

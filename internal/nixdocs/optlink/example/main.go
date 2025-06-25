@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	"alin.ovh/searchix/internal/nixdocs/optlink"
 	"github.com/yuin/goldmark"
-	"go.alanpearce.eu/searchix/internal/nixdocs/optlink"
 )
 
 func main() {

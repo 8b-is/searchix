@@ -4,12 +4,12 @@ import (
 	"context"
 	"net/url"
 
-	"go.alanpearce.eu/searchix/internal/config"
-	"go.alanpearce.eu/searchix/internal/fetcher/http"
-	"go.alanpearce.eu/searchix/internal/index"
+	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/fetcher/http"
+	"alin.ovh/searchix/internal/index"
 
+	"alin.ovh/x/log"
 	"gitlab.com/tozd/go/errors"
-	"go.alanpearce.eu/x/log"
 )
 
 type DownloadFetcher struct {

@@ -3,10 +3,10 @@ package components
 import (
 	"time"
 
-	g "go.alanpearce.eu/gomponents"
-	. "go.alanpearce.eu/gomponents/html"
-	"go.alanpearce.eu/searchix/internal/config"
-	"go.alanpearce.eu/searchix/internal/importer"
+	g "alin.ovh/gomponents"
+	. "alin.ovh/gomponents/html"
+	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/importer"
 )
 
 func SearchForm(tdata TemplateData, r ResultData) g.Node {

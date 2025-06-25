@@ -1,9 +1,9 @@
 package components
 
 import (
-	"go.alanpearce.eu/searchix/internal/nix"
+	"alin.ovh/searchix/internal/nix"
 
-	g "go.alanpearce.eu/gomponents"
+	g "alin.ovh/gomponents"
 )
 
 func Detail(thing nix.Importable) g.Node {

@@ -6,7 +6,7 @@ import (
 	"github.com/yuin/goldmark"
 	"gitlab.com/tozd/go/errors"
 
-	"go.alanpearce.eu/searchix/internal/nixdocs"
+	"alin.ovh/searchix/internal/nixdocs"
 )
 
 type Markdown string

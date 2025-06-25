@@ -43,7 +43,7 @@ buildGoApplication {
     "-s"
     "-w"
     "-X"
-    "go.alanpearce.eu/searchix/internal/config.Version=v${version}"
+    "alin.ovh/searchix/internal/config.Version=v${version}"
   ];
 
   postInstall = ''

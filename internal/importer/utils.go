@@ -5,8 +5,8 @@ import (
 	"io"
 	"strings"
 
-	"go.alanpearce.eu/searchix/internal/config"
-	"go.alanpearce.eu/searchix/internal/nix"
+	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/nix"
 
 	"github.com/bcicen/jstream"
 	"gitlab.com/tozd/go/errors"

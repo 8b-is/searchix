@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"go.alanpearce.eu/searchix/internal/config"
+	"alin.ovh/searchix/internal/config"
 
+	"alin.ovh/x/log"
 	"github.com/andybalholm/brotli"
 	"gitlab.com/tozd/go/errors"
-	"go.alanpearce.eu/x/log"
 )
 
 type brotliReadCloser struct {

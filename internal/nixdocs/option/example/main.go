@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"go.alanpearce.eu/searchix/internal/nixdocs/option"
+	"alin.ovh/searchix/internal/nixdocs/option"
 
 	"github.com/yuin/goldmark"
 )

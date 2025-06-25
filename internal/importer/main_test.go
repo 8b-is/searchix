@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
-	"go.alanpearce.eu/searchix/internal/config"
-	"go.alanpearce.eu/searchix/internal/index"
-	"go.alanpearce.eu/searchix/internal/manpages"
-	"go.alanpearce.eu/x/log"
+	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/index"
+	"alin.ovh/searchix/internal/manpages"
+	"alin.ovh/x/log"
 )
 
 var cfg = config.DefaultConfig

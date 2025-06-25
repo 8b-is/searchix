@@ -8,10 +8,10 @@ import (
 	"reflect"
 	"strings"
 
-	"go.alanpearce.eu/searchix/internal/config"
-	"go.alanpearce.eu/searchix/internal/nix"
-	"go.alanpearce.eu/searchix/internal/programs"
-	"go.alanpearce.eu/x/log"
+	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/nix"
+	"alin.ovh/searchix/internal/programs"
+	"alin.ovh/x/log"
 
 	"github.com/bcicen/jstream"
 	"github.com/mitchellh/mapstructure"

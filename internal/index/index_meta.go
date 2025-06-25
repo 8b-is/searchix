@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	"go.alanpearce.eu/searchix/internal/file"
-	"go.alanpearce.eu/x/log"
+	"alin.ovh/searchix/internal/file"
+	"alin.ovh/x/log"
 
 	"gitlab.com/tozd/go/errors"
 )

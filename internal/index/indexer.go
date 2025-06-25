@@ -11,11 +11,11 @@ import (
 	"path/filepath"
 	"slices"
 
-	"go.alanpearce.eu/searchix/internal/config"
-	"go.alanpearce.eu/searchix/internal/file"
-	"go.alanpearce.eu/searchix/internal/index/nixattr"
-	"go.alanpearce.eu/searchix/internal/nix"
-	"go.alanpearce.eu/x/log"
+	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/file"
+	"alin.ovh/searchix/internal/index/nixattr"
+	"alin.ovh/searchix/internal/nix"
+	"alin.ovh/x/log"
 	"go.uber.org/zap"
 
 	"github.com/blevesearch/bleve/v2"

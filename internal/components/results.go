@@ -1,10 +1,10 @@
 package components
 
 import (
-	"go.alanpearce.eu/searchix/internal/config"
+	"alin.ovh/searchix/internal/config"
 
-	g "go.alanpearce.eu/gomponents"
-	. "go.alanpearce.eu/gomponents/html"
+	g "alin.ovh/gomponents"
+	. "alin.ovh/gomponents/html"
 )
 
 func Results(r ResultData) g.Node {

@@ -3,8 +3,8 @@ package server
 import (
 	"net/http"
 
+	"alin.ovh/x/log"
 	"gitlab.com/tozd/go/errors"
-	"go.alanpearce.eu/x/log"
 )
 
 type LoggingResponseWriter struct {

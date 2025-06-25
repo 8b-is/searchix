@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	"alin.ovh/searchix/internal/nixdocs/filepath"
 	"github.com/yuin/goldmark"
-	"go.alanpearce.eu/searchix/internal/nixdocs/filepath"
 )
 
 func main() {

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"go.alanpearce.eu/searchix/internal/nixdocs/envvar"
+	"alin.ovh/searchix/internal/nixdocs/envvar"
 
 	"github.com/yuin/goldmark"
 )

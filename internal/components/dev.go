@@ -3,10 +3,10 @@ package components
 import (
 	"strconv"
 
-	"go.alanpearce.eu/searchix/internal/index"
+	"alin.ovh/searchix/internal/index"
 
-	g "go.alanpearce.eu/gomponents"
-	. "go.alanpearce.eu/gomponents/html"
+	g "alin.ovh/gomponents"
+	. "alin.ovh/gomponents/html"
 )
 
 func Score(h index.DocumentMatch) g.Node {

@@ -1,8 +1,8 @@
 package components
 
 import (
-	g "go.alanpearce.eu/gomponents"
-	. "go.alanpearce.eu/gomponents/html"
+	g "alin.ovh/gomponents"
+	. "alin.ovh/gomponents/html"
 )
 
 func Error(tdata TemplateData) g.Node {
