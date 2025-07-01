@@ -27,8 +27,27 @@ func Packages(result *index.Result) g.Node {
 					return packageRow(hit, *m)
 				}
 
-				return nil
+				return emptyPackageRow(hit)
 			}),
+		),
+	)
+}
+
+func emptyPackageRow(hit index.DocumentMatch) g.Node {
+	return Tr(
+		Td(
+			openDialogLink(hit.ID),
+		),
+		Td(
+			g.Text(hit.ID),
+		),
+		Td(Class("description"),
+			g.Text("No description available"),
+		),
+		g.If(config.DevMode,
+			Td(Class("score"),
+				Score(hit),
+			),
 		),
 	)
 }

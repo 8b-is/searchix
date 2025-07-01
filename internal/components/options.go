@@ -26,8 +26,25 @@ func Options(result *index.Result) g.Node {
 					return optionRow(hit, *m)
 				}
 
-				return nil
+				return emptyOptionRow(hit)
 			}),
+		),
+	)
+}
+
+func emptyOptionRow(hit index.DocumentMatch) g.Node {
+	return Tr(
+		Td(
+			g.Text(hit.ID),
+		),
+		Td(Class("description"),
+			g.Text("No description available"),
+			Dialog(ID(hit.ID)),
+		),
+		g.If(config.DevMode,
+			Td(Class("score"),
+				Score(hit),
+			),
 		),
 	)
 }
