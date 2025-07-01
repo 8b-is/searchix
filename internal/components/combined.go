@@ -21,7 +21,7 @@ func CombinedData(data nix.Importable) g.Node {
 		}
 	}
 
-	return g.Text("")
+	return g.Text("No description Available")
 }
 
 func Combined(result *index.Result) g.Node {
@@ -39,7 +39,7 @@ func Combined(result *index.Result) g.Node {
 			g.MapIter(result.Hits, func(hit index.DocumentMatch) g.Node {
 				return Tr(
 					Td(
-						openCombinedDialogLink(nix.GetKey(hit.Data)),
+						openCombinedDialogLink(hit.ID),
 					),
 					Td(Class("description"),
 						CombinedData(hit.Data),
