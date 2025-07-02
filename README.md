@@ -1,6 +1,7 @@
 # Searchix
 
 [![Build Status](https://ci.alanpearce.eu/badge/searchix.svg)](https://ci.alanpearce.eu/jobs/searchix)
+[![Service Status](https://img.shields.io/endpoint?url=https%3A%2F%2Fstatus.searchix.ovh%2Fshield-badges%2Fstatus.json&style=flat)](https://status.searchix.ovh)
 
 A search tool to find options and packages in the NixOS ecosystem. Aims to be like [search.nixos.org](https://search.nixos.org/) with more sources:
 
