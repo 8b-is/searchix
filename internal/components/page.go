@@ -90,27 +90,34 @@ func Page(tdata TemplateData, children ...g.Node) g.Node {
 				),
 				Main(children...),
 				Footer(
-					g.If(config.Version != "",
-						g.Group([]g.Node{
-							g.Text("Searchix "),
-							A(
-								Href(
-									"https://codeberg.org/alanpearce/searchix/src/tag/"+config.Version+"/CHANGELOG.md",
+					P(
+						g.If(config.Version != "",
+							g.Group([]g.Node{
+								g.Text("Searchix "),
+								A(
+									Href(
+										"https://codeberg.org/alanpearce/searchix/src/tag/"+config.Version+"/CHANGELOG.md",
+									),
+									TitleAttr("View changelog"),
+									g.Text(config.Version),
 								),
-								TitleAttr("View changelog"),
-								g.Text(config.Version),
-							),
-							g.Text(" "),
-						}),
+								g.Text(" "),
+							}),
+						),
 					),
-					g.Text("Made by "),
-					A(Href("https://alanpearce.eu"), g.Text("Alan Pearce")),
-					g.Text(". "),
-					A(Href("https://codeberg.org/alanpearce/searchix"), g.Text("Source code")),
-					g.Text(" "),
-					A(
-						Href("https://codeberg.org/alanpearce/searchix/issues"),
-						g.Text("Report issues"),
+					P(
+						A(Href("https://codeberg.org/alanpearce/searchix"), g.Text("Source code")),
+						g.Text(" "),
+						A(Href("https://status.searchix.ovh"), g.Text("Status page")),
+						g.Text(" "),
+						A(
+							Href("https://codeberg.org/alanpearce/searchix/issues"),
+							g.Text("Report issues"),
+						),
+					),
+					P(
+						g.Text("Made by "),
+						A(Href("https://alanpearce.eu"), g.Text("Alan Pearce")),
 					),
 				),
 			),
