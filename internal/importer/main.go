@@ -76,7 +76,6 @@ func (imp *Importer) createSourceImporter(
 		ctx, cancel := context.WithTimeout(parent, source.Timeout.Duration)
 		defer cancel()
 		files, err := fetcher.FetchIfNeeded(ctx, sourceMeta)
-
 		if err != nil {
 			var exerr *exec.ExitError
 			if errors.As(err, &exerr) {
@@ -233,7 +232,6 @@ func New(
 	cfg *config.Config,
 	options *Options,
 ) (*Importer, errors.E) {
-
 	return &Importer{
 		config:   cfg,
 		log:      options.Logger,

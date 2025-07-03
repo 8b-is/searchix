@@ -78,5 +78,7 @@ func FilterConstructor(
 }
 
 func init() {
-	registry.RegisterTokenFilter(Name, FilterConstructor)
+	if err := registry.RegisterTokenFilter(Name, FilterConstructor); err != nil {
+		panic(err)
+	}
 }

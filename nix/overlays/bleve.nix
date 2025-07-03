@@ -1,8 +1,9 @@
-{ lib
-, stdenv
-, fetchFromGitHub
-, installShellFiles
-, buildGoModule
+{
+  lib,
+  stdenv,
+  fetchFromGitHub,
+  installShellFiles,
+  buildGoModule,
 }:
 let
   gomod = builtins.fromTOML (builtins.readFile ./../../gomod2nix.toml);

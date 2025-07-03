@@ -13,8 +13,10 @@ var nixpkgs = Repository{
 	Repo:  "nixpkgs",
 }
 
-const none = "'none'"
-const self = "'self'"
+const (
+	none = "'none'"
+	self = "'self'"
+)
 
 const maxAge = (1 * 365 * 24 * time.Hour)
 

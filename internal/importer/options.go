@@ -125,7 +125,6 @@ func (i *OptionIngester) Process(ctx context.Context) (<-chan nix.Importable, <-
 
 			var decls []*nix.Link
 			for _, decl := range x["declarations"].([]interface{}) {
-
 				switch decl := reflect.ValueOf(decl); decl.Kind() {
 				case reflect.String:
 					s := decl.String()
@@ -164,7 +163,7 @@ func (i *OptionIngester) Process(ctx context.Context) (<-chan nix.Importable, <-
 				continue
 			}
 
-			var decs = make([]nix.Link, len(i.optJSON.Declarations))
+			decs := make([]nix.Link, len(i.optJSON.Declarations))
 			for i, d := range i.optJSON.Declarations {
 				decs[i] = nix.Link(d)
 			}

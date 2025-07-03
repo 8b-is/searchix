@@ -196,7 +196,7 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 			}
 
 			if meta["platforms"] != nil {
-				var plats = make([]any, len(meta["platforms"].([]any)))
+				plats := make([]any, len(meta["platforms"].([]any)))
 				i := 0
 				for _, plat := range meta["platforms"].([]interface{}) {
 					switch v := reflect.ValueOf(plat); v.Kind() {
@@ -239,7 +239,7 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 			if meta["maintainers"] != nil {
 				switch maint := reflect.ValueOf(meta["maintainers"]); maint.Kind() {
 				case reflect.String:
-					maints = []nix.Maintainer{nix.Maintainer{Name: maint.String(), Github: maint.String()}}
+					maints = []nix.Maintainer{{Name: maint.String(), Github: maint.String()}}
 				case reflect.Slice, reflect.Array:
 					maints = make([]nix.Maintainer, maint.Len())
 					for i, val := range maint.Slice(0, maint.Len()).Interface().([]any) {

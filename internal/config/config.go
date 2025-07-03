@@ -11,8 +11,10 @@ import (
 	"gitlab.com/tozd/go/errors"
 )
 
-var Version string
-var DevMode bool
+var (
+	Version string
+	DevMode bool
+)
 
 const MaxResultsShowAll = 10_000
 
@@ -26,7 +28,6 @@ func (u *URL) MarshalText() ([]byte, error) {
 
 func (u *URL) UnmarshalText(text []byte) (err error) {
 	u.URL, err = url.Parse(string(text))
-
 	if err != nil {
 		return errors.WithMessagef(err, "could not parse URL %s", string(text))
 	}

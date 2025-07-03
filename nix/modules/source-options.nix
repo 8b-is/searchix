@@ -1,7 +1,15 @@
-{ cfg, settingsFormat }:
-{ config, lib, name, ... }:
+{ settingsFormat, ... }:
+{
+  lib,
+  name,
+  ...
+}:
 let
-  inherit (lib) literalExpression mkOption mkEnableOption types;
+  inherit (lib)
+    mkOption
+    mkEnableOption
+    types
+    ;
 in
 {
   freeformType = settingsFormat.type;

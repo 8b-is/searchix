@@ -2,8 +2,8 @@
 
 ## Requirements:
 
--   400MiB disk space
--   ~100MiB RAM (requires setting `Importer.LowMemory = true`)
+- 400MiB disk space
+- ~100MiB RAM (requires setting `Importer.LowMemory = true`)
 
 This [repository](https://git.alanpearce.eu/searchix) (or its [codeberg mirror](https://codeberg.org/alanpearce/searchix)) is importable as a flake containing a NixOS module.
 

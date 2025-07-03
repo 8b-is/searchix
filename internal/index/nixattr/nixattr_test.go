@@ -22,7 +22,6 @@ import (
 )
 
 func TestNixAttrFilter(t *testing.T) {
-
 	tests := []struct {
 		input  analysis.TokenStream
 		output analysis.TokenStream

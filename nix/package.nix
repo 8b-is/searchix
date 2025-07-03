@@ -1,4 +1,5 @@
-{ pkgs ? (
+{
+  pkgs ? (
     let
       inherit (builtins) fetchTree fromJSON readFile;
       inherit ((fromJSON (readFile ../flake.lock)).nodes) nixpkgs gomod2nix;
@@ -8,9 +9,9 @@
         (import "${fetchTree gomod2nix.locked}/overlay.nix")
       ];
     }
-  )
-, buildGoApplication ? pkgs.buildGoApplication
-, css
+  ),
+  buildGoApplication ? pkgs.buildGoApplication,
+  css,
 }:
 let
   version = "0.1.44";
@@ -18,19 +19,19 @@ in
 buildGoApplication {
   pname = "searchix";
   inherit version;
-  src = with pkgs.lib.fileset; toSource {
-    root = ../.;
-    fileset = difference
-      (unions [
+  src =
+    with pkgs.lib.fileset;
+    toSource {
+      root = ../.;
+      fileset = difference (unions [
         ../go.mod
         ../go.sum
         ../internal
         ../frontend
         ../cmd
         ../web
-      ])
-      (maybeMissing ../frontend/static/base.css);
-  };
+      ]) (maybeMissing ../frontend/static/base.css);
+    };
 
   subPackages = [ "cmd/searchix-web" ];
 

@@ -1,9 +1,10 @@
 self:
 
-{ config
-, lib
-, pkgs
-, ...
+{
+  config,
+  lib,
+  pkgs,
+  ...
 }:
 
 let
@@ -41,16 +42,29 @@ let
     ProtectKernelLogs = true;
     ProtectKernelModules = true;
     ProtectKernelTunables = true;
-    RestrictAddressFamilies = [ "AF_UNIX" "AF_INET" "AF_INET6" ];
+    RestrictAddressFamilies = [
+      "AF_UNIX"
+      "AF_INET"
+      "AF_INET6"
+    ];
     RestrictNamespaces = true;
     RestrictRealtime = true;
     RestrictSUIDSGID = true;
     SystemCallArchitectures = "native";
-    SystemCallFilter = [ "@system-service" "~@privileged @setuid @keyring" ];
+    SystemCallFilter = [
+      "@system-service"
+      "~@privileged @setuid @keyring"
+    ];
     UMask = "0066";
   };
 
-  inherit (lib) mkEnableOption mkOption mkIf optionalAttrs types;
+  inherit (lib)
+    mkEnableOption
+    mkOption
+    mkIf
+    optionalAttrs
+    types
+    ;
 in
 {
   options.services.searchix = {
@@ -75,7 +89,15 @@ in
     };
 
     environment = mkOption {
-      type = with types; attrsOf (nullOr (oneOf [ str path package ]));
+      type =
+        with types;
+        attrsOf (
+          nullOr (oneOf [
+            str
+            path
+            package
+          ])
+        );
       default = { };
       description = "Environment variables passed to the service process.";
     };
@@ -92,7 +114,14 @@ in
           };
 
           logLevel = mkOption {
-            type = with types; enum [ "error" "warn" "info" "debug" ];
+            type =
+              with types;
+              enum [
+                "error"
+                "warn"
+                "info"
+                "debug"
+              ];
             description = "Only log messages with the given severity or above.";
             default = "info";
           };
@@ -182,10 +211,15 @@ in
                 };
 
                 sources = mkOption {
-                  type = with types;
-                    attrsOf (submodule (import ./source-options.nix {
-                      inherit cfg settingsFormat;
-                    }));
+                  type =
+                    with types;
+                    attrsOf (
+                      submodule (
+                        import ./source-options.nix {
+                          inherit cfg settingsFormat;
+                        }
+                      )
+                    );
                   default = {
                     nixos.enable = true;
                     nixpkgs.enable = true;
@@ -211,12 +245,15 @@ in
       wantedBy = [ "multi-user.target" ];
       path = with pkgs; [ nix ];
       inherit (cfg) environment;
-      serviceConfig = defaultServiceConfig // {
-        ExecStart = "${package}/bin/searchix-web --config ${(settingsFormat.generate "searchix-config.toml" cfg.settings)}";
-      } // lib.optionalAttrs (cfg.settings.web.port < 1024) {
-        AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];
-        CapabilityBoundingSet = [ "CAP_NET_BIND_SERVICE" ];
-      };
+      serviceConfig =
+        defaultServiceConfig
+        // {
+          ExecStart = "${package}/bin/searchix-web --config ${(settingsFormat.generate "searchix-config.toml" cfg.settings)}";
+        }
+        // lib.optionalAttrs (cfg.settings.web.port < 1024) {
+          AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];
+          CapabilityBoundingSet = [ "CAP_NET_BIND_SERVICE" ];
+        };
     };
 
     users.users = optionalAttrs (cfg.user == "searchix") {

@@ -34,9 +34,7 @@ type HTTPError struct {
 	Code    int
 }
 
-var (
-	sources []*config.Source
-)
+var sources []*config.Source
 
 func applyDevModeOverrides(cfg *config.Config) {
 	if len(cfg.Web.ContentSecurityPolicy.ScriptSrc) == 0 {
@@ -103,8 +101,8 @@ func NewMux(
 					return
 				}
 
-				var pageSize = search.DefaultPageSize
-				var pageNumber = 1
+				pageSize := search.DefaultPageSize
+				pageNumber := 1
 				if pg := r.URL.Query().Get("page"); pg != "" {
 					pageNumber, err = strconv.Atoi(pg)
 					if err != nil || pageNumber > math.MaxInt {

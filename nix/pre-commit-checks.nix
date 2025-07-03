@@ -1,5 +1,5 @@
-{ pkgs }:
-rec {
+{ pkgs, treefmtEval }:
+{
   src = ../.;
   hooks = {
     gotest.enable = false;
@@ -18,10 +18,6 @@ rec {
       # excludes is a regex
       excludes = [ "nix/overlays/.*" ];
     };
-    nixpkgs-fmt = {
-      enable = true;
-      excludes = [ "nix/overlays/.*" ];
-    };
 
     convco.enable = true;
 
@@ -29,11 +25,18 @@ rec {
     check-symlinks.enable = true;
     editorconfig-checker = {
       enable = true;
-      excludes = [ "\.md$" "\.ya?ml$" ];
+      excludes = [
+        "\.md$"
+        "\.ya?ml$"
+      ];
     };
     prettier = {
       enable = true;
-      types_or = [ "plain-text" "yaml" "javascript" ];
+      types_or = [
+        "plain-text"
+        "yaml"
+        "javascript"
+      ];
       excludes = [ "CHANGELOG\.md$" ];
     };
 
@@ -52,7 +55,10 @@ rec {
       enable = true;
       name = "go-mod-tidy";
       description = "Run `go mod tidy`";
-      types_or = [ "go" "go-mod" ];
+      types_or = [
+        "go"
+        "go-mod"
+      ];
       entry = "${pkgs.go}/bin/go mod tidy";
       pass_filenames = false;
     };
@@ -70,7 +76,10 @@ rec {
       name = "generate-default-config";
       description = "Ensure default configuration file is up-to-date";
       files = "^defaults.toml|internal/config/";
-      types_or = [ "go" "toml" ];
+      types_or = [
+        "go"
+        "toml"
+      ];
       entry =
         let
           script = pkgs.writeShellScript "generate-default-config" ''
@@ -78,6 +87,11 @@ rec {
           '';
         in
         builtins.toString script;
+    };
+
+    treefmt = {
+      enable = true;
+      packageOverrides.treefmt = treefmtEval.config.build.wrapper;
     };
   };
 }
