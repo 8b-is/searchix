@@ -3,8 +3,8 @@ package config
 import (
 	"fmt"
 
+	"github.com/Southclaws/fault"
 	"github.com/stoewer/go-strcase"
-	"gitlab.com/tozd/go/errors"
 )
 
 type Fetcher int
@@ -38,7 +38,7 @@ func ParseFetcher(name string) (Fetcher, error) {
 	case "download":
 		return Download, nil
 	default:
-		return UnknownFetcher, errors.Errorf("unsupported fetcher %s", name)
+		return UnknownFetcher, fault.Newf("unsupported fetcher %s", name)
 	}
 }
 

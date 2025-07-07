@@ -5,7 +5,8 @@ import (
 	"net/url"
 	"strings"
 
-	"gitlab.com/tozd/go/errors"
+	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 )
 
 type RepoType int
@@ -22,7 +23,7 @@ type Repository struct {
 	Revision string `toml:"-"`
 }
 
-func (r *Repository) GetRawFileURL(path string) (string, errors.E) {
+func (r *Repository) GetRawFileURL(path string) (string, error) {
 	switch r.Type {
 	case GitHub:
 		ref := r.Revision
@@ -31,19 +32,19 @@ func (r *Repository) GetRawFileURL(path string) (string, errors.E) {
 		}
 		u, err := url.JoinPath("https://github.com/", r.Owner, r.Repo, "raw", ref, path)
 		if err != nil {
-			return "", errors.Wrap(err, "failed to join path")
+			return "", fault.Wrap(err, fmsg.With("failed to join path"))
 		}
 
 		return u, nil
 	default:
-		return "", errors.Errorf(
+		return "", fault.Newf(
 			"don't know how to generate a repository URL for %s",
 			r.Type.String(),
 		)
 	}
 }
 
-func (r *Repository) GetFileURL(path string, line ...string) (string, errors.E) {
+func (r *Repository) GetFileURL(path string, line ...string) (string, error) {
 	switch r.Type {
 	case GitHub:
 		ref := r.Revision
@@ -52,7 +53,7 @@ func (r *Repository) GetFileURL(path string, line ...string) (string, errors.E) 
 		}
 		u, err := url.JoinPath("https://github.com/", r.Owner, r.Repo, "blob", ref, path)
 		if err != nil {
-			return "", errors.Wrap(err, "failed to join path")
+			return "", fault.Wrap(err, fmsg.With("failed to join path"))
 		}
 		if len(line) > 0 {
 			u += fmt.Sprintf("#L%s", line[0])
@@ -60,7 +61,7 @@ func (r *Repository) GetFileURL(path string, line ...string) (string, errors.E) 
 
 		return u, nil
 	default:
-		return "", errors.Errorf(
+		return "", fault.Newf(
 			"don't know how to generate a repository URL for %s",
 			r.Type.String(),
 		)
@@ -90,12 +91,12 @@ func (f RepoType) String() string {
 	}
 }
 
-func parseRepoType(name string) (RepoType, errors.E) {
+func parseRepoType(name string) (RepoType, error) {
 	switch strings.ToLower(name) {
 	case "github":
 		return GitHub, nil
 	default:
-		return UnknownRepoType, errors.Errorf("unsupported repo type %s", name)
+		return UnknownRepoType, fault.Newf("unsupported repo type %s", name)
 	}
 }
 

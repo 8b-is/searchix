@@ -8,7 +8,8 @@ import (
 	"alin.ovh/searchix/internal/file"
 	"alin.ovh/x/log"
 
-	"gitlab.com/tozd/go/errors"
+	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 )
 
 const CurrentSchemaVersion = 5
@@ -30,13 +31,13 @@ type Meta struct {
 	data
 }
 
-func createMeta(path string, log *log.Logger) (*Meta, errors.E) {
+func createMeta(path string, log *log.Logger) (*Meta, error) {
 	exists, err := file.Exists(path)
 	if err != nil {
-		return nil, errors.WithMessage(err, "could not check for existence of index metadata")
+		return nil, fault.Wrap(err, fmsg.With("could not check for existence of index metadata"))
 	}
 	if exists {
-		return nil, errors.New("index metadata already exists")
+		return nil, fault.New("index metadata already exists")
 	}
 
 	return &Meta{
@@ -48,10 +49,10 @@ func createMeta(path string, log *log.Logger) (*Meta, errors.E) {
 	}, nil
 }
 
-func openMeta(path string, log *log.Logger) (*Meta, errors.E) {
+func openMeta(path string, log *log.Logger) (*Meta, error) {
 	exists, err := file.Exists(path)
 	if err != nil {
-		return nil, errors.WithMessage(err, "could not check for existence of index metadata")
+		return nil, fault.Wrap(err, fmsg.With("could not check for existence of index metadata"))
 	}
 	if !exists {
 		return createMeta(path, log)
@@ -59,7 +60,7 @@ func openMeta(path string, log *log.Logger) (*Meta, errors.E) {
 
 	j, baseErr := os.ReadFile(path)
 	if baseErr != nil {
-		return nil, errors.WithMessage(baseErr, "could not open index metadata file")
+		return nil, fault.Wrap(baseErr, fmsg.With("could not open index metadata file"))
 	}
 	meta := Meta{
 		path: path,
@@ -67,7 +68,7 @@ func openMeta(path string, log *log.Logger) (*Meta, errors.E) {
 	}
 
 	if err := json.Unmarshal(j, &meta.data); err != nil {
-		return nil, errors.WithMessage(err, "index metadata is corrupt, try replacing the index")
+		return nil, fault.Wrap(err, fmsg.With("index metadata is corrupt, try replacing the index"))
 	}
 
 	return &meta, nil
@@ -77,16 +78,16 @@ func (i *Meta) IsSchemaOutdated() bool {
 	return i.SchemaVersion < CurrentSchemaVersion
 }
 
-func (i *Meta) Save() errors.E {
+func (i *Meta) Save() error {
 	i.SchemaVersion = CurrentSchemaVersion
 	j, err := json.Marshal(i.data)
 	if err != nil {
-		return errors.WithMessage(err, "could not prepare index metadata for saving")
+		return fault.Wrap(err, fmsg.With("could not prepare index metadata for saving"))
 	}
 	i.log.Debug("saving index metadata", "path", i.path)
 	err = os.WriteFile(i.path, j, 0o600)
 	if err != nil {
-		return errors.WithMessage(err, "could not save index metadata")
+		return fault.Wrap(err, fmsg.With("could not save index metadata"))
 	}
 
 	return nil

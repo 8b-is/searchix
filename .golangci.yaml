@@ -32,11 +32,9 @@ linters:
                 - errors.New(
                 - errors.Unwrap(
                 - errors.Join(
-                - .Wrap(
-                - .Wrapf(
-                - .WithMessage(
-                - .WithMessagef(
-                - .WithStack(
+                - fault.New(
+                - fault.Newf(
+                - fault.Wrap(
                 - (context.Context).Err(
     exclusions:
         generated: lax

@@ -7,11 +7,10 @@ import (
 	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/nix"
 	"alin.ovh/x/log"
-	"gitlab.com/tozd/go/errors"
 )
 
 type Processor interface {
-	Process(context.Context) (<-chan nix.Importable, <-chan errors.E)
+	Process(context.Context) (<-chan nix.Importable, <-chan error)
 }
 
 func process(
@@ -19,7 +18,7 @@ func process(
 	indexer *index.WriteIndex,
 	processor Processor,
 	logger *log.Logger,
-) (bool, errors.E) {
+) (bool, error) {
 	wg := sync.WaitGroup{}
 
 	wg.Add(1)
@@ -29,7 +28,7 @@ func process(
 	iErrs := indexer.Import(ctx, objects)
 
 	var hadObjectErrors bool
-	var criticalError errors.E
+	var criticalError error
 	go func() {
 		for {
 			select {

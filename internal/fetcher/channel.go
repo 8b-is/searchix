@@ -13,8 +13,8 @@ import (
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/index"
 	"alin.ovh/x/log"
-
-	"gitlab.com/tozd/go/errors"
+	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 )
 
 type ChannelFetcher struct {
@@ -26,7 +26,7 @@ type ChannelFetcher struct {
 func NewChannelFetcher(
 	source *config.Source,
 	logger *log.Logger,
-) (*ChannelFetcher, errors.E) {
+) (*ChannelFetcher, error) {
 	switch source.Importer {
 	case config.Options:
 		return &ChannelFetcher{
@@ -34,14 +34,14 @@ func NewChannelFetcher(
 			Logger: logger,
 		}, nil
 	default:
-		return nil, errors.Errorf("unsupported importer type %s", source.Importer)
+		return nil, fault.Newf("unsupported importer type %s", source.Importer)
 	}
 }
 
 func (i *ChannelFetcher) FetchIfNeeded(
 	ctx context.Context,
 	sourceMeta *index.SourceMeta,
-) (*FetchedFiles, errors.E) {
+) (*FetchedFiles, error) {
 	args := []string{
 		"--no-build-output",
 		"--timeout",
@@ -60,7 +60,7 @@ func (i *ChannelFetcher) FetchIfNeeded(
 	cmd := exec.CommandContext(ctx, "nix-build", args...)
 	out, err := cmd.Output()
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to run nix-build (--dry-run)")
+		return nil, fault.Wrap(err, fmsg.With("failed to run nix-build (--dry-run)"))
 	}
 
 	outPath := path.Join(strings.TrimSpace(string(out)), i.Source.OutputPath, "options.json")
@@ -77,7 +77,7 @@ func (i *ChannelFetcher) FetchIfNeeded(
 
 	file, err := os.Open(outPath)
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to open options.json")
+		return nil, fault.Wrap(err, fmsg.With("failed to open options.json"))
 	}
 
 	return &FetchedFiles{

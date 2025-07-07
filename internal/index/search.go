@@ -12,10 +12,11 @@ import (
 	"alin.ovh/searchix/internal/nix"
 	"alin.ovh/x/log"
 
+	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/search"
 	"github.com/blevesearch/bleve/v2/search/query"
-	"gitlab.com/tozd/go/errors"
 )
 
 const DefaultPageSize = 100
@@ -40,7 +41,7 @@ func (index *ReadIndex) LastUpdated() time.Time {
 	return index.meta.LastUpdated()
 }
 
-func (index *ReadIndex) GetEnabledSources() ([]string, errors.E) {
+func (index *ReadIndex) GetEnabledSources() ([]string, error) {
 	facet := bleve.NewFacetRequest("Source", 100)
 	query := bleve.NewMatchAllQuery()
 	search := bleve.NewSearchRequest(query)
@@ -48,7 +49,7 @@ func (index *ReadIndex) GetEnabledSources() ([]string, errors.E) {
 
 	results, err := index.index.Search(search)
 	if err != nil {
-		return nil, errors.WithMessage(err, "could not get list of enabled sources from index")
+		return nil, fault.Wrap(err, fmsg.With("could not get list of enabled sources from index"))
 	}
 
 	enabledSources := make([]string, results.Facets["Source"].Terms.Len())
@@ -77,16 +78,16 @@ func setBoost[T query.BoostableQuery](q T, boost float64) T {
 func (index *ReadIndex) search(
 	ctx context.Context,
 	request *bleve.SearchRequest,
-) (*Result, errors.E) {
+) (*Result, error) {
 	request.Fields = []string{"_data", "Source"}
 
 	bleveResult, err := index.index.SearchInContext(ctx, request)
 	select {
 	case <-ctx.Done():
-		return nil, errors.WithStack(ctx.Err())
+		return nil, fault.Wrap(ctx.Err())
 	default:
 		if err != nil {
-			return nil, errors.WithMessage(err, "failed to execute search query")
+			return nil, fault.Wrap(err, fmsg.With("failed to execute search query"))
 		}
 
 		hits := func(yield func(DocumentMatch) bool) {
@@ -124,7 +125,7 @@ func (index *ReadIndex) Search(
 	keyword string,
 	from int,
 	pageSize int,
-) (*Result, errors.E) {
+) (*Result, error) {
 	query := bleve.NewBooleanQuery()
 
 	if strings.ContainsAny(keyword, "+-=&|<>!(){}[]^\"~*?:\\/") {
@@ -227,7 +228,7 @@ func (index *ReadIndex) GetDocument(
 	ctx context.Context,
 	source *config.Source,
 	id string,
-) (*nix.Importable, errors.E) {
+) (*nix.Importable, error) {
 	key := nix.MakeKey(source, id)
 	query := bleve.NewDocIDQuery([]string{key})
 	search := bleve.NewSearchRequest(query)
@@ -254,7 +255,7 @@ func (index *ReadIndex) GetDocument(
 func (index *ReadIndex) Close() error {
 	err := index.index.Close()
 	if err != nil {
-		return errors.WithStack(err)
+		return fault.Wrap(err)
 	}
 
 	return nil

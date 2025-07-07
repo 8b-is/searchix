@@ -6,6 +6,7 @@ require (
 	alin.ovh/gomponents v1.6.0
 	alin.ovh/x v1.0.0
 	badc0de.net/pkg/flagutil v1.0.1
+	github.com/Southclaws/fault v0.8.2
 	github.com/andybalholm/brotli v1.1.1
 	github.com/bcicen/jstream v1.0.1
 	github.com/blevesearch/bleve/v2 v2.5.2
@@ -20,7 +21,6 @@ require (
 	github.com/stefanfritsch/goldmark-fences v1.0.0
 	github.com/stoewer/go-strcase v1.3.0
 	github.com/yuin/goldmark v1.7.12
-	gitlab.com/tozd/go/errors v0.10.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.41.0
 	modernc.org/sqlite v1.38.0

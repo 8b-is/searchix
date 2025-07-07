@@ -8,8 +8,9 @@ import (
 	"time"
 
 	"alin.ovh/x/log"
+	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/fsnotify/fsnotify"
-	"gitlab.com/tozd/go/errors"
 )
 
 type FileWatcher struct {
@@ -17,10 +18,10 @@ type FileWatcher struct {
 	log     *log.Logger
 }
 
-func NewFileWatcher(log *log.Logger) (*FileWatcher, errors.E) {
+func NewFileWatcher(log *log.Logger) (*FileWatcher, error) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		return nil, errors.WithMessage(err, "could not create watcher")
+		return nil, fault.Wrap(err, fmsg.With("could not create watcher"))
 	}
 
 	return &FileWatcher{
@@ -29,23 +30,23 @@ func NewFileWatcher(log *log.Logger) (*FileWatcher, errors.E) {
 	}, nil
 }
 
-func (i FileWatcher) AddRecursive(from string) errors.E {
+func (i FileWatcher) AddRecursive(from string) error {
 	i.log.Debug(fmt.Sprintf("watching files under %s", from))
 	err := filepath.WalkDir(from, func(path string, entry fs.DirEntry, err error) error {
 		if err != nil {
-			return errors.WithMessagef(err, "could not walk directory %s", path)
+			return fault.Wrap(err, fmsg.Withf("could not walk directory %s", path))
 		}
 		if entry.IsDir() {
 			i.log.Debug(fmt.Sprintf("adding directory %s to watcher", path))
 			if err = i.watcher.Add(path); err != nil {
-				return errors.WithMessagef(err, "could not add directory %s to watcher", path)
+				return fault.Wrap(err, fmsg.Withf("could not add directory %s to watcher", path))
 			}
 		}
 
 		return nil
 	})
 
-	return errors.WithMessage(err, "error walking directory tree")
+	return fault.Wrap(err, fmsg.With("error walking directory tree"))
 }
 
 func (i FileWatcher) Start(callback func(string)) {

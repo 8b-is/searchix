@@ -24,8 +24,9 @@ import (
 	"alin.ovh/searchix/internal/sentryhttp"
 	"alin.ovh/x/log"
 
+	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/osdevisnot/sorvor/pkg/livereload"
-	"gitlab.com/tozd/go/errors"
 )
 
 type HTTPError struct {
@@ -61,12 +62,12 @@ func NewMux(
 	options *Options,
 	log *log.Logger,
 	liveReload bool,
-) (*http.ServeMux, errors.E) {
+) (*http.ServeMux, error) {
 	if cfg == nil {
-		return nil, errors.New("cfg is nil")
+		return nil, fault.New("cfg is nil")
 	}
 	if options.ReadIndex == nil {
-		return nil, errors.New("read index is nil")
+		return nil, fault.New("read index is nil")
 	}
 	index := options.ReadIndex
 	sortSources(cfg.Importer.Sources)
@@ -361,7 +362,7 @@ func NewMux(
 	mdb := options.ManpagesURLMap
 	err := mdb.Open()
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to open manpages URL map")
+		return nil, fault.Wrap(err, fmsg.With("failed to open manpages URL map"))
 	}
 	mux.HandleFunc("/man/{section}/{page}", func(w http.ResponseWriter, r *http.Request) {
 		section := r.PathValue("section")
@@ -385,11 +386,11 @@ func NewMux(
 		top.Handle("/livereload", liveReload)
 		fw, err := NewFileWatcher(log.Named("watcher"))
 		if err != nil {
-			return nil, errors.WithMessage(err, "could not create file watcher")
+			return nil, fault.Wrap(err, fmsg.With("could not create file watcher"))
 		}
 		err = fw.AddRecursive(path.Join("frontend"))
 		if err != nil {
-			return nil, errors.WithMessage(err, "could not add directory to file watcher")
+			return nil, fault.Wrap(err, fmsg.With("could not add directory to file watcher"))
 		}
 		go fw.Start(func(filename string) {
 			log.Debug(fmt.Sprintf("got filename %s", filename))

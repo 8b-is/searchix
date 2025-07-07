@@ -11,8 +11,9 @@ import (
 	"alin.ovh/searchix/internal/config"
 
 	"alin.ovh/x/log"
+	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/andybalholm/brotli"
-	"gitlab.com/tozd/go/errors"
 )
 
 type brotliReadCloser struct {
@@ -28,7 +29,7 @@ func newBrotliReader(src io.ReadCloser) *brotliReadCloser {
 }
 
 func (r *brotliReadCloser) Close() error {
-	return errors.Wrap(r.src.Close(), "failed to call close on underlying reader")
+	return fault.Wrap(r.src.Close(), fmsg.With("failed to call close on underlying reader"))
 }
 
 func FetchFileIfNeeded(
@@ -36,7 +37,7 @@ func FetchFileIfNeeded(
 	log *log.Logger,
 	mtime time.Time,
 	url string,
-) (io.ReadCloser, time.Time, errors.E) {
+) (io.ReadCloser, time.Time, error) {
 	var newMtime time.Time
 	var ifModifiedSince string
 	if !mtime.IsZero() {
@@ -45,10 +46,9 @@ func FetchFileIfNeeded(
 
 	req, baseErr := http.NewRequestWithContext(ctx, "GET", url, http.NoBody)
 	if baseErr != nil {
-		return nil, newMtime, errors.WithMessagef(
+		return nil, newMtime, fault.Wrap(
 			baseErr,
-			"could not create HTTP request for %s",
-			url,
+			fmsg.Withf("could not create HTTP request for %s", url),
 		)
 	}
 
@@ -59,11 +59,14 @@ func FetchFileIfNeeded(
 	}
 	res, baseErr := http.DefaultClient.Do(req)
 	if baseErr != nil {
-		return nil, newMtime, errors.WithMessagef(baseErr, "could not make HTTP request to %s", url)
+		return nil, newMtime, fault.Wrap(
+			baseErr,
+			fmsg.Withf("could not make HTTP request to %s", url),
+		)
 	}
 
 	var body io.ReadCloser
-	var err errors.E
+	var err error
 	switch res.StatusCode {
 	case http.StatusNotModified:
 		newMtime = mtime
@@ -88,10 +91,10 @@ func FetchFileIfNeeded(
 		case "", "identity", "gzip":
 			body = res.Body
 		default:
-			err = errors.Errorf("cannot handle a body with content-encoding %s", ce)
+			err = fault.Newf("cannot handle a body with content-encoding %s", ce)
 		}
 	default:
-		err = errors.Errorf("got response code %d, don't know what to do", res.StatusCode)
+		err = fault.Newf("got response code %d, don't know what to do", res.StatusCode)
 	}
 
 	return NewReadCloser(body), newMtime, err

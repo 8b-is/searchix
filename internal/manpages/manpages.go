@@ -12,7 +12,8 @@ import (
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/fetcher/http"
 	"alin.ovh/x/log"
-	"gitlab.com/tozd/go/errors"
+	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 )
 
 const basename = "manpage-urls.json"
@@ -35,29 +36,29 @@ func New(cfg *config.Config, logger *log.Logger) *URLMap {
 func (m *URLMap) Update(
 	ctx context.Context,
 	source *config.Source,
-) errors.E {
+) error {
 	if !source.Manpages.Enable {
-		return errors.New("manpages not enabled for this source")
+		return fault.New("manpages not enabled for this source")
 	}
 
 	if source.Manpages.Path == "" {
-		return errors.New("manpages repo source path not configured")
+		return fault.New("manpages repo source path not configured")
 	}
 
 	url, err := makeManpageURL(source)
 	if err != nil {
-		return errors.WithMessage(err, "failed to join manpages URL")
+		return fault.Wrap(err, fmsg.With("failed to join manpages URL"))
 	}
 
 	m.logger.Debug("fetching manpages URL map", "url", url)
 	r, mtime, err := http.FetchFileIfNeeded(ctx, m.logger.Named("http"), m.mtime, url)
 	if err != nil {
-		return errors.WithMessage(err, "failed to fetch manpages")
+		return fault.Wrap(err, fmsg.With("failed to fetch manpages"))
 	}
 	defer r.Close()
 
 	if err := m.save(r); err != nil {
-		return errors.WithMessage(err, "failed to save manpages")
+		return fault.Wrap(err, fmsg.With("failed to save manpages"))
 	}
 
 	m.mtime = mtime
@@ -66,24 +67,24 @@ func (m *URLMap) Update(
 }
 
 // Open loads the manpage URLs from the JSON file
-func (m *URLMap) Open() errors.E {
+func (m *URLMap) Open() error {
 	m.logger.Debug("opening manpages file", "path", m.path)
 
 	stat, err := os.Stat(m.path)
 	if err != nil {
-		return errors.WithMessagef(err, "failed to stat manpages file: %s", m.path)
+		return fault.Wrap(err, fmsg.Withf("failed to stat manpages file: %s", m.path))
 	}
 
 	data, err := os.ReadFile(m.path)
 	if err != nil {
-		return errors.WithMessage(err, "failed to read manpages file")
+		return fault.Wrap(err, fmsg.With("failed to read manpages file"))
 	}
 
 	m.mtime = stat.ModTime()
 
 	m.urlMap = make(map[string]string)
 	if err := json.Unmarshal(data, &m.urlMap); err != nil {
-		return errors.WithMessage(err, "failed to parse manpages JSON")
+		return fault.Wrap(err, fmsg.With("failed to parse manpages JSON"))
 	}
 
 	m.logger.Debug("loaded manpages data", "urls", len(m.urlMap))
@@ -91,17 +92,17 @@ func (m *URLMap) Open() errors.E {
 	return nil
 }
 
-func (m *URLMap) save(r io.Reader) errors.E {
+func (m *URLMap) save(r io.Reader) error {
 	m.logger.Debug("saving manpages file", "path", m.path)
 
 	f, err := os.Create(m.path)
 	if err != nil {
-		return errors.WithMessage(err, "failed to create manpages file")
+		return fault.Wrap(err, fmsg.With("failed to create manpages file"))
 	}
 	defer f.Close()
 
 	if _, err := io.Copy(f, r); err != nil {
-		return errors.WithMessage(err, "failed to write manpages file")
+		return fault.Wrap(err, fmsg.With("failed to write manpages file"))
 	}
 
 	return nil
@@ -119,10 +120,10 @@ func (m *URLMap) Get(section string, page string) (string, bool) {
 	return url, true
 }
 
-func makeManpageURL(source *config.Source) (string, errors.E) {
+func makeManpageURL(source *config.Source) (string, error) {
 	url, err := source.Repo.GetRawFileURL(source.Manpages.Path)
 	if err != nil {
-		return "", errors.WithMessage(err, "failed to join manpage URL")
+		return "", fault.Wrap(err, fmsg.With("failed to join manpage URL"))
 	}
 
 	return url, nil

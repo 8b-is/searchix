@@ -12,7 +12,8 @@ import (
 	"alin.ovh/searchix/internal/manpages"
 	"alin.ovh/x/log"
 
-	"gitlab.com/tozd/go/errors"
+	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
 )
@@ -36,7 +37,7 @@ func New(
 	options *Options,
 	log *log.Logger,
 	liveReload bool,
-) (*Server, errors.E) {
+) (*Server, error) {
 	mux, err := NewMux(conf, options, log, liveReload)
 	if err != nil {
 		return nil, err
@@ -57,16 +58,15 @@ func New(
 	}, nil
 }
 
-func (s *Server) Start() errors.E {
+func (s *Server) Start() error {
 	listenAddress := net.JoinHostPort(s.cfg.Web.ListenAddress, strconv.Itoa(s.cfg.Web.Port))
 	l, err := net.Listen("tcp", listenAddress)
 	if err != nil {
-		return errors.WithMessagef(
-			err,
-			"could not listen on address %s and port %d",
-			s.cfg.Web.ListenAddress,
-			s.cfg.Web.Port,
-		)
+		return fault.Wrap(
+			err, fmsg.Withf("could not listen on address %s and port %d",
+				s.cfg.Web.ListenAddress,
+				s.cfg.Web.Port,
+			))
 	}
 	s.listener = l
 
@@ -79,7 +79,7 @@ func (s *Server) Start() errors.E {
 	}
 
 	if err := s.server.Serve(l); err != nil && err != http.ErrServerClosed {
-		return errors.WithMessage(err, "could not start server")
+		return fault.Wrap(err, fmsg.With("could not start server"))
 	}
 
 	return nil

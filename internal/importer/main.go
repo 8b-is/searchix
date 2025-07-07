@@ -2,6 +2,7 @@ package importer
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"maps"
 	"math"
@@ -18,7 +19,8 @@ import (
 	"alin.ovh/x/log"
 	"github.com/getsentry/sentry-go"
 
-	"gitlab.com/tozd/go/errors"
+	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 )
 
 type Options struct {
@@ -58,14 +60,14 @@ func (imp *Importer) createSourceImporter(
 	parent context.Context,
 	meta *index.Meta,
 	forceUpdate bool,
-) func(*config.Source) errors.E {
-	return func(source *config.Source) errors.E {
+) func(*config.Source) error {
+	return func(source *config.Source) error {
 		logger := imp.log.With("name", source.Key)
 		logger.Debug("starting fetcher")
 
 		fetcher, err := fetcher.New(source, logger)
 		if err != nil {
-			return errors.WithMessage(err, "error creating fetcher")
+			return fault.Wrap(err, fmsg.With("error creating fetcher"))
 		}
 
 		sourceMeta := meta.GetSourceMeta(source.Key)
@@ -93,7 +95,7 @@ func (imp *Importer) createSourceImporter(
 				}
 			}
 
-			return errors.WithMessage(err, "importer fetch failed")
+			return fault.Wrap(err, fmsg.With("importer fetch failed"))
 		}
 		logger.Info(
 			"importer fetch succeeded",
@@ -147,12 +149,12 @@ func (imp *Importer) createSourceImporter(
 				)
 			}
 			if err != nil {
-				return errors.WithMessagef(err, "failed to create processor")
+				return fault.Wrap(err, fmsg.Withf("failed to create processor"))
 			}
 
 			hadWarnings, err := process(ctx, imp.indexer, processor, logger)
 			if err != nil {
-				return errors.WithMessagef(err, "failed to process source")
+				return fault.Wrap(err, fmsg.Withf("failed to process source"))
 			}
 
 			if source.Manpages.Enable {
@@ -187,7 +189,7 @@ func (imp *Importer) Start(
 	ctx context.Context,
 	forceUpdate bool,
 	onlyUpdateSources *[]string,
-) errors.E {
+) error {
 	if len(imp.config.Importer.Sources) == 0 {
 		imp.log.Info("No sources enabled")
 
@@ -220,7 +222,7 @@ func (imp *Importer) Start(
 
 	err := imp.indexer.SaveMeta()
 	if err != nil {
-		return errors.Wrap(err, "failed to save metadata")
+		return fault.Wrap(err, fmsg.With("failed to save metadata"))
 	}
 
 	SetLastUpdated(time.Now())
@@ -231,7 +233,7 @@ func (imp *Importer) Start(
 func New(
 	cfg *config.Config,
 	options *Options,
-) (*Importer, errors.E) {
+) (*Importer, error) {
 	return &Importer{
 		config:   cfg,
 		log:      options.Logger,
@@ -243,13 +245,13 @@ func New(
 func (imp *Importer) EnsureSourcesIndexed(
 	ctx context.Context,
 	read *index.ReadIndex,
-) errors.E {
+) error {
 	cfgEnabledSources := slices.Collect(maps.Keys(imp.config.Importer.Sources))
 	slices.Sort(cfgEnabledSources)
 
 	indexedSources, err := read.GetEnabledSources()
 	if err != nil {
-		return errors.Wrap(err, "Failed to get enabled sources from index")
+		return fault.Wrap(err, fmsg.With("Failed to get enabled sources from index"))
 	}
 	slices.Sort(indexedSources)
 	if !slices.Equal(cfgEnabledSources, indexedSources) {
@@ -267,7 +269,7 @@ func (imp *Importer) EnsureSourcesIndexed(
 				&newSources,
 			)
 			if err != nil {
-				return errors.Wrap(err, "Failed to update index with new sources")
+				return fault.Wrap(err, fmsg.With("Failed to update index with new sources"))
 			}
 		}
 		if len(retiredSources) > 0 {
@@ -275,7 +277,7 @@ func (imp *Importer) EnsureSourcesIndexed(
 			for _, s := range retiredSources {
 				err := imp.indexer.DeleteBySource(s)
 				if err != nil {
-					return errors.Wrapf(err, "Failed to remove retired source %s", s)
+					return fault.Wrap(err, fmsg.Withf("Failed to remove retired source %s", s))
 				}
 			}
 		}
@@ -290,7 +292,7 @@ func (imp *Importer) StartUpdateTimer(
 ) {
 	const monitorSlug = "import"
 	localHub.WithScope(func(scope *sentry.Scope) {
-		var err errors.E
+		var err error
 		scope.SetContext("monitor", sentry.Context{"slug": monitorSlug})
 		monitorConfig := &sentry.MonitorConfig{
 			Schedule:      sentry.IntervalSchedule(1, sentry.MonitorScheduleUnitDay),

@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"io"
 
-	"gitlab.com/tozd/go/errors"
+	"github.com/Southclaws/fault"
 )
 
 type Reader struct {
@@ -20,5 +20,5 @@ func NewReadCloser(body io.ReadCloser) *Reader {
 }
 
 func (r *Reader) Close() error {
-	return errors.WithStack(r.closer.Close())
+	return fault.Wrap(r.closer.Close())
 }

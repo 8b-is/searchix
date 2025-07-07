@@ -8,7 +8,8 @@ import (
 	"io"
 	"io/fs"
 
-	"gitlab.com/tozd/go/errors"
+	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 )
 
 var Assets = &AssetCollection{
@@ -30,17 +31,17 @@ type AssetCollection struct {
 	ByPath      map[string]*Asset
 }
 
-func newAsset(filename string) (*Asset, errors.E) {
+func newAsset(filename string) (*Asset, error) {
 	file, err := Files.Open(filename)
 	if err != nil {
-		return nil, errors.WithMessagef(err, "could not open file %s", filename)
+		return nil, fault.Wrap(err, fmsg.Withf("could not open file %s", filename))
 	}
 	defer file.Close()
 
 	shasum := sha256.New()
 	hash := fnv.New64a()
 	if _, err := io.Copy(io.MultiWriter(shasum, hash), file); err != nil {
-		return nil, errors.WithMessagef(err, "could not hash file %s", filename)
+		return nil, fault.Wrap(err, fmsg.Withf("could not hash file %s", filename))
 	}
 
 	return &Asset{
@@ -51,10 +52,10 @@ func newAsset(filename string) (*Asset, errors.E) {
 	}, nil
 }
 
-func hashScripts() errors.E {
+func hashScripts() error {
 	scripts, err := fs.Glob(Files, "static/**.js")
 	if err != nil {
-		return errors.WithMessage(err, "could not glob files")
+		return fault.Wrap(err, fmsg.With("could not glob files"))
 	}
 	for _, filename := range scripts {
 		asset, err := newAsset(filename)
@@ -68,10 +69,10 @@ func hashScripts() errors.E {
 	return nil
 }
 
-func hashStyles() errors.E {
+func hashStyles() error {
 	styles, err := fs.Glob(Files, "static/**.css")
 	if err != nil {
-		return errors.WithMessage(err, "could not glob files")
+		return fault.Wrap(err, fmsg.With("could not glob files"))
 	}
 	for _, filename := range styles {
 		asset, err := newAsset(filename)
@@ -85,7 +86,7 @@ func hashStyles() errors.E {
 	return nil
 }
 
-func Rehash() (err errors.E) {
+func Rehash() (err error) {
 	Assets.Scripts = []*Asset{}
 	err = hashScripts()
 	if err != nil {

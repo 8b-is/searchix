@@ -18,6 +18,8 @@ import (
 	"alin.ovh/x/log"
 	"go.uber.org/zap"
 
+	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/analysis"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
@@ -32,7 +34,6 @@ import (
 	"github.com/blevesearch/bleve/v2/document"
 	"github.com/blevesearch/bleve/v2/mapping"
 	index "github.com/blevesearch/bleve_index_api"
-	"gitlab.com/tozd/go/errors"
 )
 
 var idAnalyzer analysis.Analyzer
@@ -51,14 +52,10 @@ type WriteIndex struct {
 }
 
 type BatchError struct {
-	errors.E
+	error
 }
 
-func (e *BatchError) Error() string {
-	return e.E.Error()
-}
-
-func createIndexMapping() (mapping.IndexMapping, errors.E) {
+func createIndexMapping() (mapping.IndexMapping, error) {
 	indexMapping := bleve.NewIndexMapping()
 	indexMapping.StoreDynamic = false
 	indexMapping.IndexDynamic = false
@@ -78,7 +75,7 @@ func createIndexMapping() (mapping.IndexMapping, errors.E) {
 		"max":  25.0,
 	})
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to add ngram token filter")
+		return nil, fault.Wrap(err, fmsg.With("failed to add ngram token filter"))
 	}
 
 	err = indexMapping.AddCustomAnalyzer("c_name", map[string]any{
@@ -90,7 +87,7 @@ func createIndexMapping() (mapping.IndexMapping, errors.E) {
 		},
 	})
 	if err != nil {
-		return nil, errors.WithMessage(err, "could not add custom analyser")
+		return nil, fault.Wrap(err, fmsg.With("could not add custom analyser"))
 	}
 
 	err = indexMapping.AddCustomAnalyzer("loc", map[string]any{
@@ -102,7 +99,7 @@ func createIndexMapping() (mapping.IndexMapping, errors.E) {
 		},
 	})
 	if err != nil {
-		return nil, errors.WithMessage(err, "could not add custom analyser")
+		return nil, fault.Wrap(err, fmsg.With("could not add custom analyser"))
 	}
 
 	err = indexMapping.AddCustomAnalyzer("dotted_keyword", map[string]any{
@@ -113,7 +110,7 @@ func createIndexMapping() (mapping.IndexMapping, errors.E) {
 		},
 	})
 	if err != nil {
-		return nil, errors.WithMessage(err, "could not add custom analyser")
+		return nil, fault.Wrap(err, fmsg.With("could not add custom analyser"))
 	}
 
 	identityFieldMapping := bleve.NewKeywordFieldMapping()
@@ -179,7 +176,7 @@ func createIndexMapping() (mapping.IndexMapping, errors.E) {
 	return indexMapping, nil
 }
 
-func createIndex(indexPath string, options *Options) (bleve.Index, errors.E) {
+func createIndex(indexPath string, options *Options) (bleve.Index, error) {
 	indexMapping, err := createIndexMapping()
 	if err != nil {
 		return nil, err
@@ -199,7 +196,7 @@ func createIndex(indexPath string, options *Options) (bleve.Index, errors.E) {
 		kvconfig,
 	)
 	if baseErr != nil {
-		return nil, errors.WithMessagef(baseErr, "unable to create index at path %s", indexPath)
+		return nil, fault.Wrap(baseErr, fmsg.Withf("unable to create index at path %s", indexPath))
 	}
 
 	return idx, nil
@@ -218,16 +215,16 @@ var expectedDataFiles = []string{
 	"manpage-urls.json",
 }
 
-func deleteIndex(dataRoot string) errors.E {
+func deleteIndex(dataRoot string) error {
 	dir, err := os.ReadDir(dataRoot)
 	if err != nil {
-		return errors.WithMessagef(err, "could not read data directory %s", dataRoot)
+		return fault.Wrap(err, fmsg.Withf("could not read data directory %s", dataRoot))
 	}
 	remainingFiles := slices.DeleteFunc(dir, func(e fs.DirEntry) bool {
 		return slices.Contains(expectedDataFiles, e.Name())
 	})
 	if len(remainingFiles) > 0 {
-		return errors.Errorf(
+		return fault.Newf(
 			"cowardly refusing to remove data directory %s as it contains unknown files: %v",
 			dataRoot,
 			remainingFiles,
@@ -236,7 +233,7 @@ func deleteIndex(dataRoot string) errors.E {
 
 	err = os.RemoveAll(dataRoot)
 	if err != nil {
-		return errors.WithMessagef(err, "could not remove data directory %s", dataRoot)
+		return fault.Wrap(err, fmsg.Withf("could not remove data directory %s", dataRoot))
 	}
 
 	return nil
@@ -246,13 +243,13 @@ func OpenOrCreate(
 	dataRoot string,
 	force bool,
 	options *Options,
-) (*ReadIndex, *WriteIndex, bool, errors.E) {
-	var err errors.E
+) (*ReadIndex, *WriteIndex, bool, error) {
+	var err error
 	bleve.SetLog(zap.NewStdLog(options.Logger.Named("bleve").GetLogger()))
 	if !filepath.IsAbs(dataRoot) {
 		wd, err := os.Getwd()
 		if err != nil {
-			return nil, nil, false, errors.WithMessagef(err, "could not get working directory")
+			return nil, nil, false, fault.Wrap(err, fmsg.Withf("could not get working directory"))
 		}
 		dataRoot = filepath.Join(wd, dataRoot)
 	}
@@ -262,11 +259,10 @@ func OpenOrCreate(
 
 	exists, err := file.Exists(indexPath)
 	if err != nil {
-		return nil, nil, exists, errors.WithMessagef(
-			err,
-			"could not check if index exists at path %s",
-			indexPath,
-		)
+		return nil, nil, exists, fault.Wrap(
+			err, fmsg.Withf("could not check if index exists at path %s",
+				indexPath,
+			))
 	}
 
 	var idx bleve.Index
@@ -292,7 +288,7 @@ func OpenOrCreate(
 		var baseErr error
 		idx, baseErr = bleve.Open(indexPath)
 		if baseErr != nil {
-			return nil, nil, exists, errors.WithMessagef(baseErr, "could not open index at path %s", indexPath)
+			return nil, nil, exists, fault.Wrap(baseErr, fmsg.Withf("could not open index at path %s", indexPath))
 		}
 
 		meta, err = openMeta(metaPath, options.Logger)
@@ -324,16 +320,16 @@ func OpenOrCreate(
 		nil
 }
 
-func (i *WriteIndex) SaveMeta() errors.E {
+func (i *WriteIndex) SaveMeta() error {
 	return i.Meta.Save()
 }
 
 func (i *WriteIndex) Import(
 	ctx context.Context,
 	objects <-chan nix.Importable,
-) <-chan errors.E {
-	var err errors.E
-	errs := make(chan errors.E)
+) <-chan error {
+	var err error
+	errs := make(chan error)
 
 	go func() {
 		defer close(errs)
@@ -353,7 +349,7 @@ func (i *WriteIndex) Import(
 
 			doc := document.NewDocument(nix.GetKey(obj))
 			if err := indexMapping.MapDocument(doc, obj); err != nil {
-				errs <- errors.WithMessagef(err, "could not map document for object: %s", obj.GetName())
+				errs <- fault.Wrap(err, fmsg.Withf("could not map document for object: %s", obj.GetName()))
 
 				continue
 			}
@@ -361,7 +357,7 @@ func (i *WriteIndex) Import(
 			var data bytes.Buffer
 			enc := gob.NewEncoder(&data)
 			if err := enc.Encode(&obj); err != nil {
-				errs <- errors.WithMessage(err, "could not store object in search index")
+				errs <- fault.Wrap(err, fmsg.With("could not store object in search index"))
 
 				continue
 			}
@@ -376,7 +372,7 @@ func (i *WriteIndex) Import(
 
 			// log.Debug("adding object to index", "name", opt.Name)
 			if err := batch.IndexAdvanced(doc); err != nil {
-				errs <- errors.WithMessagef(err, "could not index object %s", obj.GetName())
+				errs <- fault.Wrap(err, fmsg.Withf("could not index object %s", obj.GetName()))
 
 				continue
 			}
@@ -400,11 +396,11 @@ func (i *WriteIndex) Import(
 	return errs
 }
 
-func (i *WriteIndex) Flush(batch *bleve.Batch) errors.E {
+func (i *WriteIndex) Flush(batch *bleve.Batch) error {
 	size := batch.Size()
 	if size == 0 {
 		return &BatchError{
-			E: errors.New("no documents to flush"),
+			fault.New("no documents to flush"),
 		}
 	}
 	i.log.Debug("flushing batch", "size", size)
@@ -412,7 +408,7 @@ func (i *WriteIndex) Flush(batch *bleve.Batch) errors.E {
 	err := i.index.Batch(batch)
 	if err != nil {
 		return &BatchError{
-			E: errors.WithMessagef(err, "could not flush batch"),
+			fault.Wrap(err, fmsg.Withf("could not flush batch")),
 		}
 	}
 
@@ -421,20 +417,20 @@ func (i *WriteIndex) Flush(batch *bleve.Batch) errors.E {
 	return nil
 }
 
-func (i *WriteIndex) Close() (err errors.E) {
+func (i *WriteIndex) Close() (err error) {
 	if e := i.Meta.Save(); e != nil {
 		// index needs to be closed anyway
-		err = errors.WithMessage(e, "could not save metadata")
+		err = fault.Wrap(e, fmsg.With("could not save metadata"))
 	}
 
 	if e := i.index.Close(); e != nil {
-		err = errors.WithMessagef(e, "could not close index")
+		err = fault.Wrap(e, fmsg.Withf("could not close index"))
 	}
 
 	return err
 }
 
-func (i *WriteIndex) DeleteBySource(source string) errors.E {
+func (i *WriteIndex) DeleteBySource(source string) error {
 	query := bleve.NewTermQuery(source)
 	search := bleve.NewSearchRequest(query)
 	search.Size = math.MaxInt
@@ -442,7 +438,7 @@ func (i *WriteIndex) DeleteBySource(source string) errors.E {
 
 	results, err := i.index.Search(search)
 	if err != nil {
-		return errors.WithMessagef(err, "failed to query documents of retired index %s", source)
+		return fault.Wrap(err, fmsg.Withf("failed to query documents of retired index %s", source))
 	}
 
 	batch := i.index.NewBatch()
@@ -458,7 +454,7 @@ func (i *WriteIndex) DeleteBySource(source string) errors.E {
 	}
 	err = i.Flush(batch)
 	if err != nil {
-		return errors.WithStack(err)
+		return fault.Wrap(err)
 	}
 
 	if uint64(search.Size) < results.Total {

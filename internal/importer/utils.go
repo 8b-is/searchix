@@ -8,8 +8,9 @@ import (
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/nix"
 
+	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/bcicen/jstream"
-	"gitlab.com/tozd/go/errors"
 )
 
 func ValueTypeToString(valueType jstream.ValueType) string {
@@ -33,10 +34,10 @@ func ValueTypeToString(valueType jstream.ValueType) string {
 	return "very strange"
 }
 
-func MakeChannelLink(repo config.Repository, subPath string) (*nix.Link, errors.E) {
+func MakeChannelLink(repo config.Repository, subPath string) (*nix.Link, error) {
 	url, err := repo.GetFileURL(subPath)
 	if err != nil {
-		return nil, err
+		return nil, fault.Wrap(err, fmsg.Withf("failed to generate channel link for %s", subPath))
 	}
 
 	return &nix.Link{
@@ -45,16 +46,14 @@ func MakeChannelLink(repo config.Repository, subPath string) (*nix.Link, errors.
 	}, nil
 }
 
-func setRepoRevision(file io.ReadCloser, source *config.Source) errors.E {
+func setRepoRevision(file io.ReadCloser, source *config.Source) error {
 	if file != nil {
 		defer file.Close()
 		var str strings.Builder
 		_, err := io.Copy(&str, file)
 		if err != nil {
-			return errors.WithMessagef(
-				err,
-				"unable to read revision file",
-			)
+			return fault.Wrap(
+				err, fmsg.Withf("unable to read revision file"))
 		}
 
 		source.Repo.Revision = strings.TrimSpace(str.String())

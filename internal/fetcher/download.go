@@ -7,9 +7,10 @@ import (
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/fetcher/http"
 	"alin.ovh/searchix/internal/index"
+	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 
 	"alin.ovh/x/log"
-	"gitlab.com/tozd/go/errors"
 )
 
 type DownloadFetcher struct {
@@ -21,7 +22,7 @@ type DownloadFetcher struct {
 func NewDownloadFetcher(
 	source *config.Source,
 	logger *log.Logger,
-) (*DownloadFetcher, errors.E) {
+) (*DownloadFetcher, error) {
 	switch source.Importer {
 	case config.Options, config.Packages:
 		return &DownloadFetcher{
@@ -29,7 +30,7 @@ func NewDownloadFetcher(
 			Logger: logger,
 		}, nil
 	default:
-		return nil, errors.Errorf("unsupported importer type %s", source.Importer)
+		return nil, fault.Newf("unsupported importer type %s", source.Importer)
 	}
 }
 
@@ -42,7 +43,7 @@ var files = map[string]string{
 func (i *DownloadFetcher) FetchIfNeeded(
 	ctx context.Context,
 	sourceMeta *index.SourceMeta,
-) (*FetchedFiles, errors.E) {
+) (*FetchedFiles, error) {
 	f := &FetchedFiles{}
 	sourceUpdated := sourceMeta.Updated
 
@@ -58,11 +59,13 @@ func (i *DownloadFetcher) FetchIfNeeded(
 	for _, filename := range filesToFetch {
 		fetchURL, baseErr := url.JoinPath(i.Source.URL, filename)
 		if baseErr != nil {
-			return nil, errors.WithMessagef(
+			return nil, fault.Wrap(
 				baseErr,
-				"could not build URL with elements %s and %s",
-				i.Source.URL,
-				filename,
+				fmsg.Withf(
+					"could not build URL with elements %s and %s",
+					i.Source.URL,
+					filename,
+				),
 			)
 		}
 
@@ -72,7 +75,7 @@ func (i *DownloadFetcher) FetchIfNeeded(
 		if err != nil {
 			i.Logger.Warn("failed to fetch file", "url", fetchURL, "error", err)
 
-			return nil, err
+			return nil, fault.Wrap(err, fmsg.Withf("could not fetch file %s", filename))
 		}
 		// don't bother to issue requests for the later files
 		if mtime.Before(sourceUpdated) {
@@ -88,7 +91,7 @@ func (i *DownloadFetcher) FetchIfNeeded(
 		case files["packages"]:
 			f.Packages = body
 		default:
-			return f, errors.Errorf("unknown filename %s", filename)
+			return f, fault.Newf("unknown filename %s", filename)
 		}
 	}
 

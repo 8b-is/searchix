@@ -9,7 +9,8 @@ import (
 	"alin.ovh/searchix/internal/index"
 
 	"alin.ovh/x/log"
-	"gitlab.com/tozd/go/errors"
+	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 )
 
 type NixpkgsChannelFetcher struct {
@@ -17,16 +18,16 @@ type NixpkgsChannelFetcher struct {
 	Logger *log.Logger
 }
 
-func makeChannelURL(channel string, subPath string) (string, errors.E) {
+func makeChannelURL(channel string, subPath string) (string, error) {
 	url, err := url.JoinPath("https://channels.nixos.org/", channel, subPath)
 
-	return url, errors.WithMessagef(err, "error creating URL")
+	return url, fault.Wrap(err, fmsg.Withf("error creating URL"))
 }
 
 func NewNixpkgsChannelFetcher(
 	source *config.Source,
 	logger *log.Logger,
-) (*NixpkgsChannelFetcher, errors.E) {
+) (*NixpkgsChannelFetcher, error) {
 	switch source.Importer {
 	case config.Options, config.Packages:
 		return &NixpkgsChannelFetcher{
@@ -34,7 +35,7 @@ func NewNixpkgsChannelFetcher(
 			Logger: logger,
 		}, nil
 	default:
-		return nil, errors.Errorf("unsupported importer type %s", source.Importer)
+		return nil, fault.Newf("unsupported importer type %s", source.Importer)
 	}
 }
 
@@ -47,7 +48,7 @@ const (
 func (i *NixpkgsChannelFetcher) FetchIfNeeded(
 	ctx context.Context,
 	sourceMeta *index.SourceMeta,
-) (f *FetchedFiles, err errors.E) {
+) (f *FetchedFiles, err error) {
 	f = &FetchedFiles{}
 
 	filesToFetch := make([]string, 2)
@@ -69,9 +70,7 @@ func (i *NixpkgsChannelFetcher) FetchIfNeeded(
 		i.Logger.Debug("attempting to fetch file", "url", fetchURL)
 		body, mtime, err := http.FetchFileIfNeeded(ctx, i.Logger, sourceMeta.Updated, fetchURL)
 		if err != nil {
-			i.Logger.Warn("failed to fetch file", "url", fetchURL, "error", err)
-
-			return f, err
+			return f, fault.Wrap(err, fmsg.Withf("failed to fetch file with url %s", fetchURL))
 		}
 		// don't bother to issue requests for the later files
 		if mtime.Before(sourceMeta.Updated) {
@@ -87,7 +86,7 @@ func (i *NixpkgsChannelFetcher) FetchIfNeeded(
 		case packagesFileName:
 			f.Packages = body
 		default:
-			return f, errors.Errorf("unknown file kind %s", filename)
+			return f, fault.Newf("unknown file kind %s", filename)
 		}
 	}
 

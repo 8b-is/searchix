@@ -7,8 +7,7 @@ import (
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/index"
 	"alin.ovh/x/log"
-
-	"gitlab.com/tozd/go/errors"
+	"github.com/Southclaws/fault"
 )
 
 type FetchedFiles struct {
@@ -18,13 +17,13 @@ type FetchedFiles struct {
 }
 
 type Fetcher interface {
-	FetchIfNeeded(context.Context, *index.SourceMeta) (*FetchedFiles, errors.E)
+	FetchIfNeeded(context.Context, *index.SourceMeta) (*FetchedFiles, error)
 }
 
 func New(
 	source *config.Source,
 	logger *log.Logger,
-) (fetcher Fetcher, err errors.E) {
+) (fetcher Fetcher, err error) {
 	switch source.Fetcher {
 	case config.ChannelNixpkgs:
 		fetcher, err = NewNixpkgsChannelFetcher(source, logger)
@@ -33,7 +32,7 @@ func New(
 	case config.Download:
 		fetcher, err = NewDownloadFetcher(source, logger)
 	default:
-		err = errors.Errorf("unsupported fetcher type %s", source.Fetcher.String())
+		err = fault.Newf("unsupported fetcher type %s", source.Fetcher.String())
 	}
 
 	return

@@ -1,15 +1,17 @@
 package config
 
 import (
+	"errors"
 	"maps"
 	"net/url"
 	"os"
 	"time"
 
 	"alin.ovh/x/log"
+	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/creasty/defaults"
 	"github.com/pelletier/go-toml/v2"
-	"gitlab.com/tozd/go/errors"
 )
 
 var (
@@ -30,7 +32,7 @@ func (u *URL) MarshalText() ([]byte, error) {
 func (u *URL) UnmarshalText(text []byte) (err error) {
 	u.URL, err = url.Parse(string(text))
 	if err != nil {
-		return errors.WithMessagef(err, "could not parse URL %s", string(text))
+		return fault.Wrap(err, fmsg.Withf("could not parse URL %s", string(text)))
 	}
 
 	return nil
@@ -57,7 +59,7 @@ func (d *Duration) MarshalText() ([]byte, error) {
 func (d *Duration) UnmarshalText(text []byte) (err error) {
 	d.Duration, err = time.ParseDuration(string(text))
 	if err != nil {
-		return errors.WithMessagef(err, "could not parse duration %s", string(text))
+		return fault.Wrap(err, fmsg.Withf("could not parse duration %s", string(text)))
 	}
 
 	return nil
@@ -67,7 +69,7 @@ func mustURL(in string) (u URL) {
 	var err error
 	u.URL, err = url.Parse(in)
 	if err != nil {
-		panic(errors.Errorf("URL cannot be parsed: %s", in))
+		panic(fault.Newf("URL cannot be parsed: %s", in))
 	}
 
 	return u
@@ -81,7 +83,7 @@ type LocalTime struct {
 func (t *LocalTime) MarshalText() ([]byte, error) {
 	b, err := t.LocalTime.MarshalText()
 	if err != nil {
-		return nil, errors.WithMessage(err, "could not marshal time value")
+		return nil, fault.Wrap(err, fmsg.With("could not marshal time value"))
 	}
 
 	return b, nil
@@ -90,7 +92,7 @@ func (t *LocalTime) MarshalText() ([]byte, error) {
 func (t *LocalTime) UnmarshalText(in []byte) (err error) {
 	err = t.LocalTime.UnmarshalText(in)
 	if err != nil {
-		return errors.WithMessage(err, "could not parse time value")
+		return fault.Wrap(err, fmsg.With("could not parse time value"))
 	}
 
 	return nil
@@ -99,19 +101,19 @@ func (t *LocalTime) UnmarshalText(in []byte) (err error) {
 func mustLocalTime(in string) (time LocalTime) {
 	err := time.UnmarshalText([]byte(in))
 	if err != nil {
-		panic(errors.Errorf("Could not parse time: %s", in))
+		panic(fault.Newf("Could not parse time: %s", in))
 	}
 
 	return
 }
 
-func GetConfig(filename string, log *log.Logger) (*Config, errors.E) {
+func GetConfig(filename string, log *log.Logger) (*Config, error) {
 	config := DefaultConfig
 	if filename != "" {
 		log.Debug("reading config", "filename", filename)
 		f, err := os.Open(filename)
 		if err != nil {
-			return nil, errors.Wrap(err, "reading config failed")
+			return nil, fault.Wrap(err, fmsg.With("reading config failed"))
 		}
 		defer f.Close()
 
@@ -121,14 +123,14 @@ func GetConfig(filename string, log *log.Logger) (*Config, errors.E) {
 		if err != nil {
 			var tomlError *toml.DecodeError
 			if errors.As(err, &tomlError) {
-				return nil, errors.WithMessage(err, tomlError.Error())
+				return nil, fault.Wrap(err, fmsg.With(tomlError.Error()))
 			}
 			var missingConfigError *toml.StrictMissingError
 			if errors.As(err, &missingConfigError) {
-				return nil, errors.Errorf("unexpected config: %s", missingConfigError.String())
+				return nil, fault.Newf("unexpected config: %s", missingConfigError.String())
 			}
 
-			return nil, errors.Wrap(err, "config error")
+			return nil, fault.Wrap(err, fmsg.With("config error"))
 		}
 	}
 
@@ -148,7 +150,7 @@ func GetConfig(filename string, log *log.Logger) (*Config, errors.E) {
 			v.Key = k
 		}
 		if err := defaults.Set(v); err != nil {
-			return nil, errors.Wrap(err, "setting defaults failed")
+			return nil, fault.Wrap(err, fmsg.With("setting defaults failed"))
 		}
 	}
 

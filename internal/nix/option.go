@@ -3,8 +3,8 @@ package nix
 import (
 	"io"
 
+	"github.com/Southclaws/fault"
 	"github.com/yuin/goldmark"
-	"gitlab.com/tozd/go/errors"
 
 	"alin.ovh/searchix/internal/nixdocs"
 )
@@ -51,5 +51,5 @@ var md = goldmark.New(
 
 // implements gomponent.Node
 func (text Markdown) Render(w io.Writer) error {
-	return errors.WithStack(md.Convert([]byte(text), w))
+	return fault.Wrap(md.Convert([]byte(text), w))
 }

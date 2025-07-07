@@ -25,10 +25,10 @@ func TestSearchGitPackagesFirst(t *testing.T) {
 		BatchSize: cfg.Importer.BatchSize,
 		LowMemory: false,
 	})
-	defer read.Close()
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer read.Close()
 	if !exists {
 		t.Fatal("expected index to exist")
 	}
@@ -88,10 +88,10 @@ func TestSearchJujutsuPackagesFirst(t *testing.T) {
 		Logger:    log.Named("index"),
 		LowMemory: false,
 	})
-	defer read.Close()
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer read.Close()
 	if !exists {
 		t.Fatal("expected index to exist")
 	}

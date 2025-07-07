@@ -9,7 +9,8 @@ import (
 
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/x/log"
-	"gitlab.com/tozd/go/errors"
+	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	_ "modernc.org/sqlite" //nolint:blank-imports // sqlite driver needed for database/sql
 )
 
@@ -26,7 +27,7 @@ func Instantiate(
 	ctx context.Context,
 	source *config.Source,
 	logger *log.Logger,
-) (*DB, errors.E) {
+) (*DB, error) {
 	// nix-instantiate --eval --json -I nixpkgs=channel:nixos-unstable --expr 'toString <nixpkgs/programs.sqlite>'
 	args := []string{
 		"--eval",
@@ -39,7 +40,7 @@ func Instantiate(
 	cmd := exec.CommandContext(ctx, "nix-instantiate", args...)
 	out, err := cmd.Output()
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to run nix-instantiate")
+		return nil, fault.Wrap(err, fmsg.With("failed to run nix-instantiate"))
 	}
 
 	outPath := strings.Trim(strings.TrimSpace(string(out)), "\"")
@@ -53,17 +54,17 @@ func Instantiate(
 	}, nil
 }
 
-func (p *DB) Open() errors.E {
+func (p *DB) Open() error {
 	var err error
 	p.db, err = sql.Open("sqlite", p.Path)
 	if err != nil {
-		return errors.WithMessage(err, "failed to open sqlite database")
+		return fault.Wrap(err, fmsg.With("failed to open sqlite database"))
 	}
 	p.logger.Debug("opened sqlite database")
 
 	_, err = p.db.Exec("ATTACH DATABASE ':memory:' AS mem")
 	if err != nil {
-		return errors.WithMessage(err, "failed to attach in-memory database")
+		return fault.Wrap(err, fmsg.With("failed to attach in-memory database"))
 	}
 
 	_, err = p.db.Exec(`
@@ -73,13 +74,13 @@ FROM main.Programs
 GROUP BY name, package
 `)
 	if err != nil {
-		return errors.WithMessage(err, "failed to create programs table")
+		return fault.Wrap(err, fmsg.With("failed to create programs table"))
 	}
 	p.logger.Debug("created programs table")
 
 	_, err = p.db.Exec(`CREATE INDEX mem.idx_package ON programs(package)`)
 	if err != nil {
-		return errors.WithMessage(err, "failed to create idx_package index")
+		return fault.Wrap(err, fmsg.With("failed to create idx_package index"))
 	}
 	p.logger.Debug("created idx_package index")
 
@@ -89,43 +90,43 @@ FROM mem.programs
 WHERE package = ?
 `)
 	if err != nil {
-		return errors.WithMessage(err, "failed to prepare statement")
+		return fault.Wrap(err, fmsg.With("failed to prepare statement"))
 	}
 	p.logger.Debug("prepared statement")
 
 	return nil
 }
 
-func (p *DB) Close() errors.E {
+func (p *DB) Close() error {
 	if err := p.db.Close(); err != nil {
-		return errors.WithMessage(err, "failed to close sqlite database")
+		return fault.Wrap(err, fmsg.With("failed to close sqlite database"))
 	}
 
 	return nil
 }
 
-func (p *DB) GetPackagePrograms(ctx context.Context, pkg string) ([]string, errors.E) {
+func (p *DB) GetPackagePrograms(ctx context.Context, pkg string) ([]string, error) {
 	var programs []string
 	if p.db == nil {
-		return nil, errors.New("database not open")
+		return nil, fault.New("database not open")
 	}
 	rows, err := p.stmt.QueryContext(ctx, pkg)
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed to execute query")
+		return nil, fault.Wrap(err, fmsg.With("failed to execute query"))
 	}
 	defer rows.Close()
 
 	for rows.Next() {
 		var name string
 		if err := rows.Scan(&name); err != nil {
-			return nil, errors.WithMessage(err, "failed to scan row")
+			return nil, fault.Wrap(err, fmsg.With("failed to scan row"))
 		}
 
 		programs = append(programs, name)
 	}
 	rerr := rows.Close()
 	if rerr != nil {
-		return nil, errors.WithMessage(rerr, "sql error")
+		return nil, fault.Wrap(rerr, fmsg.With("sql error"))
 	}
 
 	return programs, nil

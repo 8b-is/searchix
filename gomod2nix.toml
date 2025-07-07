@@ -16,6 +16,9 @@ schema = 3
   [mod."github.com/RoaringBitmap/roaring/v2"]
     version = "v2.5.0"
     hash = "sha256-wyIQtrFZHO3G+1tKPoDpee+frmzDZDqfE581vBnAMYI="
+  [mod."github.com/Southclaws/fault"]
+    version = "v0.8.2"
+    hash = "sha256-ifMHIRqeMNV2+jhi5jxA42iK1DATNPYI4pN69inRGT4="
   [mod."github.com/andybalholm/brotli"]
     version = "v1.1.1"
     hash = "sha256-kCt+irK1gvz2lGQUeEolYa5+FbLsfWlJMCd5hm+RPgQ="
@@ -151,9 +154,6 @@ schema = 3
   [mod."github.com/yuin/goldmark"]
     version = "v1.7.12"
     hash = "sha256-thLYBS4woL2X5qRdo7vP+xCvjlGRDU0jXtDCUt6vvWM="
-  [mod."gitlab.com/tozd/go/errors"]
-    version = "v0.10.0"
-    hash = "sha256-oW37KsieVKJOWk9ZXbGuQvuU4nyJCZzgYrTZHFkoCs4="
   [mod."go.etcd.io/bbolt"]
     version = "v1.4.1"
     hash = "sha256-FqKrJJxOOfAnvziKKFzI6VUGDp+ga6IgZmuihHp2I2A="

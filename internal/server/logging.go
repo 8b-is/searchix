@@ -4,7 +4,8 @@ import (
 	"net/http"
 
 	"alin.ovh/x/log"
-	"gitlab.com/tozd/go/errors"
+	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 )
 
 type LoggingResponseWriter struct {
@@ -29,7 +30,7 @@ func (lrw *LoggingResponseWriter) Write(b []byte) (int, error) {
 
 	count, err := lrw.ResponseWriter.Write(b)
 	if err != nil {
-		return count, errors.Wrap(err, "failed to write response")
+		return count, fault.Wrap(err, fmsg.With("failed to write response"))
 	}
 
 	return count, nil

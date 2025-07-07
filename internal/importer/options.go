@@ -9,9 +9,10 @@ import (
 	"alin.ovh/searchix/internal/nix"
 	"alin.ovh/x/log"
 
+	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/bcicen/jstream"
 	"github.com/mitchellh/mapstructure"
-	"gitlab.com/tozd/go/errors"
 )
 
 type nixValueJSON struct {
@@ -68,7 +69,7 @@ func NewOptionProcessor(
 	infile io.ReadCloser,
 	source *config.Source,
 	log *log.Logger,
-) (*OptionIngester, errors.E) {
+) (*OptionIngester, error) {
 	i := OptionIngester{
 		dec:     jstream.NewDecoder(infile, source.JSONDepth).EmitKV(),
 		log:     log,
@@ -87,16 +88,16 @@ func NewOptionProcessor(
 	if err != nil {
 		defer infile.Close()
 
-		return nil, errors.WithMessage(err, "could not create mapstructure decoder")
+		return nil, fault.Wrap(err, fmsg.With("could not create mapstructure decoder"))
 	}
 	i.ms = ms
 
 	return &i, nil
 }
 
-func (i *OptionIngester) Process(ctx context.Context) (<-chan nix.Importable, <-chan errors.E) {
+func (i *OptionIngester) Process(ctx context.Context) (<-chan nix.Importable, <-chan error) {
 	results := make(chan nix.Importable)
-	errs := make(chan errors.E)
+	errs := make(chan error)
 
 	go func() {
 		defer i.infile.Close()
@@ -111,12 +112,12 @@ func (i *OptionIngester) Process(ctx context.Context) (<-chan nix.Importable, <-
 			default:
 			}
 			if err := i.dec.Err(); err != nil {
-				errs <- errors.WithMessage(err, "could not decode JSON")
+				errs <- fault.Wrap(err, fmsg.With("could not decode JSON"))
 
 				continue
 			}
 			if mv.ValueType != jstream.Object {
-				errs <- errors.Errorf("unexpected object type %s", ValueTypeToString(mv.ValueType))
+				errs <- fault.Newf("unexpected object type %s", ValueTypeToString(mv.ValueType))
 
 				continue
 			}
@@ -130,10 +131,9 @@ func (i *OptionIngester) Process(ctx context.Context) (<-chan nix.Importable, <-
 					s := decl.String()
 					link, err := MakeChannelLink(i.source.Repo, s)
 					if err != nil {
-						errs <- errors.WithMessagef(err,
-							"could not make a channel link for channel %s, revision %s and subpath %s",
+						errs <- fault.Wrap(err, fmsg.Withf("could not make a channel link for channel %s, revision %s and subpath %s",
 							i.source.Channel, i.source.Repo.Revision, s,
-						)
+						))
 
 						continue
 					}
@@ -146,7 +146,7 @@ func (i *OptionIngester) Process(ctx context.Context) (<-chan nix.Importable, <-
 					}
 					decls = append(decls, &link)
 				default:
-					errs <- errors.Errorf("unexpected declaration type %s", decl.Kind().String())
+					errs <- fault.Newf("unexpected declaration type %s", decl.Kind().String())
 
 					continue
 				}
@@ -158,7 +158,7 @@ func (i *OptionIngester) Process(ctx context.Context) (<-chan nix.Importable, <-
 			i.optJSON = nixOptionJSON{}
 			err := i.ms.Decode(x) // stores in optJSON
 			if err != nil {
-				errs <- errors.WithMessagef(err, "failed to decode option %#v", x)
+				errs <- fault.Wrap(err, fmsg.Withf("failed to decode option %#v", x))
 
 				continue
 			}

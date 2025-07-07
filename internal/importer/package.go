@@ -13,9 +13,10 @@ import (
 	"alin.ovh/searchix/internal/programs"
 	"alin.ovh/x/log"
 
+	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
 	"github.com/bcicen/jstream"
 	"github.com/mitchellh/mapstructure"
-	"gitlab.com/tozd/go/errors"
 )
 
 type packageJSON struct {
@@ -70,7 +71,7 @@ func NewPackageProcessor(
 	source *config.Source,
 	log *log.Logger,
 	programsDB *programs.DB,
-) (*PackageIngester, errors.E) {
+) (*PackageIngester, error) {
 	i := &PackageIngester{
 		dec:      jstream.NewDecoder(infile, source.JSONDepth).EmitKV(),
 		log:      log,
@@ -89,7 +90,7 @@ func NewPackageProcessor(
 	if err != nil {
 		defer infile.Close()
 
-		return nil, errors.WithMessage(err, "could not create mapstructure decoder")
+		return nil, fault.Wrap(err, fmsg.With("could not create mapstructure decoder"))
 	}
 	i.ms = ms
 
@@ -117,14 +118,14 @@ func convertToLicense(in map[string]any) *nix.License {
 	return l
 }
 
-func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <-chan errors.E) {
+func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <-chan error) {
 	results := make(chan nix.Importable)
-	errs := make(chan errors.E)
+	errs := make(chan error)
 
 	if i.programs != nil {
 		err := i.programs.Open()
 		if err != nil {
-			errs <- errors.WithMessage(err, "could not open programs database")
+			errs <- fault.Wrap(err, fmsg.With("could not open programs database"))
 			i.programs = nil
 		}
 	}
@@ -140,7 +141,7 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 
 	outer:
 		for mv := range i.dec.Stream() {
-			var err errors.E
+			var err error
 			var programs []string
 			select {
 			case <-ctx.Done():
@@ -148,12 +149,12 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 			default:
 			}
 			if err := i.dec.Err(); err != nil {
-				errs <- errors.WithMessage(err, "could not decode JSON")
+				errs <- fault.Wrap(err, fmsg.With("could not decode JSON"))
 
 				continue
 			}
 			if mv.ValueType != jstream.Object {
-				errs <- errors.Errorf("unexpected object type %s", ValueTypeToString(mv.ValueType))
+				errs <- fault.Newf("unexpected object type %s", ValueTypeToString(mv.ValueType))
 
 				continue
 			}
@@ -176,7 +177,7 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 						case reflect.Map:
 							licenses[i] = *convertToLicense(v.Interface().(map[string]interface{}))
 						default:
-							errs <- errors.Errorf(
+							errs <- fault.Newf(
 								"don't know how to handle sublicense of type %s: %v",
 								v.Kind().String(),
 								v,
@@ -186,7 +187,7 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 				case reflect.String:
 					licenses = append(licenses, makeAdhocLicense(v.String()))
 				default:
-					errs <- errors.Errorf(
+					errs <- fault.Newf(
 						"don't know how to handle license of type %s: %v",
 						v.Kind().String(),
 						meta["license"],
@@ -211,7 +212,7 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 						}
 						plats = append(plats, ps...)
 					default:
-						errs <- errors.Errorf(
+						errs <- fault.Newf(
 							"don't know how to convert platform type %s: %v",
 							v.Kind().String(),
 							v.Interface(),
@@ -228,7 +229,7 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 				case reflect.Slice:
 				// already fine
 				default:
-					errs <- errors.Errorf(
+					errs <- fault.Newf(
 						"don't know how to interpret homepage type %s'",
 						v.Kind().String(),
 					)
@@ -256,7 +257,7 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 								maints[i].Github = m["github"].(string)
 							}
 						default:
-							errs <- errors.Errorf(
+							errs <- fault.Newf(
 								"don't know how to handle maintainer entry of type %s: %v",
 								v.Kind().String(),
 								v,
@@ -264,7 +265,7 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 						}
 					}
 				default:
-					errs <- errors.Errorf(
+					errs <- fault.Newf(
 						"don't know how to interpret maintainers type %s'",
 						maint.Kind().String(),
 					)
@@ -274,7 +275,7 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 
 			i.pkg = packageJSON{}
 			if err := i.ms.Decode(x); err != nil { // stores in i.pkg
-				errs <- errors.WithMessagef(err, "failed to decode package %#v", x)
+				errs <- fault.Wrap(err, fmsg.Withf("failed to decode package %#v", x))
 
 				continue
 			}
@@ -282,7 +283,7 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 			if i.programs != nil {
 				programs, err = i.programs.GetPackagePrograms(ctx, kv.Key)
 				if err != nil {
-					errs <- errors.WithMessagef(err, "failed to get programs for package %s", i.pkg.Name)
+					errs <- fault.Wrap(err, fmsg.Withf("failed to get programs for package %s", i.pkg.Name))
 				}
 			}
 
@@ -303,7 +304,7 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 			if i.pkg.Meta.Position != "" {
 				defURL, err := url.Parse(i.pkg.Meta.Position)
 				if err != nil {
-					errs <- errors.WithMessagef(err, "failed to parse source URL %s", definition)
+					errs <- fault.Wrap(err, fmsg.Withf("failed to parse source URL %s", definition))
 				}
 				if defURL.IsAbs() {
 					definition = i.pkg.Meta.Position
@@ -311,7 +312,7 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 					subpath, line, _ := strings.Cut(i.pkg.Meta.Position, ":")
 					definition, err = i.source.Repo.GetFileURL(subpath, line)
 					if err != nil {
-						errs <- errors.WithMessagef(err, "failed to make repo URL for package %s", i.pkg.Name)
+						errs <- fault.Wrap(err, fmsg.Withf("failed to make repo URL for package %s", i.pkg.Name))
 					}
 				}
 			}
