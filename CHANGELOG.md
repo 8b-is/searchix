@@ -1,13 +1,22 @@
 # Changelog
 
-## [v0.1.45](https://codeberg.org/alanpearce/searchix/compare/v0.1.44...756d8f1f343473e7e33b81eceb11e2bb608752b6) (2025-07-07)
+## [v0.1.46](https://codeberg.org/alanpearce/searchix/compare/v0.1.45...465a9a8d03878f9b8f22424d679080fb53317d6d) (2025-07-07)
 
 ### Features
+
+- enable advanced query string syntax
+  ([465a9a8](https://codeberg.org/alanpearce/searchix/commit/465a9a8d03878f9b8f22424d679080fb53317d6d))
+- improve matching of multiple keywords
+  ([516f3e9](https://codeberg.org/alanpearce/searchix/commit/516f3e9dcd9b987e6ddda7741f088901b319fe38))
+
+### [v0.1.45](https://codeberg.org/alanpearce/searchix/compare/v0.1.44...v0.1.45) (2025-07-07)
+
+#### Features
 
 - add link to status page
   ([35aa773](https://codeberg.org/alanpearce/searchix/commit/35aa773dd51342bc23fbafcc3dcceab9bcd9387e))
 
-### Fixes
+#### Fixes
 
 - set default values for custom sources
   ([756d8f1](https://codeberg.org/alanpearce/searchix/commit/756d8f1f343473e7e33b81eceb11e2bb608752b6))
