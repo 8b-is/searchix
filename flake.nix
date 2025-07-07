@@ -36,6 +36,11 @@
       nixosModules = {
         web = import ./nix/modules self;
       };
+      overlays = {
+        default = _: prev: {
+          searchix = self.packages.${prev.system}.default;
+        };
+      };
     }
     // (flake-utils.lib.eachDefaultSystem (
       system:
