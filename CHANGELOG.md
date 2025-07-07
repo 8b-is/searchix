@@ -1,8 +1,24 @@
 # Changelog
 
-## [v0.1.44](https://codeberg.org/alanpearce/searchix/compare/v0.1.43...e7d8aad2ed535ab5e887cd6aac9459696be9b3fe) (2025-06-24)
+## [v0.1.45](https://codeberg.org/alanpearce/searchix/compare/v0.1.44...756d8f1f343473e7e33b81eceb11e2bb608752b6) (2025-07-07)
+
+### Features
+
+- add link to status page
+  ([35aa773](https://codeberg.org/alanpearce/searchix/commit/35aa773dd51342bc23fbafcc3dcceab9bcd9387e))
 
 ### Fixes
+
+- set default values for custom sources
+  ([756d8f1](https://codeberg.org/alanpearce/searchix/commit/756d8f1f343473e7e33b81eceb11e2bb608752b6))
+- avoid panic when rendering combined data
+  ([1685f38](https://codeberg.org/alanpearce/searchix/commit/1685f383414d5a184376519fa81002a506712534))
+- panic rendering corrupted data
+  ([a2b341d](https://codeberg.org/alanpearce/searchix/commit/a2b341d554d9fecc5a4a90eec5438eb1dec2de04))
+
+### [v0.1.44](https://codeberg.org/alanpearce/searchix/compare/v0.1.43...v0.1.44) (2025-06-25)
+
+#### Fixes
 
 - descriptions truncated by one character
   ([e7d8aad](https://codeberg.org/alanpearce/searchix/commit/e7d8aad2ed535ab5e887cd6aac9459696be9b3fe))
