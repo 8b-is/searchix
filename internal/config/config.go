@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"alin.ovh/x/log"
+	"github.com/creasty/defaults"
 	"github.com/pelletier/go-toml/v2"
 	"gitlab.com/tozd/go/errors"
 )
@@ -141,6 +142,15 @@ func GetConfig(filename string, log *log.Logger) (*Config, errors.E) {
 	maps.DeleteFunc(config.Importer.Sources, func(_ string, v *Source) bool {
 		return !v.Enable
 	})
+
+	for k, v := range config.Importer.Sources {
+		if v.Key == "" {
+			v.Key = k
+		}
+		if err := defaults.Set(v); err != nil {
+			return nil, errors.Wrap(err, "setting defaults failed")
+		}
+	}
 
 	return &config, nil
 }

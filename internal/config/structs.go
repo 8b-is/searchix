@@ -5,7 +5,9 @@ package config
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/creasty/defaults"
 	"go.uber.org/zap/zapcore"
 )
 
@@ -37,22 +39,22 @@ type Importer struct {
 }
 
 type Source struct {
-	Name       string       `comment:"Human-readable name of source for generating links"`
-	Order      uint         `comment:"Order in which to show source in web interface."`
-	Key        string       `comment:"Machine-readable name of source. Must be URL- and path-safe."`
-	Enable     bool         `comment:"Controls whether to show in the web interface and to run fetch/import jobs."`
-	Fetcher    Fetcher      `comment:"How to fetch options.json. One of 'channel', 'channel-nixpkgs' or 'download'."`
-	Importer   ImporterType `comment:"Kind of data available from source. Currently supports 'packages' and 'options'."`
-	Channel    string       `comment:"(Fetcher=channel) Local name for channel, (Fetcher=channel-nixpkgs) Remote name of channel."`
-	URL        string       `comment:"(Fetcher=channel) Remote URL for channel, (Fetcher=download) Path containing files named 'revision' and 'options.json'."`
-	Attribute  string       `comment:"(Fetcher=channel) Nix attribute name (i.e. nix-build -A) that builds an {options,packages}.json"`
-	ImportPath string       `comment:"(Fetcher=channel) Sub-path of imported channel which contains the attribute above, e.g. release.nix"`
-	Timeout    Duration     `comment:"Abort import if it takes longer than this."`
-	OutputPath string       `comment:"(Fetcher=channel) Path under ./result symlink to folder containing {options,packages}.json."`
-	Repo       Repository   `comment:"Used to generate declaration/definition links"`
-	Programs   ProgramsDB   `comment:"Used to enable searching for programs in multi-program packages"`
-	Manpages   Manpages     `comment:"Used to enable searching for manpages"`
-	JSONDepth  int          `comment:"Depth at which packages/object object is to be found"`
+	Name       string       `default:"-"               comment:"Human-readable name of source for generating links"`
+	Order      uint         `                          comment:"Order in which to show source in web interface."`
+	Key        string       `                          comment:"Machine-readable name of source. Must be URL- and path-safe."`
+	Enable     bool         `                          comment:"Controls whether to show in the web interface and to run fetch/import jobs."`
+	Fetcher    Fetcher      `                          comment:"How to fetch options.json. One of 'channel', 'channel-nixpkgs' or 'download'."`
+	Importer   ImporterType `default:"options"         comment:"Kind of data available from source. Currently supports 'packages' and 'options'."`
+	Channel    string       `                          comment:"(Fetcher=channel) Local name for channel, (Fetcher=channel-nixpkgs) Remote name of channel."`
+	URL        string       `                          comment:"(Fetcher=channel) Remote URL for channel, (Fetcher=download) Path containing files named 'revision' and 'options.json'."`
+	Attribute  string       `default:"options"         comment:"(Fetcher=channel) Nix attribute name (i.e. nix-build -A) that builds an {options,packages}.json"`
+	ImportPath string       `                          comment:"(Fetcher=channel) Sub-path of imported channel which contains the attribute above, e.g. release.nix"`
+	Timeout    Duration     `default:"5m"              comment:"Abort import if it takes longer than this."`
+	OutputPath string       `default:"share/doc/nixos" comment:"(Fetcher=channel) Path under ./result symlink to folder containing {options,packages}.json."`
+	Repo       Repository   `                          comment:"Used to generate declaration/definition links"`
+	Programs   ProgramsDB   `                          comment:"Used to enable searching for programs in multi-program packages"`
+	Manpages   Manpages     `                          comment:"Used to enable searching for manpages"`
+	JSONDepth  int          `default:"1"               comment:"Depth at which packages/object object is to be found"`
 }
 
 type ProgramsDB struct {
@@ -73,5 +75,11 @@ func (source *Source) String() string {
 		return source.Name
 	default:
 		return fmt.Sprintf("Source(%s)", source.Name)
+	}
+}
+
+func (source *Source) SetDefaults() {
+	if defaults.CanUpdate(source.Name) {
+		source.Name = strings.ToTitle(source.Key[0:1]) + source.Key[1:]
 	}
 }

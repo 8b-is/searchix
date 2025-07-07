@@ -79,6 +79,9 @@ schema = 3
   [mod."github.com/blevesearch/zapx/v16"]
     version = "v16.2.4"
     hash = "sha256-Jo5k7DflV/ghszOWJTCOGVyyLMvlvSYyxRrmSIFjyEE="
+  [mod."github.com/creasty/defaults"]
+    version = "v1.8.0"
+    hash = "sha256-I1LE1cfOhMS5JxB7+fWTKieefw2Gge1UhIZh+A6pa6s="
   [mod."github.com/crewjam/csp"]
     version = "v0.0.2"
     hash = "sha256-4vlGmDdQjPiXmueCV51fJH/hRcG8eqhCi9TENCXjzfA="

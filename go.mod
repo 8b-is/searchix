@@ -10,6 +10,7 @@ require (
 	github.com/bcicen/jstream v1.0.1
 	github.com/blevesearch/bleve/v2 v2.5.2
 	github.com/blevesearch/bleve_index_api v1.2.8
+	github.com/creasty/defaults v1.8.0
 	github.com/crewjam/csp v0.0.2
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/getsentry/sentry-go v0.33.0
