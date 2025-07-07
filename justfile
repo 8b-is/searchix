@@ -27,6 +27,9 @@ format:
 fix:
 	go fix .
 
+test:
+	go test ./...
+
 build:
 	nix build .#
 
