@@ -147,6 +147,11 @@ func (index *ReadIndex) Search(
 		query.AddShould(q)
 	}
 
+	idQuery := bleve.NewMatchQuery(keyword)
+	idQuery.SetField("_id")
+	idQuery.SetBoost(8)
+	query.AddShould(idQuery)
+
 	mainProgramQuery := bleve.NewMatchQuery(keyword)
 	mainProgramQuery.SetField("MainProgram")
 	mainProgramQuery.SetBoost(10)

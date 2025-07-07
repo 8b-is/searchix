@@ -19,6 +19,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/blevesearch/bleve/v2"
+	"github.com/blevesearch/bleve/v2/analysis"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/keyword"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/simple"
@@ -30,9 +31,11 @@ import (
 	"github.com/blevesearch/bleve/v2/analysis/tokenizer/unicode"
 	"github.com/blevesearch/bleve/v2/document"
 	"github.com/blevesearch/bleve/v2/mapping"
-	indexAPI "github.com/blevesearch/bleve_index_api"
+	index "github.com/blevesearch/bleve_index_api"
 	"gitlab.com/tozd/go/errors"
 )
+
+var idAnalyzer analysis.Analyzer
 
 type Options struct {
 	LowMemory bool
@@ -170,6 +173,8 @@ func createIndexMapping() (mapping.IndexMapping, errors.E) {
 
 	indexMapping.AddDocumentMapping("option", optionMapping)
 	indexMapping.AddDocumentMapping("package", packageMapping)
+
+	idAnalyzer = indexMapping.AnalyzerNamed("c_name")
 
 	return indexMapping, nil
 }
@@ -360,11 +365,17 @@ func (i *WriteIndex) Import(
 
 				continue
 			}
-			field := document.NewTextFieldWithIndexingOptions("_data", nil, data.Bytes(), indexAPI.StoreField)
-			newDoc := doc.AddField(field)
+			field := document.NewTextFieldWithIndexingOptions("_data", nil, data.Bytes(), index.StoreField)
+			doc.AddField(field)
+			idField := document.NewTextFieldCustom(
+				"_id", nil, []byte(doc.ID()),
+				index.IndexField|index.StoreField|index.IncludeTermVectors,
+				idAnalyzer,
+			)
+			doc.AddField(idField)
 
 			// log.Debug("adding object to index", "name", opt.Name)
-			if err := batch.IndexAdvanced(newDoc); err != nil {
+			if err := batch.IndexAdvanced(doc); err != nil {
 				errs <- errors.WithMessagef(err, "could not index object %s", obj.GetName())
 
 				continue
