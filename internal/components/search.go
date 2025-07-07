@@ -16,6 +16,12 @@ func SearchForm(tdata TemplateData, r ResultData) g.Node {
 			Legend(
 				ID("legend"),
 				H2(g.Textf("%s search", sourceNameAndType(tdata.Source))),
+				A(
+					Class("help"),
+					Target("_blank"),
+					Href("https://blevesearch.com/docs/Query-String-Query/"),
+					g.Text("advanced query syntax"),
+				),
 			),
 			Input(
 				ID("query"),

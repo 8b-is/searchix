@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/gob"
 	"iter"
+	"strings"
 	"time"
 
 	"alin.ovh/searchix/internal/config"
@@ -126,13 +127,17 @@ func (index *ReadIndex) Search(
 ) (*Result, errors.E) {
 	query := bleve.NewBooleanQuery()
 
-	// match the user's query in any field ...
-	query.AddMust(bleve.NewDisjunctionQuery(
-		setBoost(bleve.NewTermQuery(keyword), 50),
-		setBoost(bleve.NewPrefixQuery(keyword), 25),
-		setBoost(bleve.NewMatchPhraseQuery(keyword), 25),
-		bleve.NewMatchQuery(keyword),
-	))
+	if strings.ContainsAny(keyword, "+-=&|<>!(){}[]^\"~*?:\\/") {
+		query.AddMust(bleve.NewQueryStringQuery(keyword))
+	} else {
+		// match the user's query in any field ...
+		query.AddMust(bleve.NewDisjunctionQuery(
+			setBoost(bleve.NewTermQuery(keyword), 50),
+			setBoost(bleve.NewPrefixQuery(keyword), 25),
+			setBoost(bleve.NewMatchPhraseQuery(keyword), 25),
+			bleve.NewMatchQuery(keyword),
+		))
+	}
 
 	if source != nil {
 		query.AddMust(
