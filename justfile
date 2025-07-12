@@ -51,7 +51,7 @@ update-nix-package-version:
 	#!/usr/bin/env bash
 	VER=$(convco version --bump)
 	sd 'version = "[^"]+"' "version = \"$VER\"" nix/package.nix
-	sd 'h=v.+$' "h=v$VER" nix/modules/default.nix
+	sd '/v[0-9.]+/' "/v$VER/" nix/modules/default.nix
 
 release: clean-workdir changelog update-nix-package-version
 	#!/bin/sh
