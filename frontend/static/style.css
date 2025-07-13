@@ -135,9 +135,6 @@ section > footer {
 
 h2 {
   font-size: 1.5rem;
-}
-
-h2 {
   margin-top: 0;
 }
 
@@ -154,6 +151,10 @@ dialog {
 
 dialog > button {
   float: right;
+}
+
+main > h2 {
+  margin-top: revert;
 }
 
 dialog > h2 {
