@@ -222,6 +222,10 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 				}
 				meta["platforms"] = plats
 			}
+
+			if meta["homepage"] == nil && meta["homePage"] != nil {
+				meta["homepage"] = meta["homePage"]
+			}
 			if meta["homepage"] != nil {
 				switch v := reflect.ValueOf(meta["homepage"]); v.Kind() {
 				case reflect.String:
