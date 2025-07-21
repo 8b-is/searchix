@@ -1,6 +1,6 @@
 module alin.ovh/searchix
 
-go 1.23.6
+go 1.24.3
 
 require (
 	alin.ovh/gomponents v1.6.0
