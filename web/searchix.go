@@ -56,5 +56,7 @@ func (s *Server) Start(liveReload bool) error {
 
 func (s *Server) Stop() {
 	<-s.sv.Stop()
-	s.sentryHub.Flush(2 * time.Second)
+	if s.cfg.Web.Environment == "production" {
+		s.sentryHub.Flush(2 * time.Second)
+	}
 }

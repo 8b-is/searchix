@@ -161,8 +161,6 @@ func main() {
 	}()
 
 	<-ctx.Done()
-	logger.Debug("calling stop")
 	s.Stop()
 	wg.Wait()
-	logger.Debug("done")
 }

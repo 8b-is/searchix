@@ -90,7 +90,7 @@ func (s *Server) Stop() chan struct{} {
 
 	idleConnsClosed := make(chan struct{})
 	if s.cfg.Web.Environment == "development" {
-		shutdownTimeout = 1 * time.Second
+		shutdownTimeout = 1 * time.Millisecond
 	}
 
 	go func() {
