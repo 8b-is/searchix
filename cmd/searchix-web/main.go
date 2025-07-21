@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -147,7 +148,7 @@ func main() {
 	go func() {
 		defer wg.Done()
 		err := s.Start(*dev)
-		if err != nil {
+		if err != nil && !errors.Is(err, context.Canceled) {
 			// Error starting or closing listener:
 			logger.Fatal("error", "error", err)
 		}
