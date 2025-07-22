@@ -71,8 +71,12 @@ func NewMux(
 	}
 	index := options.ReadIndex
 	sortSources(cfg.Importer.Sources)
+	assets, err := frontend.New()
+	if err != nil {
+		return nil, fault.Wrap(err, fmsg.With("could not create frontend asset collection"))
+	}
 
-	errorHandler := createErrorHandler(cfg, log)
+	errorHandler := createErrorHandler(cfg, assets, log)
 
 	top := http.NewServeMux()
 	mux := sentryhttp.NewServeMux()
@@ -143,7 +147,7 @@ func NewMux(
 						ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
 						Source:        source,
 						Sources:       sources,
-						Assets:        frontend.Assets,
+						Assets:        assets,
 						Query:         qs,
 					},
 					Query:   qs,
@@ -197,7 +201,7 @@ func NewMux(
 						ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
 						Sources:       sources,
 						Source:        source,
-						Assets:        frontend.Assets,
+						Assets:        assets,
 					},
 					components.ResultData{},
 				).Render(w)
@@ -251,7 +255,7 @@ func NewMux(
 				ExtraHeadHTML: cfg.Web.ExtraHeadHTML,
 				Source:        source,
 				Sources:       sources,
-				Assets:        frontend.Assets,
+				Assets:        assets,
 			}
 			var baseErr error
 			if r.Header.Get("Fetch") == "true" {
@@ -347,7 +351,7 @@ func NewMux(
 	})
 
 	mux.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
-		asset, found := frontend.Assets.ByPath[r.URL.Path]
+		asset, found := assets.ByPath[r.URL.Path]
 		if !found {
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 
@@ -360,8 +364,7 @@ func NewMux(
 	})
 
 	mdb := options.ManpagesURLMap
-	err := mdb.Open()
-	if err != nil {
+	if err := mdb.Open(); err != nil {
 		return nil, fault.Wrap(err, fmsg.With("failed to open manpages URL map"))
 	}
 	mux.HandleFunc("/man/{section}/{page}", func(w http.ResponseWriter, r *http.Request) {
@@ -395,7 +398,7 @@ func NewMux(
 		go fw.Start(func(filename string) {
 			log.Debug(fmt.Sprintf("got filename %s", filename))
 			if match, _ := path.Match("frontend/static/*", filename); match {
-				err := frontend.Rehash()
+				err := assets.Rehash()
 				if err != nil {
 					log.Error("failed to re-hash frontend assets", "error", err)
 				}

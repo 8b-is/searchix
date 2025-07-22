@@ -55,14 +55,19 @@ func main() {
 		os.Exit(0)
 	}
 	if *generateErrorPage {
-		err := components.ErrorTemplate(components.TemplateData{
+		assets, err := frontend.New()
+		if err != nil {
+			panic("failed to create assets: " + err.Error())
+		}
+
+		err = components.ErrorTemplate(components.TemplateData{
 			Source:        nil,
 			Sources:       []*config.Source{},
 			Query:         "",
 			ExtraHeadHTML: "",
 			Code:          0,
 			Message:       `{{placeholder "http.error.status_code"}} {{placeholder "http.error.status_text"}}`,
-			Assets:        frontend.Assets,
+			Assets:        assets,
 		}).Render(os.Stdout)
 		if err != nil {
 			panic("failed to render error template: " + err.Error())

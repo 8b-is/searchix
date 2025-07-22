@@ -11,6 +11,7 @@ import (
 
 func createErrorHandler(
 	config *config.Config,
+	assets *frontend.AssetCollection,
 	log *log.Logger,
 ) func(http.ResponseWriter, *http.Request, string, int) {
 	return func(w http.ResponseWriter, r *http.Request, message string, code int) {
@@ -23,7 +24,7 @@ func createErrorHandler(
 			Sources:       sources,
 			Code:          code,
 			Message:       message,
-			Assets:        frontend.Assets,
+			Assets:        assets,
 		}
 		w.Header().Set("Cache-Control", "no-store")
 		w.Header().Del("Vary")
