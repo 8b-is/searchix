@@ -62,7 +62,7 @@ func (imp *Importer) createSourceImporter(
 	forceUpdate bool,
 ) func(*config.Source) error {
 	return func(source *config.Source) error {
-		logger := imp.log.With("name", source.Key)
+		logger := imp.options.Logger.With("name", source.Key)
 		logger.Debug("starting fetcher")
 
 		fetcher, err := fetcher.New(source, logger)
@@ -113,7 +113,7 @@ func (imp *Importer) createSourceImporter(
 			var pdb *programs.DB
 
 			if source.Programs.Enable {
-				pdb, err = programs.Instantiate(ctx, source, imp.log.Named("programs"))
+				pdb, err = programs.Instantiate(ctx, source, imp.options.Logger.Named("programs"))
 				if err != nil {
 					logger.Warn("programs database instantiation failed", "error", err)
 				}
@@ -152,13 +152,13 @@ func (imp *Importer) createSourceImporter(
 				return fault.Wrap(err, fmsg.Withf("failed to create processor"))
 			}
 
-			hadWarnings, err := process(ctx, imp.indexer, processor, logger)
+			hadWarnings, err := process(ctx, imp.options.WriteIndex, processor, logger)
 			if err != nil {
 				return fault.Wrap(err, fmsg.Withf("failed to process source"))
 			}
 
 			if source.Manpages.Enable {
-				err = imp.manpages.Update(ctx, source)
+				err = imp.options.Manpages.Update(ctx, source)
 				if err != nil {
 					logger.Warn("manpages database update failed", "error", err)
 				}
@@ -179,10 +179,8 @@ func (imp *Importer) createSourceImporter(
 }
 
 type Importer struct {
-	config   *config.Config
-	log      *log.Logger
-	indexer  *index.WriteIndex
-	manpages *manpages.URLMap
+	config  *config.Config
+	options *Options
 }
 
 func (imp *Importer) Start(
@@ -191,12 +189,12 @@ func (imp *Importer) Start(
 	onlyUpdateSources *[]string,
 ) error {
 	if len(imp.config.Importer.Sources) == 0 {
-		imp.log.Info("No sources enabled")
+		imp.options.Logger.Info("No sources enabled")
 
 		return nil
 	}
 
-	imp.log.Debug("starting importer", "timeout", imp.config.Importer.Timeout.Duration)
+	imp.options.Logger.Debug("starting importer", "timeout", imp.config.Importer.Timeout.Duration)
 	importCtx, cancelImport := context.WithTimeout(
 		ctx,
 		imp.config.Importer.Timeout.Duration,
@@ -205,7 +203,7 @@ func (imp *Importer) Start(
 
 	forceUpdate = forceUpdate || (onlyUpdateSources != nil && len(*onlyUpdateSources) > 0)
 
-	meta := imp.indexer.Meta
+	meta := imp.options.WriteIndex.Meta
 
 	importSource := imp.createSourceImporter(importCtx, meta, forceUpdate)
 	for name, source := range imp.config.Importer.Sources {
@@ -216,11 +214,11 @@ func (imp *Importer) Start(
 		}
 		err := importSource(source)
 		if err != nil {
-			imp.log.Error("import failed", "source", name, "error", err)
+			imp.options.Logger.Error("import failed", "source", name, "error", err)
 		}
 	}
 
-	err := imp.indexer.SaveMeta()
+	err := imp.options.WriteIndex.SaveMeta()
 	if err != nil {
 		return fault.Wrap(err, fmsg.With("failed to save metadata"))
 	}
@@ -235,10 +233,8 @@ func New(
 	options *Options,
 ) (*Importer, error) {
 	return &Importer{
-		config:   cfg,
-		log:      options.Logger,
-		indexer:  options.WriteIndex,
-		manpages: options.Manpages,
+		config:  cfg,
+		options: options,
 	}, nil
 }
 
@@ -262,7 +258,7 @@ func (imp *Importer) EnsureSourcesIndexed(
 			return slices.Contains(cfgEnabledSources, s)
 		})
 		if len(newSources) > 0 {
-			imp.log.Info("adding new sources", "sources", newSources)
+			imp.options.Logger.Info("adding new sources", "sources", newSources)
 			err := imp.Start(
 				ctx,
 				false,
@@ -273,9 +269,9 @@ func (imp *Importer) EnsureSourcesIndexed(
 			}
 		}
 		if len(retiredSources) > 0 {
-			imp.log.Info("removing retired sources", "sources", retiredSources)
+			imp.options.Logger.Info("removing retired sources", "sources", retiredSources)
 			for _, s := range retiredSources {
-				err := imp.indexer.DeleteBySource(s)
+				err := imp.options.WriteIndex.DeleteBySource(s)
 				if err != nil {
 					return fault.Wrap(err, fmsg.Withf("Failed to remove retired source %s", s))
 				}
@@ -301,15 +297,19 @@ func (imp *Importer) StartUpdateTimer(
 			Timezone:      time.Local.String(),
 		}
 
-		Job.FinishedAt = imp.indexer.Meta.LastUpdated()
+		Job.FinishedAt = imp.options.WriteIndex.Meta.LastUpdated()
 
 		var nextRun time.Time
 		switch {
 		case Job.FinishedAt.Before(time.Now().Add(-24 * time.Hour)):
-			imp.log.Info("indexing last ran more than 24 hours ago, scheduling immediate update")
+			imp.options.Logger.Info(
+				"indexing last ran more than 24 hours ago, scheduling immediate update",
+			)
 			nextRun = time.Now()
-		case imp.indexer.Meta.IsSchemaOutdated():
-			imp.log.Info("indexing schema version is out of date, scheduling immediate update")
+		case imp.options.WriteIndex.Meta.IsSchemaOutdated():
+			imp.options.Logger.Info(
+				"indexing schema version is out of date, scheduling immediate update",
+			)
 			nextRun = time.Now()
 		default:
 			nextRun = nextUTCOccurrenceOfTime(imp.config.Importer.UpdateAt)
@@ -318,12 +318,12 @@ func (imp *Importer) StartUpdateTimer(
 		for {
 			select {
 			case <-parentCtx.Done():
-				imp.log.Debug("stopping scheduler")
+				imp.options.Logger.Debug("stopping scheduler")
 
 				return
 			case <-time.After(time.Until(nextRun)):
 			}
-			imp.log.Info("updating index")
+			imp.options.Logger.Info("updating index")
 
 			eventID := localHub.CaptureCheckIn(&sentry.CheckIn{
 				MonitorSlug: monitorSlug,
@@ -336,7 +336,7 @@ func (imp *Importer) StartUpdateTimer(
 			cancel()
 
 			if err != nil {
-				imp.log.Warn("error updating index", "error", err)
+				imp.options.Logger.Warn("error updating index", "error", err)
 
 				localHub.CaptureException(err)
 				localHub.CaptureCheckIn(&sentry.CheckIn{
@@ -345,7 +345,7 @@ func (imp *Importer) StartUpdateTimer(
 					Status:      sentry.CheckInStatusError,
 				}, monitorConfig)
 			} else {
-				imp.log.Info("update complete")
+				imp.options.Logger.Info("update complete")
 
 				localHub.CaptureCheckIn(&sentry.CheckIn{
 					ID:          *eventID,
@@ -355,7 +355,11 @@ func (imp *Importer) StartUpdateTimer(
 			}
 			nextRun = nextUTCOccurrenceOfTime(imp.config.Importer.UpdateAt)
 			MarkIndexingFinished(nextRun)
-			imp.log.Info("scheduling next run", "next-run", nextRun.Format(time.DateTime))
+			imp.options.Logger.Info(
+				"scheduling next run",
+				"next-run",
+				nextRun.Format(time.DateTime),
+			)
 		}
 	})
 }
