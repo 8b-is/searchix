@@ -6,9 +6,6 @@ import (
 	"encoding/gob"
 	"io/fs"
 	"math"
-	"os"
-	"path"
-	"path/filepath"
 	"slices"
 
 	"alin.ovh/searchix/internal/config"
@@ -176,7 +173,7 @@ func createIndexMapping() (mapping.IndexMapping, error) {
 	return indexMapping, nil
 }
 
-func createIndex(indexPath string, options *Options) (bleve.Index, error) {
+func createIndex(root *file.Root, options *Options) (bleve.Index, error) {
 	indexMapping, err := createIndexMapping()
 	if err != nil {
 		return nil, err
@@ -188,6 +185,9 @@ func createIndex(indexPath string, options *Options) (bleve.Index, error) {
 			"PersisterNapUnderNumFiles": 500,
 		}
 	}
+
+	//nolint:forbidigo // external package
+	indexPath := root.JoinPath(indexBaseName)
 	idx, baseErr := bleve.NewUsing(
 		indexPath,
 		indexMapping,
@@ -215,83 +215,72 @@ var expectedDataFiles = []string{
 	"manpage-urls.json",
 }
 
-func deleteIndex(dataRoot string) error {
-	dir, err := os.ReadDir(dataRoot)
+func deleteIndex(root *file.Root) error {
+	dir, err := fs.ReadDir(root.FS(), ".")
 	if err != nil {
-		return fault.Wrap(err, fmsg.Withf("could not read data directory %s", dataRoot))
+		return fault.Wrap(err, fmsg.Withf("could not read data directory"))
 	}
 	remainingFiles := slices.DeleteFunc(dir, func(e fs.DirEntry) bool {
 		return slices.Contains(expectedDataFiles, e.Name())
 	})
 	if len(remainingFiles) > 0 {
 		return fault.Newf(
-			"cowardly refusing to remove data directory %s as it contains unknown files: %v",
-			dataRoot,
+			"cowardly refusing to remove data directory as it contains unknown files: %v",
 			remainingFiles,
 		)
 	}
 
-	err = os.RemoveAll(dataRoot)
+	err = root.RemoveAll()
 	if err != nil {
-		return fault.Wrap(err, fmsg.Withf("could not remove data directory %s", dataRoot))
+		return fault.Wrap(err)
 	}
 
 	return nil
 }
 
 func OpenOrCreate(
-	dataRoot string,
+	root *file.Root,
 	force bool,
 	options *Options,
 ) (*ReadIndex, *WriteIndex, bool, error) {
 	var err error
 	bleve.SetLog(zap.NewStdLog(options.Logger.Named("bleve").GetLogger()))
-	if !filepath.IsAbs(dataRoot) {
-		wd, err := os.Getwd()
-		if err != nil {
-			return nil, nil, false, fault.Wrap(err, fmsg.Withf("could not get working directory"))
-		}
-		dataRoot = filepath.Join(wd, dataRoot)
-	}
 
-	indexPath := path.Join(dataRoot, indexBaseName)
-	metaPath := path.Join(dataRoot, metaBaseName)
-
-	exists, err := file.Exists(indexPath)
+	exists, err := root.Exists(indexBaseName)
 	if err != nil {
 		return nil, nil, exists, fault.Wrap(
-			err, fmsg.Withf("could not check if index exists at path %s",
-				indexPath,
-			))
+			err, fmsg.Withf("could not check if index exists at path %s", indexBaseName))
 	}
 
 	var idx bleve.Index
 	var meta *Meta
 	if !exists || force {
 		if force {
-			err = deleteIndex(dataRoot)
+			err = deleteIndex(root)
 			if err != nil {
 				return nil, nil, false, err
 			}
 		}
-		idx, err = createIndex(indexPath, options)
+		idx, err = createIndex(root, options)
 		if err != nil {
 			return nil, nil, false, err
 		}
 
-		meta, err = createMeta(metaPath, options.Logger)
+		meta, err = createMeta(root, options.Logger)
 		if err != nil {
 			return nil, nil, false, err
 		}
 
 	} else {
 		var baseErr error
+		//nolint:forbidigo // external package
+		indexPath := root.JoinPath(indexBaseName)
 		idx, baseErr = bleve.Open(indexPath)
 		if baseErr != nil {
 			return nil, nil, exists, fault.Wrap(baseErr, fmsg.Withf("could not open index at path %s", indexPath))
 		}
 
-		meta, err = openMeta(metaPath, options.Logger)
+		meta, err = openMeta(root, options.Logger)
 		if err != nil {
 			return nil, nil, exists, err
 		}

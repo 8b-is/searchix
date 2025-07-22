@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/file"
 	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/manpages"
 	"alin.ovh/x/log"
@@ -13,7 +14,11 @@ import (
 var cfg = config.DefaultConfig
 
 func BenchmarkImporterLowMemory(b *testing.B) {
-	tmp := b.TempDir()
+	tmp, err := file.OpenRoot(b.TempDir())
+	if err != nil {
+		b.Fatal(err)
+	}
+
 	logger := log.Configure(false)
 	_, write, _, err := index.OpenOrCreate(tmp, false, &index.Options{
 		LowMemory: true,
@@ -28,7 +33,10 @@ func BenchmarkImporterLowMemory(b *testing.B) {
 		Logger:     logger.Named("importer"),
 		LowMemory:  true,
 		WriteIndex: write,
-		Manpages:   manpages.New(&cfg, logger.Named("manpages")),
+		Manpages: manpages.New(&manpages.Options{
+			Logger: logger.Named("manpages"),
+			Root:   tmp,
+		}),
 	})
 	if err != nil {
 		b.Fatal(err)

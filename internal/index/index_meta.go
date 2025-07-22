@@ -2,7 +2,6 @@ package index
 
 import (
 	"encoding/json"
-	"os"
 	"time"
 
 	"alin.ovh/searchix/internal/file"
@@ -26,13 +25,13 @@ type data struct {
 }
 
 type Meta struct {
-	path string
+	root *file.Root
 	log  *log.Logger
 	data
 }
 
-func createMeta(path string, log *log.Logger) (*Meta, error) {
-	exists, err := file.Exists(path)
+func createMeta(root *file.Root, log *log.Logger) (*Meta, error) {
+	exists, err := root.Exists(metaBaseName)
 	if err != nil {
 		return nil, fault.Wrap(err, fmsg.With("could not check for existence of index metadata"))
 	}
@@ -41,7 +40,7 @@ func createMeta(path string, log *log.Logger) (*Meta, error) {
 	}
 
 	return &Meta{
-		path: path,
+		root: root,
 		log:  log,
 		data: data{
 			SchemaVersion: CurrentSchemaVersion,
@@ -49,21 +48,21 @@ func createMeta(path string, log *log.Logger) (*Meta, error) {
 	}, nil
 }
 
-func openMeta(path string, log *log.Logger) (*Meta, error) {
-	exists, err := file.Exists(path)
+func openMeta(root *file.Root, log *log.Logger) (*Meta, error) {
+	exists, err := root.Exists(metaBaseName)
 	if err != nil {
 		return nil, fault.Wrap(err, fmsg.With("could not check for existence of index metadata"))
 	}
 	if !exists {
-		return createMeta(path, log)
+		return createMeta(root, log)
 	}
 
-	j, baseErr := os.ReadFile(path)
+	j, baseErr := root.ReadFile(metaBaseName)
 	if baseErr != nil {
 		return nil, fault.Wrap(baseErr, fmsg.With("could not open index metadata file"))
 	}
 	meta := Meta{
-		path: path,
+		root: root,
 		log:  log,
 	}
 
@@ -84,8 +83,8 @@ func (i *Meta) Save() error {
 	if err != nil {
 		return fault.Wrap(err, fmsg.With("could not prepare index metadata for saving"))
 	}
-	i.log.Debug("saving index metadata", "path", i.path)
-	err = os.WriteFile(i.path, j, 0o600)
+	i.log.Debug("saving index metadata", "path", metaBaseName)
+	err = i.root.WriteFile(metaBaseName, j, 0o600)
 	if err != nil {
 		return fault.Wrap(err, fmsg.With("could not save index metadata"))
 	}

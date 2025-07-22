@@ -1,8 +1,8 @@
+//nolint:forbidigo // wrappers for os.File functions go here
 package file
 
 import (
 	"errors"
-	"io"
 	"io/fs"
 	"os"
 
@@ -10,7 +10,7 @@ import (
 	"github.com/Southclaws/fault/fmsg"
 )
 
-func Mkdirp(dir string) error {
+func mkdirp(dir string) error {
 	err := os.MkdirAll(dir, os.ModeDir|os.ModePerm)
 	if err != nil {
 		return fault.Wrap(err, fmsg.Withf("could not create directory %s", dir))
@@ -19,7 +19,7 @@ func Mkdirp(dir string) error {
 	return nil
 }
 
-func NeedNotExist(err error) error {
+func needNotExist(err error) error {
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return fault.Wrap(err)
 	}
@@ -27,29 +27,14 @@ func NeedNotExist(err error) error {
 	return nil
 }
 
-func StatIfExists(file string) (fs.FileInfo, error) {
+func statIfExists(file string) (fs.FileInfo, error) {
 	stat, err := os.Stat(file)
 
-	return stat, NeedNotExist(err)
+	return stat, needNotExist(err)
 }
 
-func Exists(file string) (bool, error) {
-	stat, err := StatIfExists(file)
+func exists(file string) (bool, error) {
+	stat, err := statIfExists(file)
 
 	return stat != nil, err
-}
-
-func WriteToFile(path string, body io.Reader) error {
-	file, err := os.Create(path)
-	if err != nil {
-		return fault.Wrap(err, fmsg.Withf("error creating file at %s", path))
-	}
-	defer file.Close()
-
-	_, err = io.Copy(file, body)
-	if err != nil {
-		return fault.Wrap(err, fmsg.Withf("error downloading file %s", path))
-	}
-
-	return nil
 }

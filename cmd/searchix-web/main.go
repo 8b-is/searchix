@@ -16,6 +16,7 @@ import (
 	"alin.ovh/searchix/frontend"
 	"alin.ovh/searchix/internal/components"
 	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/file"
 	"alin.ovh/searchix/internal/importer"
 	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/manpages"
@@ -76,6 +77,7 @@ func main() {
 	}
 
 	if *cpuprofile != "" {
+		//nolint:forbidigo // admin specifies profile file location
 		f, err := os.Create(*cpuprofile)
 		if err != nil {
 			panic("can't create CPU profile: " + err.Error())
@@ -99,8 +101,14 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
+	root, err := file.CreateAndOpenRoot(cfg.DataPath)
+	if err != nil {
+		logger.Fatal("Failed to open data root", "error", err)
+	}
+	defer root.Close()
+
 	read, write, exists, err := index.OpenOrCreate(
-		cfg.DataPath,
+		root,
 		*replace,
 		&index.Options{
 			LowMemory: cfg.Importer.LowMemory,
@@ -112,7 +120,10 @@ func main() {
 		logger.Fatal("Failed to open or create index", "error", err)
 	}
 
-	mdb := manpages.New(cfg, logger.Named("manpages"))
+	mdb := manpages.New(&manpages.Options{
+		Logger: logger.Named("manpages"),
+		Root:   root,
+	})
 
 	s, err := web.New(cfg, logger, &server.Options{
 		ReadIndex:      read,

@@ -63,6 +63,7 @@ func (i *ChannelFetcher) FetchIfNeeded(
 		return nil, fault.Wrap(err, fmsg.With("failed to run nix-build (--dry-run)"))
 	}
 
+	//nolint:forbidigo // nix-build only gives the top-level path
 	outPath := path.Join(strings.TrimSpace(string(out)), i.Source.OutputPath, "options.json")
 	i.Logger.Debug(
 		"checking output path",
@@ -75,6 +76,7 @@ func (i *ChannelFetcher) FetchIfNeeded(
 		sourceMeta.Updated = time.Now().Truncate(time.Second)
 	}
 
+	//nolint:forbidigo // nix builds the file in the nix store
 	file, err := os.Open(outPath)
 	if err != nil {
 		return nil, fault.Wrap(err, fmsg.With("failed to open options.json"))

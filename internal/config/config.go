@@ -111,6 +111,7 @@ func GetConfig(filename string, log *log.Logger) (*Config, error) {
 	config := DefaultConfig
 	if filename != "" {
 		log.Debug("reading config", "filename", filename)
+		//nolint:forbidigo // need to read config file from anywhere
 		f, err := os.Open(filename)
 		if err != nil {
 			return nil, fault.Wrap(err, fmsg.With("reading config failed"))

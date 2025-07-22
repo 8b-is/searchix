@@ -1,9 +1,10 @@
 ---
-# yamllint disable-line rule:line-length
+# yamllint disable rule:line-length
 # yaml-language-server: $schema=https://golangci-lint.run/jsonschema/golangci.jsonschema.json
 version: "2"
 linters:
     enable:
+        - forbidigo
         - gocritic
         - godox
         - gosec
@@ -21,6 +22,21 @@ linters:
         - unconvert
         - wrapcheck
     settings:
+        forbidigo:
+            forbid:
+                - pattern: ^(file)?path.Join$
+                  msg: "should use os.Root methods instead of path functions"
+                - pattern: ^filepath\.(Join|Walkdir)$
+                  msg: "should use os.Root methods instead of filepath functions"
+                - pattern: ^os\.(Open(File)?|Create|(New|Read|Write)File|Mkdir(All|Temp)?|Chmod|Chown|Chtimes|Link|Lstat|ReadDir|Remove(All)?|Rename|Stat|Symlink|Truncate|CopyFS|DirFS)$
+                  msg: "should use os.Root methods instead of os.File functions"
+                - pattern: ^file.Root.JoinPath$
+                  pkg: internal/file
+                  msg: "should use os.Root methods instead of working with paths"
+                - pattern: ^os\.Root\.Name$
+                  msg: "should use or implement methods on file.Root"
+            exclude-godoc-examples: true
+            analyze-types: true
         gosec:
             excludes:
                 - G115

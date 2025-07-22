@@ -5,12 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"os"
-	"path/filepath"
 	"time"
 
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/fetcher/http"
+	"alin.ovh/searchix/internal/file"
 	"alin.ovh/x/log"
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
@@ -19,17 +18,22 @@ import (
 const basename = "manpage-urls.json"
 
 type URLMap struct {
-	path string
+	root *file.Root
 
 	mtime  time.Time
 	logger *log.Logger
 	urlMap map[string]string
 }
 
-func New(cfg *config.Config, logger *log.Logger) *URLMap {
+type Options struct {
+	Logger *log.Logger
+	Root   *file.Root
+}
+
+func New(opts *Options) *URLMap {
 	return &URLMap{
-		path:   filepath.Join(cfg.DataPath, basename),
-		logger: logger,
+		logger: opts.Logger,
+		root:   opts.Root,
 	}
 }
 
@@ -68,14 +72,14 @@ func (m *URLMap) Update(
 
 // Open loads the manpage URLs from the JSON file
 func (m *URLMap) Open() error {
-	m.logger.Debug("opening manpages file", "path", m.path)
+	m.logger.Debug("opening manpages file", "path", basename)
 
-	stat, err := os.Stat(m.path)
+	stat, err := m.root.Stat(basename)
 	if err != nil {
-		return fault.Wrap(err, fmsg.Withf("failed to stat manpages file: %s", m.path))
+		return fault.Wrap(err, fmsg.Withf("failed to stat manpages file: %s", basename))
 	}
 
-	data, err := os.ReadFile(m.path)
+	data, err := m.root.ReadFile(basename)
 	if err != nil {
 		return fault.Wrap(err, fmsg.With("failed to read manpages file"))
 	}
@@ -93,9 +97,9 @@ func (m *URLMap) Open() error {
 }
 
 func (m *URLMap) save(r io.Reader) error {
-	m.logger.Debug("saving manpages file", "path", m.path)
+	m.logger.Debug("saving manpages file", "path", basename)
 
-	f, err := os.Create(m.path)
+	f, err := m.root.Create(basename)
 	if err != nil {
 		return fault.Wrap(err, fmsg.With("failed to create manpages file"))
 	}

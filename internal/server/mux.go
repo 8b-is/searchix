@@ -387,17 +387,17 @@ func NewMux(
 		liveReload := livereload.New()
 		liveReload.Start()
 		top.Handle("/livereload", liveReload)
-		fw, err := NewFileWatcher(log.Named("watcher"))
+		fw, err := NewFileWatcher(log.Named("watcher"), "frontend")
 		if err != nil {
 			return nil, fault.Wrap(err, fmsg.With("could not create file watcher"))
 		}
-		err = fw.AddRecursive(path.Join("frontend"))
+		err = fw.AddRecursive(".")
 		if err != nil {
 			return nil, fault.Wrap(err, fmsg.With("could not add directory to file watcher"))
 		}
 		go fw.Start(func(filename string) {
 			log.Debug(fmt.Sprintf("got filename %s", filename))
-			if match, _ := path.Match("frontend/static/*", filename); match {
+			if match, _ := path.Match("static/*", filename); match {
 				err := assets.Rehash()
 				if err != nil {
 					log.Error("failed to re-hash frontend assets", "error", err)

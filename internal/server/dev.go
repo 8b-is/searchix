@@ -3,10 +3,9 @@ package server
 import (
 	"fmt"
 	"io/fs"
-	"os"
-	"path/filepath"
 	"time"
 
+	"alin.ovh/searchix/internal/file"
 	"alin.ovh/x/log"
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
@@ -15,31 +14,49 @@ import (
 
 type FileWatcher struct {
 	watcher *fsnotify.Watcher
+	root    *file.Root
+	rootDir string
 	log     *log.Logger
 }
 
-func NewFileWatcher(log *log.Logger) (*FileWatcher, error) {
+func NewFileWatcher(log *log.Logger, rootDir string) (*FileWatcher, error) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return nil, fault.Wrap(err, fmsg.With("could not create watcher"))
 	}
 
+	root, err := file.OpenRoot(rootDir)
+	if err != nil {
+		return nil, fault.Wrap(err, fmsg.With("could not open root directory"))
+	}
+
 	return &FileWatcher{
-		watcher,
-		log,
+		watcher: watcher,
+		root:    root,
+		rootDir: rootDir,
+		log:     log,
 	}, nil
 }
 
+func (i FileWatcher) Add(path string) error {
+	//nolint:forbidigo // external package
+	fullpath := i.root.JoinPath(path)
+	i.log.Debug(fmt.Sprintf("adding file %s to watcher", fullpath))
+	if err := i.watcher.Add(fullpath); err != nil {
+		return fault.Wrap(err, fmsg.Withf("could not add file %s to watcher", path))
+	}
+
+	return nil
+}
+
 func (i FileWatcher) AddRecursive(from string) error {
-	i.log.Debug(fmt.Sprintf("watching files under %s", from))
-	err := filepath.WalkDir(from, func(path string, entry fs.DirEntry, err error) error {
+	err := fs.WalkDir(i.root.FS(), from, func(path string, entry fs.DirEntry, err error) error {
 		if err != nil {
 			return fault.Wrap(err, fmsg.Withf("could not walk directory %s", path))
 		}
 		if entry.IsDir() {
-			i.log.Debug(fmt.Sprintf("adding directory %s to watcher", path))
-			if err = i.watcher.Add(path); err != nil {
-				return fault.Wrap(err, fmsg.Withf("could not add directory %s to watcher", path))
+			if err = i.Add(path); err != nil {
+				return err
 			}
 		}
 
@@ -54,7 +71,7 @@ func (i FileWatcher) Start(callback func(string)) {
 		select {
 		case event := <-i.watcher.Events:
 			if event.Has(fsnotify.Create) || event.Has(fsnotify.Rename) {
-				f, err := os.Stat(event.Name)
+				f, err := i.root.Stat(event.Name)
 				if err != nil {
 					i.log.Error(fmt.Sprintf("error handling %s event: %v", event.Op.String(), err))
 				} else if f.IsDir() {

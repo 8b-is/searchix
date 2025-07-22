@@ -9,18 +9,25 @@ import (
 	"time"
 
 	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/file"
 	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/nix"
 	"alin.ovh/x/log"
 )
 
-const dataRoot = "../../data"
+const rootPath = "../../data"
 
 func TestSearchGitPackagesFirst(t *testing.T) {
 	log := log.Configure(false)
 	cfg := config.DefaultConfig
 
-	read, _, exists, err := index.OpenOrCreate(dataRoot, false, &index.Options{
+	root, err := file.CreateAndOpenRoot(rootPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer root.Close()
+
+	read, _, exists, err := index.OpenOrCreate(root, false, &index.Options{
 		Logger:    log.Named("index"),
 		BatchSize: cfg.Importer.BatchSize,
 		LowMemory: false,
@@ -84,7 +91,13 @@ func TestSearchJujutsuPackagesFirst(t *testing.T) {
 	log := log.Configure(false)
 	cfg := config.DefaultConfig
 
-	read, _, exists, err := index.OpenOrCreate(dataRoot, false, &index.Options{
+	root, err := file.CreateAndOpenRoot(rootPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer root.Close()
+
+	read, _, exists, err := index.OpenOrCreate(root, false, &index.Options{
 		Logger:    log.Named("index"),
 		LowMemory: false,
 	})
