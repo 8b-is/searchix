@@ -81,8 +81,8 @@ func (imp *Importer) createSourceImporter(
 		if err != nil {
 			var exerr *exec.ExitError
 			if errors.As(err, &exerr) {
-				lines := strings.Split(strings.TrimSpace(string(exerr.Stderr)), "\n")
-				for _, line := range lines {
+				lines := strings.SplitSeq(strings.TrimSpace(string(exerr.Stderr)), "\n")
+				for line := range lines {
 					logger.Error(
 						"importer fetch failed",
 						"fetcher",
