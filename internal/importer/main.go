@@ -65,7 +65,9 @@ func (imp *Importer) createSourceImporter(
 		logger := imp.options.Logger.With("name", source.Key)
 		logger.Debug("starting fetcher")
 
-		fetcher, err := fetcher.New(source, logger)
+		fetcher, err := fetcher.New(source, &fetcher.Options{
+			Logger: logger,
+		})
 		if err != nil {
 			return fault.Wrap(err, fmsg.With("error creating fetcher"))
 		}
