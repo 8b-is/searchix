@@ -30,15 +30,6 @@ func CreateAndOpenRoot(name string) (*Root, error) {
 }
 
 func OpenRoot(name string) (*Root, error) {
-	if !filepath.IsAbs(name) {
-		wd, err := os.Getwd()
-		if err != nil {
-			return nil, fault.Wrap(err, fmsg.With("failed to get current working directory"))
-		}
-
-		name = filepath.Join(wd, name)
-	}
-
 	r, err := os.OpenRoot(name)
 	if err != nil {
 		return nil, fault.Wrap(err, fmsg.Withf("failed to open data root directory %s", name))
