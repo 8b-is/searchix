@@ -80,10 +80,10 @@ func (r *Root) WriteFile(name string, data []byte, perm fs.FileMode) error {
 	return nil
 }
 
-func (r *Root) RemoveAll() error {
-	err := os.RemoveAll(r.Name())
+func (r *Root) RemoveAll(name string) error {
+	err := os.RemoveAll(r.JoinPath(name))
 	if err != nil {
-		return fault.Wrap(err, fmsg.Withf("failed to remove data root %s", r.Name()))
+		return fault.Wrap(err, fmsg.Withf("failed to remove path %s", r.JoinPath(name)))
 	}
 
 	return nil

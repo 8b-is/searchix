@@ -4,9 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
-	"io/fs"
 	"math"
-	"slices"
 
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/file"
@@ -210,29 +208,15 @@ const (
 var expectedDataFiles = []string{
 	metaBaseName,
 	indexBaseName,
-	"sources",
-	"nixpkgs-programs.db",
 	"manpage-urls.json",
 }
 
 func deleteIndex(root *file.Root) error {
-	dir, err := fs.ReadDir(root.FS(), ".")
-	if err != nil {
-		return fault.Wrap(err, fmsg.Withf("could not read data directory"))
-	}
-	remainingFiles := slices.DeleteFunc(dir, func(e fs.DirEntry) bool {
-		return slices.Contains(expectedDataFiles, e.Name())
-	})
-	if len(remainingFiles) > 0 {
-		return fault.Newf(
-			"cowardly refusing to remove data directory as it contains unknown files: %v",
-			remainingFiles,
-		)
-	}
-
-	err = root.RemoveAll()
-	if err != nil {
-		return fault.Wrap(err)
+	for _, file := range expectedDataFiles {
+		err := root.RemoveAll(file)
+		if err != nil {
+			return fault.Wrap(err, fmsg.Withf("could not remove file %s", file))
+		}
 	}
 
 	return nil
