@@ -138,6 +138,7 @@ func main() {
 		LowMemory:  cfg.Importer.LowMemory,
 		Logger:     logger.Named("importer"),
 		Manpages:   mdb,
+		Root:       root,
 	})
 	if err != nil {
 		logger.Fatal("Failed to create importer", "error", err)

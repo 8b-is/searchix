@@ -2,9 +2,11 @@
 package file
 
 import (
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
@@ -54,6 +56,49 @@ func (r *Root) Exists(file string) (bool, error) {
 	stat, err := r.StatIfExists(file)
 
 	return stat != nil, err
+}
+
+func (r *Root) CopyTo(source, target string) error {
+	src, err := os.Open(source)
+	if err != nil {
+		return fault.Wrap(err, fmsg.Withf("failed to open source file %s", source))
+	}
+	defer src.Close()
+
+	dst, err := r.OpenFile(target, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0o640)
+	if err != nil {
+		return fault.Wrap(err, fmsg.Withf("failed to create target file %s", target))
+	}
+	defer dst.Close()
+
+	if _, err := io.Copy(dst, src); err != nil {
+		return fault.Wrap(err, fmsg.Withf("failed to copy file from %s to %s", source, target))
+	}
+
+	err = dst.Sync()
+	if err != nil {
+		return fault.Wrap(err, fmsg.Withf("failed to sync target file %s", target))
+	}
+
+	return nil
+}
+
+func (r *Root) Chtimes(name string, atime time.Time, mtime time.Time) error {
+	err := os.Chtimes(r.JoinPath(name), atime, mtime)
+	if err != nil {
+		return fault.Wrap(err, fmsg.Withf("failed to change times of %s", name))
+	}
+
+	return nil
+}
+
+func (r *Root) MkdirAll(name string) error {
+	err := os.MkdirAll(r.JoinPath(name), 0o750)
+	if err != nil {
+		return fault.Wrap(err, fmsg.Withf("failed to create directory %s", name))
+	}
+
+	return nil
 }
 
 func (r *Root) ReadFile(name string) ([]byte, error) {

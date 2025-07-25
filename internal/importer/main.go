@@ -13,6 +13,7 @@ import (
 
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/fetcher"
+	"alin.ovh/searchix/internal/file"
 	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/manpages"
 	"alin.ovh/searchix/internal/programs"
@@ -28,6 +29,7 @@ type Options struct {
 	Logger     *log.Logger
 	WriteIndex *index.WriteIndex
 	Manpages   *manpages.URLMap
+	Root       *file.Root
 }
 
 var Job struct {
@@ -67,6 +69,7 @@ func (imp *Importer) createSourceImporter(
 
 		fetcher, err := fetcher.New(source, &fetcher.Options{
 			Logger: logger,
+			Root:   imp.options.Root,
 		})
 		if err != nil {
 			return fault.Wrap(err, fmsg.With("error creating fetcher"))

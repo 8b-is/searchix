@@ -3,19 +3,19 @@ package fetcher
 import (
 	"context"
 	"net/url"
+	"strings"
 
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/fetcher/http"
 	"alin.ovh/searchix/internal/index"
 
-	"alin.ovh/x/log"
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
 )
 
 type NixpkgsChannelFetcher struct {
 	Source *config.Source
-	Logger *log.Logger
+	*Options
 }
 
 func makeChannelURL(channel string, subPath string) (string, error) {
@@ -26,13 +26,13 @@ func makeChannelURL(channel string, subPath string) (string, error) {
 
 func NewNixpkgsChannelFetcher(
 	source *config.Source,
-	logger *log.Logger,
+	options *Options,
 ) (*NixpkgsChannelFetcher, error) {
 	switch source.Importer {
 	case config.Options, config.Packages:
 		return &NixpkgsChannelFetcher{
-			Source: source,
-			Logger: logger,
+			Source:  source,
+			Options: options,
 		}, nil
 	default:
 		return nil, fault.Newf("unsupported importer type %s", source.Importer)
@@ -60,23 +60,30 @@ func (i *NixpkgsChannelFetcher) FetchIfNeeded(
 		filesToFetch[1] = optionsFilename
 	}
 
+	fetcher := http.NewFetcher(&http.Options{
+		Logger: i.Logger.Named("http"),
+		Root:   i.Root,
+	})
+
 	var fetchURL string
 	for _, filename := range filesToFetch {
+		target := i.Source.JoinPath(strings.TrimSuffix(filename, ".br"))
 		fetchURL, err = makeChannelURL(i.Source.Channel, filename)
 		if err != nil {
 			return
 		}
 
 		i.Logger.Debug("attempting to fetch file", "url", fetchURL)
-		body, mtime, err := http.FetchFileIfNeeded(ctx, i.Logger, sourceMeta.Updated, fetchURL)
+		body, err := fetcher.FetchFileIfNeeded(ctx, target, fetchURL)
 		if err != nil {
 			return f, fault.Wrap(err, fmsg.Withf("failed to fetch file with url %s", fetchURL))
 		}
-		// don't bother to issue requests for the later files
-		if mtime.Before(sourceMeta.Updated) {
-			break
+
+		stat, err := i.Root.Stat(target)
+		if err != nil {
+			return nil, fault.Wrap(err, fmsg.Withf("could not stat file %s", target))
 		}
-		sourceMeta.Updated = mtime
+		sourceMeta.Updated = stat.ModTime()
 
 		switch filename {
 		case revisionFilename:

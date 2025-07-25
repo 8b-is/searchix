@@ -9,25 +9,23 @@ import (
 	"alin.ovh/searchix/internal/index"
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
-
-	"alin.ovh/x/log"
 )
 
 type DownloadFetcher struct {
 	Source     *config.Source
 	SourceFile string
-	Logger     *log.Logger
+	*Options
 }
 
 func NewDownloadFetcher(
 	source *config.Source,
-	logger *log.Logger,
+	options *Options,
 ) (*DownloadFetcher, error) {
 	switch source.Importer {
 	case config.Options, config.Packages:
 		return &DownloadFetcher{
-			Source: source,
-			Logger: logger,
+			Source:  source,
+			Options: options,
 		}, nil
 	default:
 		return nil, fault.Newf("unsupported importer type %s", source.Importer)
@@ -45,7 +43,6 @@ func (i *DownloadFetcher) FetchIfNeeded(
 	sourceMeta *index.SourceMeta,
 ) (*FetchedFiles, error) {
 	f := &FetchedFiles{}
-	sourceUpdated := sourceMeta.Updated
 
 	filesToFetch := make([]string, 2)
 	filesToFetch[0] = files["revision"]
@@ -56,34 +53,41 @@ func (i *DownloadFetcher) FetchIfNeeded(
 		filesToFetch[1] = files["options"]
 	}
 
-	for _, filename := range filesToFetch {
-		fetchURL, baseErr := url.JoinPath(i.Source.URL, filename)
+	fetcher := http.NewFetcher(&http.Options{
+		Logger: i.Logger.Named("http"),
+		Root:   i.Root,
+	})
+
+	for _, basename := range filesToFetch {
+		target := i.Source.JoinPath(basename)
+		fetchURL, baseErr := url.JoinPath(i.Source.URL, basename)
 		if baseErr != nil {
 			return nil, fault.Wrap(
 				baseErr,
 				fmsg.Withf(
 					"could not build URL with elements %s and %s",
 					i.Source.URL,
-					filename,
+					basename,
 				),
 			)
 		}
 
-		i.Logger.Debug("preparing to fetch URL", "url", fetchURL)
+		i.Logger.Debug("preparing to fetch URL", "url", fetchURL, "target", target)
 
-		body, mtime, err := http.FetchFileIfNeeded(ctx, i.Logger, sourceUpdated, fetchURL)
+		body, err := fetcher.FetchFileIfNeeded(ctx, target, fetchURL)
 		if err != nil {
 			i.Logger.Warn("failed to fetch file", "url", fetchURL, "error", err)
 
-			return nil, fault.Wrap(err, fmsg.Withf("could not fetch file %s", filename))
+			return nil, fault.Wrap(err, fmsg.Withf("could not fetch file %s", basename))
 		}
-		// don't bother to issue requests for the later files
-		if mtime.Before(sourceUpdated) {
-			break
-		}
-		sourceMeta.Updated = mtime
 
-		switch filename {
+		stat, err := i.Root.Stat(target)
+		if err != nil {
+			return nil, fault.Wrap(err, fmsg.Withf("could not stat file %s", target))
+		}
+		sourceMeta.Updated = stat.ModTime()
+
+		switch basename {
 		case files["revision"]:
 			f.Revision = body
 		case files["options"]:
@@ -91,7 +95,7 @@ func (i *DownloadFetcher) FetchIfNeeded(
 		case files["packages"]:
 			f.Packages = body
 		default:
-			return f, fault.Newf("unknown filename %s", filename)
+			return f, fault.Newf("unknown filename %s", basename)
 		}
 	}
 

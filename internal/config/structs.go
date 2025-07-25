@@ -5,6 +5,7 @@ package config
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/creasty/defaults"
@@ -82,4 +83,9 @@ func (source *Source) SetDefaults() {
 	if defaults.CanUpdate(source.Name) {
 		source.Name = strings.ToTitle(source.Key[0:1]) + source.Key[1:]
 	}
+}
+
+func (source *Source) JoinPath(name string) string {
+	//nolint:forbidigo // is not absolute
+	return filepath.Join("sources", source.Key, name)
 }
