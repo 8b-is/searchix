@@ -3,79 +3,79 @@
 # yaml-language-server: $schema=https://golangci-lint.run/jsonschema/golangci.jsonschema.json
 version: "2"
 linters:
-    enable:
-        - forbidigo
-        - gocritic
-        - godox
-        - gosec
-        - grouper
-        - lll
-        - nilerr
-        - nlreturn
-        - noctx
-        - nosprintfhostport
-        - paralleltest
-        - prealloc
-        - reassign
-        - revive
-        - sloglint
-        - unconvert
-        - wrapcheck
-    settings:
-        forbidigo:
-            forbid:
-                - pattern: ^(file)?path.Join$
-                  msg: "should use os.Root methods instead of path functions"
-                - pattern: ^filepath\.(Join|Walkdir)$
-                  msg: "should use os.Root methods instead of filepath functions"
-                - pattern: ^os\.(Open(File)?|Create|(New|Read|Write)File|Mkdir(All|Temp)?|Chmod|Chown|Chtimes|Link|Lstat|ReadDir|Remove(All)?|Rename|Stat|Symlink|Truncate|CopyFS|DirFS)$
-                  msg: "should use os.Root methods instead of os.File functions"
-                - pattern: ^file.Root.JoinPath$
-                  pkg: internal/file
-                  msg: "should use os.Root methods instead of working with paths"
-                - pattern: ^os\.Root\.Name$
-                  msg: "should use or implement methods on file.Root"
-            exclude-godoc-examples: true
-            analyze-types: true
-        gosec:
-            excludes:
-                - G115
-        paralleltest:
-            ignore-missing: true
-        wrapcheck:
-            ignore-sigs:
-                - .Errorf(
-                - errors.New(
-                - errors.Unwrap(
-                - errors.Join(
-                - fault.New(
-                - fault.Newf(
-                - fault.Wrap(
-                - (context.Context).Err(
-    exclusions:
-        generated: lax
-        presets:
-            - comments
-            - common-false-positives
-            - legacy
-            - std-error-handling
-        rules:
-            - linters:
-                  - revive
-              path: internal/components
-              text: dot-imports
-            - linters:
-                  - staticcheck
-              path: internal/components
-              text: dot imports
-        paths:
-            - third_party$
-            - builtin$
-            - examples$
+  enable:
+    - forbidigo
+    - gocritic
+    - godox
+    - gosec
+    - grouper
+    - lll
+    - nilerr
+    - nlreturn
+    - noctx
+    - nosprintfhostport
+    - paralleltest
+    - prealloc
+    - reassign
+    - revive
+    - sloglint
+    - unconvert
+    - wrapcheck
+  settings:
+    forbidigo:
+      forbid:
+        - pattern: ^(file)?path.Join$
+          msg: "should use os.Root methods instead of path functions"
+        - pattern: ^filepath\.(Join|Walkdir)$
+          msg: "should use os.Root methods instead of filepath functions"
+        - pattern: ^os\.(Open(File)?|Create|(New|Read|Write)File|Mkdir(All|Temp)?|Chmod|Chown|Chtimes|Link|Lstat|ReadDir|Remove(All)?|Rename|Stat|Symlink|Truncate|CopyFS|DirFS)$
+          msg: "should use os.Root methods instead of os.File functions"
+        - pattern: ^file.Root.JoinPath$
+          pkg: internal/file
+          msg: "should use os.Root methods instead of working with paths"
+        - pattern: ^os\.Root\.Name$
+          msg: "should use or implement methods on file.Root"
+      exclude-godoc-examples: true
+      analyze-types: true
+    gosec:
+      excludes:
+        - G115
+    paralleltest:
+      ignore-missing: true
+    wrapcheck:
+      ignore-sigs:
+        - .Errorf(
+        - errors.New(
+        - errors.Unwrap(
+        - errors.Join(
+        - fault.New(
+        - fault.Newf(
+        - fault.Wrap(
+        - (context.Context).Err(
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - revive
+        path: internal/components
+        text: dot-imports
+      - linters:
+          - staticcheck
+        path: internal/components
+        text: dot imports
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
 formatters:
-    exclusions:
-        generated: lax
-        paths:
-            - third_party$
-            - builtin$
-            - examples$
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
