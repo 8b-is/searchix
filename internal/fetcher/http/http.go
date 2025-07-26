@@ -95,20 +95,22 @@ func (h *Fetcher) FetchFileIfNeeded(
 	}
 
 	var body io.ReadCloser
-	var newMtime time.Time
+	newMtime := time.Now()
 	encoding := res.Header.Get("Content-Encoding")
 	switch res.StatusCode {
 	case http.StatusNotModified:
 	case http.StatusOK:
 		var baseErr error
-		newMtime, baseErr = time.Parse(time.RFC1123, res.Header.Get("Last-Modified"))
-		if baseErr != nil {
-			h.logger.Warn(
-				"could not parse Last-Modified header from response",
-				"value",
-				res.Header.Get("Last-Modified"),
-			)
-			newMtime = time.Now()
+		if lastMod := res.Header.Get("Last-Modified"); lastMod != "" {
+			newMtime, baseErr = time.Parse(time.RFC1123, lastMod)
+			if baseErr != nil {
+				h.logger.Warn(
+					"could not parse Last-Modified header from response",
+					"value",
+					res.Header.Get("Last-Modified"),
+				)
+				newMtime = time.Now()
+			}
 		}
 
 		switch encoding {
