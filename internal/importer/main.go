@@ -33,28 +33,25 @@ type Options struct {
 }
 
 var Job struct {
-	InProgress bool
-	StartedAt  time.Time
-	FinishedAt time.Time
-	NextRun    time.Time
-}
-
-func SetNextRun(nextRun time.Time) {
-	Job.NextRun = nextRun
-}
-
-func SetLastUpdated(last time.Time) {
-	Job.FinishedAt = last
+	StartedAt time.Time
+	LastRun   struct {
+		StartedAt  time.Time
+		FinishedAt time.Time
+	}
+	NextRun time.Time
 }
 
 func MarkIndexingStarted() {
 	Job.StartedAt = time.Now()
-	Job.InProgress = true
 }
 
-func MarkIndexingFinished(nextRun time.Time) {
-	Job.FinishedAt = time.Now()
-	Job.InProgress = false
+func MarkIndexingFinished() {
+	Job.LastRun.StartedAt = Job.StartedAt
+	Job.LastRun.FinishedAt = time.Now()
+	Job.StartedAt = time.Time{}
+}
+
+func SetNextRun(nextRun time.Time) {
 	Job.NextRun = nextRun
 }
 
@@ -77,10 +74,7 @@ func (imp *Importer) createSourceImporter(
 		}
 
 		sourceMeta := meta.GetSourceMeta(source.Key)
-		if forceUpdate {
-			sourceMeta.Updated = time.Unix(0, 0)
-		}
-		previousUpdate := sourceMeta.Updated
+		previousUpdate := sourceMeta.UpdatedAt
 		ctx, cancel := context.WithTimeout(parent, source.Timeout.Duration)
 		defer cancel()
 		files, err := fetcher.FetchIfNeeded(ctx, sourceMeta)
@@ -108,16 +102,17 @@ func (imp *Importer) createSourceImporter(
 			"previous",
 			previousUpdate.Format(time.DateTime),
 			"current",
-			sourceMeta.Updated.Format(time.DateTime),
+			sourceMeta.UpdatedAt.Format(time.DateTime),
 			"is_updated",
-			sourceMeta.Updated.After(previousUpdate),
+			sourceMeta.UpdatedAt.After(previousUpdate),
 			"update_force",
 			forceUpdate,
 			"fetch_only",
 			fetchOnly,
 		)
 
-		if !fetchOnly && (!sourceMeta.Updated.After(previousUpdate) || forceUpdate) {
+		if !fetchOnly &&
+			(!sourceMeta.UpdatedAt.After(sourceMeta.ImportedAt) || sourceMeta.ImportedAt.IsZero() || forceUpdate) {
 			var pdb *programs.DB
 
 			if source.Programs.Enable {
@@ -172,6 +167,8 @@ func (imp *Importer) createSourceImporter(
 				}
 			}
 
+			sourceMeta.ImportedAt = time.Now()
+
 			if hadWarnings {
 				logger.Warn("importer succeeded, but with warnings/errors")
 			} else {
@@ -213,6 +210,7 @@ func (imp *Importer) Start(
 	forceUpdate = forceUpdate || (onlyUpdateSources != nil && len(*onlyUpdateSources) > 0)
 
 	meta := imp.options.WriteIndex.Meta
+	MarkIndexingStarted()
 
 	importSource := imp.createSourceImporter(importCtx, meta, forceUpdate, fetchOnly)
 	for name, source := range imp.config.Importer.Sources {
@@ -227,12 +225,12 @@ func (imp *Importer) Start(
 		}
 	}
 
+	MarkIndexingFinished()
+
 	err := imp.options.WriteIndex.SaveMeta()
 	if err != nil {
 		return fault.Wrap(err, fmsg.With("failed to save metadata"))
 	}
-
-	SetLastUpdated(time.Now())
 
 	return nil
 }
@@ -241,6 +239,8 @@ func New(
 	cfg *config.Config,
 	options *Options,
 ) (*Importer, error) {
+	Job.LastRun = options.WriteIndex.Meta.LastImport
+
 	return &Importer{
 		config:  cfg,
 		options: options,
@@ -307,11 +307,9 @@ func (imp *Importer) StartUpdateTimer(
 			Timezone:      time.Local.String(),
 		}
 
-		Job.FinishedAt = imp.options.WriteIndex.Meta.LastUpdated()
-
 		var nextRun time.Time
 		switch {
-		case Job.FinishedAt.Before(time.Now().Add(-24 * time.Hour)):
+		case Job.LastRun.FinishedAt.Before(time.Now().Add(-24 * time.Hour)):
 			imp.options.Logger.Info(
 				"indexing last ran more than 24 hours ago, scheduling immediate update",
 			)
@@ -339,7 +337,6 @@ func (imp *Importer) StartUpdateTimer(
 				MonitorSlug: monitorSlug,
 				Status:      sentry.CheckInStatusInProgress,
 			}, monitorConfig)
-			MarkIndexingStarted()
 
 			ctx, cancel := context.WithTimeout(parentCtx, imp.config.Importer.Timeout.Duration)
 			err = imp.Start(ctx, false, false, nil)
@@ -364,7 +361,8 @@ func (imp *Importer) StartUpdateTimer(
 				}, monitorConfig)
 			}
 			nextRun = nextUTCOccurrenceOfTime(imp.config.Importer.UpdateAt)
-			MarkIndexingFinished(nextRun)
+			SetNextRun(nextRun)
+
 			imp.options.Logger.Info(
 				"scheduling next run",
 				"next-run",

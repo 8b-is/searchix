@@ -82,7 +82,7 @@ func (i *NixpkgsChannelFetcher) FetchIfNeeded(
 		if err != nil {
 			return nil, fault.Wrap(err, fmsg.Withf("could not stat file %s", target))
 		}
-		sourceMeta.Updated = stat.ModTime()
+		sourceMeta.UpdatedAt = stat.ModTime()
 
 		switch urlname {
 		case revisionFilename:

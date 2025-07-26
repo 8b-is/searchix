@@ -1,12 +1,14 @@
 package components
 
 import (
+	"fmt"
 	"time"
 
 	g "alin.ovh/gomponents"
 	. "alin.ovh/gomponents/html"
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/importer"
+	"github.com/dustin/go-humanize"
 )
 
 func SearchForm(tdata TemplateData, r ResultData) g.Node {
@@ -48,7 +50,7 @@ func SearchPage(tdata TemplateData, r ResultData, children ...g.Node) g.Node {
 				return A(Href(source.Repo.String()), g.Text(source.Name))
 			}),
 		),
-		g.If(importer.Job.InProgress,
+		g.If(!importer.Job.StartedAt.IsZero(),
 			P(Class("notice"),
 				g.Text("Indexing in progress, started "),
 				Time(
@@ -57,23 +59,32 @@ func SearchPage(tdata TemplateData, r ResultData, children ...g.Node) g.Node {
 					g.Text(time.Since(importer.Job.StartedAt).Round(time.Second).String()),
 				),
 				g.Text(" ago. "),
-				g.If(!importer.Job.FinishedAt.IsZero(),
-					g.Group([]g.Node{
+				g.Iff(!importer.Job.LastRun.FinishedAt.IsZero(), func() g.Node {
+					duration := importer.Job.LastRun.FinishedAt.Sub(importer.Job.LastRun.StartedAt)
+
+					return g.Group([]g.Node{
 						g.Text("Last run took "),
 						Time(
-							DateTime(importer.Job.FinishedAt.Format(time.RFC3339)),
-							Title(importer.Job.FinishedAt.Format(time.DateTime)),
-							g.Text(time.Since(importer.Job.FinishedAt).Round(time.Minute).String()),
+							DateTime(DurationDateTimeString(duration)),
+							Title(duration.Round(time.Second).String()),
+							g.Text(duration.Round(time.Minute).String()),
 						),
-					}),
-				),
+					})
+				}),
 			),
 			P(
 				g.Text("Indexing last ran "),
 				Time(
-					DateTime(importer.Job.FinishedAt.Format(time.RFC3339)),
-					Title(importer.Job.FinishedAt.Format(time.DateTime)),
-					g.Textf("%.0f hours ago", time.Since(importer.Job.FinishedAt).Hours()),
+					DateTime(importer.Job.LastRun.FinishedAt.Format(time.RFC3339)),
+					Title(importer.Job.LastRun.FinishedAt.Format(time.DateTime)),
+					g.Text(
+						humanize.RelTime(
+							importer.Job.LastRun.FinishedAt,
+							time.Now(),
+							"ago",
+							"in the future",
+						),
+					),
 				),
 				g.Text(", will run again in "),
 				Time(
@@ -127,4 +138,9 @@ func MapCommaList[T any](items []T, fn func(T) g.Node) g.Node {
 	}
 
 	return g.Group(out)
+}
+
+func DurationDateTimeString(d time.Duration) string {
+	// PThHmMsS
+	return fmt.Sprintf("PT%dH%dM%dS", d/time.Hour, d/time.Minute%60, d/time.Second%60)
 }

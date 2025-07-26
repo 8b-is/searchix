@@ -11,17 +11,22 @@ import (
 	"github.com/Southclaws/fault/fmsg"
 )
 
-const CurrentSchemaVersion = 5
+const CurrentSchemaVersion = 6
 
 type SourceMeta struct {
-	Updated time.Time
-	Path    string
-	Rev     string
+	ImportedAt time.Time
+	UpdatedAt  time.Time
+	Path       string
+	Rev        string
 }
 
 type data struct {
 	SchemaVersion int
-	Sources       map[string]*SourceMeta
+	LastImport    struct {
+		StartedAt  time.Time
+		FinishedAt time.Time
+	}
+	Sources map[string]*SourceMeta
 }
 
 type Meta struct {
@@ -44,6 +49,7 @@ func createMeta(root *file.Root, log *log.Logger) (*Meta, error) {
 		log:  log,
 		data: data{
 			SchemaVersion: CurrentSchemaVersion,
+			Sources:       make(map[string]*SourceMeta),
 		},
 	}, nil
 }
@@ -102,17 +108,25 @@ func (i *Meta) GetSourceMeta(source string) *SourceMeta {
 }
 
 func (i *Meta) SetSourceMeta(source string, meta *SourceMeta) {
-	if i.Sources == nil {
-		i.Sources = make(map[string]*SourceMeta)
-	}
 	i.Sources[source] = meta
+}
+
+func (i *Meta) LastImported() time.Time {
+	var last time.Time
+	for _, sourceMeta := range i.Sources {
+		if sourceMeta.ImportedAt.After(last) {
+			last = sourceMeta.ImportedAt
+		}
+	}
+
+	return last
 }
 
 func (i *Meta) LastUpdated() time.Time {
 	var last time.Time
 	for _, sourceMeta := range i.Sources {
-		if sourceMeta.Updated.After(last) {
-			last = sourceMeta.Updated
+		if sourceMeta.UpdatedAt.After(last) {
+			last = sourceMeta.UpdatedAt
 		}
 	}
 

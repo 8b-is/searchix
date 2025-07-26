@@ -13,6 +13,7 @@ require (
 	github.com/blevesearch/bleve_index_api v1.2.8
 	github.com/creasty/defaults v1.8.0
 	github.com/crewjam/csp v0.0.2
+	github.com/dustin/go-humanize v1.0.1
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/getsentry/sentry-go v0.33.0
 	github.com/mitchellh/mapstructure v1.5.0
@@ -46,7 +47,6 @@ require (
 	github.com/blevesearch/zapx/v14 v14.4.2 // indirect
 	github.com/blevesearch/zapx/v15 v15.4.2 // indirect
 	github.com/blevesearch/zapx/v16 v16.2.4 // indirect
-	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v1.0.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect

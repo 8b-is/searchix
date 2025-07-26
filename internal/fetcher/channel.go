@@ -74,7 +74,7 @@ func (i *ChannelFetcher) FetchIfNeeded(
 	)
 	if outPath != sourceMeta.Path {
 		sourceMeta.Path = outPath
-		sourceMeta.Updated = time.Now().Truncate(time.Second)
+		sourceMeta.UpdatedAt = time.Now().Truncate(time.Second)
 
 		if exists, err := i.Root.Exists(target); err != nil {
 			return nil, fault.Wrap(err, fmsg.With("failed to check if target path exists"))

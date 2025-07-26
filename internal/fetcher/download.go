@@ -85,7 +85,7 @@ func (i *DownloadFetcher) FetchIfNeeded(
 		if err != nil {
 			return nil, fault.Wrap(err, fmsg.Withf("could not stat file %s", target))
 		}
-		sourceMeta.Updated = stat.ModTime()
+		sourceMeta.UpdatedAt = stat.ModTime()
 
 		switch basename {
 		case files["revision"]:
