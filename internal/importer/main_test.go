@@ -45,6 +45,7 @@ func BenchmarkImporterLowMemory(b *testing.B) {
 	err = imp.Start(
 		context.Background(),
 		false,
+		false,
 		&[]string{"nixpkgs"},
 	)
 	if err != nil {

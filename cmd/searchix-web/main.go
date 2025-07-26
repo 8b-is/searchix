@@ -35,6 +35,7 @@ var (
 	generateErrorPage = flag.Bool("generate-error-page", false, "generate error page and exit")
 	dev               = flag.Bool("dev", false, "enable live reloading and nicer logging")
 	replace           = flag.Bool("replace", false, "replace existing index and exit")
+	fetch             = flag.Bool("fetch", false, "fetch data and exit")
 	version           = flag.Bool("version", false, "print version information")
 	cpuprofile        = flag.String("cpuprofile", "", "enable CPU profiling and save to `file`")
 )
@@ -144,13 +145,13 @@ func main() {
 		logger.Fatal("Failed to create importer", "error", err)
 	}
 
-	if !exists || *replace {
-		err := imp.Start(ctx, true, nil)
+	if !exists || *replace || *fetch {
+		err := imp.Start(ctx, true, *fetch, nil)
 		if err != nil {
 			logger.Fatal("Failed to start importer", "error", err)
 		}
 
-		if *replace {
+		if *replace || *fetch {
 			return
 		}
 	}

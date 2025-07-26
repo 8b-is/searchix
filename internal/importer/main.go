@@ -62,6 +62,7 @@ func (imp *Importer) createSourceImporter(
 	parent context.Context,
 	meta *index.Meta,
 	forceUpdate bool,
+	fetchOnly bool,
 ) func(*config.Source) error {
 	return func(source *config.Source) error {
 		logger := imp.options.Logger.With("name", source.Key)
@@ -105,16 +106,18 @@ func (imp *Importer) createSourceImporter(
 		logger.Info(
 			"importer fetch succeeded",
 			"previous",
-			previousUpdate,
+			previousUpdate.Format(time.DateTime),
 			"current",
 			sourceMeta.Updated.Format(time.DateTime),
 			"is_updated",
 			sourceMeta.Updated.After(previousUpdate),
 			"update_force",
 			forceUpdate,
+			"fetch_only",
+			fetchOnly,
 		)
 
-		if sourceMeta.Updated.After(previousUpdate) || forceUpdate {
+		if !fetchOnly && (!sourceMeta.Updated.After(previousUpdate) || forceUpdate) {
 			var pdb *programs.DB
 
 			if source.Programs.Enable {
@@ -191,6 +194,7 @@ type Importer struct {
 func (imp *Importer) Start(
 	ctx context.Context,
 	forceUpdate bool,
+	fetchOnly bool,
 	onlyUpdateSources *[]string,
 ) error {
 	if len(imp.config.Importer.Sources) == 0 {
@@ -210,7 +214,7 @@ func (imp *Importer) Start(
 
 	meta := imp.options.WriteIndex.Meta
 
-	importSource := imp.createSourceImporter(importCtx, meta, forceUpdate)
+	importSource := imp.createSourceImporter(importCtx, meta, forceUpdate, fetchOnly)
 	for name, source := range imp.config.Importer.Sources {
 		if onlyUpdateSources != nil && len(*onlyUpdateSources) > 0 {
 			if !slices.Contains(*onlyUpdateSources, name) {
@@ -266,6 +270,7 @@ func (imp *Importer) EnsureSourcesIndexed(
 			imp.options.Logger.Info("adding new sources", "sources", newSources)
 			err := imp.Start(
 				ctx,
+				false,
 				false,
 				&newSources,
 			)
@@ -337,7 +342,7 @@ func (imp *Importer) StartUpdateTimer(
 			MarkIndexingStarted()
 
 			ctx, cancel := context.WithTimeout(parentCtx, imp.config.Importer.Timeout.Duration)
-			err = imp.Start(ctx, false, nil)
+			err = imp.Start(ctx, false, false, nil)
 			cancel()
 
 			if err != nil {
