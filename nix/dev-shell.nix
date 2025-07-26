@@ -20,7 +20,6 @@ mkShell {
       bleve
       wgo
       gomod2nix
-      nixpkgs-lint
     ]
     ++ pre-commit-check.enabledPackages;
   inherit (pre-commit-check) shellHook;
