@@ -89,6 +89,11 @@ func (i *ChannelFetcher) FetchIfNeeded(
 		if err != nil {
 			return nil, fault.Wrap(err, fmsg.With("failed to copy options.json"))
 		}
+
+		err = i.Root.Chtimes(target, time.Time{}, sourceMeta.UpdatedAt)
+		if err != nil {
+			return nil, fault.Wrap(err, fmsg.With("failed to update timestamps"))
+		}
 	}
 
 	file, err := i.Root.Open(target)
