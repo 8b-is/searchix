@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"maps"
-	"math"
 	"os/exec"
 	"slices"
 	"strings"
@@ -18,7 +17,6 @@ import (
 	"alin.ovh/searchix/internal/manpages"
 	"alin.ovh/searchix/internal/programs"
 	"alin.ovh/x/log"
-	"github.com/getsentry/sentry-go"
 
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
@@ -294,82 +292,51 @@ func (imp *Importer) EnsureSourcesIndexed(
 
 func (imp *Importer) StartUpdateTimer(
 	parentCtx context.Context,
-	localHub *sentry.Hub,
 ) {
-	const monitorSlug = "import"
-	localHub.WithScope(func(scope *sentry.Scope) {
-		var err error
-		scope.SetContext("monitor", sentry.Context{"slug": monitorSlug})
-		monitorConfig := &sentry.MonitorConfig{
-			Schedule:      sentry.IntervalSchedule(1, sentry.MonitorScheduleUnitDay),
-			MaxRuntime:    int64(math.Ceil(imp.config.Importer.Timeout.Minutes())),
-			CheckInMargin: 5,
-			Timezone:      time.Local.String(),
-		}
+	var nextRun time.Time
+	switch {
+	case Job.LastRun.FinishedAt.Before(time.Now().Add(-24 * time.Hour)):
+		imp.options.Logger.Info(
+			"indexing last ran more than 24 hours ago, scheduling immediate update",
+		)
+		nextRun = time.Now()
+	case imp.options.WriteIndex.Meta.IsSchemaOutdated():
+		imp.options.Logger.Info(
+			"indexing schema version is out of date, scheduling immediate update",
+		)
+		nextRun = time.Now()
+	default:
+		nextRun = nextUTCOccurrenceOfTime(imp.config.Importer.UpdateAt)
+	}
+	SetNextRun(nextRun)
+	for {
+		select {
+		case <-parentCtx.Done():
+			imp.options.Logger.Debug("stopping scheduler")
 
-		var nextRun time.Time
-		switch {
-		case Job.LastRun.FinishedAt.Before(time.Now().Add(-24 * time.Hour)):
-			imp.options.Logger.Info(
-				"indexing last ran more than 24 hours ago, scheduling immediate update",
-			)
-			nextRun = time.Now()
-		case imp.options.WriteIndex.Meta.IsSchemaOutdated():
-			imp.options.Logger.Info(
-				"indexing schema version is out of date, scheduling immediate update",
-			)
-			nextRun = time.Now()
-		default:
-			nextRun = nextUTCOccurrenceOfTime(imp.config.Importer.UpdateAt)
+			return
+		case <-time.After(time.Until(nextRun)):
 		}
+		imp.options.Logger.Info("updating index")
+
+		ctx, cancel := context.WithTimeout(parentCtx, imp.config.Importer.Timeout.Duration)
+		err := imp.Start(ctx, false, false, nil)
+		cancel()
+
+		if err != nil {
+			imp.options.Logger.Warn("error updating index", "error", err)
+		} else {
+			imp.options.Logger.Info("update complete")
+		}
+		nextRun = nextUTCOccurrenceOfTime(imp.config.Importer.UpdateAt)
 		SetNextRun(nextRun)
-		for {
-			select {
-			case <-parentCtx.Done():
-				imp.options.Logger.Debug("stopping scheduler")
 
-				return
-			case <-time.After(time.Until(nextRun)):
-			}
-			imp.options.Logger.Info("updating index")
-
-			eventID := localHub.CaptureCheckIn(&sentry.CheckIn{
-				MonitorSlug: monitorSlug,
-				Status:      sentry.CheckInStatusInProgress,
-			}, monitorConfig)
-
-			ctx, cancel := context.WithTimeout(parentCtx, imp.config.Importer.Timeout.Duration)
-			err = imp.Start(ctx, false, false, nil)
-			cancel()
-
-			if err != nil {
-				imp.options.Logger.Warn("error updating index", "error", err)
-
-				localHub.CaptureException(err)
-				localHub.CaptureCheckIn(&sentry.CheckIn{
-					ID:          *eventID,
-					MonitorSlug: monitorSlug,
-					Status:      sentry.CheckInStatusError,
-				}, monitorConfig)
-			} else {
-				imp.options.Logger.Info("update complete")
-
-				localHub.CaptureCheckIn(&sentry.CheckIn{
-					ID:          *eventID,
-					MonitorSlug: monitorSlug,
-					Status:      sentry.CheckInStatusOK,
-				}, monitorConfig)
-			}
-			nextRun = nextUTCOccurrenceOfTime(imp.config.Importer.UpdateAt)
-			SetNextRun(nextRun)
-
-			imp.options.Logger.Info(
-				"scheduling next run",
-				"next-run",
-				nextRun.Format(time.DateTime),
-			)
-		}
-	})
+		imp.options.Logger.Info(
+			"scheduling next run",
+			"next-run",
+			nextRun.Format(time.DateTime),
+		)
+	}
 }
 
 func nextUTCOccurrenceOfTime(dayTime config.LocalTime) time.Time {

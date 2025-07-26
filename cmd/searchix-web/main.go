@@ -11,7 +11,6 @@ import (
 	"sync"
 
 	"badc0de.net/pkg/flagutil"
-	"github.com/getsentry/sentry-go"
 
 	"alin.ovh/searchix/frontend"
 	"alin.ovh/searchix/internal/components"
@@ -175,7 +174,7 @@ func main() {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		imp.StartUpdateTimer(ctx, sentry.CurrentHub().Clone())
+		imp.StartUpdateTimer(ctx)
 	}()
 
 	<-ctx.Done()
