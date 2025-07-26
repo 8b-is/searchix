@@ -3,7 +3,6 @@ package fetcher
 import (
 	"context"
 	"net/url"
-	"strings"
 
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/fetcher/http"
@@ -51,13 +50,13 @@ func (i *NixpkgsChannelFetcher) FetchIfNeeded(
 ) (f *FetchedFiles, err error) {
 	f = &FetchedFiles{}
 
-	filesToFetch := make([]string, 2)
-	filesToFetch[0] = revisionFilename
+	filesToFetch := make(map[string]string, 2)
+	filesToFetch[revisionFilename] = "revision"
 	switch i.Source.Importer {
 	case config.Packages:
-		filesToFetch[1] = packagesFileName
+		filesToFetch[packagesFileName] = "packages.json"
 	case config.Options:
-		filesToFetch[1] = optionsFilename
+		filesToFetch[optionsFilename] = "options.json"
 	}
 
 	fetcher := http.NewFetcher(&http.Options{
@@ -66,9 +65,9 @@ func (i *NixpkgsChannelFetcher) FetchIfNeeded(
 	})
 
 	var fetchURL string
-	for _, filename := range filesToFetch {
-		target := i.Source.JoinPath(strings.TrimSuffix(filename, ".br"))
-		fetchURL, err = makeChannelURL(i.Source.Channel, filename)
+	for urlname, filename := range filesToFetch {
+		target := i.Source.JoinPath(filename)
+		fetchURL, err = makeChannelURL(i.Source.Channel, urlname)
 		if err != nil {
 			return
 		}
@@ -85,7 +84,7 @@ func (i *NixpkgsChannelFetcher) FetchIfNeeded(
 		}
 		sourceMeta.Updated = stat.ModTime()
 
-		switch filename {
+		switch urlname {
 		case revisionFilename:
 			f.Revision = body
 		case optionsFilename:
@@ -93,7 +92,7 @@ func (i *NixpkgsChannelFetcher) FetchIfNeeded(
 		case packagesFileName:
 			f.Packages = body
 		default:
-			return f, fault.Newf("unknown file kind %s", filename)
+			return f, fault.Newf("unknown file kind %s", urlname)
 		}
 	}
 
