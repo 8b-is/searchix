@@ -27,9 +27,11 @@ func TestSearchGitPackagesFirst(t *testing.T) {
 	}
 	defer root.Close()
 
-	read, _, exists, err := index.OpenOrCreate(root, false, &index.Options{
+	read, _, exists, err := index.OpenOrCreate(&index.Options{
 		Logger:    log.Named("index"),
+		Root:      root,
 		BatchSize: cfg.Importer.BatchSize,
+		Force:     false,
 		LowMemory: false,
 	})
 	if err != nil {
@@ -97,9 +99,11 @@ func TestSearchJujutsuPackagesFirst(t *testing.T) {
 	}
 	defer root.Close()
 
-	read, _, exists, err := index.OpenOrCreate(root, false, &index.Options{
-		Logger:    log.Named("index"),
+	read, _, exists, err := index.OpenOrCreate(&index.Options{
+		Force:     false,
 		LowMemory: false,
+		Logger:    log.Named("index"),
+		Root:      root,
 	})
 	if err != nil {
 		t.Fatal(err)

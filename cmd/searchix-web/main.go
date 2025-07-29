@@ -108,12 +108,12 @@ func main() {
 	defer root.Close()
 
 	read, write, exists, err := index.OpenOrCreate(
-		root,
-		*replace,
 		&index.Options{
+			Force:     *replace,
 			LowMemory: cfg.Importer.LowMemory,
 			BatchSize: cfg.Importer.BatchSize,
 			Logger:    logger.Named("index"),
+			Root:      root,
 		},
 	)
 	if err != nil {

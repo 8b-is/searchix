@@ -24,6 +24,7 @@ import (
 
 type Options struct {
 	LowMemory  bool
+	Offline    bool
 	Logger     *log.Logger
 	WriteIndex *index.WriteIndex
 	Manpages   *manpages.URLMap

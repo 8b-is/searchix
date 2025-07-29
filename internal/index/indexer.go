@@ -34,9 +34,11 @@ import (
 var idAnalyzer analysis.Analyzer
 
 type Options struct {
+	Force     bool
 	LowMemory bool
 	BatchSize int
 	Logger    *log.Logger
+	Root      *file.Root
 }
 
 type WriteIndex struct {
@@ -223,13 +225,12 @@ func deleteIndex(root *file.Root) error {
 }
 
 func OpenOrCreate(
-	root *file.Root,
-	force bool,
 	options *Options,
 ) (*ReadIndex, *WriteIndex, bool, error) {
 	var err error
 	bleve.SetLog(zap.NewStdLog(options.Logger.Named("bleve").GetLogger()))
 
+	root := options.Root
 	exists, err := root.Exists(indexBaseName)
 	if err != nil {
 		return nil, nil, exists, fault.Wrap(
@@ -238,8 +239,8 @@ func OpenOrCreate(
 
 	var idx bleve.Index
 	var meta *Meta
-	if !exists || force {
-		if force {
+	if !exists || options.Force {
+		if options.Force {
 			err = deleteIndex(root)
 			if err != nil {
 				return nil, nil, false, err
