@@ -11,7 +11,7 @@ import (
 	"github.com/Southclaws/fault/fmsg"
 )
 
-const CurrentSchemaVersion = 6
+const CurrentSchemaVersion = 7
 
 type SourceMeta struct {
 	ImportedAt time.Time

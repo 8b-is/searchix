@@ -25,7 +25,7 @@ func OptionDetail(option nix.Option) g.Node {
 						Dd(
 							g.If(option.Default.Markdown != "",
 								option.Default.Markdown,
-								Pre(Code(g.Text(option.Default.Text))),
+								Pre(Code(g.Text(option.Default.Plain))),
 							),
 						),
 					})
@@ -38,7 +38,7 @@ func OptionDetail(option nix.Option) g.Node {
 						Dd(
 							g.If(option.Example.Markdown != "",
 								option.Example.Markdown,
-								Pre(Code(g.Text(option.Example.Text))),
+								Pre(Code(g.Text(option.Example.Plain))),
 							),
 						),
 					})

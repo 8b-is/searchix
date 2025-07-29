@@ -123,9 +123,9 @@ func createIndexMapping() (mapping.IndexMapping, error) {
 	nameNGramMapping.IncludeTermVectors = true
 	nameNGramMapping.Store = false
 
-	nixValueMapping := bleve.NewDocumentStaticMapping()
-	nixValueMapping.AddFieldMappingsAt("Text", textFieldMapping)
-	nixValueMapping.AddFieldMappingsAt("Markdown", textFieldMapping)
+	nixDocMapping := bleve.NewDocumentStaticMapping()
+	nixDocMapping.AddFieldMappingsAt("Text", textFieldMapping)
+	nixDocMapping.AddFieldMappingsAt("Markdown", textFieldMapping)
 
 	locFieldMapping := bleve.NewKeywordFieldMapping()
 	locFieldMapping.Analyzer = "loc"
@@ -145,8 +145,8 @@ func createIndexMapping() (mapping.IndexMapping, error) {
 	optionMapping.AddFieldMappingsAt("RelatedPackages", textFieldMapping)
 	optionMapping.AddFieldMappingsAt("Description", descriptionFieldMapping)
 
-	optionMapping.AddSubDocumentMapping("Default", nixValueMapping)
-	optionMapping.AddSubDocumentMapping("Example", nixValueMapping)
+	optionMapping.AddSubDocumentMapping("Default", nixDocMapping)
+	optionMapping.AddSubDocumentMapping("Example", nixDocMapping)
 
 	packageMapping := bleve.NewDocumentStaticMapping()
 

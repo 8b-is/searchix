@@ -15,7 +15,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-type nixValueJSON struct {
+type nixDocJSON struct {
 	Type string `mapstructure:"_type"`
 	Text string
 }
@@ -27,30 +27,30 @@ type linkJSON struct {
 
 type nixOptionJSON struct {
 	Declarations    []linkJSON
-	Default         *nixValueJSON
+	Default         *nixDocJSON
 	Description     string
-	Example         *nixValueJSON
+	Example         *nixDocJSON
 	Loc             []string
 	ReadOnly        bool
 	RelatedPackages string
 	Type            string
 }
 
-func (i *OptionIngester) convertValue(nj *nixValueJSON) *nix.Value {
+func (i *OptionIngester) convertDocsValue(nj *nixDocJSON) *nix.Docs {
 	if nj == nil {
 		return nil
 	}
 	switch nj.Type {
 	case "", "literalExpression":
-		return &nix.Value{
-			Text: nj.Text,
+		return &nix.Docs{
+			Plain: nj.Text,
 		}
 	case "literalMD":
-		return &nix.Value{
+		return &nix.Docs{
 			Markdown: nix.Markdown(nj.Text),
 		}
 	default:
-		i.log.Warn("got unexpected Value type", "type", nj.Type, "text", nj.Text)
+		i.log.Warn("got unexpected docs type", "type", nj.Type, "text", nj.Text)
 
 		return nil
 	}
@@ -173,9 +173,9 @@ func (i *OptionIngester) Process(ctx context.Context) (<-chan nix.Importable, <-
 				Name:            kv.Key,
 				Source:          i.source.Key,
 				Declarations:    decs,
-				Default:         i.convertValue(i.optJSON.Default),
+				Default:         i.convertDocsValue(i.optJSON.Default),
 				Description:     nix.Markdown(i.optJSON.Description),
-				Example:         i.convertValue(i.optJSON.Example),
+				Example:         i.convertDocsValue(i.optJSON.Example),
 				RelatedPackages: nix.Markdown(i.optJSON.RelatedPackages),
 				Loc:             i.optJSON.Loc,
 				Type:            i.optJSON.Type,

@@ -11,8 +11,8 @@ import (
 
 type Markdown string
 
-type Value struct {
-	Text     string   `json:",omitempty"`
+type Docs struct {
+	Plain    string   `json:",omitempty"`
 	Markdown Markdown `json:",omitempty"`
 }
 
@@ -25,9 +25,9 @@ type Option struct {
 	Name            string
 	Source          string
 	Declarations    []Link
-	Default         *Value `json:",omitempty"`
+	Default         *Docs `json:",omitempty"`
 	Description     Markdown
-	Example         *Value `json:",omitempty"`
+	Example         *Docs `json:",omitempty"`
 	Loc             []string
 	RelatedPackages Markdown `json:",omitempty"`
 	Type            string
