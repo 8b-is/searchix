@@ -52,7 +52,6 @@ func process(
 				if !running {
 					wg.Done()
 					pErrs = nil
-					logger.Debug("processing completed")
 
 					continue
 				}

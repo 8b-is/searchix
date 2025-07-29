@@ -3,7 +3,6 @@ package importer
 import (
 	"context"
 	"errors"
-	"fmt"
 	"maps"
 	"os/exec"
 	"slices"
@@ -136,7 +135,6 @@ func (imp *Importer) createSourceImporter(
 			)
 			switch source.Importer {
 			case config.Options:
-				logger.Debug("processor created", "file", fmt.Sprintf("%T", files.Options))
 				processor, err = NewOptionProcessor(
 					files.Options,
 					source,
