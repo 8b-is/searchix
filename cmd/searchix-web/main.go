@@ -34,7 +34,8 @@ var (
 	generateErrorPage = flag.Bool("generate-error-page", false, "generate error page and exit")
 	dev               = flag.Bool("dev", false, "enable live reloading and nicer logging")
 	replace           = flag.Bool("replace", false, "replace existing index and exit")
-	fetch             = flag.Bool("fetch", false, "fetch data and exit")
+	prefetch          = flag.Bool("fetch", false, "pre-fetch data and exit")
+	offline           = flag.Bool("offline", false, "run in offline mode")
 	version           = flag.Bool("version", false, "print version information")
 	cpuprofile        = flag.String("cpuprofile", "", "enable CPU profiling and save to `file`")
 )
@@ -139,18 +140,19 @@ func main() {
 		Logger:     logger.Named("importer"),
 		Manpages:   mdb,
 		Root:       root,
+		Offline:    *offline,
 	})
 	if err != nil {
 		logger.Fatal("Failed to create importer", "error", err)
 	}
 
-	if !exists || *replace || *fetch {
-		err := imp.Start(ctx, true, *fetch, nil)
+	if !exists || *replace || *prefetch {
+		err := imp.Start(ctx, true, *prefetch, nil)
 		if err != nil {
 			logger.Fatal("Failed to start importer", "error", err)
 		}
 
-		if *replace || *fetch {
+		if *replace || *prefetch {
 			return
 		}
 	}

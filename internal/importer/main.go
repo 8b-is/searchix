@@ -60,69 +60,100 @@ func (imp *Importer) createSourceImporter(
 	fetchOnly bool,
 ) func(*config.Source) error {
 	return func(source *config.Source) error {
-		logger := imp.options.Logger.With("name", source.Key)
-		logger.Debug("starting fetcher")
+		var files *fetcher.FetchedFiles
 
-		fetcher, err := fetcher.New(source, &fetcher.Options{
+		logger := imp.options.Logger.With("name", source.Key)
+		pdb, err := programs.New(source, &programs.Options{
 			Logger: logger,
 			Root:   imp.options.Root,
 		})
 		if err != nil {
-			return fault.Wrap(err, fmsg.With("error creating fetcher"))
+			return fault.Wrap(err, fmsg.With("error creating program database"))
 		}
 
 		sourceMeta := meta.GetSourceMeta(source.Key)
 		previousUpdate := sourceMeta.UpdatedAt
+
+		fopts := &fetcher.Options{
+			Logger: logger,
+			Root:   imp.options.Root,
+		}
+
 		ctx, cancel := context.WithTimeout(parent, source.Timeout.Duration)
 		defer cancel()
-		files, err := fetcher.FetchIfNeeded(ctx, sourceMeta)
-		if err != nil {
-			var exerr *exec.ExitError
-			if errors.As(err, &exerr) {
-				lines := strings.SplitSeq(strings.TrimSpace(string(exerr.Stderr)), "\n")
-				for line := range lines {
-					logger.Error(
-						"importer fetch failed",
-						"fetcher",
-						source.Fetcher.String(),
-						"stderr",
-						line,
-						"status",
-						exerr.ExitCode(),
-					)
-				}
+
+		if imp.options.Offline {
+			logger.Debug("skipping fetch; in offline mode")
+
+			files, err = fetcher.Open(source, fopts)
+			if err != nil {
+				return fault.Wrap(err, fmsg.With("error opening fetched files"))
+			}
+		} else {
+			logger.Debug("starting fetcher")
+
+			fetcher, err := fetcher.New(source, fopts)
+			if err != nil {
+				return fault.Wrap(err, fmsg.With("error creating fetcher"))
 			}
 
-			return fault.Wrap(err, fmsg.With("importer fetch failed"))
-		}
-		logger.Info(
-			"importer fetch succeeded",
-			"previous",
-			previousUpdate.Format(time.DateTime),
-			"current",
-			sourceMeta.UpdatedAt.Format(time.DateTime),
-			"is_updated",
-			sourceMeta.UpdatedAt.After(previousUpdate),
-			"update_force",
-			forceUpdate,
-			"fetch_only",
-			fetchOnly,
-		)
+			files, err = fetcher.FetchIfNeeded(ctx, sourceMeta)
+			if err != nil {
+				var exerr *exec.ExitError
+				if errors.As(err, &exerr) {
+					lines := strings.SplitSeq(strings.TrimSpace(string(exerr.Stderr)), "\n")
+					for line := range lines {
+						logger.Error(
+							"importer fetch failed",
+							"fetcher",
+							source.Fetcher.String(),
+							"stderr",
+							line,
+							"status",
+							exerr.ExitCode(),
+						)
+					}
+				}
 
-		if !fetchOnly &&
-			(!sourceMeta.UpdatedAt.After(sourceMeta.ImportedAt) || sourceMeta.ImportedAt.IsZero() || forceUpdate) {
-			var pdb *programs.DB
+				return fault.Wrap(err, fmsg.With("importer fetch failed"))
+			}
+			logger.Info(
+				"importer fetch succeeded",
+				"previous",
+				previousUpdate.Format(time.DateTime),
+				"current",
+				sourceMeta.UpdatedAt.Format(time.DateTime),
+				"is_updated",
+				sourceMeta.UpdatedAt.After(previousUpdate),
+				"update_force",
+				forceUpdate,
+				"fetch_only",
+				fetchOnly,
+			)
 
 			if source.Programs.Enable {
-				pdb, err = programs.Instantiate(ctx, source, imp.options.Logger.Named("programs"))
+				err = pdb.Instantiate(ctx)
 				if err != nil {
 					logger.Warn("programs database instantiation failed", "error", err)
 				}
 			}
 
-			err = setRepoRevision(files.Revision, source)
-			if err != nil {
-				logger.Warn("could not set source repo revision", "error", err)
+			if source.Manpages.Enable {
+				err = imp.options.Manpages.Update(ctx, source)
+				if err != nil {
+					logger.Warn("manpages database update failed", "error", err)
+				}
+			}
+		}
+
+		if !fetchOnly &&
+			(!sourceMeta.UpdatedAt.After(sourceMeta.ImportedAt) || sourceMeta.ImportedAt.IsZero() || forceUpdate) {
+
+			if files.Revision != nil {
+				err = setRepoRevision(files.Revision, source)
+				if err != nil {
+					logger.Warn("could not set source repo revision", "error", err)
+				}
 			}
 
 			var processor Processor
@@ -155,13 +186,6 @@ func (imp *Importer) createSourceImporter(
 			hadWarnings, err := process(ctx, imp.options.WriteIndex, processor, logger)
 			if err != nil {
 				return fault.Wrap(err, fmsg.Withf("failed to process source"))
-			}
-
-			if source.Manpages.Enable {
-				err = imp.options.Manpages.Update(ctx, source)
-				if err != nil {
-					logger.Warn("manpages database update failed", "error", err)
-				}
 			}
 
 			sourceMeta.ImportedAt = time.Now()

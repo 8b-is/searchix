@@ -123,7 +123,7 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 	errs := make(chan error)
 
 	if i.programs != nil {
-		err := i.programs.Open()
+		err := i.programs.Open(ctx)
 		if err != nil {
 			errs <- fault.Wrap(err, fmsg.With("could not open programs database"))
 			i.programs = nil
@@ -284,7 +284,7 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 				continue
 			}
 
-			if i.programs != nil {
+			if i.source.Programs.Enable {
 				programs, err = i.programs.GetPackagePrograms(ctx, kv.Key)
 				if err != nil {
 					errs <- fault.Wrap(err, fmsg.Withf("failed to get programs for package %s", i.pkg.Name))

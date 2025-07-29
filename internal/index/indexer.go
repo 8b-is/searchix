@@ -210,7 +210,6 @@ const (
 var expectedDataFiles = []string{
 	metaBaseName,
 	indexBaseName,
-	"manpage-urls.json",
 }
 
 func deleteIndex(root *file.Root) error {
@@ -224,9 +223,7 @@ func deleteIndex(root *file.Root) error {
 	return nil
 }
 
-func OpenOrCreate(
-	options *Options,
-) (*ReadIndex, *WriteIndex, bool, error) {
+func OpenOrCreate(options *Options) (*ReadIndex, *WriteIndex, bool, error) {
 	var err error
 	bleve.SetLog(zap.NewStdLog(options.Logger.Named("bleve").GetLogger()))
 
