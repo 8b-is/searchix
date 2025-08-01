@@ -159,23 +159,23 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 				continue
 			}
 			kv := mv.Value.(jstream.KV)
-			x := kv.Value.(map[string]interface{})
+			x := kv.Value.(map[string]any)
 
-			meta := x["meta"].(map[string]interface{})
+			meta := x["meta"].(map[string]any)
 
 			var licenses []nix.License
 			if meta["license"] != nil {
 				switch v := reflect.ValueOf(meta["license"]); v.Kind() {
 				case reflect.Map:
-					licenses = append(licenses, *convertToLicense(v.Interface().(map[string]interface{})))
+					licenses = append(licenses, *convertToLicense(v.Interface().(map[string]any)))
 				case reflect.Array, reflect.Slice:
 					licenses = make([]nix.License, v.Len())
-					for i, v := range v.Interface().([]interface{}) {
+					for i, v := range v.Interface().([]any) {
 						switch v := reflect.ValueOf(v); v.Kind() {
 						case reflect.String:
 							licenses[i] = makeAdhocLicense(v.String())
 						case reflect.Map:
-							licenses[i] = *convertToLicense(v.Interface().(map[string]interface{}))
+							licenses[i] = *convertToLicense(v.Interface().(map[string]any))
 						default:
 							errs <- fault.Newf(
 								"don't know how to handle sublicense of type %s: %v",
@@ -199,7 +199,7 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 			if meta["platforms"] != nil {
 				plats := make([]any, len(meta["platforms"].([]any)))
 				i := 0
-				for _, plat := range meta["platforms"].([]interface{}) {
+				for _, plat := range meta["platforms"].([]any) {
 					switch v := reflect.ValueOf(plat); v.Kind() {
 					case reflect.String:
 						plats[i] = v.String()

@@ -58,9 +58,12 @@ func New(
 	}, nil
 }
 
-func (s *Server) Start() error {
+func (s *Server) Start(ctx context.Context) error {
 	listenAddress := net.JoinHostPort(s.cfg.Web.ListenAddress, strconv.Itoa(s.cfg.Web.Port))
-	l, err := net.Listen("tcp", listenAddress)
+	lc := net.ListenConfig{
+		KeepAlive: 5 * time.Minute,
+	}
+	l, err := lc.Listen(ctx, "tcp", listenAddress)
 	if err != nil {
 		return fault.Wrap(
 			err, fmsg.Withf("could not listen on address %s and port %d",

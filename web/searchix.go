@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"time"
 
 	"alin.ovh/searchix/internal/config"
@@ -39,14 +40,14 @@ func New(cfg *config.Config, log *log.Logger, options *server.Options) (*Server,
 	}, nil
 }
 
-func (s *Server) Start(liveReload bool) error {
+func (s *Server) Start(ctx context.Context, liveReload bool) error {
 	var err error
 	s.sv, err = server.New(s.cfg, s.options, s.log.Named("server"), liveReload)
 	if err != nil {
 		return fault.Wrap(err, fmsg.With("error setting up server"))
 	}
 
-	err = s.sv.Start()
+	err = s.sv.Start(ctx)
 	if err != nil {
 		return fault.Wrap(err, fmsg.With("error starting server"))
 	}

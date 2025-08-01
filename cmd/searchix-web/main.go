@@ -163,8 +163,10 @@ func main() {
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
+		sCtx, cancel := context.WithCancel(ctx)
 		defer wg.Done()
-		err := s.Start(*dev)
+		defer cancel()
+		err := s.Start(sCtx, *dev)
 		if err != nil && !errors.Is(err, context.Canceled) {
 			// Error starting or closing listener:
 			logger.Fatal("error", "error", err)

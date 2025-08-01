@@ -122,10 +122,10 @@ func (i *OptionIngester) Process(ctx context.Context) (<-chan nix.Importable, <-
 				continue
 			}
 			kv := mv.Value.(jstream.KV)
-			x := kv.Value.(map[string]interface{})
+			x := kv.Value.(map[string]any)
 
 			var decls []*nix.Link
-			for _, decl := range x["declarations"].([]interface{}) {
+			for _, decl := range x["declarations"].([]any) {
 				switch decl := reflect.ValueOf(decl); decl.Kind() {
 				case reflect.String:
 					s := decl.String()
@@ -139,7 +139,7 @@ func (i *OptionIngester) Process(ctx context.Context) (<-chan nix.Importable, <-
 					}
 					decls = append(decls, link)
 				case reflect.Map:
-					v := decl.Interface().(map[string]interface{})
+					v := decl.Interface().(map[string]any)
 					link := nix.Link{
 						Name: v["name"].(string),
 						URL:  v["url"].(string),
