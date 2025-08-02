@@ -183,7 +183,7 @@ func (imp *Importer) createSourceImporter(
 				return fault.Wrap(err, fmsg.Withf("failed to create processor"))
 			}
 
-			hadWarnings, err := process(ctx, imp.options.WriteIndex, processor, logger)
+			hadWarnings, err := imp.process(ctx, processor)
 			if err != nil {
 				return fault.Wrap(err, fmsg.Withf("failed to process source"))
 			}

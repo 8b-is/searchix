@@ -6,18 +6,15 @@ import (
 
 	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/nix"
-	"alin.ovh/x/log"
 )
 
 type Processor interface {
 	Process(context.Context) (<-chan nix.Importable, <-chan error)
 }
 
-func process(
+func (imp *Importer) process(
 	ctx context.Context,
-	indexer *index.WriteIndex,
 	processor Processor,
-	logger *log.Logger,
 ) (bool, error) {
 	wg := sync.WaitGroup{}
 
@@ -25,7 +22,7 @@ func process(
 	objects, pErrs := processor.Process(ctx)
 
 	wg.Add(1)
-	iErrs := indexer.Import(ctx, objects)
+	iErrs := imp.options.WriteIndex.Import(ctx, objects)
 
 	var hadObjectErrors bool
 	var criticalError error
@@ -36,7 +33,7 @@ func process(
 				if !running {
 					wg.Done()
 					iErrs = nil
-					logger.Debug("ingest completed")
+					imp.options.Logger.Debug("ingest completed")
 
 					continue
 				}
@@ -47,7 +44,7 @@ func process(
 					break
 				}
 				hadObjectErrors = true
-				logger.Warn("error ingesting object", "error", err)
+				imp.options.Logger.Warn("error ingesting object", "error", err)
 			case err, running := <-pErrs:
 				if !running {
 					wg.Done()
@@ -56,7 +53,7 @@ func process(
 					continue
 				}
 				hadObjectErrors = true
-				logger.Warn("error processing object", "error", err)
+				imp.options.Logger.Warn("error processing object", "error", err)
 			}
 		}
 	}()
