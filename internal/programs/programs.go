@@ -12,7 +12,7 @@ import (
 	"alin.ovh/x/log"
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
-	_ "modernc.org/sqlite" //nolint:blank-imports // sqlite driver needed for database/sql
+	_ "modernc.org/sqlite" //nolint:revive // sqlite driver needed for database/sql
 )
 
 type DB struct {
