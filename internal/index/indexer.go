@@ -1,22 +1,20 @@
 package index
 
 import (
-	"bytes"
 	"context"
-	"encoding/gob"
 	"math"
 
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/file"
 	"alin.ovh/searchix/internal/index/nixattr"
 	"alin.ovh/searchix/internal/nix"
+	"alin.ovh/searchix/internal/storage"
 	"alin.ovh/x/log"
 	"go.uber.org/zap"
 
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
 	"github.com/blevesearch/bleve/v2"
-	"github.com/blevesearch/bleve/v2/analysis"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/custom"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/keyword"
 	"github.com/blevesearch/bleve/v2/analysis/analyzer/simple"
@@ -26,25 +24,24 @@ import (
 	"github.com/blevesearch/bleve/v2/analysis/token/porter"
 	"github.com/blevesearch/bleve/v2/analysis/tokenizer/letter"
 	"github.com/blevesearch/bleve/v2/analysis/tokenizer/unicode"
-	"github.com/blevesearch/bleve/v2/document"
 	"github.com/blevesearch/bleve/v2/mapping"
-	index "github.com/blevesearch/bleve_index_api"
 )
-
-var idAnalyzer analysis.Analyzer
 
 type Options struct {
 	Force     bool
 	LowMemory bool
 	BatchSize int
+	Store     *storage.Store
 	Logger    *log.Logger
 	Root      *file.Root
+	Config    *config.Config
 }
 
 type WriteIndex struct {
 	batchSize int
 	index     bleve.Index
 	log       *log.Logger
+	store     *storage.Store
 	Meta      *Meta
 }
 
@@ -111,17 +108,19 @@ func createIndexMapping() (mapping.IndexMapping, error) {
 	}
 
 	identityFieldMapping := bleve.NewKeywordFieldMapping()
+	identityFieldMapping.Store = false
 
 	attributeFieldMapping := bleve.NewKeywordFieldMapping()
 	attributeFieldMapping.Analyzer = "dotted_keyword"
+	attributeFieldMapping.Store = true
 
 	keywordFieldMapping := bleve.NewKeywordFieldMapping()
 	keywordFieldMapping.Analyzer = simple.Name
+	keywordFieldMapping.Store = false
 
 	nameNGramMapping := bleve.NewTextFieldMapping()
 	nameNGramMapping.Analyzer = "c_name"
 	nameNGramMapping.IncludeTermVectors = true
-	nameNGramMapping.Store = false
 
 	nixDocMapping := bleve.NewDocumentStaticMapping()
 	nixDocMapping.AddFieldMappingsAt("Text", textFieldMapping)
@@ -167,8 +166,6 @@ func createIndexMapping() (mapping.IndexMapping, error) {
 
 	indexMapping.AddDocumentMapping("option", optionMapping)
 	indexMapping.AddDocumentMapping("package", packageMapping)
-
-	idAnalyzer = indexMapping.AnalyzerNamed("c_name")
 
 	return indexMapping, nil
 }
@@ -277,14 +274,17 @@ func OpenOrCreate(options *Options) (*ReadIndex, *WriteIndex, bool, error) {
 	}
 
 	return &ReadIndex{
-			index: idx,
-			log:   options.Logger,
-			meta:  meta,
+			config: options.Config,
+			log:    options.Logger,
+			store:  options.Store,
+			index:  idx,
+			meta:   meta,
 		},
 		&WriteIndex{
 			index:     idx,
 			batchSize: options.BatchSize,
 			log:       options.Logger,
+			store:     options.Store,
 			Meta:      meta,
 		},
 		exists,
@@ -306,7 +306,6 @@ func (i *WriteIndex) Import(
 		defer close(errs)
 		k := 0
 		batch := i.index.NewBatch()
-		indexMapping := i.index.Mapping()
 
 	outer:
 		for obj := range objects {
@@ -318,31 +317,7 @@ func (i *WriteIndex) Import(
 			default:
 			}
 
-			doc := document.NewDocument(nix.GetKey(obj))
-			if err := indexMapping.MapDocument(doc, obj); err != nil {
-				errs <- fault.Wrap(err, fmsg.Withf("could not map document for object: %s", obj.GetName()))
-
-				continue
-			}
-
-			var data bytes.Buffer
-			enc := gob.NewEncoder(&data)
-			if err := enc.Encode(&obj); err != nil {
-				errs <- fault.Wrap(err, fmsg.With("could not store object in search index"))
-
-				continue
-			}
-			field := document.NewTextFieldWithIndexingOptions("_data", nil, data.Bytes(), index.StoreField)
-			doc.AddField(field)
-			idField := document.NewTextFieldCustom(
-				"_id", nil, []byte(doc.ID()),
-				index.IndexField|index.StoreField|index.IncludeTermVectors,
-				idAnalyzer,
-			)
-			doc.AddField(idField)
-
-			// log.Debug("adding object to index", "name", opt.Name)
-			if err := batch.IndexAdvanced(doc); err != nil {
+			if err := batch.Index(nix.GetKey(obj), obj); err != nil {
 				errs <- fault.Wrap(err, fmsg.Withf("could not index object %s", obj.GetName()))
 
 				continue

@@ -8,9 +8,9 @@ require (
 	badc0de.net/pkg/flagutil v1.0.1
 	github.com/Southclaws/fault v0.8.2
 	github.com/andybalholm/brotli v1.1.1
+	github.com/asdine/storm/v3 v3.2.1
 	github.com/bcicen/jstream v1.0.1
 	github.com/blevesearch/bleve/v2 v2.5.2
-	github.com/blevesearch/bleve_index_api v1.2.8
 	github.com/creasty/defaults v1.8.0
 	github.com/crewjam/csp v0.0.2
 	github.com/dustin/go-humanize v1.0.1
@@ -22,6 +22,7 @@ require (
 	github.com/stefanfritsch/goldmark-fences v1.0.0
 	github.com/stoewer/go-strcase v1.3.0
 	github.com/yuin/goldmark v1.7.12
+	go.etcd.io/bbolt v1.4.2
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.41.0
 	modernc.org/sqlite v1.38.0
@@ -31,6 +32,7 @@ require (
 	github.com/Code-Hex/dd v1.1.0 // indirect
 	github.com/RoaringBitmap/roaring/v2 v2.5.0 // indirect
 	github.com/bits-and-blooms/bitset v1.22.0 // indirect
+	github.com/blevesearch/bleve_index_api v1.2.8 // indirect
 	github.com/blevesearch/geo v0.2.3 // indirect
 	github.com/blevesearch/go-faiss v1.0.25 // indirect
 	github.com/blevesearch/go-porterstemmer v1.0.3 // indirect
@@ -60,10 +62,9 @@ require (
 	github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec // indirect
 	github.com/sykesm/zap-logfmt v0.0.4 // indirect
 	github.com/thessem/zap-prettyconsole v0.5.2 // indirect
-	go.etcd.io/bbolt v1.4.1 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/exp v0.0.0-20250606033433-dcc06ee1d476 // indirect
-	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/sys v0.34.0 // indirect
 	golang.org/x/text v0.26.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 	modernc.org/libc v1.65.10 // indirect

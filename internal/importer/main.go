@@ -15,6 +15,7 @@ import (
 	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/manpages"
 	"alin.ovh/searchix/internal/programs"
+	"alin.ovh/searchix/internal/storage"
 	"alin.ovh/x/log"
 
 	"github.com/Southclaws/fault"
@@ -28,6 +29,7 @@ type Options struct {
 	WriteIndex *index.WriteIndex
 	Manpages   *manpages.URLMap
 	Root       *file.Root
+	Storage    *storage.Store
 }
 
 var Job struct {
@@ -43,10 +45,11 @@ func MarkIndexingStarted() {
 	Job.StartedAt = time.Now()
 }
 
-func MarkIndexingFinished() {
+func MarkIndexingFinished(meta *index.Meta) {
 	Job.LastRun.StartedAt = Job.StartedAt
 	Job.LastRun.FinishedAt = time.Now()
 	Job.StartedAt = time.Time{}
+	meta.LastImport = Job.LastRun
 }
 
 func SetNextRun(nextRun time.Time) {
@@ -183,7 +186,7 @@ func (imp *Importer) createSourceImporter(
 				return fault.Wrap(err, fmsg.Withf("failed to create processor"))
 			}
 
-			hadWarnings, err := imp.process(ctx, processor)
+			hadWarnings, err := imp.process(ctx, processor, source)
 			if err != nil {
 				return fault.Wrap(err, fmsg.Withf("failed to process source"))
 			}
@@ -246,7 +249,7 @@ func (imp *Importer) Start(
 		}
 	}
 
-	MarkIndexingFinished()
+	MarkIndexingFinished(meta)
 
 	err := imp.options.WriteIndex.SaveMeta()
 	if err != nil {

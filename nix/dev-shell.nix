@@ -17,6 +17,7 @@ mkShell {
       sd
       modd
       brotli
+      boltbrowser
       bleve
       wgo
       gomod2nix

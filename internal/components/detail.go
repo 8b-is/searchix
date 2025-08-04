@@ -8,10 +8,10 @@ import (
 
 func Detail(thing nix.Importable) g.Node {
 	switch t := thing.(type) {
-	case nix.Option:
-		return OptionDetail(t)
-	case nix.Package:
-		return PackageDetail(t)
+	case *nix.Option:
+		return OptionDetail(*t)
+	case *nix.Package:
+		return PackageDetail(*t)
 	default:
 		return nil
 	}

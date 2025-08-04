@@ -70,6 +70,7 @@ func NewMux(
 		return nil, fault.New("read index is nil")
 	}
 	index := options.ReadIndex
+	store := options.Store
 	sortSources(cfg.Importer.Sources)
 	assets, err := frontend.New()
 	if err != nil {
@@ -230,10 +231,7 @@ func NewMux(
 			}
 			importerSingular := importerType.Singular()
 
-			ctx, cancel := context.WithTimeout(r.Context(), searchTimeout)
-			doc, err := index.GetDocument(ctx, source, r.PathValue("id"))
-			cancel()
-
+			doc, err := store.GetDocument(source, r.PathValue("id"))
 			if err != nil {
 				errorHandler(
 					w,
@@ -260,9 +258,9 @@ func NewMux(
 			var baseErr error
 			if r.Header.Get("Fetch") == "true" {
 				w.Header().Add("Content-Type", "text/html; charset=utf-8")
-				baseErr = components.Detail(*doc).Render(w)
+				baseErr = components.Detail(doc).Render(w)
 			} else {
-				baseErr = components.DetailPage(tdata, *doc).Render(w)
+				baseErr = components.DetailPage(tdata, doc).Render(w)
 			}
 			if baseErr != nil {
 				log.Error("template error", "template", importerSingular, "error", baseErr)

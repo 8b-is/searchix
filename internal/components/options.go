@@ -22,7 +22,7 @@ func Options(result *index.Result) g.Node {
 		),
 		TBody(
 			g.MapIter(result.Hits, func(hit index.DocumentMatch) g.Node {
-				if m := convertMatch[nix.Option](hit.Data); m != nil {
+				if m, ok := hit.Data.(*nix.Option); ok {
 					return optionRow(hit, *m)
 				}
 

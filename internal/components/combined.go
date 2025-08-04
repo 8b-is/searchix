@@ -10,15 +10,11 @@ import (
 )
 
 func CombinedData(data nix.Importable) g.Node {
-	switch data.(type) {
-	case nix.Option:
-		if o := convertMatch[nix.Option](data); o != nil {
-			return firstSentence(o.Description)
-		}
-	case nix.Package:
-		if p := convertMatch[nix.Package](data); p != nil {
-			return g.Text(firstSentence(p.Description))
-		}
+	switch data := data.(type) {
+	case *nix.Option:
+		return firstSentence(data.Description)
+	case *nix.Package:
+		return g.Text(firstSentence(data.Description))
 	}
 
 	return g.Text("No description Available")

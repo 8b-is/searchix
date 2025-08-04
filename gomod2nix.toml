@@ -22,6 +22,9 @@ schema = 3
   [mod."github.com/andybalholm/brotli"]
     version = "v1.1.1"
     hash = "sha256-kCt+irK1gvz2lGQUeEolYa5+FbLsfWlJMCd5hm+RPgQ="
+  [mod."github.com/asdine/storm/v3"]
+    version = "v3.2.1"
+    hash = "sha256-BLpBFWFjLd5Xumx72cgSA2Zget+4UYMTW+z4bkkdIR0="
   [mod."github.com/bcicen/jstream"]
     version = "v1.0.1"
     hash = "sha256-mm+/BuIEYYj6XOHCCJLxVMKd1XcBXCiRCWA+aTvr1sE="
@@ -155,8 +158,8 @@ schema = 3
     version = "v1.7.12"
     hash = "sha256-thLYBS4woL2X5qRdo7vP+xCvjlGRDU0jXtDCUt6vvWM="
   [mod."go.etcd.io/bbolt"]
-    version = "v1.4.1"
-    hash = "sha256-FqKrJJxOOfAnvziKKFzI6VUGDp+ga6IgZmuihHp2I2A="
+    version = "v1.4.2"
+    hash = "sha256-/ujVPvBaSZp3ogFsGkf5yl6CjaghnN/MKuYNf9EHUfI="
   [mod."go.uber.org/multierr"]
     version = "v1.11.0"
     hash = "sha256-Lb6rHHfR62Ozg2j2JZy3MKOMKdsfzd1IYTR57r3Mhp0="
@@ -170,8 +173,8 @@ schema = 3
     version = "v0.41.0"
     hash = "sha256-6/pi8rNmGvBFzkJQXkXkMfL1Bjydhg3BgAMYDyQ/Uvg="
   [mod."golang.org/x/sys"]
-    version = "v0.33.0"
-    hash = "sha256-wlOzIOUgAiGAtdzhW/KPl/yUVSH/lvFZfs5XOuJ9LOQ="
+    version = "v0.34.0"
+    hash = "sha256-5rZ7p8IaGli5X1sJbfIKOcOEwY4c0yQhinJPh2EtK50="
   [mod."golang.org/x/text"]
     version = "v0.26.0"
     hash = "sha256-N+27nBCyGvje0yCTlUzZoVZ0LRxx4AJ+eBlrFQVRlFQ="

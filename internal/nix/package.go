@@ -2,7 +2,7 @@ package nix
 
 type Package struct {
 	Name            string
-	Attribute       string
+	Attribute       string `storm:"id"`
 	Source          string
 	Broken          bool
 	Definition      string

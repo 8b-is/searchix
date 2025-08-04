@@ -1,15 +1,14 @@
 package index
 
 import (
-	"bytes"
 	"context"
-	"encoding/gob"
 	"iter"
 	"strings"
 	"time"
 
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/nix"
+	"alin.ovh/searchix/internal/storage"
 	"alin.ovh/x/log"
 
 	"github.com/Southclaws/fault"
@@ -32,9 +31,11 @@ type Result struct {
 }
 
 type ReadIndex struct {
-	index bleve.Index
-	log   *log.Logger
-	meta  *Meta
+	index  bleve.Index
+	config *config.Config
+	store  *storage.Store
+	log    *log.Logger
+	meta   *Meta
 }
 
 func (index *ReadIndex) LastUpdated() time.Time {
@@ -77,9 +78,10 @@ func setBoost[T query.BoostableQuery](q T, boost float64) T {
 
 func (index *ReadIndex) search(
 	ctx context.Context,
+	source *config.Source,
 	request *bleve.SearchRequest,
 ) (*Result, error) {
-	request.Fields = []string{"_data", "Source"}
+	request.Fields = []string{"Source"}
 
 	bleveResult, err := index.index.SearchInContext(ctx, request)
 	select {
@@ -91,21 +93,34 @@ func (index *ReadIndex) search(
 		}
 
 		hits := func(yield func(DocumentMatch) bool) {
-			var buf bytes.Buffer
 			for _, match := range bleveResult.Hits {
 				hit := DocumentMatch{
 					DocumentMatch: match,
 					Data:          nil,
 				}
-				_, err := buf.WriteString(match.Fields["_data"].(string))
-				if err != nil {
-					index.log.Warn("error fetching result data", "error", err)
+
+				parts := strings.SplitN(match.ID, "/", 3)
+				sourceName := parts[1]
+				id := parts[2]
+
+				src := source
+				if src == nil {
+					var ok bool
+					src, ok = index.config.Importer.Sources[sourceName]
+					if !ok {
+						continue
+					}
 				}
-				err = gob.NewDecoder(&buf).Decode(&hit.Data)
+
+				doc, err := index.store.GetDocument(src, id)
 				if err != nil {
-					index.log.Warn("error decoding gob data", "error", err, "data", buf.String())
+					index.log.Warn("error getting document", "error", err)
+
+					continue
 				}
-				buf.Reset()
+
+				hit.Data = doc
+
 				if !yield(hit) {
 					return
 				}
@@ -221,35 +236,7 @@ func (index *ReadIndex) Search(
 		search.From = from
 	}
 
-	return index.search(ctx, search)
-}
-
-func (index *ReadIndex) GetDocument(
-	ctx context.Context,
-	source *config.Source,
-	id string,
-) (*nix.Importable, error) {
-	key := nix.MakeKey(source, id)
-	query := bleve.NewDocIDQuery([]string{key})
-	search := bleve.NewSearchRequest(query)
-	search.Size = 1
-
-	result, err := index.search(ctx, search)
-	if err != nil {
-		return nil, err
-	}
-
-	if result.Total == 0 {
-		return nil, nil
-	}
-
-	for hit := range result.Hits {
-		if hit.ID == key {
-			return &hit.Data, err
-		}
-	}
-
-	return nil, err
+	return index.search(ctx, source, search)
 }
 
 func (index *ReadIndex) Close() error {

@@ -10,6 +10,7 @@ import (
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/manpages"
+	"alin.ovh/searchix/internal/storage"
 	"alin.ovh/x/log"
 
 	"github.com/Southclaws/fault"
@@ -29,6 +30,7 @@ type Server struct {
 
 type Options struct {
 	ReadIndex      *index.ReadIndex
+	Store          *storage.Store
 	ManpagesURLMap *manpages.URLMap
 }
 

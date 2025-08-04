@@ -22,7 +22,7 @@ type Link struct {
 }
 
 type Option struct {
-	Name            string
+	Name            string `storm:"id"`
 	Source          string
 	Declarations    []Link
 	Default         *Docs `json:",omitempty"`

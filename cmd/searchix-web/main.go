@@ -20,6 +20,7 @@ import (
 	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/manpages"
 	"alin.ovh/searchix/internal/server"
+	"alin.ovh/searchix/internal/storage"
 	"alin.ovh/searchix/web"
 	"alin.ovh/x/log"
 )
@@ -108,13 +109,24 @@ func main() {
 	}
 	defer root.Close()
 
+	store, err := storage.New(&storage.Options{
+		Root:   root,
+		Logger: logger.Named("store"),
+	})
+	if err != nil {
+		logger.Fatal("Failed to create store", "error", err)
+	}
+	defer store.Close()
+
 	read, write, exists, err := index.OpenOrCreate(
 		&index.Options{
+			Config:    cfg,
 			Force:     *replace,
 			LowMemory: cfg.Importer.LowMemory,
 			BatchSize: cfg.Importer.BatchSize,
 			Logger:    logger.Named("index"),
 			Root:      root,
+			Store:     store,
 		},
 	)
 	if err != nil {
@@ -129,12 +141,14 @@ func main() {
 	s, err := web.New(cfg, logger, &server.Options{
 		ReadIndex:      read,
 		ManpagesURLMap: mdb,
+		Store:          store,
 	})
 	if err != nil {
 		logger.Fatal("Failed to initialise searchix-web", "error", err)
 	}
 
 	imp, err := importer.New(cfg, &importer.Options{
+		Storage:    store,
 		WriteIndex: write,
 		LowMemory:  cfg.Importer.LowMemory,
 		Logger:     logger.Named("importer"),

@@ -4,7 +4,6 @@ import (
 	"alin.ovh/searchix/frontend"
 	"alin.ovh/searchix/internal/config"
 	search "alin.ovh/searchix/internal/index"
-	"alin.ovh/searchix/internal/nix"
 )
 
 type TemplateData struct {
@@ -24,13 +23,4 @@ type ResultData struct {
 	Prev    string
 	Next    string
 	All     string
-}
-
-func convertMatch[I nix.Importable](m nix.Importable) *I {
-	i, ok := m.(I)
-	if !ok {
-		return nil
-	}
-
-	return &i
 }
