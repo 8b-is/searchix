@@ -5,17 +5,17 @@ import (
 	"errors"
 	"time"
 
-	"alin.ovh/searchix/internal/config"
-	"alin.ovh/searchix/internal/file"
-	"alin.ovh/searchix/internal/nix"
 	"alin.ovh/x/log"
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
 	"github.com/asdine/storm/v3"
 	"github.com/asdine/storm/v3/codec/gob"
+	"go.etcd.io/bbolt"
 	"go.uber.org/zap"
 
-	"go.etcd.io/bbolt"
+	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/file"
+	"alin.ovh/searchix/internal/nix"
 )
 
 var BatchSize = 10000
@@ -26,7 +26,7 @@ type Options struct {
 }
 
 type Store struct {
-	db  *storm.DB
+	*storm.DB
 	log *log.Logger
 }
 
@@ -49,13 +49,13 @@ func New(opts *Options) (*Store, error) {
 	}
 
 	return &Store{
-		db:  bb,
+		DB:  bb,
 		log: opts.Logger,
 	}, nil
 }
 
 func (s *Store) Close() error {
-	err := s.db.Close()
+	err := s.DB.Close()
 	if err != nil {
 		return fault.Wrap(err, fmsg.With("failed to close database"))
 	}
@@ -63,71 +63,79 @@ func (s *Store) Close() error {
 	return nil
 }
 
-func (s *Store) Import(
-	ctx context.Context,
+func (s *Store) MakeSourceImporter(
 	source *config.Source,
-	objects <-chan nix.Importable,
-) <-chan error {
-	errs := make(chan error)
-	node := s.db.From(source.Key).WithBatch(true)
+) func(context.Context, <-chan nix.Importable) <-chan error {
+	return func(ctx context.Context, objects <-chan nix.Importable) <-chan error {
+		errs := make(chan error)
+		node := s.DB.From(source.Key).WithBatch(true)
 
-	i := 0
+		i := 0
 
-	var save func(storm.Node, nix.Importable) error
-	switch source.Importer {
-	case config.Packages:
-		save = saveGen[nix.Package]
-	case config.Options:
-		save = saveGen[nix.Option]
-	default:
-		errs <- fault.New("invalid importer")
+		var save func(storm.Node, nix.Importable) error
+		switch source.Importer {
+		case config.Packages:
+			save = saveGen[nix.Package]
+		case config.Options:
+			save = saveGen[nix.Option]
+		default:
+			errs <- fault.New("invalid importer")
 
-		return errs
-	}
-
-	go func() {
-		defer close(errs)
-		tx, err := node.Begin(true)
-		if err != nil {
-			errs <- fault.Wrap(err, fmsg.With("failed to begin transaction"))
-
-			return
+			return errs
 		}
-		defer func() {
-			if err := tx.Rollback(); err != nil {
-				if !errors.Is(err, storm.ErrNotInTransaction) {
-					errs <- fault.Wrap(err, fmsg.With("failed to rollback transaction"))
+
+		go func() {
+			defer close(errs)
+			tx, err := node.Begin(true)
+			if err != nil {
+				errs <- fault.Wrap(err, fmsg.With("failed to begin transaction"))
+
+				return
+			}
+			defer func() {
+				if err := tx.Rollback(); err != nil {
+					if !errors.Is(err, storm.ErrNotInTransaction) {
+						errs <- fault.Wrap(err, fmsg.With("failed to rollback transaction"))
+					}
 				}
+			}()
+
+		outer:
+			for obj := range objects {
+				i++
+				select {
+				case <-ctx.Done():
+					s.log.Warn("import aborted")
+
+					break outer
+				default:
+				}
+
+				err := save(tx, obj)
+				if err != nil {
+					errs <- fault.Wrap(err, fmsg.With("failed to save object"))
+				}
+
+				if i%BatchSize == 0 {
+					s.log.Info("imported", "count", i)
+					err := tx.Commit()
+					if err != nil {
+						errs <- fault.Wrap(err, fmsg.With("failed to commit transaction"))
+					}
+					tx, err = node.Begin(true)
+					if err != nil {
+						errs <- fault.Wrap(err, fmsg.With("failed to begin transaction"))
+					}
+				}
+			}
+
+			if err := tx.Commit(); err != nil {
+				errs <- fault.Wrap(err, fmsg.With("failed to commit transaction"))
 			}
 		}()
 
-	outer:
-		for obj := range objects {
-			i++
-			select {
-			case <-ctx.Done():
-				s.log.Warn("import aborted")
-
-				break outer
-			default:
-			}
-
-			err := save(tx, obj)
-			if err != nil {
-				errs <- fault.Wrap(err, fmsg.With("failed to save object"))
-			}
-
-			if i%BatchSize == 0 {
-				s.log.Info("imported", "count", i)
-			}
-		}
-
-		if err := tx.Commit(); err != nil {
-			errs <- fault.Wrap(err, fmsg.With("failed to commit transaction"))
-		}
-	}()
-
-	return errs
+		return errs
+	}
 }
 
 func saveGen[T nix.Importable](node storm.Node, obj nix.Importable) error {
@@ -150,7 +158,7 @@ func (s *Store) GetDocument(
 	var doc nix.Importable
 	var err error
 
-	node := s.db.From(source.Key)
+	node := s.From(source.Key)
 
 	switch source.Importer {
 	case config.Packages:
@@ -171,4 +179,50 @@ func (s *Store) GetDocument(
 	}
 
 	return doc, nil
+}
+
+func MakeSourceExporter[I nix.Importable](
+	store *Store,
+	source *config.Source,
+) func(context.Context) (<-chan I, <-chan error) {
+	return func(_ context.Context) (<-chan I, <-chan error) {
+		results := make(chan I)
+		errs := make(chan error)
+
+		go func() {
+			defer close(results)
+			defer close(errs)
+
+			var obj I
+			objs := make([]I, 0, BatchSize)
+			node := store.From(source.Key)
+			count, err := node.Count(&obj)
+			if err != nil {
+				errs <- fault.Wrap(
+					err,
+					fmsg.Withf("failed to count documents source: %s", source.Key),
+				)
+
+				return
+			}
+
+			limit := min(BatchSize, count)
+			for offset := 0; offset < count; offset += BatchSize {
+				err := node.All(&objs, storm.Skip(offset), storm.Limit(limit))
+				if err != nil {
+					errs <- fault.Wrap(
+						err,
+						fmsg.Withf("failed to export documents source: %s offset: %d limit: %d", source.Key, offset, limit),
+					)
+
+					return
+				}
+				for _, obj := range objs {
+					results <- obj
+				}
+			}
+		}()
+
+		return results, errs
+	}
 }

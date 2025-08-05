@@ -70,5 +70,8 @@ dev:
 fetch *flags:
 	wgo run --exit ./cmd/searchix-web --config config.toml --fetch --dev {{ flags }}
 
-reindex *flags:
+replace *flags:
 	wgo run --exit ./cmd/searchix-web --config config.toml --replace --dev {{ flags }}
+
+reindex *flags:
+	wgo run --exit ./cmd/searchix-web --config config.toml --reindex --dev {{ flags }}

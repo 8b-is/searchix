@@ -34,8 +34,9 @@ var (
 	)
 	generateErrorPage = flag.Bool("generate-error-page", false, "generate error page and exit")
 	dev               = flag.Bool("dev", false, "enable live reloading and nicer logging")
-	replace           = flag.Bool("replace", false, "replace existing index and exit")
 	prefetch          = flag.Bool("fetch", false, "pre-fetch data and exit")
+	replace           = flag.Bool("replace", false, "replace existing storage and exit")
+	reindex           = flag.Bool("reindex", false, "reindex existing index and exit")
 	offline           = flag.Bool("offline", false, "run in offline mode")
 	version           = flag.Bool("version", false, "print version information")
 	cpuprofile        = flag.String("cpuprofile", "", "enable CPU profiling and save to `file`")
@@ -121,7 +122,7 @@ func main() {
 	read, write, exists, err := index.OpenOrCreate(
 		&index.Options{
 			Config:    cfg,
-			Force:     *replace,
+			Force:     *reindex,
 			LowMemory: cfg.Importer.LowMemory,
 			BatchSize: cfg.Importer.BatchSize,
 			Logger:    logger.Named("index"),
@@ -167,6 +168,29 @@ func main() {
 		}
 
 		if *replace || *prefetch {
+			return
+		}
+	}
+
+	if !exists || *reindex {
+		for _, source := range cfg.Importer.Sources {
+			hadErrors, err := importer.ImportSource(
+				ctx,
+				logger.Named("importer"),
+				store,
+				source,
+				write,
+			)
+			if err != nil {
+				logger.Fatal("Failed to import source", "source", source.Name, "error", err)
+			}
+
+			if hadErrors {
+				logger.Warn("Imported source encountered errors", "source", source.Name)
+			}
+		}
+
+		if *reindex {
 			return
 		}
 	}

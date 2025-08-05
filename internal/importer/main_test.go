@@ -1,13 +1,13 @@
 package importer
 
 import (
-	"context"
 	"testing"
 
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/file"
 	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/manpages"
+	"alin.ovh/searchix/internal/storage"
 	"alin.ovh/x/log"
 )
 
@@ -21,11 +21,20 @@ func BenchmarkImporterLowMemory(b *testing.B) {
 
 	logger := log.Configure(false)
 	_, write, _, err := index.OpenOrCreate(&index.Options{
+		Config:    &cfg,
 		Force:     false,
 		LowMemory: true,
 		BatchSize: cfg.Importer.BatchSize,
 		Logger:    logger.Named("index"),
 		Root:      tmp,
+	})
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	store, err := storage.New(&storage.Options{
+		Root:   tmp,
+		Logger: logger.Named("storage"),
 	})
 	if err != nil {
 		b.Fatal(err)
@@ -47,13 +56,30 @@ func BenchmarkImporterLowMemory(b *testing.B) {
 		b.Fatal(err)
 	}
 
+	source := cfg.Importer.Sources["nixpkgs"]
+	source.Programs.Enable = false
+
 	err = imp.Start(
-		context.Background(),
+		b.Context(),
 		false,
 		false,
-		&[]string{"nixpkgs"},
+		&[]string{source.Key},
 	)
 	if err != nil {
 		b.Fatal(err)
+	}
+
+	hadErrors, err := ImportSource(
+		b.Context(),
+		logger.Named("importer"),
+		store,
+		source,
+		write,
+	)
+	if err != nil {
+		b.Fatal(err)
+	}
+	if hadErrors {
+		b.Fatal("had errors")
 	}
 }

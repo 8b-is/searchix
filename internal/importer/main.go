@@ -41,14 +41,17 @@ var Job struct {
 	NextRun time.Time
 }
 
-func MarkIndexingStarted() {
+func MarkImportStarted() {
 	Job.StartedAt = time.Now()
 }
 
-func MarkIndexingFinished(meta *index.Meta) {
+func MarkImportFinished() {
 	Job.LastRun.StartedAt = Job.StartedAt
 	Job.LastRun.FinishedAt = time.Now()
 	Job.StartedAt = time.Time{}
+}
+
+func MarkLastFetch(meta *index.Meta) {
 	meta.LastImport = Job.LastRun
 }
 
@@ -150,7 +153,7 @@ func (imp *Importer) createSourceImporter(
 		}
 
 		if !fetchOnly &&
-			(!sourceMeta.UpdatedAt.After(sourceMeta.ImportedAt) || sourceMeta.ImportedAt.IsZero() || forceUpdate) {
+			(!sourceMeta.UpdatedAt.After(sourceMeta.StoredAt) || sourceMeta.StoredAt.IsZero() || forceUpdate) {
 
 			if files.Revision != nil {
 				err = setRepoRevision(files.Revision, source)
@@ -186,12 +189,17 @@ func (imp *Importer) createSourceImporter(
 				return fault.Wrap(err, fmsg.Withf("failed to create processor"))
 			}
 
-			hadWarnings, err := imp.process(ctx, processor, source)
+			hadWarnings, err := Import(
+				ctx,
+				logger.Named("importer"),
+				processor.Process,
+				imp.options.Storage.MakeSourceImporter(source),
+			)
 			if err != nil {
 				return fault.Wrap(err, fmsg.Withf("failed to process source"))
 			}
 
-			sourceMeta.ImportedAt = time.Now()
+			sourceMeta.StoredAt = time.Now()
 
 			if hadWarnings {
 				logger.Warn("importer succeeded, but with warnings/errors")
@@ -234,7 +242,6 @@ func (imp *Importer) Start(
 	forceUpdate = forceUpdate || (onlyUpdateSources != nil && len(*onlyUpdateSources) > 0)
 
 	meta := imp.options.WriteIndex.Meta
-	MarkIndexingStarted()
 
 	importSource := imp.createSourceImporter(importCtx, meta, forceUpdate, fetchOnly)
 	for name, source := range imp.config.Importer.Sources {
@@ -249,8 +256,7 @@ func (imp *Importer) Start(
 		}
 	}
 
-	MarkIndexingFinished(meta)
-
+	MarkLastFetch(meta)
 	err := imp.options.WriteIndex.SaveMeta()
 	if err != nil {
 		return fault.Wrap(err, fmsg.With("failed to save metadata"))
@@ -345,15 +351,19 @@ func (imp *Importer) StartUpdateTimer(
 		}
 		imp.options.Logger.Info("updating index")
 
+		MarkImportStarted()
 		ctx, cancel := context.WithTimeout(parentCtx, imp.config.Importer.Timeout.Duration)
-		err := imp.Start(ctx, false, false, nil)
-		cancel()
 
+		err := imp.Start(ctx, false, false, nil)
 		if err != nil {
-			imp.options.Logger.Warn("error updating index", "error", err)
+			imp.options.Logger.Warn("error fetching update", "error", err)
 		} else {
 			imp.options.Logger.Info("update complete")
 		}
+
+		cancel()
+		MarkImportFinished()
+
 		nextRun = nextUTCOccurrenceOfTime(imp.config.Importer.UpdateAt)
 		SetNextRun(nextRun)
 

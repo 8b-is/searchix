@@ -5,19 +5,20 @@ import (
 	"time"
 
 	"alin.ovh/searchix/internal/file"
-	"alin.ovh/x/log"
 
+	"alin.ovh/x/log"
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
 )
 
-const CurrentSchemaVersion = 7
+const CurrentSchemaVersion = 8
 
 type SourceMeta struct {
-	ImportedAt time.Time
-	UpdatedAt  time.Time
-	Path       string
-	Rev        string
+	IndexedAt time.Time
+	StoredAt  time.Time
+	UpdatedAt time.Time
+	Path      string
+	Rev       string
 }
 
 type data struct {
@@ -114,8 +115,8 @@ func (i *Meta) SetSourceMeta(source string, meta *SourceMeta) {
 func (i *Meta) LastImported() time.Time {
 	var last time.Time
 	for _, sourceMeta := range i.Sources {
-		if sourceMeta.ImportedAt.After(last) {
-			last = sourceMeta.ImportedAt
+		if sourceMeta.StoredAt.After(last) {
+			last = sourceMeta.StoredAt
 		}
 	}
 
