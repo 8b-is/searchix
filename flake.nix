@@ -59,8 +59,6 @@
             nixfmt.enable = true;
             taplo.enable = true;
             prettier.enable = true;
-            gofumpt.enable = true;
-            golines.enable = true;
             sqlfluff.enable = true;
             sqlfluff.dialect = "sqlite";
           };

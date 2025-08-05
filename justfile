@@ -15,14 +15,10 @@ update-nix-dependencies:
 update-dependencies: update-go-dependencies update-nix-dependencies
 
 checkformat:
-	gofmt -d .
-	goimports -d .
-	golines --dry-run .
+	golangci-lint fmt --diff
 
 format:
-	gofmt -w .
-	goimports -w .
-	golines -w .
+	golangci-lint fmt
 
 fix:
 	go fix .

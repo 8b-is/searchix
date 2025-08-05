@@ -73,6 +73,15 @@ linters:
       - builtin$
       - examples$
 formatters:
+  enable:
+    - gofumpt
+    - golines
+    - goimports
+  settings:
+    gofmt:
+      simplify: true
+    golines:
+      tab-len: 2
   exclusions:
     generated: lax
     paths:

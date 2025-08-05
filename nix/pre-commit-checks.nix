@@ -43,14 +43,6 @@
     yamllint = {
       enable = true;
     };
-    golines = {
-      enable = true;
-      name = "golines";
-      description = "A golang formatter that fixes long lines";
-      types_or = [ "go" ];
-      entry = "${pkgs.golines}/bin/golines --write-output";
-      pass_filenames = true;
-    };
     go-mod-tidy = {
       enable = true;
       name = "go-mod-tidy";
