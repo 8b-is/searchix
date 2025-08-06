@@ -15,6 +15,8 @@ import (
 var cfg = config.DefaultConfig
 
 func BenchmarkImporterLowMemory(b *testing.B) {
+	b.ReportAllocs()
+
 	tmp, err := file.OpenRoot(b.TempDir())
 	if err != nil {
 		b.Fatal(err)
