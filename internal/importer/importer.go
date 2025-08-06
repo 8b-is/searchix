@@ -4,11 +4,12 @@ import (
 	"context"
 	"sync"
 
+	"alin.ovh/x/log"
+
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/nix"
 	"alin.ovh/searchix/internal/storage"
-	"alin.ovh/x/log"
 )
 
 type Processor interface {

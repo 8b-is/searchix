@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"alin.ovh/x/log"
+
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/fetcher"
 	"alin.ovh/searchix/internal/file"
@@ -16,7 +18,6 @@ import (
 	"alin.ovh/searchix/internal/manpages"
 	"alin.ovh/searchix/internal/programs"
 	"alin.ovh/searchix/internal/storage"
-	"alin.ovh/x/log"
 
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"

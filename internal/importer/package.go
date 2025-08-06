@@ -8,10 +8,11 @@ import (
 	"reflect"
 	"strings"
 
+	"alin.ovh/x/log"
+
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/nix"
 	"alin.ovh/searchix/internal/programs"
-	"alin.ovh/x/log"
 
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"

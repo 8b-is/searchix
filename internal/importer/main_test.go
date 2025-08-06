@@ -3,12 +3,13 @@ package importer
 import (
 	"testing"
 
+	"alin.ovh/x/log"
+
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/file"
 	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/manpages"
 	"alin.ovh/searchix/internal/storage"
-	"alin.ovh/x/log"
 )
 
 var cfg = config.DefaultConfig
@@ -48,7 +49,7 @@ func BenchmarkImporterLowMemory(b *testing.B) {
 			Logger: logger.Named("manpages"),
 			Root:   tmp,
 		}),
-		Offline: false,
+		Offline: true,
 		Root:    tmp,
 		Storage: store,
 	})

@@ -240,21 +240,25 @@ in
   };
 
   config = mkIf cfg.enable {
-    systemd.services.searchix = {
-      description = "Searchix Nix option search";
-      wantedBy = [ "multi-user.target" ];
-      path = with pkgs; [ nix ];
-      inherit (cfg) environment;
-      serviceConfig =
-        defaultServiceConfig
-        // {
-          ExecStart = "${package}/bin/searchix-web --config ${(settingsFormat.generate "searchix-config.toml" cfg.settings)}";
-        }
-        // lib.optionalAttrs (cfg.settings.web.port < 1024) {
-          AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];
-          CapabilityBoundingSet = [ "CAP_NET_BIND_SERVICE" ];
-        };
-    };
+    systemd.services.searchix =
+      let
+        configFile = settingsFormat.generate "searchix-config.toml" cfg.settings;
+      in
+      {
+        description = "Searchix Nix option search";
+        wantedBy = [ "multi-user.target" ];
+        path = with pkgs; [ nix ];
+        inherit (cfg) environment;
+        serviceConfig =
+          defaultServiceConfig
+          // {
+            ExecStart = "${package}/bin/searchix-web --config ${configFile} serve";
+          }
+          // lib.optionalAttrs (cfg.settings.web.port < 1024) {
+            AmbientCapabilities = [ "CAP_NET_BIND_SERVICE" ];
+            CapabilityBoundingSet = [ "CAP_NET_BIND_SERVICE" ];
+          };
+      };
 
     users.users = optionalAttrs (cfg.user == "searchix") {
       searchix = {
