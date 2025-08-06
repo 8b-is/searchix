@@ -5,9 +5,6 @@
     gotest.enable = false;
     golangci-lint.enable = true;
 
-    staticcheck = {
-      enable = true;
-    };
     statix = {
       enable = true;
       # ignore is a glob
