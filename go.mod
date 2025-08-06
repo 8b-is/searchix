@@ -5,7 +5,6 @@ go 1.24.3
 require (
 	alin.ovh/gomponents v1.6.0
 	alin.ovh/x v1.0.0
-	badc0de.net/pkg/flagutil v1.0.1
 	github.com/Southclaws/fault v0.8.2
 	github.com/andybalholm/brotli v1.1.1
 	github.com/asdine/storm/v3 v3.2.1
@@ -16,6 +15,7 @@ require (
 	github.com/dustin/go-humanize v1.0.1
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/getsentry/sentry-go v0.33.0
+	github.com/jessevdk/go-flags v1.6.1
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/osdevisnot/sorvor v0.4.4
 	github.com/pelletier/go-toml/v2 v2.2.4

@@ -7,9 +7,6 @@ schema = 3
   [mod."alin.ovh/x"]
     version = "v1.0.0"
     hash = "sha256-9VbqLrFz3dy34Uo62JnDQyVp50wpsoq/pJrbAvbiuM0="
-  [mod."badc0de.net/pkg/flagutil"]
-    version = "v1.0.1"
-    hash = "sha256-0LRWL5DUHW3gXQhPAhUCxnUCN7HN1qKI2yZp8MrDN6M="
   [mod."github.com/Code-Hex/dd"]
     version = "v1.1.0"
     hash = "sha256-9aoekzjMXuJmR0/7bfu4y3SfcWBgdfYybB7gt4sNKfk="
@@ -109,6 +106,9 @@ schema = 3
   [mod."github.com/google/uuid"]
     version = "v1.6.0"
     hash = "sha256-VWl9sqUzdOuhW0KzQlv0gwwUQClYkmZwSydHG2sALYw="
+  [mod."github.com/jessevdk/go-flags"]
+    version = "v1.6.1"
+    hash = "sha256-Q5WFTgRxYio0+ay3sbQeBPKeJAFvOdiDVkaTVn3hoTA="
   [mod."github.com/json-iterator/go"]
     version = "v1.1.12"
     hash = "sha256-To8A0h+lbfZ/6zM+2PpRpY3+L6725OPC66lffq6fUoM="

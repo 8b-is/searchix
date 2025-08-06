@@ -3,14 +3,13 @@ package main
 import (
 	"context"
 	"errors"
-	"flag"
 	"fmt"
 	"os"
 	"os/signal"
 	"runtime/pprof"
 	"sync"
 
-	"badc0de.net/pkg/flagutil"
+	flags "github.com/jessevdk/go-flags"
 
 	"alin.ovh/searchix/frontend"
 	"alin.ovh/searchix/internal/components"
@@ -25,40 +24,46 @@ import (
 	"alin.ovh/x/log"
 )
 
-var (
-	configFile         = flag.String("config", "config.toml", "config `file` to use")
-	printDefaultConfig = flag.Bool(
-		"print-default-config",
-		false,
-		"print default configuration and exit",
-	)
-	generateErrorPage = flag.Bool("generate-error-page", false, "generate error page and exit")
-	dev               = flag.Bool("dev", false, "enable live reloading and nicer logging")
-	prefetch          = flag.Bool("fetch", false, "pre-fetch data and exit")
-	replace           = flag.Bool("replace", false, "replace existing storage and exit")
-	reindex           = flag.Bool("reindex", false, "reindex existing index and exit")
-	offline           = flag.Bool("offline", false, "run in offline mode")
-	version           = flag.Bool("version", false, "print version information")
-	cpuprofile        = flag.String("cpuprofile", "", "enable CPU profiling and save to `file`")
-)
+var options struct {
+	Config             flags.Filename `long:"config" default:"config.toml" description:"config file to use"`
+	PrintDefaultConfig bool           `long:"print-default-config" description:"print default configuration and exit"`
+	GenerateErrorPage  bool           `long:"generate-error-page" description:"generate error page and exit"`
+	Dev                bool           `long:"dev" description:"enable live reloading and nicer logging"`
+	Prefetch           bool           `long:"prefetch" description:"pre-fetch data and exit"`
+	Replace            bool           `long:"replace" description:"replace existing storage and exit"`
+	Reindex            bool           `long:"reindex" description:"reindex existing index and exit"`
+	Rebuild            bool           `long:"rebuild" description:"rebuild existing index and exit"`
+	Offline            bool           `long:"offline" description:"run in offline mode"`
+	Version            bool           `long:"version" description:"print version information"`
+	CPUProfile         flags.Filename `long:"cpuprofile" description:"output CPU profile to FILE" value-name:"FILE"`
+}
+
+var parser = flags.NewParser(&options, flags.Default)
 
 func main() {
-	flagutil.Parse()
-	if *version {
+	_, err := parser.Parse()
+	if err != nil {
+		os.Exit(1)
+	}
+	if flags.WroteHelp(err) {
+		return
+	}
+
+	if options.Version {
 		_, err := fmt.Fprintf(os.Stderr, "searchix %s\n", config.Version)
 		if err != nil {
 			panic("can't write to standard error?!")
 		}
 		os.Exit(0)
 	}
-	if *printDefaultConfig {
+	if options.PrintDefaultConfig {
 		_, err := fmt.Print(config.GetDefaultConfig())
 		if err != nil {
 			panic("can't write to standard output?!")
 		}
 		os.Exit(0)
 	}
-	if *generateErrorPage {
+	if options.GenerateErrorPage {
 		assets, err := frontend.New()
 		if err != nil {
 			panic("failed to create assets: " + err.Error())
@@ -79,9 +84,9 @@ func main() {
 		os.Exit(0)
 	}
 
-	if *cpuprofile != "" {
+	if options.CPUProfile != "" {
 		//nolint:forbidigo // admin specifies profile file location
-		f, err := os.Create(*cpuprofile)
+		f, err := os.Create(string(options.CPUProfile))
 		if err != nil {
 			panic("can't create CPU profile: " + err.Error())
 		}
@@ -92,9 +97,9 @@ func main() {
 		defer pprof.StopCPUProfile()
 	}
 
-	logger := log.Configure(!*dev)
+	logger := log.Configure(!options.Dev)
 
-	cfg, err := config.GetConfig(*configFile, logger)
+	cfg, err := config.GetConfig(string(options.Config), logger)
 	if err != nil {
 		logger.Fatal("Failed to parse config file", "error", err)
 	}
@@ -122,7 +127,7 @@ func main() {
 	read, write, exists, err := index.OpenOrCreate(
 		&index.Options{
 			Config:    cfg,
-			Force:     *reindex,
+			Force:     options.Reindex,
 			LowMemory: cfg.Importer.LowMemory,
 			BatchSize: cfg.Importer.BatchSize,
 			Logger:    logger.Named("index"),
@@ -155,24 +160,24 @@ func main() {
 		Logger:     logger.Named("importer"),
 		Manpages:   mdb,
 		Root:       root,
-		Offline:    *offline,
+		Offline:    options.Offline,
 	})
 	if err != nil {
 		logger.Fatal("Failed to create importer", "error", err)
 	}
 
-	if !exists || *replace || *prefetch {
-		err := imp.Start(ctx, true, *prefetch, nil)
+	if !exists || options.Replace || options.Prefetch {
+		err := imp.Start(ctx, true, options.Prefetch, nil)
 		if err != nil {
 			logger.Fatal("Failed to start importer", "error", err)
 		}
 
-		if *replace || *prefetch {
+		if options.Replace || options.Prefetch {
 			return
 		}
 	}
 
-	if !exists || *reindex {
+	if !exists || options.Reindex {
 		for _, source := range cfg.Importer.Sources {
 			hadErrors, err := importer.ImportSource(
 				ctx,
@@ -190,7 +195,7 @@ func main() {
 			}
 		}
 
-		if *reindex {
+		if options.Reindex {
 			return
 		}
 	}
@@ -206,7 +211,7 @@ func main() {
 		sCtx, cancel := context.WithCancel(ctx)
 		defer wg.Done()
 		defer cancel()
-		err := s.Start(sCtx, *dev)
+		err := s.Start(sCtx, options.Dev)
 		if err != nil && !errors.Is(err, context.Canceled) {
 			// Error starting or closing listener:
 			logger.Fatal("error", "error", err)

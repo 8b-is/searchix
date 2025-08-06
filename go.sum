@@ -2,8 +2,6 @@ alin.ovh/gomponents v1.6.0 h1:ymFYykOwMSG63dQ8bQZ4U0611zkDEzVNMOpKQSwwFjE=
 alin.ovh/gomponents v1.6.0/go.mod h1:RQtPwKzGB0Nt1JTBDSqRzH2w/mg/6PkuhnNvQMV0/AQ=
 alin.ovh/x v1.0.0 h1:ePw0pO8YPLxKKJyxoF1vh2ZedE+qKkzzCQRxgaLsrc8=
 alin.ovh/x v1.0.0/go.mod h1:ivPzLVkiYeXGmUITqx4KLoNikO1URKJXYPPo4yCxuhY=
-badc0de.net/pkg/flagutil v1.0.1 h1:0ZgBzd3FehDUA8DJ70/phsnDH61/3aYMyx8Wd84KqQo=
-badc0de.net/pkg/flagutil v1.0.1/go.mod h1:HwwkfbImu+u288bnLaYDGqBxkJzvqi5YzKofmgkMLvk=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/Code-Hex/dd v1.1.0 h1:VEtTThnS9l7WhpKUIpdcWaf0B8Vp0LeeSEsxA1DZseI=
 github.com/Code-Hex/dd v1.1.0/go.mod h1:VaMyo/YjTJ3d4qm/bgtrUkT2w+aYwJ07Y7eCWyrJr1w=
@@ -92,6 +90,8 @@ github.com/google/pprof v0.0.0-20250317173921-a4b03ec1a45e/go.mod h1:boTsfXsheKC
 github.com/google/renameio v0.1.0/go.mod h1:KWCgfxg9yswjAJkECMjeO8J8rahYeXnNhOm40UhjYkI=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+github.com/jessevdk/go-flags v1.6.1 h1:Cvu5U8UGrLay1rZfv/zP7iLpSHGUZ/Ou68T0iX1bBK4=
+github.com/jessevdk/go-flags v1.6.1/go.mod h1:Mk8T1hIAWpOiJiHa9rJASDK2UGWji0EuPGBnNLMooyc=
 github.com/json-iterator/go v1.1.12 h1:PV8peI4a0ysnczrg+LtxykD8LfKY9ML6u2jnxaEnrnM=
 github.com/json-iterator/go v1.1.12/go.mod h1:e30LSqwooZae/UwlEbR2852Gd8hjQvJoHmT4TnhNGBo=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
