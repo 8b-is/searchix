@@ -82,6 +82,9 @@ formatters:
       simplify: true
     golines:
       tab-len: 2
+    goimports:
+      local-prefixes:
+        - alin.ovh/searchix
   exclusions:
     generated: lax
     paths:
