@@ -377,6 +377,13 @@ func (imp *Importer) StartUpdateTimer(
 			imp.options.Logger.Info("update complete")
 		}
 
+		err = imp.Index(ctx)
+		if err != nil {
+			imp.options.Logger.Warn("error indexing update", "error", err)
+		} else {
+			imp.options.Logger.Info("indexing complete")
+		}
+
 		cancel()
 		MarkImportFinished()
 
