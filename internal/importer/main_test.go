@@ -62,7 +62,7 @@ func BenchmarkImporterLowMemory(b *testing.B) {
 	source := cfg.Importer.Sources["nixpkgs"]
 	source.Programs.Enable = false
 
-	err = imp.Start(
+	err = imp.Fetch(
 		b.Context(),
 		false,
 		false,

@@ -81,7 +81,7 @@ func (opts *ServeOptions) Execute(_ []string) (err error) {
 	}
 
 	if !exists {
-		err = imp.Start(ctx, true, false, nil)
+		err = imp.Fetch(ctx, true, false, nil)
 		if err != nil {
 			return fault.Wrap(err, fmsg.With("Failed to start importer"))
 		}

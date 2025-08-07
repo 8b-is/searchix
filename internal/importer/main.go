@@ -221,7 +221,7 @@ type Importer struct {
 	options *Options
 }
 
-func (imp *Importer) Start(
+func (imp *Importer) Fetch(
 	ctx context.Context,
 	forceUpdate bool,
 	fetchOnly bool,
@@ -299,7 +299,7 @@ func (imp *Importer) EnsureSourcesIndexed(
 		})
 		if len(newSources) > 0 {
 			imp.options.Logger.Info("adding new sources", "sources", newSources)
-			err := imp.Start(
+			err := imp.Fetch(
 				ctx,
 				false,
 				false,
@@ -355,7 +355,7 @@ func (imp *Importer) StartUpdateTimer(
 		MarkImportStarted()
 		ctx, cancel := context.WithTimeout(parentCtx, imp.config.Importer.Timeout.Duration)
 
-		err := imp.Start(ctx, false, false, nil)
+		err := imp.Fetch(ctx, false, false, nil)
 		if err != nil {
 			imp.options.Logger.Warn("error fetching update", "error", err)
 		} else {

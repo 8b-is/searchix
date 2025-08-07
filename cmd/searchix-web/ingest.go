@@ -75,7 +75,7 @@ func (opts *IngestOptions) Execute(_ []string) error {
 	}
 
 	if !exists || opts.Replace || opts.Fetch {
-		err = imp.Start(ctx, true, opts.Fetch && !opts.Replace, nil)
+		err = imp.Fetch(ctx, true, opts.Fetch && !opts.Replace, nil)
 		if err != nil {
 			return fault.Wrap(err, fmsg.With("Failed to start importer"))
 		}
