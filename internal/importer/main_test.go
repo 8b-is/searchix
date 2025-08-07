@@ -72,7 +72,7 @@ func BenchmarkImporterLowMemory(b *testing.B) {
 		b.Fatal(err)
 	}
 
-	hadErrors, err := imp.IndexSource(b.Context(), source)
+	hadErrors, err := imp.indexSource(b.Context(), source)
 	if err != nil {
 		b.Fatal(err)
 	}

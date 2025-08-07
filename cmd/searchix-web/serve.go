@@ -86,15 +86,9 @@ func (opts *ServeOptions) Execute(_ []string) (err error) {
 			return fault.Wrap(err, fmsg.With("Failed to start importer"))
 		}
 
-		for _, source := range cfg.Importer.Sources {
-			hadErrors, err := imp.IndexSource(ctx, source)
-			if err != nil {
-				return fault.Wrap(err, fmsg.Withf("Failed to import source %s", source.Name))
-			}
-
-			if hadErrors {
-				logger.Warn("Imported source encountered errors", "source", source.Name)
-			}
+		err = imp.Index(ctx)
+		if err != nil {
+			return fault.Wrap(err, fmsg.With("Failed to index data"))
 		}
 	}
 

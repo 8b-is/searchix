@@ -20,7 +20,7 @@ type (
 	ImportDestination func(context.Context, <-chan nix.Importable) <-chan error
 )
 
-func Import(
+func pipe(
 	ctx context.Context,
 	log *log.Logger,
 	src ImportSource,
@@ -67,11 +67,11 @@ func Import(
 	return hadObjectErrors, criticalError
 }
 
-func (imp *Importer) IndexSource(
+func (imp *Importer) indexSource(
 	ctx context.Context,
 	source *config.Source,
 ) (bool, error) {
-	return Import(
+	return pipe(
 		ctx,
 		imp.options.Logger,
 		storage.MakeSourceExporter(imp.options.Storage, source),

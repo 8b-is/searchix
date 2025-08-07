@@ -190,7 +190,7 @@ func (imp *Importer) createSourceImporter(
 				return fault.Wrap(err, fmsg.Withf("failed to create processor"))
 			}
 
-			hadWarnings, err := Import(
+			hadWarnings, err := pipe(
 				ctx,
 				logger.Named("importer"),
 				processor.Process,
@@ -261,6 +261,21 @@ func (imp *Importer) Fetch(
 	err := imp.options.WriteIndex.SaveMeta()
 	if err != nil {
 		return fault.Wrap(err, fmsg.With("failed to save metadata"))
+	}
+
+	return nil
+}
+
+func (imp *Importer) Index(ctx context.Context) error {
+	for name, source := range imp.config.Importer.Sources {
+		hadErrors, err := imp.indexSource(ctx, source)
+		if err != nil {
+			return fault.Wrap(err, fmsg.Withf("Failed to import source %s", name))
+		}
+
+		if hadErrors {
+			imp.options.Logger.Warn("Imported source encountered errors", "source", source.Name)
+		}
 	}
 
 	return nil
