@@ -11,8 +11,8 @@ import (
 	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/manpages"
 	"alin.ovh/searchix/internal/storage"
-	"alin.ovh/x/log"
 
+	"alin.ovh/x/log"
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
 	"golang.org/x/net/http2"

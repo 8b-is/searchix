@@ -6,8 +6,8 @@ import (
 
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/server"
-	"alin.ovh/x/log"
 
+	"alin.ovh/x/log"
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
 	"github.com/getsentry/sentry-go"

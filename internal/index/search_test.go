@@ -8,12 +8,13 @@ import (
 	"testing"
 	"time"
 
+	"alin.ovh/x/log"
+
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/file"
 	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/nix"
 	"alin.ovh/searchix/internal/storage"
-	"alin.ovh/x/log"
 )
 
 const rootPath = "../../data"

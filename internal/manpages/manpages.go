@@ -6,12 +6,13 @@ import (
 	"fmt"
 	"time"
 
-	"alin.ovh/searchix/internal/config"
-	"alin.ovh/searchix/internal/fetcher/http"
-	"alin.ovh/searchix/internal/file"
 	"alin.ovh/x/log"
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
+
+	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/fetcher/http"
+	"alin.ovh/searchix/internal/file"
 )
 
 const basename = "manpage-urls.json"

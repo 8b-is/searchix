@@ -5,12 +5,13 @@ import (
 	"io"
 	"os"
 
-	"alin.ovh/searchix/internal/config"
-	"alin.ovh/searchix/internal/file"
-	"alin.ovh/searchix/internal/index"
 	"alin.ovh/x/log"
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
+
+	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/file"
+	"alin.ovh/searchix/internal/index"
 )
 
 type Options struct {

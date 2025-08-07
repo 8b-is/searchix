@@ -22,8 +22,8 @@ import (
 	"alin.ovh/searchix/internal/opensearch"
 	"alin.ovh/searchix/internal/pagination"
 	"alin.ovh/searchix/internal/sentryhttp"
-	"alin.ovh/x/log"
 
+	"alin.ovh/x/log"
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
 	"github.com/osdevisnot/sorvor/pkg/livereload"

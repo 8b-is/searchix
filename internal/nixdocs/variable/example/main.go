@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"os"
 
-	"alin.ovh/searchix/internal/nixdocs/variable"
 	"github.com/yuin/goldmark"
+
+	"alin.ovh/searchix/internal/nixdocs/variable"
 )
 
 func main() {

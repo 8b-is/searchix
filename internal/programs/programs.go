@@ -7,12 +7,13 @@ import (
 	"os/exec"
 	"strings"
 
-	"alin.ovh/searchix/internal/config"
-	"alin.ovh/searchix/internal/file"
 	"alin.ovh/x/log"
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
 	_ "modernc.org/sqlite" //nolint:revive // sqlite driver needed for database/sql
+
+	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/file"
 )
 
 type DB struct {

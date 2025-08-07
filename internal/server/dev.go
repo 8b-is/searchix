@@ -5,11 +5,12 @@ import (
 	"io/fs"
 	"time"
 
-	"alin.ovh/searchix/internal/file"
 	"alin.ovh/x/log"
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
 	"github.com/fsnotify/fsnotify"
+
+	"alin.ovh/searchix/internal/file"
 )
 
 type FileWatcher struct {

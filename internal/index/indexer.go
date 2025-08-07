@@ -9,9 +9,8 @@ import (
 	"alin.ovh/searchix/internal/index/nixattr"
 	"alin.ovh/searchix/internal/nix"
 	"alin.ovh/searchix/internal/storage"
-	"alin.ovh/x/log"
-	"go.uber.org/zap"
 
+	"alin.ovh/x/log"
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
 	"github.com/blevesearch/bleve/v2"
@@ -25,6 +24,7 @@ import (
 	"github.com/blevesearch/bleve/v2/analysis/tokenizer/letter"
 	"github.com/blevesearch/bleve/v2/analysis/tokenizer/unicode"
 	"github.com/blevesearch/bleve/v2/mapping"
+	"go.uber.org/zap"
 )
 
 type Options struct {

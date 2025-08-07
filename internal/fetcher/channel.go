@@ -9,10 +9,11 @@ import (
 	"strings"
 	"time"
 
-	"alin.ovh/searchix/internal/config"
-	"alin.ovh/searchix/internal/index"
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
+
+	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/index"
 )
 
 type ChannelFetcher struct {

@@ -6,9 +6,10 @@ import (
 
 	g "alin.ovh/gomponents"
 	. "alin.ovh/gomponents/html"
+	"github.com/dustin/go-humanize"
+
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/importer"
-	"github.com/dustin/go-humanize"
 )
 
 func SearchForm(tdata TemplateData, r ResultData) g.Node {
