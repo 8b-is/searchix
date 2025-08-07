@@ -181,20 +181,20 @@ func (s *Store) GetDocument(
 	return doc, nil
 }
 
-func MakeSourceExporter[I nix.Importable](
+func MakeSourceExporter(
 	store *Store,
 	source *config.Source,
-) func(context.Context) (<-chan I, <-chan error) {
-	return func(_ context.Context) (<-chan I, <-chan error) {
-		results := make(chan I)
+) func(context.Context) (<-chan nix.Importable, <-chan error) {
+	return func(_ context.Context) (<-chan nix.Importable, <-chan error) {
+		results := make(chan nix.Importable)
 		errs := make(chan error)
 
 		go func() {
 			defer close(results)
 			defer close(errs)
 
-			var obj I
-			objs := make([]I, 0, BatchSize)
+			var obj nix.Importable
+			objs := make([]nix.Importable, 0, BatchSize)
 			node := store.From(source.Key)
 			count, err := node.Count(&obj)
 			if err != nil {

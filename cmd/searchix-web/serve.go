@@ -87,13 +87,7 @@ func (opts *ServeOptions) Execute(_ []string) (err error) {
 		}
 
 		for _, source := range cfg.Importer.Sources {
-			hadErrors, err := importer.ImportSource(
-				ctx,
-				logger.Named("importer"),
-				store,
-				source,
-				write,
-			)
+			hadErrors, err := imp.IndexSource(ctx, source)
 			if err != nil {
 				return fault.Wrap(err, fmsg.Withf("Failed to import source %s", source.Name))
 			}

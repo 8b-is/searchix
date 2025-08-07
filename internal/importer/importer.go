@@ -7,7 +7,6 @@ import (
 	"alin.ovh/x/log"
 
 	"alin.ovh/searchix/internal/config"
-	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/nix"
 	"alin.ovh/searchix/internal/storage"
 )
@@ -16,11 +15,16 @@ type Processor interface {
 	Process(context.Context) (<-chan nix.Importable, <-chan error)
 }
 
-func Import[I nix.Importable](
+type (
+	ImportSource      func(context.Context) (<-chan nix.Importable, <-chan error)
+	ImportDestination func(context.Context, <-chan nix.Importable) <-chan error
+)
+
+func Import(
 	ctx context.Context,
 	log *log.Logger,
-	src func(context.Context) (<-chan I, <-chan error),
-	dst func(context.Context, <-chan I) <-chan error,
+	src ImportSource,
+	dst ImportDestination,
 ) (bool, error) {
 	wg := sync.WaitGroup{}
 
@@ -63,37 +67,16 @@ func Import[I nix.Importable](
 	return hadObjectErrors, criticalError
 }
 
-func ImportSource(
+func (imp *Importer) IndexSource(
 	ctx context.Context,
-	logger *log.Logger,
-	store *storage.Store,
 	source *config.Source,
-	write *index.WriteIndex,
-) (bool, error) {
-	var it func(context.Context, *log.Logger, *storage.Store, *config.Source, *index.WriteIndex) (bool, error)
-	switch source.Importer {
-	case config.Packages:
-		it = ImportWithType[nix.Package]
-	case config.Options:
-		it = ImportWithType[nix.Option]
-	}
-
-	return it(ctx, logger, store, source, write)
-}
-
-func ImportWithType[I nix.Importable](
-	ctx context.Context,
-	logger *log.Logger,
-	store *storage.Store,
-	source *config.Source,
-	write *index.WriteIndex,
 ) (bool, error) {
 	return Import(
 		ctx,
-		logger.Named("importer"),
-		storage.MakeSourceExporter[I](store, source),
-		func(ctx context.Context, objects <-chan I) <-chan error {
-			return write.Import(ctx, nix.ToGenericChannel(objects))
+		imp.options.Logger,
+		storage.MakeSourceExporter(imp.options.Storage, source),
+		func(ctx context.Context, objects <-chan nix.Importable) <-chan error {
+			return imp.options.WriteIndex.Import(ctx, objects)
 		},
 	)
 }
