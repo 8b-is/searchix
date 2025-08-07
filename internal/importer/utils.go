@@ -1,13 +1,16 @@
 package importer
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"strings"
+	"sync"
 
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/nix"
 
+	"alin.ovh/x/log"
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
 	"github.com/bcicen/jstream"
@@ -60,4 +63,51 @@ func setRepoRevision(file io.ReadCloser, source *config.Source) error {
 	}
 
 	return nil
+}
+
+func pipe(
+	ctx context.Context,
+	log *log.Logger,
+	src ImportSource,
+	dst ImportDestination,
+) (bool, error) {
+	wg := sync.WaitGroup{}
+
+	wg.Add(1)
+	objects, srcErrs := src(ctx)
+
+	wg.Add(1)
+	dstErrors := dst(ctx, objects)
+
+	var hadObjectErrors bool
+	var criticalError error
+	go func() {
+		for {
+			select {
+			case err, running := <-srcErrs:
+				if !running {
+					wg.Done()
+					srcErrs = nil
+					log.Debug("processing completed")
+
+					continue
+				}
+				hadObjectErrors = true
+				log.Warn("error processing object from source", "error", err)
+			case err, running := <-dstErrors:
+				if !running {
+					wg.Done()
+					dstErrors = nil
+
+					continue
+				}
+				hadObjectErrors = true
+				log.Warn("error writing object to target", "error", err)
+			}
+		}
+	}()
+
+	wg.Wait()
+
+	return hadObjectErrors, criticalError
 }
