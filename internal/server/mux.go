@@ -359,7 +359,6 @@ func NewMux(
 		}
 		// optimisation for HTTP/3: first header sent as byte(41), not the string
 		w.Header().Add("Cache-Control", "public, max-age=86400")
-		w.Header().Add("Cache-Control", "stale-while-revalidate")
 		http.ServeFileFS(w, r, frontend.Files, asset.Filename)
 	})
 
