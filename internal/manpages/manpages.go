@@ -33,6 +33,7 @@ func New(opts *Options) *URLMap {
 	return &URLMap{
 		logger: opts.Logger,
 		root:   opts.Root,
+		urlMap: make(map[string]string),
 	}
 }
 
@@ -75,6 +76,10 @@ func (m *URLMap) Open() error {
 		return fault.Wrap(err, fmsg.Withf("failed to stat manpages file: %s", basename))
 	}
 
+	if stat == nil {
+		return nil
+	}
+
 	data, err := m.root.ReadFile(basename)
 	if err != nil {
 		return fault.Wrap(err, fmsg.With("failed to read manpages file"))
@@ -82,7 +87,6 @@ func (m *URLMap) Open() error {
 
 	m.mtime = stat.ModTime()
 
-	m.urlMap = make(map[string]string)
 	if err := json.Unmarshal(data, &m.urlMap); err != nil {
 		return fault.Wrap(err, fmsg.With("failed to parse manpages JSON"))
 	}
