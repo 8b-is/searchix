@@ -252,6 +252,7 @@ in
         serviceConfig =
           defaultServiceConfig
           // {
+            ExecStartPre = "${package}/bin/searchix-web --config ${configFile} check-config";
             ExecStart = "${package}/bin/searchix-web --config ${configFile} serve";
           }
           // lib.optionalAttrs (cfg.settings.web.port < 1024) {

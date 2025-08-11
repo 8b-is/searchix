@@ -31,7 +31,7 @@ var parser = flags.NewParser(&globalOptions, flags.HelpFlag|flags.PassDoubleDash
 func main() {
 	parser.CommandHandler = func(cmd flags.Commander, args []string) (err error) {
 		switch cmd.(type) {
-		case *PrintDefaultsOptions, *Version:
+		case *PrintDefaultsOptions, *Version, *CheckConfig:
 		default:
 			logger = log.Configure(!globalOptions.Dev)
 

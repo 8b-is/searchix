@@ -107,28 +107,31 @@ func mustLocalTime(in string) (time LocalTime) {
 	return
 }
 
+func Load(filename string, target *Config) error {
+	//nolint:forbidigo // need to read config file from anywhere
+	f, err := os.Open(filename)
+	if err != nil {
+		return fault.Wrap(err, fmsg.With("reading config failed"))
+	}
+	defer f.Close()
+
+	dec := toml.NewDecoder(f)
+	dec.DisallowUnknownFields()
+	err = dec.Decode(&target)
+
+	return fault.Wrap(err)
+}
+
 func GetConfig(filename string, log *log.Logger) (*Config, error) {
+	log.Debug("reading config", "filename", filename)
+
 	config := DefaultConfig
 	if filename != "" {
-		log.Debug("reading config", "filename", filename)
-		//nolint:forbidigo // need to read config file from anywhere
-		f, err := os.Open(filename)
-		if err != nil {
-			return nil, fault.Wrap(err, fmsg.With("reading config failed"))
-		}
-		defer f.Close()
-
-		dec := toml.NewDecoder(f)
-		dec.DisallowUnknownFields()
-		err = dec.Decode(&config)
+		err := Load(filename, &config)
 		if err != nil {
 			var tomlError *toml.DecodeError
 			if errors.As(err, &tomlError) {
 				return nil, fault.Wrap(err, fmsg.With(tomlError.Error()))
-			}
-			var missingConfigError *toml.StrictMissingError
-			if errors.As(err, &missingConfigError) {
-				return nil, fault.Newf("unexpected config: %s", missingConfigError.String())
 			}
 
 			return nil, fault.Wrap(err, fmsg.With("config error"))
