@@ -1,6 +1,24 @@
 # Changelog
 
-## [v0.2.0](https://codeberg.org/alanpearce/searchix/compare/v0.1.46...6196d25ad331bdcbd0adc3da6facbcadc9bd3a1e) (2025-08-11)
+## [v0.2.1](https://codeberg.org/alanpearce/searchix/compare/v0.2.0...d6d0bf3856234f06ca5707df6c760904255bef08) (2025-08-13)
+
+### Features
+
+- remove entities not present in current import
+  ([d6d0bf3](https://codeberg.org/alanpearce/searchix/commit/d6d0bf3856234f06ca5707df6c760904255bef08))
+- pretty-print schema metadata file
+  ([85276e9](https://codeberg.org/alanpearce/searchix/commit/85276e96acd75dce54d0295dcb728cf86f096a45))
+- store import timestamp on entities
+  ([35226fd](https://codeberg.org/alanpearce/searchix/commit/35226fd9989a28f813380e665a026caf427cb549))
+
+### Fixes
+
+- storage error
+  ([f896b68](https://codeberg.org/alanpearce/searchix/commit/f896b6861faae07485b8f7bee2e9b607527882c1))
+- error when exporting from storage to index
+  ([131ccd3](https://codeberg.org/alanpearce/searchix/commit/131ccd3edc02facbceb27c4ac44451a45bbb384e))
+
+## [v0.2.0](https://codeberg.org/alanpearce/searchix/compare/v0.1.46...v0.2.0) (2025-08-13)
 
 ### ⚠ BREAKING CHANGE
 
