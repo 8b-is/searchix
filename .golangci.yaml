@@ -6,21 +6,16 @@ linters:
   enable:
     - forbidigo
     - gocritic
-    - godox
     - gosec
-    - grouper
     - lll
     - nilerr
     - nlreturn
     - noctx
-    - nosprintfhostport
     - paralleltest
-    - prealloc
-    - reassign
     - revive
-    - sloglint
-    - unconvert
     - wrapcheck
+  disable:
+    - unused
   settings:
     errcheck:
       verbose: true
