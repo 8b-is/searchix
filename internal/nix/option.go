@@ -2,6 +2,7 @@ package nix
 
 import (
 	"io"
+	"time"
 
 	"github.com/Southclaws/fault"
 	"github.com/yuin/goldmark"
@@ -31,6 +32,7 @@ type Option struct {
 	Loc             []string
 	RelatedPackages Markdown `json:",omitempty"`
 	Type            string
+	ImportedAt      time.Time `storm:"index"`
 }
 
 func (Option) BleveType() string {

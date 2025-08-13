@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"reflect"
 	"strings"
+	"time"
 
 	"alin.ovh/x/log"
 
@@ -338,6 +339,7 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 				Maintainers:     maintainers,
 				Definition:      definition,
 				Programs:        programs,
+				ImportedAt:      time.Now(),
 			}
 		}
 	}()

@@ -4,6 +4,7 @@ import (
 	"context"
 	"io"
 	"reflect"
+	"time"
 
 	"alin.ovh/x/log"
 
@@ -180,6 +181,7 @@ func (i *OptionIngester) Process(ctx context.Context) (<-chan nix.Importable, <-
 				RelatedPackages: nix.Markdown(i.optJSON.RelatedPackages),
 				Loc:             i.optJSON.Loc,
 				Type:            i.optJSON.Type,
+				ImportedAt:      time.Now(),
 			}
 		}
 	}()

@@ -1,5 +1,7 @@
 package nix
 
+import "time"
+
 type Package struct {
 	Name            string
 	Attribute       string `storm:"id"`
@@ -16,6 +18,7 @@ type Package struct {
 	PackageSet      string
 	Platforms       []string
 	Version         string
+	ImportedAt      time.Time `storm:"index"`
 }
 
 type License struct {

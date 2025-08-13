@@ -11,7 +11,7 @@ import (
 	"github.com/Southclaws/fault/fmsg"
 )
 
-const CurrentSchemaVersion = 8
+const CurrentSchemaVersion = 9
 
 type SourceMeta struct {
 	IndexedAt time.Time
