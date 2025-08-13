@@ -299,6 +299,20 @@ func (i *WriteIndex) Import(
 	ctx context.Context,
 	objects <-chan nix.Importable,
 ) <-chan error {
+	return i.WithBatch(ctx, objects, func(batch *bleve.Batch, obj nix.Importable) error {
+		if err := batch.Index(nix.GetKey(obj), obj); err != nil {
+			return fault.Wrap(err, fmsg.Withf("could not index object %s", obj.GetName()))
+		}
+
+		return nil
+	})
+}
+
+func (i *WriteIndex) WithBatch(
+	ctx context.Context,
+	objects <-chan nix.Importable,
+	processor func(batch *bleve.Batch, obj nix.Importable) error,
+) <-chan error {
 	var err error
 	errs := make(chan error)
 
@@ -311,14 +325,14 @@ func (i *WriteIndex) Import(
 		for obj := range objects {
 			select {
 			case <-ctx.Done():
-				i.log.Warn("import aborted")
+				i.log.Warn("batch process aborted")
 
 				break outer
 			default:
 			}
 
-			if err := batch.Index(nix.GetKey(obj), obj); err != nil {
-				errs <- fault.Wrap(err, fmsg.Withf("could not index object %s", obj.GetName()))
+			if err := processor(batch, obj); err != nil {
+				errs <- fault.Wrap(err, fmsg.With("could not process object"))
 
 				continue
 			}
