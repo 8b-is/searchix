@@ -1,8 +1,58 @@
 # Changelog
 
-## [v0.1.46](https://codeberg.org/alanpearce/searchix/compare/v0.1.45...465a9a8d03878f9b8f22424d679080fb53317d6d) (2025-07-07)
+## [v0.2.0](https://codeberg.org/alanpearce/searchix/compare/v0.1.46...6196d25ad331bdcbd0adc3da6facbcadc9bd3a1e) (2025-08-11)
+
+### ⚠ BREAKING CHANGE
+
+- searchix-web requires `serve` argument
 
 ### Features
+
+- add check-config command
+  ([6196d25](https://codeberg.org/alanpearce/searchix/commit/6196d25ad331bdcbd0adc3da6facbcadc9bd3a1e))
+- split storage import and indexing
+  ([40d106a](https://codeberg.org/alanpearce/searchix/commit/40d106a50be7fa87739e82c87c161db8e6a69b12))
+- store data separate from search index
+  ([520dcca](https://codeberg.org/alanpearce/searchix/commit/520dcca2755dbbab13ceebdc53d03beec8b94533))
+- add offline flag to reindex (mostly for dev)
+  ([21e9e77](https://codeberg.org/alanpearce/searchix/commit/21e9e778cc6be3c8717cd4286bedd17f2b22282a))
+- improve tracking and display of import runs
+  ([faf67ad](https://codeberg.org/alanpearce/searchix/commit/faf67ad3fe2514492c6e0b0cf5361d5b44275a06))
+- add --fetch action to populate data/sources
+  ([001c5b4](https://codeberg.org/alanpearce/searchix/commit/001c5b4f4e6dcf0110504211d3f1298d5e6abc48))
+- make downloaded filenames consistent
+  ([a49d405](https://codeberg.org/alanpearce/searchix/commit/a49d405f81ed9b872ae638832f3a1a5f2339780c))
+- store fetched files in data directory
+  ([bdb5a54](https://codeberg.org/alanpearce/searchix/commit/bdb5a54c661407c39668096074a1f4a57898eb77))
+- limit file operations using os.Root
+  ([1d518f4](https://codeberg.org/alanpearce/searchix/commit/1d518f42e04712c84dfc168cc7a286aabb56e2ed))
+- switch from errors to fault
+  ([3dfbd8d](https://codeberg.org/alanpearce/searchix/commit/3dfbd8dd7212f74622ba4892efb34bf3487da09b))
+
+### Fixes
+
+- update search index as part of update timer
+  ([a1bbe1c](https://codeberg.org/alanpearce/searchix/commit/a1bbe1c0565acf322ca9af88876b9d0c8ee52ab3))
+- styles broken after updates due to stale cache/hash mismatch
+  ([450ff2d](https://codeberg.org/alanpearce/searchix/commit/450ff2d51460c2f1e8b0679726d3a26cd8762359))
+- handle missing manpage URL map without aborting
+  ([a34ba86](https://codeberg.org/alanpearce/searchix/commit/a34ba86c2c899bbf2902c4c99b817a9692c3294f))
+- set date of files copied from nix store
+  ([762d97b](https://codeberg.org/alanpearce/searchix/commit/762d97b5cca3a5b1605f34bff57e785b93833450))
+- don't try to parse an empty last-modified header
+  ([cee1276](https://codeberg.org/alanpearce/searchix/commit/cee12761d4ab83d717452e22a34708161f722b1f))
+- error saving metadata when re-indexing
+  ([3e92836](https://codeberg.org/alanpearce/searchix/commit/3e928369c3af69d0ef24a2f5d20c938689b15aa1))
+- don't log and exit on graceful shutdown timeout
+  ([1db432a](https://codeberg.org/alanpearce/searchix/commit/1db432a56d503d60ccfafadfe6494f64cb8c325c))
+- import package even with incorrect 'homePage' casing
+  ([4c66828](https://codeberg.org/alanpearce/searchix/commit/4c6682878224589ec6c8b14cbe03eefb61e4d328))
+- re-enable margin-top for headers in full page view
+  ([7b08d54](https://codeberg.org/alanpearce/searchix/commit/7b08d540424f61cdf1d379f7d60e15641822c86e))
+
+### [v0.1.46](https://codeberg.org/alanpearce/searchix/compare/v0.1.45...v0.1.46) (2025-07-07)
+
+#### Features
 
 - enable advanced query string syntax
   ([465a9a8](https://codeberg.org/alanpearce/searchix/commit/465a9a8d03878f9b8f22424d679080fb53317d6d))
