@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"sync"
+	"syscall"
 
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
@@ -22,7 +23,7 @@ import (
 type ServeOptions struct{}
 
 func (opts *ServeOptions) Execute(_ []string) (err error) {
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
 	root, err := file.CreateAndOpenRoot(cfg.DataPath)
