@@ -27,7 +27,7 @@ func MarkImportFinished() {
 	Job.StartedAt = time.Time{}
 }
 
-func MarkLastFetch(meta *index.Meta) {
+func MarkLastRun(meta *index.Meta) {
 	meta.LastImport = Job.LastRun
 }
 
@@ -81,8 +81,19 @@ func (imp *Importer) StartUpdateTimer(
 			imp.options.Logger.Info("indexing complete")
 		}
 
+		err = imp.Prune(ctx)
+		if err != nil {
+			imp.options.Logger.Warn("error pruning index", "error", err)
+		}
+
 		cancel()
 		MarkImportFinished()
+
+		MarkLastRun(imp.options.WriteIndex.Meta)
+		err = imp.options.WriteIndex.SaveMeta()
+		if err != nil {
+			imp.options.Logger.Error("error saving metadata", "error", err)
+		}
 
 		nextRun = nextUTCOccurrenceOfTime(imp.config.Importer.UpdateAt)
 		SetNextRun(nextRun)

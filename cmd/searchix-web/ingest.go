@@ -75,9 +75,18 @@ func (opts *IngestOptions) Execute(_ []string) error {
 	}
 
 	if !exists || opts.Replace || opts.Fetch {
+		importer.MarkImportStarted()
+
 		err = imp.Fetch(ctx, true, opts.Fetch && !opts.Replace, nil)
 		if err != nil {
 			return fault.Wrap(err, fmsg.With("Failed to start importer"))
+		}
+
+		importer.MarkImportFinished()
+		importer.MarkLastRun(write.Meta)
+		err = write.SaveMeta()
+		if err != nil {
+			return fault.Wrap(err, fmsg.With("Failed to save index metadata"))
 		}
 	}
 
@@ -85,6 +94,13 @@ func (opts *IngestOptions) Execute(_ []string) error {
 		err = imp.Index(ctx)
 		if err != nil {
 			return fault.Wrap(err, fmsg.With("Failed to index data"))
+		}
+	}
+
+	if opts.Replace || opts.Reindex {
+		err = imp.Prune(ctx)
+		if err != nil {
+			return fault.Wrap(err, fmsg.With("Failed to prune index"))
 		}
 	}
 

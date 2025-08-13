@@ -22,6 +22,10 @@ linters:
     - unconvert
     - wrapcheck
   settings:
+    errcheck:
+      verbose: true
+      exclude-functions:
+        - (github.com/asdine/storm/v3.Tx).Rollback
     forbidigo:
       forbid:
         - pattern: ^(file)?path.Join$

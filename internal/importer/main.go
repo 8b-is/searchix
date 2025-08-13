@@ -10,17 +10,19 @@ import (
 	"time"
 
 	"alin.ovh/x/log"
+	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
+	"github.com/asdine/storm/v3/q"
+	"github.com/blevesearch/bleve/v2"
 
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/fetcher"
 	"alin.ovh/searchix/internal/file"
 	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/manpages"
+	"alin.ovh/searchix/internal/nix"
 	"alin.ovh/searchix/internal/programs"
 	"alin.ovh/searchix/internal/storage"
-
-	"github.com/Southclaws/fault"
-	"github.com/Southclaws/fault/fmsg"
 )
 
 type Options struct {
@@ -86,12 +88,6 @@ func (imp *Importer) Fetch(
 		}
 	}
 
-	MarkLastFetch(meta)
-	err := imp.options.WriteIndex.SaveMeta()
-	if err != nil {
-		return fault.Wrap(err, fmsg.With("failed to save metadata"))
-	}
-
 	return nil
 }
 
@@ -150,6 +146,93 @@ func (imp *Importer) EnsureSourcesIndexed(
 				}
 			}
 		}
+	}
+
+	return nil
+}
+
+func (imp *Importer) Prune(ctx context.Context) error {
+	for _, source := range imp.config.Importer.Sources {
+		err := imp.PruneSource(ctx, source)
+		if err != nil {
+			imp.options.Logger.Error("Failed to prune source", "source", source.Key, "error", err)
+		}
+	}
+
+	return nil
+}
+
+func (imp *Importer) PruneSource(ctx context.Context, source *config.Source) error {
+	store := imp.options.Storage
+	write := imp.options.WriteIndex
+
+	tx, err := store.WithBatch(true).From(source.Key).Begin(true)
+	if err != nil {
+		return fault.Wrap(err, fmsg.With("Failed to begin transaction"))
+	}
+	defer tx.Rollback()
+
+	cutoff := write.Meta.LastImport.StartedAt
+	imp.options.Logger.Debug("searching for old entities", "cutoff", cutoff.Format(time.RFC3339))
+
+	query := tx.Select(q.Lt("ImportedAt", cutoff))
+
+	var obj nix.Importable
+	switch source.Importer {
+	case config.Options:
+		obj = new(nix.Option)
+	case config.Packages:
+		obj = new(nix.Package)
+	}
+	count, err := query.Count(obj)
+	if err != nil {
+		return fault.Wrap(err, fmsg.With("failed to retrieve entities for pruning"))
+	}
+
+	imp.options.Logger.Debug(
+		"pruning",
+		"type",
+		source.Importer.String(),
+		"source",
+		source.Key,
+		"count",
+		count,
+	)
+
+	if count == 0 {
+		return nil
+	}
+
+	objs := make(chan nix.Importable, 1)
+	errs := write.WithBatch(ctx, objs, func(batch *bleve.Batch, obj nix.Importable) error {
+		batch.Delete(obj.GetName())
+
+		return nil
+	})
+
+	go func() {
+		for err := range errs {
+			imp.options.Logger.Error("failed to prune old entities", "error", err)
+		}
+	}()
+
+	err = query.Each(obj, func(record any) error {
+		objs <- record.(nix.Importable)
+
+		return nil
+	})
+	if err != nil {
+		return fault.Wrap(err, fmsg.With("failed to prune old entities from index"))
+	}
+
+	err = query.Delete(obj)
+	if err != nil {
+		return fault.Wrap(err, fmsg.With("failed to prune old entities from storage"))
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return fault.Wrap(err, fmsg.With("Failed to commit transaction"))
 	}
 
 	return nil
