@@ -86,7 +86,7 @@ func (i *Meta) IsSchemaOutdated() bool {
 
 func (i *Meta) Save() error {
 	i.SchemaVersion = CurrentSchemaVersion
-	j, err := json.Marshal(i.data)
+	j, err := json.MarshalIndent(i.data, "", "  ")
 	if err != nil {
 		return fault.Wrap(err, fmsg.With("could not prepare index metadata for saving"))
 	}
