@@ -96,7 +96,7 @@ func Page(tdata TemplateData, children ...g.Node) g.Node {
 								g.Text("Searchix "),
 								A(
 									Href(
-										"https://codeberg.org/alanpearce/searchix/src/tag/"+config.Version+"/CHANGELOG.md",
+										"https://codeberg.org/alanpearce/searchix/src/tag/v"+config.Version+"/CHANGELOG.md",
 									),
 									TitleAttr("View changelog"),
 									g.Text(config.Version),

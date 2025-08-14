@@ -81,7 +81,7 @@ func (h *Fetcher) FetchFileIfNeeded(
 		)
 	}
 
-	req.Header.Set("User-Agent", fmt.Sprintf("Searchix %s", config.Version))
+	req.Header.Set("User-Agent", fmt.Sprintf("Searchix v%s", config.Version))
 
 	if ifModifiedSince != "" {
 		req.Header.Set("If-Modified-Since", ifModifiedSince)

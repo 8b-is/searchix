@@ -91,6 +91,7 @@
           );
           buildVersion = pkgs.testers.testVersion {
             package = packages.default;
+            command = "searchix-web version";
           };
         };
       }

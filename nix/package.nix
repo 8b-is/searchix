@@ -44,7 +44,7 @@ buildGoApplication {
     "-s"
     "-w"
     "-X"
-    "alin.ovh/searchix/internal/config.Version=v${version}"
+    "alin.ovh/searchix/internal/config.Version=${version}"
   ];
 
   postInstall = ''
