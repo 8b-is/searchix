@@ -30,7 +30,7 @@ build:
 	nix build .#
 
 generate-defaults:
-	wgo run --exit ./cmd/searchix-web defaults > defaults.toml
+	go run ./cmd/searchix-web defaults > defaults.toml
 
 precommit:
 	nix-build -A pre-commit-check
@@ -61,10 +61,10 @@ release: clean-workdir changelog update-nix-package-version
 run: dev
 
 dev:
-	modd
+	watchexec --restart --exts go,toml,mod -- go run ./cmd/searchix-web --config config.toml serve --dev
 
 ingest *flags:
-	wgo run --exit ./cmd/searchix-web --config config.toml ingest --dev {{ flags }}
+	go run ./cmd/searchix-web --config config.toml ingest --dev {{ flags }}
 
 fetch: (ingest "--fetch")
 

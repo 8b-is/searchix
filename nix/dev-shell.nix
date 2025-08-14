@@ -15,11 +15,10 @@ mkShell {
       goEnv
 
       sd
-      modd
+      watchexec
       brotli
       boltbrowser
       bleve
-      wgo
       gomod2nix
     ]
     ++ pre-commit-check.enabledPackages;

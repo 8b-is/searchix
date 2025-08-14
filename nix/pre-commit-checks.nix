@@ -75,7 +75,7 @@
       entry =
         let
           script = pkgs.writeShellScript "generate-default-config" ''
-            ${pkgs.wgo}/bin/wgo run -exit ./cmd/searchix-web defaults > defaults.toml
+            ${pkgs.go}/bin/go run ./cmd/searchix-web defaults > defaults.toml
           '';
         in
         builtins.toString script;
