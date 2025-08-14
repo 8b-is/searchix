@@ -3,7 +3,10 @@
   src = ../.;
   hooks = {
     gotest.enable = false;
-    golangci-lint.enable = true;
+    golangci-lint = {
+      enable = true;
+      extraPackages = [ pkgs.go ];
+    };
 
     statix = {
       enable = true;
