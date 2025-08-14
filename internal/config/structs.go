@@ -29,6 +29,7 @@ type Web struct {
 	ExtraHeadHTML         string            `comment:"Content to add to HTML <head>. Can be used to override styling, add scripts, etc."`
 	Headers               map[string]string `comment:"Extra headers to send with HTTP requests"`
 	LogRequests           bool              `comment:"Whether to log incoming HTTP requests"`
+	SearchTimeout         Duration          `comment:"Timeout for search requests"`
 }
 
 type Importer struct {

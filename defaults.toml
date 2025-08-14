@@ -19,6 +19,8 @@ Environment = 'development'
 ExtraHeadHTML = ''
 # Whether to log incoming HTTP requests
 LogRequests = true
+# Timeout for search requests
+SearchTimeout = '1s'
 
 # Content-Security-Policy header to send with requests. Should only need changing if ExtraHeadHTML is used.
 [Web.ContentSecurityPolicy]

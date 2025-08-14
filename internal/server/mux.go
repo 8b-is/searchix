@@ -13,7 +13,6 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"time"
 
 	"alin.ovh/searchix/frontend"
 	"alin.ovh/searchix/internal/components"
@@ -82,7 +81,6 @@ func NewMux(
 	top := http.NewServeMux()
 	mux := sentryhttp.NewServeMux()
 
-	const searchTimeout = 1 * time.Second
 	createSearchHandler := func(importerType config.ImporterType) func(http.ResponseWriter, *http.Request) {
 		return func(w http.ResponseWriter, r *http.Request) {
 			var err error
@@ -123,7 +121,7 @@ func NewMux(
 				}
 				page := pagination.New(pageNumber, pageSize)
 
-				ctx, cancel := context.WithTimeout(r.Context(), searchTimeout)
+				ctx, cancel := context.WithTimeout(r.Context(), cfg.Web.SearchTimeout.Duration)
 				results, err := index.Search(ctx, source, qs, page.From, page.Size)
 				cancel()
 

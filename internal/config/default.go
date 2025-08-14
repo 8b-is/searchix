@@ -47,7 +47,8 @@ var DefaultConfig = Config{
 			"x-content-type-options": "nosniff",
 			"x-frame-options":        "DENY",
 		},
-		LogRequests: true,
+		LogRequests:   true,
+		SearchTimeout: Duration{1 * time.Second},
 	},
 	Importer: &Importer{
 		LowMemory: false,
