@@ -26,6 +26,11 @@ fix:
 test:
 	go test ./...
 
+check-flake:
+	nix flake check
+
+ci: check-flake checkformat test
+
 build:
 	nix build .#
 
