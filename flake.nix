@@ -17,7 +17,7 @@
     };
     treefmt-nix.url = "github:numtide/treefmt-nix";
     simple-css = {
-      url = "https://raw.githubusercontent.com/kevquirk/simple.css/v2.3.7/simple.css";
+      url = "github:kevquirk/simple.css";
       flake = false;
     };
   };
@@ -68,10 +68,10 @@
         };
       in
       rec {
-        packages.css = pkgs.concatText "simple.css" [ simple-css ];
+        packages.css = pkgs.concatText "simple.css" [ "${simple-css}/simple.css" ];
         packages.default = pkgs.callPackage ./nix/package.nix {
           inherit (gomod2nix.legacyPackages.${system}) buildGoApplication;
-          css = simple-css;
+          css = "${simple-css}/simple.css";
         };
         formatter = treefmtEval.config.build.wrapper;
         devShells.default = pkgs.callPackage ./nix/dev-shell.nix {

@@ -145,13 +145,17 @@
     "simple-css": {
       "flake": false,
       "locked": {
-        "narHash": "sha256-HUsHNAzjIxnM/octNykCIHSL1pq5MircDf+aJLEeO9s=",
-        "type": "file",
-        "url": "https://raw.githubusercontent.com/kevquirk/simple.css/v2.3.7/simple.css"
+        "lastModified": 1754922658,
+        "narHash": "sha256-2v4Znz5lvyM7LWYVRlLUzzW8QB6se+eIYOJnuLYtx9Q=",
+        "owner": "kevquirk",
+        "repo": "simple.css",
+        "rev": "2c23642b9751922b80a80239910f2c11af52e716",
+        "type": "github"
       },
       "original": {
-        "type": "file",
-        "url": "https://raw.githubusercontent.com/kevquirk/simple.css/v2.3.7/simple.css"
+        "owner": "kevquirk",
+        "repo": "simple.css",
+        "type": "github"
       }
     },
     "systems": {
