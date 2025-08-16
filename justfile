@@ -29,7 +29,9 @@ test:
 check-flake:
 	nix flake check
 
-ci: check-flake checkformat test
+ci: && check-flake checkformat test
+	go mod download
+	gomod2nix import
 
 build:
 	nix build .#
