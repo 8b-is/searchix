@@ -68,7 +68,7 @@
         };
       in
       rec {
-        packages.css = "${simple-css}";
+        packages.css = pkgs.concatText "simple.css" [ simple-css ];
         packages.default = pkgs.callPackage ./nix/package.nix {
           inherit (gomod2nix.legacyPackages.${system}) buildGoApplication;
           css = simple-css;
