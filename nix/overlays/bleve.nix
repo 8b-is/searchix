@@ -17,10 +17,10 @@ buildGoModule rec {
     owner = "blevesearch";
     repo = "bleve";
     rev = version;
-    hash = "sha256-PObwFsaQZKvkdQywIMKbp9cWVuqYFAa0P7rpeP7JSxU=";
+    hash = "sha256-QycDP5IRuZsLo0cDbsQoX4Qb4yjsV3PDns96+dMajoE=";
   };
 
-  vendorHash = "sha256-6C8EA2XCxP6KFAdDzWhqa26UpfW5YBEeWsSPQHxhFIU=";
+  vendorHash = "sha256-RRIDViTRRKSN6QJhUSvTCoXJ2R5E3DWT4ygk9U/Q1dA=";
 
   subPackages = [ "cmd/bleve" ];
 
