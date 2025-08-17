@@ -117,7 +117,7 @@ func (s *Store) MakeSourceImporter(
 				}
 
 				if i%BatchSize == 0 {
-					s.log.Info("imported", "count", i)
+					s.log.Debug("imported", "count", i)
 					err := tx.Commit()
 					if err != nil {
 						errs <- fault.Wrap(err, fmsg.With("failed to commit transaction"))
