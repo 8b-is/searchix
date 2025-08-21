@@ -11,7 +11,6 @@ import (
 	"github.com/asdine/storm/v3"
 	"github.com/asdine/storm/v3/codec/gob"
 	"go.etcd.io/bbolt"
-	"go.uber.org/zap"
 
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/file"
@@ -37,11 +36,6 @@ func New(opts *Options) (*Store, error) {
 		storm.Codec(gob.Codec),
 		storm.BoltOptions(0o600, &bbolt.Options{
 			Timeout: 1 * time.Second,
-			Logger: Logger{
-				opts.Logger.Named("bolt").GetLogger().Sugar().WithOptions(
-					zap.IncreaseLevel(zap.InfoLevel),
-				),
-			},
 		}),
 	)
 	if err != nil {
