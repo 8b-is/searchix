@@ -72,14 +72,14 @@ func (p *DB) Instantiate(ctx context.Context) error {
 	outPath := strings.Trim(strings.TrimSpace(string(out)), "\"")
 	p.logger.Debug("got output path", "outputPath", outPath)
 
-	_, err = p.db.ExecContext(ctx, "ATTACH DATABASE ? AS input", outPath)
-	if err != nil {
-		return fault.Wrap(err, fmsg.With("failed to attach nix-store programs database"))
-	}
-
 	_, err = p.db.ExecContext(ctx, "DROP TABLE IF EXISTS programs")
 	if err != nil {
 		return fault.Wrap(err, fmsg.With("failed to drop programs table"))
+	}
+
+	_, err = p.db.ExecContext(ctx, "ATTACH DATABASE ? AS input", outPath)
+	if err != nil {
+		return fault.Wrap(err, fmsg.With("failed to attach nix-store programs database"))
 	}
 
 	_, err = p.db.ExecContext(ctx, `
