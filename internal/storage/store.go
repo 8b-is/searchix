@@ -186,7 +186,7 @@ func MakeSourceExporter[T nix.Importable](
 	source *config.Source,
 ) func(context.Context) (<-chan nix.Importable, <-chan error) {
 	return func(_ context.Context) (<-chan nix.Importable, <-chan error) {
-		results := make(chan nix.Importable)
+		results := make(chan nix.Importable, 1)
 		errs := make(chan error)
 
 		go func() {
