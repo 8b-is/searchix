@@ -1,8 +1,24 @@
 # Changelog
 
-## [v0.2.1](https://codeberg.org/alanpearce/searchix/compare/v0.2.0...d6d0bf3856234f06ca5707df6c760904255bef08) (2025-08-13)
+## [v0.2.2](https://codeberg.org/alanpearce/searchix/compare/v0.2.1...3be8a83d4c44f7e21277abde2da69b54111c1c1a) (2025-08-21)
 
 ### Features
+
+- disable storm internal logging
+  ([180d4cf](https://codeberg.org/alanpearce/searchix/commit/180d4cf8780230e5af64e1750a2b2e4b87d519d3))
+- make web search timeout configurable
+  ([8a1972a](https://codeberg.org/alanpearce/searchix/commit/8a1972abb4b429bd62b47cb44e3219d722919faf))
+
+### Fixes
+
+- error setting up programs DB
+  ([3be8a83](https://codeberg.org/alanpearce/searchix/commit/3be8a83d4c44f7e21277abde2da69b54111c1c1a))
+- enable graceful shutdown
+  ([ff3d5a3](https://codeberg.org/alanpearce/searchix/commit/ff3d5a36af52cf8bb06bf9c0e3a519536e2fa2f2))
+
+### [v0.2.1](https://codeberg.org/alanpearce/searchix/compare/v0.2.0...v0.2.1) (2025-08-13)
+
+#### Features
 
 - remove entities not present in current import
   ([d6d0bf3](https://codeberg.org/alanpearce/searchix/commit/d6d0bf3856234f06ca5707df6c760904255bef08))
@@ -11,7 +27,7 @@
 - store import timestamp on entities
   ([35226fd](https://codeberg.org/alanpearce/searchix/commit/35226fd9989a28f813380e665a026caf427cb549))
 
-### Fixes
+#### Fixes
 
 - storage error
   ([f896b68](https://codeberg.org/alanpearce/searchix/commit/f896b6861faae07485b8f7bee2e9b607527882c1))
