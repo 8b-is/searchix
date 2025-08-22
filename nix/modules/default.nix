@@ -102,6 +102,19 @@ in
       description = "Environment variables passed to the service process.";
     };
 
+    logLevel = mkOption {
+      type =
+        with types;
+        enum [
+          "error"
+          "warn"
+          "info"
+          "debug"
+        ];
+      description = "Only log messages with the given severity or above.";
+      default = "info";
+    };
+
     settings = mkOption {
       default = { };
       type = types.submodule {
@@ -111,19 +124,6 @@ in
             type = types.str;
             description = "Where to store search index and other data.";
             default = "${cfg.homeDir}/data";
-          };
-
-          logLevel = mkOption {
-            type =
-              with types;
-              enum [
-                "error"
-                "warn"
-                "info"
-                "debug"
-              ];
-            description = "Only log messages with the given severity or above.";
-            default = "info";
           };
 
           web = mkOption {
@@ -249,7 +249,7 @@ in
         wantedBy = [ "multi-user.target" ];
         path = with pkgs; [ nix ];
         environment = {
-          LOG_LEVEL = cfg.settings.logLevel;
+          LOG_LEVEL = cfg.logLevel;
         }
         // cfg.environment;
         serviceConfig =
