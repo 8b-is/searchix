@@ -248,7 +248,10 @@ in
         description = "Searchix Nix option search";
         wantedBy = [ "multi-user.target" ];
         path = with pkgs; [ nix ];
-        inherit (cfg) environment;
+        environment = {
+          LOG_LEVEL = cfg.settings.logLevel;
+        }
+        // cfg.environment;
         serviceConfig =
           defaultServiceConfig
           // {

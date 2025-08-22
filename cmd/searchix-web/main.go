@@ -39,8 +39,6 @@ func main() {
 			if err != nil {
 				return fault.Wrap(err, fmsg.With("Failed to parse config file"))
 			}
-
-			log.SetLevel(cfg.LogLevel)
 		}
 
 		if globalOptions.CPUProfile != "" {
