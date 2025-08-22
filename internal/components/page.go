@@ -99,7 +99,7 @@ func Page(tdata TemplateData, children ...g.Node) g.Node {
 										"https://codeberg.org/alanpearce/searchix/src/tag/v"+config.Version+"/CHANGELOG.md",
 									),
 									TitleAttr("View changelog"),
-									g.Text(config.Version),
+									g.Textf("v%s", config.Version),
 								),
 								g.Text(" "),
 							}),
