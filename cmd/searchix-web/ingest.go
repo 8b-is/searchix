@@ -91,7 +91,7 @@ func (opts *IngestOptions) Execute(_ []string) error {
 		}
 	}
 
-	if !write.Exists() || updateStore {
+	if !write.Exists() || opts.Reindex || updateStore {
 		err = imp.Index(ctx)
 		if err != nil {
 			return fault.Wrap(err, fmsg.With("Failed to index data"))
