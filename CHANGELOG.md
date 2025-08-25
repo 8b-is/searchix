@@ -1,15 +1,29 @@
 # Changelog
 
-## [v0.2.3](https://codeberg.org/alanpearce/searchix/compare/v0.2.2...832214d72d377f7c02146a77528b6e9c6bb393c8) (2025-08-25)
+## [v0.2.4](https://codeberg.org/alanpearce/searchix/compare/v0.2.3...6589e14eda11b9758957278bacbbf8b280252536) (2025-08-25)
 
 ### Features
+
+- **storage:** respect --replace flag
+  ([abef2e5](https://codeberg.org/alanpearce/searchix/commit/abef2e5b0db37c771464469c3f83890b4cc0a297))
+- improve error logging during import
+  ([bc04964](https://codeberg.org/alanpearce/searchix/commit/bc04964c3405f9d50bbad7193b61ed62d9e64498))
+
+### Fixes
+
+- not re-indexing despite --reindex argument
+  ([5afd91c](https://codeberg.org/alanpearce/searchix/commit/5afd91c0b78982e8d1dfd41a911cf85d108979d9))
+
+### [v0.2.3](https://codeberg.org/alanpearce/searchix/compare/v0.2.2...v0.2.3) (2025-08-25)
+
+#### Features
 
 - re- ingest/index on SIGUSR1/2
   ([832214d](https://codeberg.org/alanpearce/searchix/commit/832214d72d377f7c02146a77528b6e9c6bb393c8))
 - listen for SIGHUP if running in a terminal
   ([15a5b32](https://codeberg.org/alanpearce/searchix/commit/15a5b3210a073c83dbd1ace8969df83c53dac755))
 
-### Fixes
+#### Fixes
 
 - always re-index if storage is (re-)created
   ([12a29a5](https://codeberg.org/alanpearce/searchix/commit/12a29a55fe895a964d8d317857ee7fb87d4071f1))
