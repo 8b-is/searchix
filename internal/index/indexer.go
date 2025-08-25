@@ -171,17 +171,10 @@ func createIndexMapping() (mapping.IndexMapping, error) {
 	return indexMapping, nil
 }
 
-func createIndex(root *file.Root, options *Options) (bleve.Index, error) {
+func createIndex(root *file.Root, kvconfig map[string]any) (bleve.Index, error) {
 	indexMapping, err := createIndexMapping()
 	if err != nil {
 		return nil, err
-	}
-	kvconfig := make(map[string]any)
-	if options.LowMemory {
-		kvconfig = map[string]any{
-			"PersisterNapTimeMSec":      1000,
-			"PersisterNapUnderNumFiles": 500,
-		}
 	}
 
 	//nolint:forbidigo // external package
@@ -232,6 +225,19 @@ func OpenOrCreate(options *Options) (*ReadIndex, *WriteIndex, error) {
 			err, fmsg.Withf("could not check if index exists at path %s", indexBaseName))
 	}
 
+	kvconfig := map[string]any{
+		"scorchPersisterOptions": map[string]any{
+			"NumPersisterWorkers":           8,
+			"MaxSizeInMemoryMergePerWorker": 128 * 1024 * 1024,
+		},
+	}
+	if options.LowMemory {
+		kvconfig = map[string]any{
+			"PersisterNapTimeMSec":      1000,
+			"PersisterNapUnderNumFiles": 500,
+		}
+	}
+
 	var idx bleve.Index
 	var meta *Meta
 	if !exists || options.Force {
@@ -241,7 +247,7 @@ func OpenOrCreate(options *Options) (*ReadIndex, *WriteIndex, error) {
 				return nil, nil, err
 			}
 		}
-		idx, err = createIndex(root, options)
+		idx, err = createIndex(root, kvconfig)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -255,7 +261,7 @@ func OpenOrCreate(options *Options) (*ReadIndex, *WriteIndex, error) {
 		var baseErr error
 		//nolint:forbidigo // external package
 		indexPath := root.JoinPath(indexBaseName)
-		idx, baseErr = bleve.Open(indexPath)
+		idx, baseErr = bleve.OpenUsing(indexPath, kvconfig)
 		if baseErr != nil {
 			return nil, nil, fault.Wrap(baseErr, fmsg.Withf("could not open index at path %s", indexPath))
 		}
