@@ -37,6 +37,9 @@ build:
 generate-defaults:
 	go run ./cmd/searchix-web defaults > defaults.toml
 
+check-config:
+	go run ./cmd/searchix-web check-config --config config.toml
+
 precommit:
 	nix-build -A pre-commit-check
 
