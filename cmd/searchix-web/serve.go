@@ -10,6 +10,7 @@ import (
 
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
+	"golang.org/x/term"
 
 	"alin.ovh/searchix/internal/file"
 	"alin.ovh/searchix/internal/importer"
@@ -23,7 +24,12 @@ import (
 type ServeOptions struct{}
 
 func (opts *ServeOptions) Execute(_ []string) (err error) {
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	signals := []os.Signal{os.Interrupt, syscall.SIGTERM}
+	if term.IsTerminal(int(os.Stdout.Fd())) {
+		signals = append(signals, syscall.SIGHUP)
+	}
+
+	ctx, cancel := signal.NotifyContext(context.Background(), signals...)
 	defer cancel()
 
 	root, err := file.CreateAndOpenRoot(cfg.DataPath)
