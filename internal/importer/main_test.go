@@ -52,7 +52,7 @@ func BenchmarkImporterLowMemory(b *testing.B) {
 			Logger: logger.Named("manpages"),
 			Root:   tmp,
 		}),
-		Offline: true,
+		Offline: false,
 		Root:    tmp,
 		Storage: store,
 	})
