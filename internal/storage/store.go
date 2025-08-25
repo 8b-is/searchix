@@ -20,8 +20,9 @@ import (
 var BatchSize = 10000
 
 type Options struct {
-	Root   *file.Root
-	Logger *log.Logger
+	Replace bool
+	Root    *file.Root
+	Logger  *log.Logger
 }
 
 type Store struct {
@@ -36,6 +37,15 @@ func New(opts *Options) (*Store, error) {
 	exists, err := opts.Root.Exists(filename)
 	if err != nil {
 		return nil, fault.Wrap(err, fmsg.With("failed to check if file exists"))
+	}
+
+	if opts.Replace && exists {
+		err = opts.Root.Remove(filename)
+		if err != nil {
+			return nil, fault.Wrap(err, fmsg.With("failed to remove existing file"))
+		}
+
+		exists = false
 	}
 
 	//nolint:forbidigo // external package
