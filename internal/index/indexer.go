@@ -226,6 +226,7 @@ func OpenOrCreate(options *Options) (*ReadIndex, *WriteIndex, error) {
 	}
 
 	kvconfig := map[string]any{
+		"unsafe_batch": true,
 		"scorchPersisterOptions": map[string]any{
 			"NumPersisterWorkers":           8,
 			"MaxSizeInMemoryMergePerWorker": 128 * 1024 * 1024,

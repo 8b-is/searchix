@@ -17,7 +17,7 @@ import (
 	"alin.ovh/searchix/internal/nix"
 )
 
-var BatchSize = 10000
+var BatchSize = 50000
 
 type Options struct {
 	Replace   bool
@@ -65,7 +65,7 @@ func New(opts *Options) (*Store, error) {
 	}
 
 	if !opts.LowMemory {
-		bb.Bolt.AllocSize = 100 * 1024 * 1024
+		bb.Bolt.AllocSize = 256 * 1024 * 1024
 	}
 
 	return &Store{
