@@ -85,6 +85,10 @@ func pipe(
 		for {
 			select {
 			case err, running := <-srcErrs:
+				if err != nil {
+					hadObjectErrors = true
+					log.Warn("error processing object from source", "error", err)
+				}
 				if !running {
 					wg.Done()
 					srcErrs = nil
@@ -92,17 +96,18 @@ func pipe(
 
 					continue
 				}
-				hadObjectErrors = true
-				log.Warn("error processing object from source", "error", err)
 			case err, running := <-dstErrors:
+				if err != nil {
+					hadObjectErrors = true
+					log.Warn("error writing object to target", "error", err)
+
+				}
 				if !running {
 					wg.Done()
 					dstErrors = nil
 
 					continue
 				}
-				hadObjectErrors = true
-				log.Warn("error writing object to target", "error", err)
 			}
 		}
 	}()
