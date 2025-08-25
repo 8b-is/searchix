@@ -20,9 +20,10 @@ import (
 var BatchSize = 10000
 
 type Options struct {
-	Replace bool
-	Root    *file.Root
-	Logger  *log.Logger
+	Replace   bool
+	LowMemory bool
+	Root      *file.Root
+	Logger    *log.Logger
 }
 
 type Store struct {
@@ -53,11 +54,18 @@ func New(opts *Options) (*Store, error) {
 	bb, err := storm.Open(path,
 		storm.Codec(gob.Codec),
 		storm.BoltOptions(0o600, &bbolt.Options{
-			Timeout: 1 * time.Second,
+			FreelistType:   bbolt.FreelistMapType,
+			NoFreelistSync: true,
+			NoGrowSync:     true,
+			Timeout:        1 * time.Second,
 		}),
 	)
 	if err != nil {
 		return nil, fault.Wrap(err, fmsg.With("failed to open database"))
+	}
+
+	if !opts.LowMemory {
+		bb.Bolt.AllocSize = 100 * 1024 * 1024
 	}
 
 	return &Store{

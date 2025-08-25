@@ -33,8 +33,9 @@ func (opts *IngestOptions) Execute(_ []string) error {
 	defer root.Close()
 
 	store, err := storage.New(&storage.Options{
-		Root:   root,
-		Logger: logger.Named("store"),
+		LowMemory: cfg.Importer.LowMemory,
+		Root:      root,
+		Logger:    logger.Named("store"),
 	})
 	if err != nil {
 		return fault.Wrap(err, fmsg.With("Failed to create store"))

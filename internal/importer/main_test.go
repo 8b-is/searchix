@@ -36,8 +36,9 @@ func BenchmarkImporterLowMemory(b *testing.B) {
 	}
 
 	store, err := storage.New(&storage.Options{
-		Root:   tmp,
-		Logger: logger.Named("storage"),
+		LowMemory: true,
+		Root:      tmp,
+		Logger:    logger.Named("storage"),
 	})
 	if err != nil {
 		b.Fatal(err)
