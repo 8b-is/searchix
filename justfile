@@ -23,8 +23,8 @@ format:
 fix:
 	go fix .
 
-test:
-	go test ./...
+test tests="./...":
+	go test {{ tests }}
 
 check-flake:
 	nix flake check
