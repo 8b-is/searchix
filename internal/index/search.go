@@ -36,7 +36,12 @@ type ReadIndex struct {
 	config *config.Config
 	store  *storage.Store
 	log    *log.Logger
+	exists bool
 	meta   *Meta
+}
+
+func (index *ReadIndex) Exists() bool {
+	return index.exists
 }
 
 func (index *ReadIndex) LastUpdated() time.Time {

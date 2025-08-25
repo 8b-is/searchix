@@ -38,7 +38,7 @@ func TestSearchGitPackagesFirst(t *testing.T) {
 	}
 	defer store.Close()
 
-	read, _, exists, err := index.OpenOrCreate(&index.Options{
+	read, _, err := index.OpenOrCreate(&index.Options{
 		Logger:    log.Named("index"),
 		Root:      root,
 		BatchSize: cfg.Importer.BatchSize,
@@ -51,7 +51,7 @@ func TestSearchGitPackagesFirst(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer read.Close()
-	if !exists {
+	if !read.Exists() {
 		t.Fatal("expected index to exist")
 	}
 
@@ -125,7 +125,7 @@ func TestSearchJujutsuPackagesFirst(t *testing.T) {
 	}
 	defer store.Close()
 
-	read, _, exists, err := index.OpenOrCreate(&index.Options{
+	read, _, err := index.OpenOrCreate(&index.Options{
 		Force:     false,
 		LowMemory: false,
 		Logger:    log.Named("index"),
@@ -138,7 +138,7 @@ func TestSearchJujutsuPackagesFirst(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer read.Close()
-	if !exists {
+	if !read.Exists() {
 		t.Fatal("expected index to exist")
 	}
 

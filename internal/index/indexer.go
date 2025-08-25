@@ -42,6 +42,7 @@ type WriteIndex struct {
 	index     bleve.Index
 	log       *log.Logger
 	store     *storage.Store
+	exists    bool
 	Meta      *Meta
 }
 
@@ -220,14 +221,14 @@ func deleteIndex(root *file.Root) error {
 	return nil
 }
 
-func OpenOrCreate(options *Options) (*ReadIndex, *WriteIndex, bool, error) {
+func OpenOrCreate(options *Options) (*ReadIndex, *WriteIndex, error) {
 	var err error
 	bleve.SetLog(zap.NewStdLog(options.Logger.Named("bleve").GetLogger()))
 
 	root := options.Root
 	exists, err := root.Exists(indexBaseName)
 	if err != nil {
-		return nil, nil, exists, fault.Wrap(
+		return nil, nil, fault.Wrap(
 			err, fmsg.Withf("could not check if index exists at path %s", indexBaseName))
 	}
 
@@ -237,17 +238,17 @@ func OpenOrCreate(options *Options) (*ReadIndex, *WriteIndex, bool, error) {
 		if options.Force {
 			err = deleteIndex(root)
 			if err != nil {
-				return nil, nil, false, err
+				return nil, nil, err
 			}
 		}
 		idx, err = createIndex(root, options)
 		if err != nil {
-			return nil, nil, false, err
+			return nil, nil, err
 		}
 
 		meta, err = createMeta(root, options.Logger)
 		if err != nil {
-			return nil, nil, false, err
+			return nil, nil, err
 		}
 
 	} else {
@@ -256,12 +257,12 @@ func OpenOrCreate(options *Options) (*ReadIndex, *WriteIndex, bool, error) {
 		indexPath := root.JoinPath(indexBaseName)
 		idx, baseErr = bleve.Open(indexPath)
 		if baseErr != nil {
-			return nil, nil, exists, fault.Wrap(baseErr, fmsg.Withf("could not open index at path %s", indexPath))
+			return nil, nil, fault.Wrap(baseErr, fmsg.Withf("could not open index at path %s", indexPath))
 		}
 
 		meta, err = openMeta(root, options.Logger)
 		if err != nil {
-			return nil, nil, exists, err
+			return nil, nil, err
 		}
 	}
 
@@ -277,18 +278,23 @@ func OpenOrCreate(options *Options) (*ReadIndex, *WriteIndex, bool, error) {
 			config: options.Config,
 			log:    options.Logger,
 			store:  options.Store,
+			exists: exists,
 			index:  idx,
 			meta:   meta,
 		},
 		&WriteIndex{
+			exists:    exists,
 			index:     idx,
 			batchSize: options.BatchSize,
 			log:       options.Logger,
 			store:     options.Store,
 			Meta:      meta,
 		},
-		exists,
 		nil
+}
+
+func (i *WriteIndex) Exists() bool {
+	return i.exists
 }
 
 func (i *WriteIndex) SaveMeta() error {

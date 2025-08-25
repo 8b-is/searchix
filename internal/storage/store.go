@@ -26,12 +26,20 @@ type Options struct {
 
 type Store struct {
 	*storm.DB
+	new bool
 	log *log.Logger
 }
 
+const filename = "searchix.bolt"
+
 func New(opts *Options) (*Store, error) {
+	exists, err := opts.Root.Exists(filename)
+	if err != nil {
+		return nil, fault.Wrap(err, fmsg.With("failed to check if file exists"))
+	}
+
 	//nolint:forbidigo // external package
-	path := opts.Root.JoinPath("searchix.bolt")
+	path := opts.Root.JoinPath(filename)
 	bb, err := storm.Open(path,
 		storm.Codec(gob.Codec),
 		storm.BoltOptions(0o600, &bbolt.Options{
@@ -44,8 +52,13 @@ func New(opts *Options) (*Store, error) {
 
 	return &Store{
 		DB:  bb,
+		new: !exists,
 		log: opts.Logger,
 	}, nil
+}
+
+func (s *Store) IsNew() bool {
+	return s.new
 }
 
 func (s *Store) Close() error {

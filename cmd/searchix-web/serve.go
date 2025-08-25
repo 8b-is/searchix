@@ -47,7 +47,7 @@ func (opts *ServeOptions) Execute(_ []string) (err error) {
 	}
 	defer store.Close()
 
-	read, write, exists, err := index.OpenOrCreate(
+	read, write, err := index.OpenOrCreate(
 		&index.Options{
 			Config:    cfg,
 			LowMemory: cfg.Importer.LowMemory,
@@ -87,12 +87,14 @@ func (opts *ServeOptions) Execute(_ []string) (err error) {
 		return fault.Wrap(err, fmsg.With("Failed to create importer"))
 	}
 
-	if !exists {
+	if store.IsNew() {
 		err = imp.Fetch(ctx, true, false, nil)
 		if err != nil {
 			return fault.Wrap(err, fmsg.With("Failed to start importer"))
 		}
+	}
 
+	if store.IsNew() || !write.Exists() {
 		err = imp.Index(ctx)
 		if err != nil {
 			return fault.Wrap(err, fmsg.With("Failed to index data"))

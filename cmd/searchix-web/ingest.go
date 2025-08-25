@@ -41,7 +41,7 @@ func (opts *IngestOptions) Execute(_ []string) error {
 	}
 	defer store.Close()
 
-	_, write, exists, err := index.OpenOrCreate(
+	_, write, err := index.OpenOrCreate(
 		&index.Options{
 			Config:    cfg,
 			Force:     opts.Reindex,
@@ -74,7 +74,8 @@ func (opts *IngestOptions) Execute(_ []string) error {
 		return fault.Wrap(err, fmsg.With("Failed to create importer"))
 	}
 
-	if !exists || opts.Replace || opts.Fetch {
+	updateStore := store.IsNew() || opts.Replace || opts.Fetch
+	if updateStore {
 		importer.MarkImportStarted()
 
 		err = imp.Fetch(ctx, true, opts.Fetch && !opts.Replace, nil)
@@ -90,7 +91,7 @@ func (opts *IngestOptions) Execute(_ []string) error {
 		}
 	}
 
-	if !exists || opts.Reindex {
+	if !write.Exists() || updateStore {
 		err = imp.Index(ctx)
 		if err != nil {
 			return fault.Wrap(err, fmsg.With("Failed to index data"))
