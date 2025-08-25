@@ -320,6 +320,10 @@ func (i *WriteIndex) Import(
 	})
 }
 
+func (i *WriteIndex) GetBatchSize() int {
+	return i.batchSize
+}
+
 func (i *WriteIndex) WithBatch(
 	ctx context.Context,
 	objects <-chan nix.Importable,

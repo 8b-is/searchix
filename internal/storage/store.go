@@ -209,6 +209,7 @@ func (s *Store) GetDocument(
 func MakeSourceExporter[T nix.Importable](
 	store *Store,
 	source *config.Source,
+	batchSize int,
 ) func(context.Context) (<-chan nix.Importable, <-chan error) {
 	return func(_ context.Context) (<-chan nix.Importable, <-chan error) {
 		results := make(chan nix.Importable, 1)
@@ -219,7 +220,7 @@ func MakeSourceExporter[T nix.Importable](
 			defer close(errs)
 
 			var obj T
-			objs := make([]T, 0, BatchSize)
+			objs := make([]T, 0, batchSize)
 			node := store.From(source.Key)
 			count, err := node.Count(&obj)
 			if err != nil {
@@ -231,8 +232,8 @@ func MakeSourceExporter[T nix.Importable](
 				return
 			}
 
-			limit := min(BatchSize, count)
-			for offset := 0; offset < count; offset += BatchSize {
+			limit := min(batchSize, count)
+			for offset := 0; offset < count; offset += batchSize {
 				err := node.All(&objs, storm.Skip(offset), storm.Limit(limit))
 				if err != nil {
 					errs <- fault.Wrap(

@@ -21,12 +21,21 @@ func (imp *Importer) indexSource(
 	ctx context.Context,
 	source *config.Source,
 ) (bool, error) {
+	writer := imp.options.WriteIndex
 	var exporter func(context.Context) (<-chan nix.Importable, <-chan error)
 	switch source.Importer {
 	case config.Packages:
-		exporter = storage.MakeSourceExporter[nix.Package](imp.options.Storage, source)
+		exporter = storage.MakeSourceExporter[nix.Package](
+			imp.options.Storage,
+			source,
+			writer.GetBatchSize(),
+		)
 	case config.Options:
-		exporter = storage.MakeSourceExporter[nix.Option](imp.options.Storage, source)
+		exporter = storage.MakeSourceExporter[nix.Option](
+			imp.options.Storage,
+			source,
+			writer.GetBatchSize(),
+		)
 	}
 
 	return pipe(
@@ -34,7 +43,7 @@ func (imp *Importer) indexSource(
 		imp.options.Logger,
 		exporter,
 		func(ctx context.Context, objects <-chan nix.Importable) <-chan error {
-			return imp.options.WriteIndex.Import(ctx, objects)
+			return writer.Import(ctx, objects)
 		},
 	)
 }
