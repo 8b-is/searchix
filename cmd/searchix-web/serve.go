@@ -119,6 +119,28 @@ func (opts *ServeOptions) Execute(_ []string) (err error) {
 		}
 	}()
 
+	reimport := make(chan os.Signal, 1)
+	go func() {
+		for sig := range reimport {
+			if sig == syscall.SIGUSR1 {
+				logger.Info("manual fetch on SIGUSR1")
+				err := imp.Fetch(ctx, false, false, nil)
+				if err != nil {
+					logger.Warn("manual fetch error", "error", err)
+				}
+				logger.Info("manual fetch succeeded")
+			}
+
+			logger.Info("manual re-index", "signal", sig.String())
+			err := imp.Index(ctx)
+			if err != nil {
+				logger.Error("manual index error", "error", err)
+			}
+			logger.Info("manual re-index completed")
+		}
+	}()
+	signal.Notify(reimport, syscall.SIGUSR1, syscall.SIGUSR2)
+
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
