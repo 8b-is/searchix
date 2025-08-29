@@ -125,7 +125,7 @@ func (opts *ServeOptions) Execute(_ []string) (err error) {
 		for sig := range reimport {
 			if sig == syscall.SIGUSR1 {
 				logger.Info("manual fetch on SIGUSR1")
-				err := imp.Fetch(ctx, false, false, nil)
+				err := imp.Fetch(ctx, true, false, nil)
 				if err != nil {
 					logger.Warn("manual fetch error", "error", err)
 				}
