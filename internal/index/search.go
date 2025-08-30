@@ -13,6 +13,7 @@ import (
 	"alin.ovh/searchix/internal/storage"
 
 	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fctx"
 	"github.com/Southclaws/fault/fmsg"
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/search"
@@ -92,10 +93,13 @@ func (index *ReadIndex) search(
 	bleveResult, err := index.index.SearchInContext(ctx, request)
 	select {
 	case <-ctx.Done():
-		return nil, fault.Wrap(ctx.Err())
+		return nil, fault.Wrap(ctx.Err(), fctx.With(ctx))
 	default:
 		if err != nil {
-			return nil, fault.Wrap(err, fmsg.With("failed to execute search query"))
+			return nil, fault.Wrap(err,
+				fctx.With(ctx),
+				fmsg.Withf("failed to execute search query"),
+			)
 		}
 
 		hits := func(yield func(DocumentMatch) bool) {

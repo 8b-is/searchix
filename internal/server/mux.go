@@ -24,6 +24,7 @@ import (
 
 	"alin.ovh/x/log"
 	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fctx"
 	"github.com/Southclaws/fault/fmsg"
 	"github.com/osdevisnot/sorvor/pkg/livereload"
 )
@@ -98,6 +99,7 @@ func NewMux(
 
 			if r.URL.Query().Has("query") {
 				qs := r.URL.Query().Get("query")
+				ctx := fctx.WithMeta(r.Context(), "search_query", qs)
 
 				if len(qs) < 2 {
 					errorHandler(w, r, "Query too short", http.StatusBadRequest)
@@ -121,7 +123,7 @@ func NewMux(
 				}
 				page := pagination.New(pageNumber, pageSize)
 
-				ctx, cancel := context.WithTimeout(r.Context(), cfg.Web.SearchTimeout.Duration)
+				ctx, cancel := context.WithTimeout(ctx, cfg.Web.SearchTimeout.Duration)
 				results, err := index.Search(ctx, source, qs, page.From, page.Size)
 				cancel()
 
@@ -131,7 +133,8 @@ func NewMux(
 
 						return
 					}
-					log.Error("search error", "error", err)
+					meta := fctx.Unwrap(err)
+					log.Error("search error", "error", err, "search_query", meta["search_query"])
 					errorHandler(w, r, err.Error(), http.StatusInternalServerError)
 
 					return
