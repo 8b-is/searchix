@@ -203,6 +203,15 @@ func (imp *Importer) PruneSource(ctx context.Context, source *config.Source) err
 		return nil
 	}
 
+	maxCount, err := tx.Count(obj)
+	if err != nil {
+		return fault.Wrap(err, fmsg.With("failed to retrieve entities for pruning"))
+	}
+
+	if float64(count) > (0.9 * float64(maxCount)) {
+		return fault.Newf("too many entities to prune: %d/%d (threshold: 90%%)", count, maxCount)
+	}
+
 	objs := make(chan nix.Importable, 1)
 	errs := write.WithBatch(ctx, objs, func(batch *bleve.Batch, obj nix.Importable) error {
 		batch.Delete(obj.GetName())
