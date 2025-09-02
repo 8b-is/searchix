@@ -8,6 +8,7 @@ import (
 	"alin.ovh/x/log"
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
+	"github.com/Southclaws/fault/ftag"
 	"github.com/asdine/storm/v3"
 	"github.com/asdine/storm/v3/codec/gob"
 	"go.etcd.io/bbolt"
@@ -197,6 +198,14 @@ func (s *Store) GetDocument(
 	}
 
 	if err != nil {
+		if errors.Is(err, storm.ErrNotFound) {
+			return nil,
+				fault.Wrap(
+					fault.Newf("document not found source: %s id: %s", source.Key, id),
+					ftag.With(ftag.NotFound),
+				)
+		}
+
 		return nil, fault.Wrap(
 			err,
 			fmsg.Withf("failed to get document source: %s id: %s", source.Key, id),

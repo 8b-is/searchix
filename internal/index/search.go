@@ -2,6 +2,7 @@ package index
 
 import (
 	"context"
+	"errors"
 	"iter"
 	"strings"
 	"time"
@@ -15,6 +16,7 @@ import (
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fctx"
 	"github.com/Southclaws/fault/fmsg"
+	"github.com/asdine/storm/v3"
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/search"
 	"github.com/blevesearch/bleve/v2/search/query"
@@ -124,7 +126,11 @@ func (index *ReadIndex) search(
 
 				doc, err := index.store.GetDocument(src, id)
 				if err != nil {
-					index.log.Warn("error getting document", "error", err)
+					if errors.Is(err, storm.ErrNotFound) {
+						index.log.Warn("document not found", "source", sourceName, "id", id)
+					} else {
+						index.log.Error("error getting document", "error", err)
+					}
 
 					continue
 				}

@@ -26,6 +26,7 @@ import (
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fctx"
 	"github.com/Southclaws/fault/fmsg"
+	"github.com/Southclaws/fault/ftag"
 	"github.com/osdevisnot/sorvor/pkg/livereload"
 )
 
@@ -234,6 +235,22 @@ func NewMux(
 
 			doc, err := store.GetDocument(source, r.PathValue("id"))
 			if err != nil {
+				if ftag.Get(err) == ftag.NotFound {
+					log.Warn("document not found", "source", source.Key, "id", r.PathValue("id"))
+					errorHandler(w, r, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+
+					return
+				}
+
+				log.Error(
+					"failed to get document",
+					"source",
+					source.Key,
+					"id",
+					r.PathValue("id"),
+					"error",
+					err,
+				)
 				errorHandler(
 					w,
 					r,
