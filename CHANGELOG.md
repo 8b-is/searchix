@@ -1,15 +1,35 @@
 # Changelog
 
-## [v0.2.4](https://codeberg.org/alanpearce/searchix/compare/v0.2.3...6589e14eda11b9758957278bacbbf8b280252536) (2025-08-25)
+## [v0.2.5](https://codeberg.org/alanpearce/searchix/compare/v0.2.4...afc540fd97b14f96cac85e6d45de669f6d35a00d) (2025-09-03)
 
 ### Features
+
+- also prune storage and index on SIGUSR1
+  ([afc540f](https://codeberg.org/alanpearce/searchix/commit/afc540fd97b14f96cac85e6d45de669f6d35a00d))
+- improve logging of pruning process
+  ([dd9ca0b](https://codeberg.org/alanpearce/searchix/commit/dd9ca0bf112a847749f4b92276baa4b89b153b8a))
+- improve logging of errors in source ID handler
+  ([7f75159](https://codeberg.org/alanpearce/searchix/commit/7f7515906b28675a38a9988eb25f9b5b527c9d95))
+- include search query in error messages
+  ([77a8dec](https://codeberg.org/alanpearce/searchix/commit/77a8dec1d8c80ff22bc539f7bd74bf20ad031353))
+- make manual fetch always update sources
+  ([ff56604](https://codeberg.org/alanpearce/searchix/commit/ff56604e64988b29c6557f57ccf59284747843ec))
+
+### Fixes
+
+- abort pruning if too many entities selected
+  ([6ae7560](https://codeberg.org/alanpearce/searchix/commit/6ae7560fb293ff0bc1dbd2cc490040ac2990266e))
+
+### [v0.2.4](https://codeberg.org/alanpearce/searchix/compare/v0.2.3...v0.2.4) (2025-08-25)
+
+#### Features
 
 - **storage:** respect --replace flag
   ([abef2e5](https://codeberg.org/alanpearce/searchix/commit/abef2e5b0db37c771464469c3f83890b4cc0a297))
 - improve error logging during import
   ([bc04964](https://codeberg.org/alanpearce/searchix/commit/bc04964c3405f9d50bbad7193b61ed62d9e64498))
 
-### Fixes
+#### Fixes
 
 - not re-indexing despite --reindex argument
   ([5afd91c](https://codeberg.org/alanpearce/searchix/commit/5afd91c0b78982e8d1dfd41a911cf85d108979d9))
