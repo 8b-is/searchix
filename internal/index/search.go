@@ -255,6 +255,26 @@ func (index *ReadIndex) Search(
 	return index.search(ctx, source, search)
 }
 
+func (index *ReadIndex) Count(source *config.Source) (uint64, error) {
+	if source == nil {
+		count, err := index.index.DocCount()
+		if err != nil {
+			return 0, fault.Wrap(err)
+		}
+
+		return count, nil
+	}
+
+	query := setField(bleve.NewTermQuery(source.Key), "Source")
+	req := bleve.NewSearchRequest(query)
+	res, err := index.index.Search(req)
+	if err != nil {
+		return 0, fault.Wrap(err)
+	}
+
+	return res.Total, nil
+}
+
 func (index *ReadIndex) Close() error {
 	err := index.index.Close()
 	if err != nil {

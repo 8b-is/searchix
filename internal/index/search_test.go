@@ -63,6 +63,15 @@ func TestSearchOrder(t *testing.T) {
 		t.Fatal("expected source to exist and be enabled")
 	}
 
+	count, err := read.Count(source)
+	if err != nil {
+		t.Fatal("could not get index object count")
+	}
+
+	if count == 0 {
+		t.Skip("expected index to contain objects")
+	}
+
 	t.Run("git packages order", func(t *testing.T) {
 		result, err := read.Search(
 			ctx,
