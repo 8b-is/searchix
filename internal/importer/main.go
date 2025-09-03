@@ -189,16 +189,6 @@ func (imp *Importer) PruneSource(ctx context.Context, source *config.Source) err
 		return fault.Wrap(err, fmsg.With("failed to retrieve entities for pruning"))
 	}
 
-	imp.options.Logger.Debug(
-		"pruning",
-		"type",
-		source.Importer.String(),
-		"source",
-		source.Key,
-		"count",
-		count,
-	)
-
 	if count == 0 {
 		return nil
 	}
@@ -243,6 +233,16 @@ func (imp *Importer) PruneSource(ctx context.Context, source *config.Source) err
 	if err != nil {
 		return fault.Wrap(err, fmsg.With("Failed to commit transaction"))
 	}
+
+	imp.options.Logger.Info(
+		"pruned old entities",
+		"type",
+		source.Importer.String(),
+		"source",
+		source.Key,
+		"count",
+		count,
+	)
 
 	return nil
 }
