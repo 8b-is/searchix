@@ -138,6 +138,15 @@ func (opts *ServeOptions) Execute(_ []string) (err error) {
 				logger.Error("manual index error", "error", err)
 			}
 			logger.Info("manual re-index completed")
+
+			if sig == syscall.SIGUSR1 {
+				logger.Info("manual prune")
+				err = imp.Prune(ctx)
+				if err != nil {
+					logger.Error("manual prune error", "error", err)
+				}
+				logger.Info("manual prune completed")
+			}
 		}
 	}()
 	signal.Notify(reimport, syscall.SIGUSR1, syscall.SIGUSR2)
