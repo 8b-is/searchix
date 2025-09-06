@@ -126,16 +126,11 @@ func Page(tdata TemplateData, children ...g.Node) g.Node {
 }
 
 func css(css *frontend.Asset) g.Node {
-	return Link(Href(css.URL), Rel("stylesheet"),
-		Integrity("sha256-"+css.Base64SHA256))
+	return Link(Href(css.URL), Rel("stylesheet"))
 }
 
 func script(s *frontend.Asset) g.Node {
-	return Script(
-		Src(s.URL),
-		Defer(),
-		g.Attr("integrity", "sha256-"+s.Base64SHA256),
-	)
+	return Script(Src(s.URL), Defer())
 }
 
 func sourceNameAndType(source *config.Source) string {

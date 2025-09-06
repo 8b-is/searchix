@@ -1,8 +1,6 @@
 package frontend
 
 import (
-	"crypto/sha256"
-	"encoding/base64"
 	"fmt"
 	"hash/fnv"
 	"io"
@@ -13,10 +11,9 @@ import (
 )
 
 type Asset struct {
-	URL          string
-	ETag         string
-	Filename     string
-	Base64SHA256 string
+	URL      string
+	ETag     string
+	Filename string
 }
 
 type AssetCollection struct {
@@ -47,17 +44,15 @@ func newAsset(filename string) (*Asset, error) {
 	}
 	defer file.Close()
 
-	shasum := sha256.New()
 	hash := fnv.New64a()
-	if _, err := io.Copy(io.MultiWriter(shasum, hash), file); err != nil {
+	if _, err := io.Copy(hash, file); err != nil {
 		return nil, fault.Wrap(err, fmsg.Withf("could not hash file %s", filename))
 	}
 
 	return &Asset{
-		URL:          "/" + filename,
-		ETag:         fmt.Sprintf(`W/"%x"`, hash.Sum(nil)),
-		Filename:     filename,
-		Base64SHA256: base64.StdEncoding.EncodeToString(shasum.Sum(nil)),
+		URL:      "/" + filename,
+		ETag:     fmt.Sprintf(`W/"%x"`, hash.Sum(nil)),
+		Filename: filename,
 	}, nil
 }
 
