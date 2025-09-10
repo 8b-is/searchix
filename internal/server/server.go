@@ -101,14 +101,13 @@ func (s *Server) Stop() chan struct{} {
 	go func() {
 		s.log.Debug("shutting down server")
 		ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
-		defer cancel()
 		err := s.server.Shutdown(ctx)
+		cancel()
 		s.log.Debug("server shut down")
 		if err != nil {
 			// Error from closing listeners, or context timeout:
 			s.log.Error("error shutting down server", "error", err)
 		}
-		s.listener.Close()
 		close(idleConnsClosed)
 	}()
 
