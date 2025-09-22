@@ -41,8 +41,6 @@ buildGoApplication {
   '';
   tags = [ "embed" ];
   ldflags = [
-    "-s"
-    "-w"
     "-X"
     "alin.ovh/searchix/internal/config.Version=${version}"
   ];
