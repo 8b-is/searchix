@@ -93,6 +93,8 @@ func (s *Store) MakeSourceImporter(
 	source *config.Source,
 ) func(context.Context, <-chan nix.Importable) <-chan error {
 	return func(ctx context.Context, objects <-chan nix.Importable) <-chan error {
+		var imp nix.Importable
+
 		errs := make(chan error)
 		node := s.DB.From(source.Key).WithBatch(true)
 
@@ -101,8 +103,10 @@ func (s *Store) MakeSourceImporter(
 		var save func(storm.Node, nix.Importable) error
 		switch source.Importer {
 		case config.Packages:
+			imp = &nix.Package{}
 			save = saveGen[nix.Package]
 		case config.Options:
+			imp = &nix.Option{}
 			save = saveGen[nix.Option]
 		default:
 			errs <- fault.New("invalid importer")
@@ -157,6 +161,10 @@ func (s *Store) MakeSourceImporter(
 
 			if err := tx.Commit(); err != nil {
 				errs <- fault.Wrap(err, fmsg.With("failed to commit transaction"))
+			}
+
+			if err := node.ReIndex(imp); err != nil {
+				errs <- fault.Wrap(err, fmsg.With("failed to reindex storm db"))
 			}
 		}()
 
