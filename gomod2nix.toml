@@ -91,6 +91,9 @@ schema = 3
   [mod."github.com/dustin/go-humanize"]
     version = "v1.0.1"
     hash = "sha256-yuvxYYngpfVkUg9yAmG99IUVmADTQA0tMbBXe0Fq0Mc="
+  [mod."github.com/ecnepsnai/sdnotify"]
+    version = "v1.0.0"
+    hash = "sha256-KvbVhR/ubJs0lIZW6jmTMC3PnUiS0X99DSqe0tor+eo="
   [mod."github.com/fsnotify/fsnotify"]
     version = "v1.9.0"
     hash = "sha256-WtpE1N6dpHwEvIub7Xp/CrWm0fd6PX7MKA4PV44rp2g="

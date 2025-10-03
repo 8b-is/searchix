@@ -13,6 +13,7 @@ require (
 	github.com/creasty/defaults v1.8.0
 	github.com/crewjam/csp v0.0.2
 	github.com/dustin/go-humanize v1.0.1
+	github.com/ecnepsnai/sdnotify v1.0.0
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/getsentry/sentry-go v0.33.0
 	github.com/jessevdk/go-flags v1.6.1

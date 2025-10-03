@@ -23,6 +23,9 @@ let
     ReadWritePaths = [ cfg.homeDir ];
     StateDirectory = mkIf (cfg.homeDir == "/var/lib/searchix") [ "searchix" ];
     Restart = "on-failure";
+    Type = "notify";
+    NotifyAccess = "main";
+    WatchdogSec = "60";
 
     CacheDirectory = "searchix";
     CapabilityBoundingSet = "";
