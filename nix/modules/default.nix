@@ -251,6 +251,7 @@ in
         description = "Searchix Nix option search";
         wantedBy = [ "multi-user.target" ];
         path = with pkgs; [ nix ];
+        stopIfChanged = false;
         environment = {
           LOG_LEVEL = cfg.logLevel;
         }
