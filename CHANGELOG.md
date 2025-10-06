@@ -1,8 +1,26 @@
 # Changelog
 
-## [v0.2.5](https://codeberg.org/alanpearce/searchix/compare/v0.2.4...afc540fd97b14f96cac85e6d45de669f6d35a00d) (2025-09-03)
+## [v0.2.6](https://codeberg.org/alanpearce/searchix/compare/v0.2.5...d94a199425050ef9b1da09e5b8bba7611d3c1082) (2025-10-04)
 
 ### Features
+
+- restart instead of stopping service during generation switches
+  ([d94a199](https://codeberg.org/alanpearce/searchix/commit/d94a199425050ef9b1da09e5b8bba7611d3c1082))
+- use sd_notify for watchdog and status notification
+  ([49031e3](https://codeberg.org/alanpearce/searchix/commit/49031e3ce0a01afda5079015c442a67720017220))
+
+### Fixes
+
+- incorrectly selecting too many entities to prune
+  ([eeac61c](https://codeberg.org/alanpearce/searchix/commit/eeac61c274b3ee615aedf3318c97715d70915a72))
+- avoid listener error on shutdown
+  ([6d79f11](https://codeberg.org/alanpearce/searchix/commit/6d79f1131c25a59f6ea7f4957d12813f8c62e73e))
+- CSS not allowed by subresource integrity (disable for now)
+  ([c4dc9b2](https://codeberg.org/alanpearce/searchix/commit/c4dc9b20cce2b08e7cf0f0e0b6c21fb3938177d0))
+
+### [v0.2.5](https://codeberg.org/alanpearce/searchix/compare/v0.2.4...v0.2.5) (2025-09-03)
+
+#### Features
 
 - also prune storage and index on SIGUSR1
   ([afc540f](https://codeberg.org/alanpearce/searchix/commit/afc540fd97b14f96cac85e6d45de669f6d35a00d))
@@ -15,7 +33,7 @@
 - make manual fetch always update sources
   ([ff56604](https://codeberg.org/alanpearce/searchix/commit/ff56604e64988b29c6557f57ccf59284747843ec))
 
-### Fixes
+#### Fixes
 
 - abort pruning if too many entities selected
   ([6ae7560](https://codeberg.org/alanpearce/searchix/commit/6ae7560fb293ff0bc1dbd2cc490040ac2990266e))
