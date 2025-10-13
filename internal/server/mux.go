@@ -311,6 +311,12 @@ func NewMux(
 					source.Key,
 					"search",
 				),
+				Image: opensearch.Image{
+					Height:  32,
+					Width:   32,
+					Type:    "image/x-icon",
+					Content: cfg.Web.BaseURL.JoinPath("favicon.ico").String(),
+				},
 				URL: opensearch.URL{
 					Method: "get",
 					Type:   "text/html",
@@ -346,6 +352,12 @@ func NewMux(
 			LongName:    "Search nix options and packages with Searchix",
 			Description: "Search nix options and packages with Searchix",
 			SearchForm:  cfg.Web.BaseURL.JoinPath(),
+			Image: opensearch.Image{
+				Height:  32,
+				Width:   32,
+				Type:    "image/x-icon",
+				Content: cfg.Web.BaseURL.JoinPath("favicon.ico").String(),
+			},
 			URL: opensearch.URL{
 				Method: "get",
 				Type:   "text/html",
