@@ -5,6 +5,7 @@ import (
 	"hash/fnv"
 	"io"
 	"io/fs"
+	"path/filepath"
 
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
@@ -56,50 +57,27 @@ func newAsset(filename string) (*Asset, error) {
 	}, nil
 }
 
-func (a *AssetCollection) hashScripts() error {
-	scripts, err := fs.Glob(Files, "static/**.js")
-	if err != nil {
-		return fault.Wrap(err, fmsg.With("could not glob files"))
-	}
-	for _, filename := range scripts {
-		asset, err := newAsset(filename)
-		if err != nil {
-			return err
-		}
-		a.Scripts = append(a.Scripts, asset)
-		a.ByPath[asset.URL] = asset
-	}
-
-	return nil
-}
-
-func (a *AssetCollection) hashStyles() error {
-	styles, err := fs.Glob(Files, "static/**.css")
-	if err != nil {
-		return fault.Wrap(err, fmsg.With("could not glob files"))
-	}
-	for _, filename := range styles {
-		asset, err := newAsset(filename)
-		if err != nil {
-			return err
-		}
-		a.Stylesheets = append(a.Stylesheets, asset)
-		a.ByPath[asset.URL] = asset
-	}
-
-	return nil
-}
-
 func (a *AssetCollection) Rehash() (err error) {
 	a.Scripts = []*Asset{}
-	err = a.hashScripts()
-	if err != nil {
-		return err
-	}
 	a.Stylesheets = []*Asset{}
-	err = a.hashStyles()
+
+	files, err := fs.Glob(Files, "static/**")
 	if err != nil {
-		return err
+		return fault.Wrap(err, fmsg.With("could not glob files"))
+	}
+
+	for _, filename := range files {
+		asset, err := newAsset(filename)
+		if err != nil {
+			return err
+		}
+		switch filepath.Ext(filename) {
+		case ".js":
+			a.Scripts = append(a.Scripts, asset)
+		case ".css":
+			a.Stylesheets = append(a.Stylesheets, asset)
+		}
+		a.ByPath[asset.URL] = asset
 	}
 
 	return nil
