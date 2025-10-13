@@ -12,9 +12,10 @@ import (
 )
 
 type Asset struct {
-	URL      string
-	ETag     string
-	Filename string
+	StaticURL string
+	URL       string
+	ETag      string
+	Filename  string
 }
 
 type AssetCollection struct {
@@ -50,10 +51,16 @@ func newAsset(filename string) (*Asset, error) {
 		return nil, fault.Wrap(err, fmsg.Withf("could not hash file %s", filename))
 	}
 
+	rel, err := filepath.Rel("static", filename)
+	if err != nil {
+		return nil, fault.Wrap(err, fmsg.Withf("could not get relative path for %s", filename))
+	}
+
 	return &Asset{
-		URL:      "/" + filename,
-		ETag:     fmt.Sprintf(`W/"%x"`, hash.Sum(nil)),
-		Filename: filename,
+		StaticURL: "/" + filename,
+		URL:       "/" + rel,
+		ETag:      fmt.Sprintf(`W/"%x"`, hash.Sum(nil)),
+		Filename:  filename,
 	}, nil
 }
 
@@ -78,6 +85,7 @@ func (a *AssetCollection) Rehash() (err error) {
 			a.Stylesheets = append(a.Stylesheets, asset)
 		}
 		a.ByPath[asset.URL] = asset
+		a.ByPath[asset.StaticURL] = asset
 	}
 
 	return nil

@@ -21,7 +21,6 @@ func Page(tdata TemplateData, children ...g.Node) g.Node {
 				TitleEl(g.Text("Searchix"), g.If(config.DevMode, g.Text(" (Dev)"))),
 				g.Map(tdata.Assets.Stylesheets, css),
 				g.Raw(tdata.ExtraHeadHTML),
-				Link(Rel("icon"), Href("/static/favicon.ico")),
 				g.If(len(tdata.Sources) > 0,
 					Link(
 						Rel("search"),

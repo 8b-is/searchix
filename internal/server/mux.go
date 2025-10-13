@@ -366,7 +366,7 @@ func NewMux(
 		}
 	})
 
-	mux.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		asset, found := assets.ByPath[r.URL.Path]
 		if !found {
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
