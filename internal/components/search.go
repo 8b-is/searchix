@@ -96,7 +96,7 @@ func SearchPage(tdata TemplateData, r ResultData, children ...g.Node) g.Node {
 				g.Text("."),
 			),
 		),
-		script(tdata.Assets.ByPath["/static/search.js"]),
+		script(tdata.Assets.ByPath["/search.js"]),
 		SearchForm(tdata, r),
 		Section(
 			ID("results"),
