@@ -116,6 +116,11 @@ func (imp *Importer) Index(ctx context.Context, onlyUpdateSources []string) erro
 		}
 	}
 
+	err := meta.Save()
+	if err != nil {
+		return fault.Wrap(err, fmsg.With("Failed to save metadata"))
+	}
+
 	return nil
 }
 
