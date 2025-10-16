@@ -12,14 +12,12 @@ import (
 	"alin.ovh/searchix/internal/importer"
 	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/manpages"
-	"alin.ovh/searchix/internal/storage"
 )
 
 type IngestOptions struct {
 	Fetch   bool `long:"fetch"   description:"pre-fetch data"`
 	Offline bool `long:"offline" description:"offline mode"`
-	Replace bool `long:"replace" description:"replace existing storage"`
-	Reindex bool `long:"reindex" description:"reindex existing index"`
+	Replace bool `long:"replace" description:"replace existing index"`
 }
 
 func (opts *IngestOptions) Execute(_ []string) error {
@@ -32,25 +30,14 @@ func (opts *IngestOptions) Execute(_ []string) error {
 	}
 	defer root.Close()
 
-	store, err := storage.New(&storage.Options{
-		LowMemory: cfg.Importer.LowMemory,
-		Root:      root,
-		Logger:    logger.Named("store"),
-	})
-	if err != nil {
-		return fault.Wrap(err, fmsg.With("Failed to create store"))
-	}
-	defer store.Close()
-
-	_, write, err := index.OpenOrCreate(
+	read, write, err := index.OpenOrCreate(
 		&index.Options{
 			Config:    cfg,
-			Force:     opts.Reindex,
+			Force:     opts.Replace,
 			LowMemory: cfg.Importer.LowMemory,
 			BatchSize: cfg.Importer.BatchSize,
 			Logger:    logger.Named("index"),
 			Root:      root,
-			Store:     store,
 		},
 	)
 	if err != nil {
@@ -63,7 +50,7 @@ func (opts *IngestOptions) Execute(_ []string) error {
 	})
 
 	imp, err := importer.New(cfg, &importer.Options{
-		Storage:    store,
+		ReadIndex:  read,
 		WriteIndex: write,
 		LowMemory:  cfg.Importer.LowMemory,
 		Logger:     logger.Named("importer"),
@@ -75,11 +62,10 @@ func (opts *IngestOptions) Execute(_ []string) error {
 		return fault.Wrap(err, fmsg.With("Failed to create importer"))
 	}
 
-	updateStore := store.IsNew() || opts.Replace || opts.Fetch
-	if updateStore {
+	if !opts.Offline && (!write.Exists() || opts.Fetch || opts.Replace) {
 		importer.MarkImportStarted()
 
-		err = imp.Fetch(ctx, true, opts.Fetch && !opts.Replace, nil)
+		err = imp.Fetch(ctx, true, nil)
 		if err != nil {
 			return fault.Wrap(err, fmsg.With("Failed to start importer"))
 		}
@@ -92,17 +78,10 @@ func (opts *IngestOptions) Execute(_ []string) error {
 		}
 	}
 
-	if !write.Exists() || opts.Reindex || updateStore {
-		err = imp.Index(ctx)
+	if !write.Exists() || opts.Replace {
+		err = imp.Index(ctx, nil)
 		if err != nil {
 			return fault.Wrap(err, fmsg.With("Failed to index data"))
-		}
-	}
-
-	if opts.Replace || opts.Reindex {
-		err = imp.Prune(ctx)
-		if err != nil {
-			return fault.Wrap(err, fmsg.With("Failed to prune index"))
 		}
 	}
 

@@ -11,9 +11,9 @@ import (
 
 func CombinedData(data nix.Importable) g.Node {
 	switch data := data.(type) {
-	case *nix.Option:
+	case nix.Option:
 		return firstSentence(data.Description)
-	case *nix.Package:
+	case nix.Package:
 		return g.Text(firstSentence(data.Description))
 	}
 

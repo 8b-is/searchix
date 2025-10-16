@@ -22,8 +22,8 @@ func Options(result *index.Result) g.Node {
 		),
 		TBody(
 			g.MapIter(result.Hits, func(hit index.DocumentMatch) g.Node {
-				if m, ok := hit.Data.(*nix.Option); ok {
-					return optionRow(hit, *m)
+				if m, ok := hit.Data.(nix.Option); ok {
+					return optionRow(hit, m)
 				}
 
 				return emptyOptionRow(hit)

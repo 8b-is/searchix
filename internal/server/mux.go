@@ -71,7 +71,6 @@ func NewMux(
 		return nil, fault.New("read index is nil")
 	}
 	index := options.ReadIndex
-	store := options.Store
 	sortSources(cfg.Importer.Sources)
 	assets, err := frontend.New()
 	if err != nil {
@@ -233,7 +232,7 @@ func NewMux(
 			}
 			importerSingular := importerType.Singular()
 
-			doc, err := store.GetDocument(source, r.PathValue("id"))
+			doc, err := index.GetDocument(r.Context(), source, r.PathValue("id"))
 			if err != nil {
 				if ftag.Get(err) == ftag.NotFound {
 					log.Warn("document not found", "source", source.Key, "id", r.PathValue("id"))

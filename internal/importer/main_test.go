@@ -9,7 +9,6 @@ import (
 	"alin.ovh/searchix/internal/file"
 	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/manpages"
-	"alin.ovh/searchix/internal/storage"
 )
 
 var cfg = config.DefaultConfig
@@ -35,15 +34,6 @@ func BenchmarkImporterLowMemory(b *testing.B) {
 		b.Fatal(err)
 	}
 
-	store, err := storage.New(&storage.Options{
-		LowMemory: true,
-		Root:      tmp,
-		Logger:    logger.Named("storage"),
-	})
-	if err != nil {
-		b.Fatal(err)
-	}
-
 	imp, err := New(&cfg, &Options{
 		Logger:     logger.Named("importer"),
 		LowMemory:  true,
@@ -54,7 +44,6 @@ func BenchmarkImporterLowMemory(b *testing.B) {
 		}),
 		Offline: false,
 		Root:    tmp,
-		Storage: store,
 	})
 	if err != nil {
 		b.Fatal(err)
@@ -66,18 +55,9 @@ func BenchmarkImporterLowMemory(b *testing.B) {
 	err = imp.Fetch(
 		b.Context(),
 		false,
-		false,
-		&[]string{source.Key},
+		[]string{source.Key},
 	)
 	if err != nil {
 		b.Fatal(err)
-	}
-
-	hadErrors, err := imp.indexSource(b.Context(), source)
-	if err != nil {
-		b.Fatal(err)
-	}
-	if hadErrors {
-		b.Fatal("had errors")
 	}
 }

@@ -14,7 +14,6 @@ import (
 	"alin.ovh/searchix/internal/file"
 	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/nix"
-	"alin.ovh/searchix/internal/storage"
 )
 
 const rootPath = "../../data"
@@ -29,22 +28,12 @@ func TestSearchOrder(t *testing.T) {
 	}
 	defer root.Close()
 
-	store, err := storage.New(&storage.Options{
-		Root:   root,
-		Logger: log.Named("storage"),
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer store.Close()
-
 	read, _, err := index.OpenOrCreate(&index.Options{
 		Logger:    log.Named("index"),
 		Root:      root,
 		BatchSize: cfg.Importer.BatchSize,
 		Force:     false,
 		LowMemory: false,
-		Store:     store,
 		Config:    &cfg,
 	})
 	if err != nil {
@@ -96,9 +85,9 @@ func TestSearchOrder(t *testing.T) {
 		}
 		var i int
 		for hit := range result.Hits {
-			data, ok := hit.Data.(*nix.Package)
+			data, ok := hit.Data.(nix.Package)
 			if !ok {
-				t.Fatalf("Expected hit.Data to be *nix.Package, got %T", hit.Data)
+				t.Fatalf("Expected hit.Data to be nix.Package, got %T", hit.Data)
 			}
 
 			if _, found := important[data.Attribute]; found {
@@ -143,9 +132,9 @@ func TestSearchOrder(t *testing.T) {
 		unwantedIndex := math.MaxInt
 		var i int
 		for hit := range result.Hits {
-			data, ok := hit.Data.(*nix.Package)
+			data, ok := hit.Data.(nix.Package)
 			if !ok {
-				t.Fatalf("Expected hit.Data to be *nix.Package, got %T", hit.Data)
+				t.Fatalf("Expected hit.Data to be nix.Package, got %T", hit.Data)
 			}
 
 			if _, found := important[data.Attribute]; found {

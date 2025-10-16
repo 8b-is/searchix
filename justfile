@@ -77,5 +77,3 @@ ingest *flags:
 fetch: (ingest "--fetch")
 
 replace: (ingest "--replace")
-
-reindex: (ingest "--reindex")

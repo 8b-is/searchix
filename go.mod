@@ -10,6 +10,7 @@ require (
 	github.com/asdine/storm/v3 v3.2.1
 	github.com/bcicen/jstream v1.0.1
 	github.com/blevesearch/bleve/v2 v2.5.2
+	github.com/blevesearch/bleve_index_api v1.2.8
 	github.com/creasty/defaults v1.8.0
 	github.com/crewjam/csp v0.0.2
 	github.com/dustin/go-humanize v1.0.1
@@ -34,7 +35,6 @@ require (
 	github.com/Code-Hex/dd v1.1.0 // indirect
 	github.com/RoaringBitmap/roaring/v2 v2.5.0 // indirect
 	github.com/bits-and-blooms/bitset v1.22.0 // indirect
-	github.com/blevesearch/bleve_index_api v1.2.8 // indirect
 	github.com/blevesearch/geo v0.2.3 // indirect
 	github.com/blevesearch/go-faiss v1.0.25 // indirect
 	github.com/blevesearch/go-porterstemmer v1.0.3 // indirect

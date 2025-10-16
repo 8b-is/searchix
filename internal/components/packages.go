@@ -23,8 +23,8 @@ func Packages(result *index.Result) g.Node {
 		),
 		TBody(
 			g.MapIter(result.Hits, func(hit index.DocumentMatch) g.Node {
-				if m, ok := hit.Data.(*nix.Package); ok {
-					return packageRow(hit, *m)
+				if m, ok := hit.Data.(nix.Package); ok {
+					return packageRow(hit, m)
 				}
 
 				return emptyPackageRow(hit)

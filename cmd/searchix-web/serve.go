@@ -20,7 +20,6 @@ import (
 	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/manpages"
 	"alin.ovh/searchix/internal/server"
-	"alin.ovh/searchix/internal/storage"
 	"alin.ovh/searchix/web"
 )
 
@@ -38,16 +37,6 @@ func (opts *ServeOptions) Execute(_ []string) (err error) {
 	}
 	defer root.Close()
 
-	store, err := storage.New(&storage.Options{
-		LowMemory: cfg.Importer.LowMemory,
-		Root:      root,
-		Logger:    logger.Named("store"),
-	})
-	if err != nil {
-		return fault.Wrap(err, fmsg.With("Failed to create store"))
-	}
-	defer store.Close()
-
 	read, write, err := index.OpenOrCreate(
 		&index.Options{
 			Config:    cfg,
@@ -55,7 +44,6 @@ func (opts *ServeOptions) Execute(_ []string) (err error) {
 			BatchSize: cfg.Importer.BatchSize,
 			Logger:    logger.Named("index"),
 			Root:      root,
-			Store:     store,
 		},
 	)
 	if err != nil {
@@ -70,14 +58,13 @@ func (opts *ServeOptions) Execute(_ []string) (err error) {
 	s, err := web.New(cfg, logger, &server.Options{
 		ReadIndex:      read,
 		ManpagesURLMap: mdb,
-		Store:          store,
 	})
 	if err != nil {
 		return fault.Wrap(err, fmsg.With("Failed to initialise searchix-web"))
 	}
 
 	imp, err := importer.New(cfg, &importer.Options{
-		Storage:    store,
+		ReadIndex:  read,
 		WriteIndex: write,
 		LowMemory:  cfg.Importer.LowMemory,
 		Logger:     logger.Named("importer"),
@@ -91,20 +78,8 @@ func (opts *ServeOptions) Execute(_ []string) (err error) {
 	ctx, stop := signal.NotifyContext(context.Background(), signals...)
 	defer stop()
 
-	if store.IsNew() {
-		err = sdnotify.Status("fetching")
-		if err != nil {
-			logger.Warn("failed to update systemd status", "error", err)
-		}
-
-		err = imp.Fetch(ctx, true, false, nil)
-		if err != nil {
-			return fault.Wrap(err, fmsg.With("Failed to start importer"))
-		}
-	}
-
-	if store.IsNew() || !write.Exists() {
-		err = imp.Index(ctx)
+	if !write.Exists() {
+		err = imp.Index(ctx, nil)
 		if err != nil {
 			return fault.Wrap(err, fmsg.With("Failed to index data"))
 		}
@@ -143,7 +118,7 @@ func (opts *ServeOptions) Execute(_ []string) (err error) {
 
 			if sig == syscall.SIGUSR1 {
 				logger.Info("manual fetch on SIGUSR1")
-				err := imp.Fetch(ctx, true, false, nil)
+				err := imp.Fetch(ctx, true, nil)
 				if err != nil {
 					logger.Warn("manual fetch error", "error", err)
 				}
@@ -151,7 +126,7 @@ func (opts *ServeOptions) Execute(_ []string) (err error) {
 			}
 
 			logger.Info("manual re-index", "signal", sig.String())
-			err = imp.Index(ctx)
+			err = imp.Index(ctx, nil)
 			if err != nil {
 				logger.Error("manual index error", "error", err)
 			}

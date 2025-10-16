@@ -67,14 +67,14 @@ func (imp *Importer) StartUpdateTimer(
 		MarkImportStarted()
 		ctx, cancel := context.WithTimeout(parentCtx, imp.config.Importer.Timeout.Duration)
 
-		err := imp.Fetch(ctx, false, false, nil)
+		err := imp.Fetch(ctx, false, nil)
 		if err != nil {
 			imp.options.Logger.Warn("error fetching update", "error", err)
 		} else {
 			imp.options.Logger.Info("update complete")
 		}
 
-		err = imp.Index(ctx)
+		err = imp.Index(ctx, nil)
 		if err != nil {
 			imp.options.Logger.Warn("error indexing update", "error", err)
 		} else {

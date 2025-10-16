@@ -2,48 +2,63 @@ package importer
 
 import (
 	"context"
+	"sync"
 
-	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/nix"
-	"alin.ovh/searchix/internal/storage"
 )
 
 type Processor interface {
 	Process(context.Context) (<-chan nix.Importable, <-chan error)
 }
 
-type (
-	ImportSource      func(context.Context) (<-chan nix.Importable, <-chan error)
-	ImportDestination func(context.Context, <-chan nix.Importable) <-chan error
-)
-
-func (imp *Importer) indexSource(
+func (imp *Importer) process(
 	ctx context.Context,
-	source *config.Source,
+	processor Processor,
 ) (bool, error) {
-	writer := imp.options.WriteIndex
-	var exporter func(context.Context) (<-chan nix.Importable, <-chan error)
-	switch source.Importer {
-	case config.Packages:
-		exporter = storage.MakeSourceExporter[nix.Package](
-			imp.options.Storage,
-			source,
-			writer.GetBatchSize(),
-		)
-	case config.Options:
-		exporter = storage.MakeSourceExporter[nix.Option](
-			imp.options.Storage,
-			source,
-			writer.GetBatchSize(),
-		)
-	}
+	wg := sync.WaitGroup{}
 
-	return pipe(
-		ctx,
-		imp.options.Logger,
-		exporter,
-		func(ctx context.Context, objects <-chan nix.Importable) <-chan error {
-			return writer.Import(ctx, objects)
-		},
-	)
+	wg.Add(1)
+	objects, pErrs := processor.Process(ctx)
+
+	wg.Add(1)
+	iErrs := imp.options.WriteIndex.Import(ctx, objects)
+
+	var hadObjectErrors bool
+	var criticalError error
+	go func() {
+		for {
+			select {
+			case err, running := <-iErrs:
+				if !running {
+					wg.Done()
+					iErrs = nil
+					imp.options.Logger.Debug("ingest completed")
+
+					continue
+				}
+				be, isBatchError := err.(*index.BatchError)
+				if isBatchError {
+					criticalError = be
+
+					break
+				}
+				hadObjectErrors = true
+				imp.options.Logger.Warn("error ingesting object", "error", err)
+			case err, running := <-pErrs:
+				if !running {
+					wg.Done()
+					pErrs = nil
+
+					continue
+				}
+				hadObjectErrors = true
+				imp.options.Logger.Warn("error processing object", "error", err)
+			}
+		}
+	}()
+
+	wg.Wait()
+
+	return hadObjectErrors, criticalError
 }
