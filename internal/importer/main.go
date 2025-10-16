@@ -204,9 +204,12 @@ func (imp *Importer) PruneSource(
 	}
 
 	if res.Total == 0 {
+		imp.options.Logger.Debug("no old entities found")
+
 		return nil
 	}
 
+	imp.options.Logger.Debug("found old entities", "count", res.Total)
 	if float64(res.Total) > (0.9 * float64(maxCount)) {
 		return fault.Newf("too many entities to prune: %d/%d (threshold: 90%%)", res.Total, maxCount)
 	}
