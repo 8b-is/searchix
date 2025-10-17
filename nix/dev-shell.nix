@@ -17,7 +17,6 @@ mkShell {
       sd
       watchexec
       brotli
-      boltbrowser
       bleve
       gomod2nix
     ]
