@@ -1,15 +1,37 @@
 # Changelog
 
-## [v0.2.6](https://codeberg.org/alanpearce/searchix/compare/v0.2.5...d94a199425050ef9b1da09e5b8bba7611d3c1082) (2025-10-04)
+## [v0.2.7](https://codeberg.org/alanpearce/searchix/compare/v0.2.6...3348e3f8f5d151d8a81da8f2b9540c8dd0d1184e) (2025-10-16)
 
 ### Features
+
+- add debug logging for prune search
+  ([3348e3f](https://codeberg.org/alanpearce/searchix/commit/3348e3f8f5d151d8a81da8f2b9540c8dd0d1184e))
+- revert back to using index as storage
+  ([7c0e372](https://codeberg.org/alanpearce/searchix/commit/7c0e3729dd314a571fd635408fb89f24199e00b3))
+- add icon to OpenSearch Description XML
+  ([5cc6ab7](https://codeberg.org/alanpearce/searchix/commit/5cc6ab750051e5afc26b945327c73709de20b107))
+- serve assets from root
+  ([60b8ef0](https://codeberg.org/alanpearce/searchix/commit/60b8ef0aad7364f462449990e9edd7b53d01c4be))
+- add favicon
+  ([43ad85a](https://codeberg.org/alanpearce/searchix/commit/43ad85ad7c45ea39eeca1721112ff109c1614694))
+
+### Fixes
+
+- save metadata after import
+  ([fce18f9](https://codeberg.org/alanpearce/searchix/commit/fce18f928e4f085875ee714a8bb0549388d6e693))
+- incorrect javascript linking
+  ([e0bbccf](https://codeberg.org/alanpearce/searchix/commit/e0bbccf0b9c5e43bfa2ef02a5bb33c27b8bf5d00))
+
+### [v0.2.6](https://codeberg.org/alanpearce/searchix/compare/v0.2.5...v0.2.6) (2025-10-06)
+
+#### Features
 
 - restart instead of stopping service during generation switches
   ([d94a199](https://codeberg.org/alanpearce/searchix/commit/d94a199425050ef9b1da09e5b8bba7611d3c1082))
 - use sd_notify for watchdog and status notification
   ([49031e3](https://codeberg.org/alanpearce/searchix/commit/49031e3ce0a01afda5079015c442a67720017220))
 
-### Fixes
+#### Fixes
 
 - incorrectly selecting too many entities to prune
   ([eeac61c](https://codeberg.org/alanpearce/searchix/commit/eeac61c274b3ee615aedf3318c97715d70915a72))
