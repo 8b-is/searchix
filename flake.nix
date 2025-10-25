@@ -15,7 +15,10 @@
         flake-utils.follows = "flake-utils";
       };
     };
-    treefmt-nix.url = "github:numtide/treefmt-nix";
+    treefmt-nix = {
+      url = "github:numtide/treefmt-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     simple-css = {
       url = "github:kevquirk/simple.css";
       flake = false;
