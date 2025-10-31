@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/gob"
 	"iter"
+	"net/url"
 	"strings"
 	"time"
 
@@ -50,7 +51,7 @@ func (index *ReadIndex) LastUpdated() time.Time {
 }
 
 func (index *ReadIndex) GetEnabledSources() ([]string, error) {
-	facet := bleve.NewFacetRequest("Source", 100)
+	facet := bleve.NewFacetRequest("Source", len(index.config.Importer.Sources))
 	query := bleve.NewMatchAllQuery()
 	search := bleve.NewSearchRequest(query)
 	search.AddFacet("Source", facet)
@@ -136,20 +137,9 @@ func (index *ReadIndex) Search(
 	keyword string,
 	from int,
 	pageSize int,
+	facets url.Values,
 ) (*Result, error) {
 	query := bleve.NewBooleanQuery()
-
-	if strings.ContainsAny(keyword, "+-=&|<>!(){}[]^\"~*?:\\/") {
-		query.AddMust(bleve.NewQueryStringQuery(keyword))
-	} else {
-		// match the user's query in any field ...
-		query.AddMust(bleve.NewDisjunctionQuery(
-			setBoost(bleve.NewTermQuery(keyword), 50),
-			setBoost(bleve.NewPrefixQuery(keyword), 25),
-			setBoost(bleve.NewMatchPhraseQuery(keyword), 25),
-			bleve.NewMatchQuery(keyword),
-		))
-	}
 
 	if source != nil {
 		query.AddMust(
@@ -164,69 +154,105 @@ func (index *ReadIndex) Search(
 		query.AddShould(q)
 	}
 
-	idQuery := bleve.NewMatchQuery(keyword)
-	idQuery.SetField("_id")
-	idQuery.SetBoost(8)
-	query.AddShould(idQuery)
+	if keyword != "" {
+		if strings.ContainsAny(keyword, "+-=&|<>!(){}[]^\"~*?:\\/") {
+			query.AddMust(bleve.NewQueryStringQuery(keyword))
+		} else {
+			// match the user's query in any field ...
+			query.AddMust(bleve.NewDisjunctionQuery(
+				setBoost(bleve.NewTermQuery(keyword), 50),
+				setBoost(bleve.NewPrefixQuery(keyword), 25),
+				setBoost(bleve.NewMatchPhraseQuery(keyword), 25),
+				bleve.NewMatchQuery(keyword),
+			))
+		}
 
-	mainProgramQuery := bleve.NewMatchQuery(keyword)
-	mainProgramQuery.SetField("MainProgram")
-	mainProgramQuery.SetBoost(10)
-	query.AddShould(mainProgramQuery)
+		idQuery := bleve.NewMatchQuery(keyword)
+		idQuery.SetField("_id")
+		idQuery.SetBoost(8)
+		query.AddShould(idQuery)
 
-	mainProgramLiteralQuery := bleve.NewTermQuery(keyword)
-	mainProgramLiteralQuery.SetField("MainProgram")
-	mainProgramLiteralQuery.SetBoost(50)
-	query.AddShould(mainProgramLiteralQuery)
+		mainProgramQuery := bleve.NewMatchQuery(keyword)
+		mainProgramQuery.SetField("MainProgram")
+		mainProgramQuery.SetBoost(10)
+		query.AddShould(mainProgramQuery)
 
-	programsQuery := bleve.NewMatchQuery(keyword)
-	programsQuery.SetField("Programs")
-	programsQuery.SetBoost(2)
-	query.AddShould(programsQuery)
+		mainProgramLiteralQuery := bleve.NewTermQuery(keyword)
+		mainProgramLiteralQuery.SetField("MainProgram")
+		mainProgramLiteralQuery.SetBoost(50)
+		query.AddShould(mainProgramLiteralQuery)
 
-	programsLiteralQuery := bleve.NewTermQuery(keyword)
-	programsLiteralQuery.SetField("Programs")
-	programsLiteralQuery.SetBoost(100)
-	query.AddShould(programsLiteralQuery)
+		programsQuery := bleve.NewMatchQuery(keyword)
+		programsQuery.SetField("Programs")
+		programsQuery.SetBoost(2)
+		query.AddShould(programsQuery)
 
-	attrQuery := bleve.NewMatchQuery(keyword)
-	attrQuery.SetField("Attribute")
-	attrQuery.SetBoost(2)
-	query.AddShould(attrQuery)
+		programsLiteralQuery := bleve.NewTermQuery(keyword)
+		programsLiteralQuery.SetField("Programs")
+		programsLiteralQuery.SetBoost(100)
+		query.AddShould(programsLiteralQuery)
 
-	attrPrefixQuery := bleve.NewPrefixQuery(keyword)
-	attrPrefixQuery.SetField("Attribute")
-	attrPrefixQuery.SetBoost(10)
-	query.AddShould(attrPrefixQuery)
+		attrQuery := bleve.NewMatchQuery(keyword)
+		attrQuery.SetField("Attribute")
+		attrQuery.SetBoost(2)
+		query.AddShould(attrQuery)
 
-	attrTermQuery := bleve.NewTermQuery(keyword)
-	attrTermQuery.SetField("Attribute")
-	attrTermQuery.SetBoost(600)
-	query.AddShould(attrTermQuery)
+		attrPrefixQuery := bleve.NewPrefixQuery(keyword)
+		attrPrefixQuery.SetField("Attribute")
+		attrPrefixQuery.SetBoost(10)
+		query.AddShould(attrPrefixQuery)
 
-	nameQuery := bleve.NewMatchQuery(keyword)
-	nameQuery.SetField("Name")
-	nameQuery.SetBoost(2)
-	query.AddShould(nameQuery)
+		attrTermQuery := bleve.NewTermQuery(keyword)
+		attrTermQuery.SetField("Attribute")
+		attrTermQuery.SetBoost(600)
+		query.AddShould(attrTermQuery)
 
-	nameNGramQuery := bleve.NewMatchQuery(keyword)
-	nameNGramQuery.SetField("NameNGram")
-	nameNGramQuery.SetBoost(2)
-	query.AddShould(nameNGramQuery)
+		nameQuery := bleve.NewMatchQuery(keyword)
+		nameQuery.SetField("Name")
+		nameQuery.SetBoost(2)
+		query.AddShould(nameQuery)
 
-	namePrefixQuery := bleve.NewPrefixQuery(keyword)
-	namePrefixQuery.SetField("Name")
-	namePrefixQuery.SetBoost(10)
-	query.AddShould(namePrefixQuery)
+		nameNGramQuery := bleve.NewMatchQuery(keyword)
+		nameNGramQuery.SetField("NameNGram")
+		nameNGramQuery.SetBoost(2)
+		query.AddShould(nameNGramQuery)
 
-	nameTermQuery := bleve.NewTermQuery(keyword)
-	nameTermQuery.SetField("Name")
-	nameTermQuery.SetBoost(100)
-	query.AddShould(nameTermQuery)
+		namePrefixQuery := bleve.NewPrefixQuery(keyword)
+		namePrefixQuery.SetField("Name")
+		namePrefixQuery.SetBoost(10)
+		query.AddShould(namePrefixQuery)
+
+		nameTermQuery := bleve.NewTermQuery(keyword)
+		nameTermQuery.SetField("Name")
+		nameTermQuery.SetBoost(100)
+		query.AddShould(nameTermQuery)
+	}
 
 	search := bleve.NewSearchRequest(query)
 	search.Explain = config.DevMode
 	search.Size = pageSize
+
+	if len(facets) > 0 {
+		for name, values := range facets {
+			or := bleve.NewDisjunctionQuery()
+			for _, value := range values {
+				q := bleve.NewTermQuery(value)
+				q.SetField(name)
+
+				or.AddQuery(q)
+			}
+			query.AddMust(or)
+		}
+
+		if keyword == "" {
+			search.SortBy([]string{"_id"})
+		}
+	}
+
+	if source == nil || source.Importer == config.Packages {
+		search.AddFacet("Package set", bleve.NewFacetRequest("PackageSet", 10))
+		search.AddFacet("Platform", bleve.NewFacetRequest("Platforms", 10))
+	}
 
 	if from != 0 {
 		search.From = from

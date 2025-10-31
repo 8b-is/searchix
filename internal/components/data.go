@@ -2,6 +2,7 @@ package components
 
 import (
 	"net/url"
+	"slices"
 	"strconv"
 
 	"alin.ovh/searchix/frontend"
@@ -23,8 +24,9 @@ type TemplateData struct {
 
 type ResultData struct {
 	TemplateData
-	Query   string
-	Results *search.Result
+	Query        string
+	FacetQueries url.Values
+	Results      *search.Result
 }
 
 type SearchNav struct {
@@ -67,4 +69,28 @@ func (u SearchNav) WithPagination(page *pagination.Pagination) SearchNav {
 	}
 
 	return u
+}
+
+func (u SearchNav) HasFacet(field string, term string) bool {
+	return slices.Contains(u.URL.Query()[field], term)
+}
+
+func (u SearchNav) AddFacet(field string, term string) string {
+	nu := u.URL
+	q := nu.Query()
+	q.Add(field, term)
+	nu.RawQuery = q.Encode()
+
+	return nu.String()
+}
+
+func (u SearchNav) RemoveFacet(field string, term string) string {
+	nu := u.URL
+	q := nu.Query()
+	q[field] = slices.DeleteFunc(q[field], func(v string) bool {
+		return v == term
+	})
+	nu.RawQuery = q.Encode()
+
+	return nu.String()
 }

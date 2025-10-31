@@ -1,6 +1,11 @@
 package components
 
 import (
+	"maps"
+	"slices"
+
+	"github.com/blevesearch/bleve/v2/search"
+
 	"alin.ovh/searchix/internal/config"
 
 	g "alin.ovh/gomponents"
@@ -29,6 +34,7 @@ func Results(r ResultData) g.Node {
 	}
 
 	return g.Group([]g.Node{
+		Facets(r),
 		content,
 		Footer(
 			g.Attr("aria-label", "pagination"),
@@ -51,6 +57,56 @@ func Results(r ResultData) g.Node {
 			),
 		),
 	})
+}
+
+func Facets(r ResultData) g.Node {
+	return Nav(
+		Class("facets"),
+		g.Map(slices.Sorted(maps.Keys(r.Results.Facets)), func(name string) g.Node {
+			facet := r.Results.Facets[name]
+
+			return Div(Class("facet"),
+				H3(g.Text(name)),
+				Ul(
+					g.Map(facet.Terms.Terms(), func(term *search.TermFacet) g.Node {
+						t := term.Term
+						if t == "" {
+							t = "None"
+						}
+
+						return Term(
+							g.If(
+								r.SearchNav.HasFacet(facet.Field, term.Term),
+								A(
+									Href(r.SearchNav.RemoveFacet(facet.Field, term.Term)),
+									TitleAttr("remove"),
+									g.Text(t),
+								),
+								A(
+									Href(r.SearchNav.AddFacet(facet.Field, term.Term)),
+									g.Text(t),
+								),
+							),
+							Span(
+								Class("count"),
+								g.Textf("%d", term.Count),
+							),
+						)
+					}),
+					g.If(facet.Missing > 0,
+						Li(Class("term"),
+							A(Href(r.SearchNav.AddFacet(facet.Field, "")), g.Text("None")),
+							Span(Class("count"), g.Textf("%d", facet.Missing)),
+						),
+					),
+				),
+			)
+		}),
+	)
+}
+
+func Term(children ...g.Node) g.Node {
+	return Li(Class("term"), g.Group(children))
 }
 
 func ResultsPage(r ResultData) g.Node {

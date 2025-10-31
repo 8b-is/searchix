@@ -12,34 +12,37 @@ import (
 	"alin.ovh/searchix/internal/importer"
 )
 
-func SearchForm(tdata TemplateData, r ResultData) g.Node {
-	return Search(Form(
+func SearchForm(tdata TemplateData, r ResultData, children ...g.Node) g.Node {
+	return Form(
 		ID("search"),
-		FieldSet(
-			Legend(
-				ID("legend"),
-				H2(g.Textf("%s search", sourceNameAndType(tdata.Source))),
-				A(
-					Class("help"),
-					Target("_blank"),
-					Href("https://blevesearch.com/docs/Query-String-Query/"),
-					g.Text("advanced query syntax"),
+		Search(
+			FieldSet(
+				Legend(
+					ID("legend"),
+					H2(g.Textf("%s search", sourceNameAndType(tdata.Source))),
+					A(
+						Class("help"),
+						Target("_blank"),
+						Href("https://blevesearch.com/docs/Query-String-Query/"),
+						g.Text("advanced query syntax"),
+					),
 				),
+				Input(
+					ID("query"),
+					Aria("labelledby", "legend"),
+					MinLength("2"),
+					Name("query"),
+					Type("search"),
+					Value(r.Query),
+					AutoFocus(),
+					g.Attr("spellcheck", "false"),
+					g.Attr("autocapitalize", "none"),
+				),
+				Button(g.Text("Search")),
 			),
-			Input(
-				ID("query"),
-				Aria("labelledby", "legend"),
-				MinLength("2"),
-				Name("query"),
-				Type("search"),
-				Value(r.Query),
-				AutoFocus(),
-				g.Attr("spellcheck", "false"),
-				g.Attr("autocapitalize", "none"),
-			),
-			Button(g.Text("Search")),
 		),
-	))
+		g.Group(children),
+	)
 }
 
 func SearchPage(tdata TemplateData, r ResultData, children ...g.Node) g.Node {
@@ -97,12 +100,13 @@ func SearchPage(tdata TemplateData, r ResultData, children ...g.Node) g.Node {
 			),
 		),
 		script(tdata.Assets.ByPath["/search.js"]),
-		SearchForm(tdata, r),
-		Section(
-			ID("results"),
-			Role("list"),
-			Aria("label", "search results"),
-			g.Group(children),
+		SearchForm(tdata, r,
+			Div(
+				ID("results"),
+				Role("list"),
+				Aria("label", "search results"),
+				g.Group(children),
+			),
 		),
 		Dialog(
 			ID("dialog"),

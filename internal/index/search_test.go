@@ -68,6 +68,7 @@ func TestSearchOrder(t *testing.T) {
 			"git",
 			0,
 			100,
+			nil,
 		)
 		if err != nil {
 			t.Fatal(err)
@@ -112,6 +113,7 @@ func TestSearchOrder(t *testing.T) {
 			"jj",
 			0,
 			100,
+			nil,
 		)
 		if err != nil {
 			t.Fatal(err)

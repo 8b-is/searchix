@@ -4,6 +4,7 @@ const queryInput = document.getElementById("query");
 const dialog = document.getElementById("dialog");
 const results = document.getElementById("results");
 let pagination = document.getElementById("pagination");
+let facets = document.querySelector(".facets");
 
 const resultsRange = new Range();
 resultsRange.setStart(results, 0);
@@ -58,7 +59,7 @@ function addOpenDialogListeners(results) {
  *
  * @param {MouseEvent} ev
  */
-function paginationLinkClicked(ev) {
+function updateSearch(ev) {
   const url = new URL(ev.target.href);
   getResults(url);
   ev.preventDefault();
@@ -66,24 +67,33 @@ function paginationLinkClicked(ev) {
 
 /**
  *
- * @param {HTMLElement} pagination
+ * @param {HTMLElement} parent
  */
-function addPaginationEventListeners(pagination) {
-  Array.from(pagination.children).forEach((child) =>
-    child.addEventListener("click", paginationLinkClicked),
-  );
+function addUpdateSearchListeners(parent) {
+  parent
+    .querySelectorAll("a")
+    .forEach((child) => child.addEventListener("click", updateSearch));
 }
 
+/**
+ * @param {string} html
+ */
 function renderResults(html) {
   const fragment = resultsRange.createContextualFragment(
     escapePolicy !== null ? escapePolicy.createHTML(html) : html,
   );
-  pagination = fragment.querySelector("#pagination");
   resultsRange.deleteContents();
   resultsRange.insertNode(fragment);
   addOpenDialogListeners(results);
+
+  pagination = results.querySelector("#pagination");
   if (pagination !== null) {
-    addPaginationEventListeners(pagination);
+    addUpdateSearchListeners(pagination);
+  }
+
+  facets = results.querySelector(".facets");
+  if (facets !== null) {
+    addUpdateSearchListeners(facets);
   }
 }
 
@@ -141,9 +151,12 @@ search.addEventListener("submit", function (ev) {
 
 if (results !== null) {
   addOpenDialogListeners(results);
-}
-if (pagination !== null) {
-  addPaginationEventListeners(pagination);
+  if (pagination !== null) {
+    addUpdateSearchListeners(pagination);
+  }
+  if (facets !== null) {
+    addUpdateSearchListeners(facets);
+  }
 }
 
 document.querySelector("a.current").addEventListener("click", function (ev) {

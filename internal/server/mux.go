@@ -94,11 +94,18 @@ func NewMux(
 				}
 			}
 
-			if r.URL.Query().Has("query") {
-				qs := r.URL.Query().Get("query")
-				ctx := fctx.WithMeta(r.Context(), "search_query", qs)
+			facets := r.URL.Query()
+			facets.Del("query")
+			facets.Del("page")
 
-				if len(qs) < 2 {
+			if r.URL.Query().Has("query") || len(facets) > 0 {
+				qs := r.URL.Query().Get("query")
+				ctx := r.Context()
+				if qs != "" {
+					ctx = fctx.WithMeta(ctx, "search_query", qs)
+				}
+
+				if len(qs) < 2 && len(facets) == 0 {
 					errorHandler(w, r, "Query too short", http.StatusBadRequest)
 
 					return
@@ -121,7 +128,7 @@ func NewMux(
 				page := pagination.New(pageNumber, pageSize)
 
 				ctx, cancel := context.WithTimeout(ctx, cfg.Web.SearchTimeout.Duration)
-				results, err := index.Search(ctx, source, qs, page.From, page.Size)
+				results, err := index.Search(ctx, source, qs, page.From, page.Size, facets)
 				cancel()
 
 				if err != nil {
@@ -151,8 +158,9 @@ func NewMux(
 						Query:         qs,
 						SearchNav:     components.NewSearchNav(*r.URL).WithPagination(page),
 					},
-					Query:   qs,
-					Results: results,
+					Query:        qs,
+					FacetQueries: facets,
+					Results:      results,
 				}
 
 				w.Header().Add("Cache-Control", "max-age=300")
