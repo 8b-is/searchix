@@ -9,7 +9,7 @@ import (
 type ImporterType int
 
 const (
-	All = iota - 1
+	All ImporterType = iota - 1
 	UnknownType
 	Packages
 	Options
