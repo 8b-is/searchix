@@ -253,6 +253,9 @@ func (index *ReadIndex) Search(
 		search.AddFacet("Package set", bleve.NewFacetRequest("PackageSet", 10))
 		search.AddFacet("Platform", bleve.NewFacetRequest("Platforms", 10))
 	}
+	if source == nil || source.Importer == config.Options {
+		search.AddFacet("Option set", bleve.NewFacetRequest("Parents", 10))
+	}
 
 	if from != 0 {
 		search.From = from

@@ -146,6 +146,7 @@ func createIndexMapping() (mapping.IndexMapping, error) {
 	)
 	optionMapping.AddFieldMappingsAt("Source", identityFieldMapping)
 	optionMapping.AddFieldMappingsAt("Loc", locFieldMapping)
+	optionMapping.AddFieldMappingsAt("Parents", locFieldMapping)
 	optionMapping.AddFieldMappingsAt("RelatedPackages", textFieldMapping)
 	optionMapping.AddFieldMappingsAt("Description", descriptionFieldMapping)
 

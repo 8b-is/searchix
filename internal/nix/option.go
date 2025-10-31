@@ -30,6 +30,7 @@ type Option struct {
 	Description     Markdown
 	Example         *Docs `json:",omitempty"`
 	Loc             []string
+	Parents         string
 	RelatedPackages Markdown `json:",omitempty"`
 	Type            string
 	ImportedAt      time.Time `storm:"index"`
