@@ -8,11 +8,11 @@ import (
 )
 
 func Results(r ResultData) g.Node {
-	if r.Query == "" {
+	if r.Results == nil {
 		return Br()
 	}
 
-	if r.Results == nil || r.Results.Total == 0 {
+	if r.Results.Total == 0 {
 		return Span(Role("status"), g.Text("Nothing found"))
 	}
 
@@ -34,11 +34,11 @@ func Results(r ResultData) g.Node {
 			g.Attr("aria-label", "pagination"),
 			Nav(
 				ID("pagination"),
-				g.If(r.Prev != "",
-					A(Class("button"), Href(r.Prev), Rel("prev"), g.Text("Prev")),
+				g.If(r.SearchNav.Prev != "",
+					A(Class("button"), Href(r.SearchNav.Prev), Rel("prev"), g.Text("Prev")),
 				),
-				g.If(r.Next != "",
-					A(Class("button"), Href(r.Next), Rel("next"), g.Text("Next")),
+				g.If(r.SearchNav.Next != "",
+					A(Class("button"), Href(r.SearchNav.Next), Rel("next"), g.Text("Next")),
 				),
 			),
 			Span(
@@ -46,8 +46,8 @@ func Results(r ResultData) g.Node {
 				g.Textf("%d results", r.Results.Total),
 			),
 			g.Text(" "),
-			g.If(r.Next != r.Prev && r.Results.Total < config.MaxResultsShowAll,
-				A(Href(r.All), g.Text("Show All")),
+			g.If(r.SearchNav.All != "",
+				A(Href(r.SearchNav.All), g.Text("Show All")),
 			),
 		),
 	})

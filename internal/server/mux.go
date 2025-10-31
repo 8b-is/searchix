@@ -8,7 +8,6 @@ import (
 	"maps"
 	"math"
 	"net/http"
-	"net/url"
 	"path"
 	"slices"
 	"strconv"
@@ -86,9 +85,7 @@ func NewMux(
 		return func(w http.ResponseWriter, r *http.Request) {
 			var err error
 			var source *config.Source
-			var urlBase string
 			if importerType != config.All {
-				urlBase = "search"
 				source = cfg.Importer.Sources[r.PathValue("source")]
 				if source == nil || importerType != source.Importer {
 					errorHandler(w, r, http.StatusText(http.StatusNotFound), http.StatusNotFound)
@@ -143,6 +140,7 @@ func NewMux(
 					results.Total > config.MaxResultsShowAll {
 					errorHandler(w, r, "Too many results, use pagination", http.StatusBadRequest)
 				}
+				page.SetResults(results.Total)
 
 				tdata := components.ResultData{
 					TemplateData: components.TemplateData{
@@ -151,36 +149,10 @@ func NewMux(
 						Sources:       sources,
 						Assets:        assets,
 						Query:         qs,
+						SearchNav:     components.NewSearchNav(*r.URL).WithPagination(page),
 					},
 					Query:   qs,
 					Results: results,
-				}
-
-				page.SetResults(results.Total)
-				if page.Needed {
-					q, err := url.ParseQuery(r.URL.RawQuery)
-					if err != nil {
-						errorHandler(w, r, "Query string error", http.StatusBadRequest)
-
-						return
-					}
-
-					if page.Next != 0 {
-						q.Set("page", strconv.Itoa(page.Next))
-						tdata.Next = urlBase + "?" + q.Encode()
-					}
-
-					if page.Prev != 0 {
-						if page.Prev == 1 {
-							q.Del("page")
-						} else {
-							q.Set("page", strconv.Itoa(page.Prev))
-						}
-						tdata.Prev = urlBase + "?" + q.Encode()
-					}
-
-					q.Set("page", "0")
-					tdata.All = urlBase + "?" + q.Encode()
 				}
 
 				w.Header().Add("Cache-Control", "max-age=300")
