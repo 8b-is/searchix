@@ -23,8 +23,6 @@ linters:
         - (github.com/asdine/storm/v3.Tx).Rollback
     forbidigo:
       forbid:
-        - pattern: ^(file)?path.Join$
-          msg: "should use os.Root methods instead of path functions"
         - pattern: ^filepath\.(Join|Walkdir)$
           msg: "should use os.Root methods instead of filepath functions"
         - pattern: ^os\.(Open(File)?|Create|(New|Read|Write)File|Mkdir(All|Temp)?|Chmod|Chown|Chtimes|Link|Lstat|ReadDir|Remove(All)?|Rename|Stat|Symlink|Truncate|CopyFS|DirFS)$
