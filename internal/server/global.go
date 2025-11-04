@@ -1,0 +1,228 @@
+package server
+
+import (
+	"context"
+	"encoding/xml"
+	"fmt"
+	"math"
+	"net/http"
+	"strconv"
+
+	"alin.ovh/x/log"
+	"github.com/Southclaws/fault/fctx"
+
+	"alin.ovh/searchix/frontend"
+	"alin.ovh/searchix/internal/components"
+	"alin.ovh/searchix/internal/config"
+	search "alin.ovh/searchix/internal/index"
+	"alin.ovh/searchix/internal/manpages"
+	"alin.ovh/searchix/internal/opensearch"
+	"alin.ovh/searchix/internal/pagination"
+)
+
+type GlobalHandler struct {
+	assets *frontend.AssetCollection
+	cfg    *config.Config
+	index  *search.ReadIndex
+	log    *log.Logger
+	mdb    *manpages.URLMap
+
+	errorHandler func(w http.ResponseWriter, r *http.Request, message string, statusCode int)
+}
+
+func (g *GlobalHandler) NewSourceHandler(source *config.Source) *SourceHandler {
+	h := &SourceHandler{
+		global: g,
+		source: source,
+		mux:    http.NewServeMux(),
+	}
+
+	h.mux.HandleFunc("/search", h.Search)
+	h.mux.HandleFunc("/{id}", h.Detail)
+	h.mux.HandleFunc("/opensearch.xml", h.OpenSearchXML)
+
+	return h
+}
+
+func (g *GlobalHandler) Search(source *config.Source, w http.ResponseWriter, r *http.Request) {
+	facets := r.URL.Query()
+	facets.Del("query")
+	facets.Del("page")
+
+	var err error
+	if r.URL.Query().Has("query") || len(facets) > 0 {
+		qs := r.URL.Query().Get("query")
+		ctx := r.Context()
+		if qs != "" {
+			ctx = fctx.WithMeta(ctx, "search_query", qs)
+		}
+
+		if len(qs) < 2 && len(facets) == 0 {
+			g.errorHandler(w, r, "Query too short", http.StatusBadRequest)
+
+			return
+		}
+
+		pageSize := search.DefaultPageSize
+		pageNumber := 1
+		if pg := r.URL.Query().Get("page"); pg != "" {
+			pageNumber, err = strconv.Atoi(pg)
+			if err != nil || pageNumber > math.MaxInt {
+				g.errorHandler(w, r, "Bad query string", http.StatusBadRequest)
+
+				return
+			}
+			if pageNumber == 0 {
+				pageNumber = 1
+				pageSize = config.MaxResultsShowAll
+			}
+		}
+		page := pagination.New(pageNumber, pageSize)
+
+		ctx, cancel := context.WithTimeout(ctx, g.cfg.Web.SearchTimeout.Duration)
+		results, err := g.index.Search(ctx, source, qs, page.From, page.Size, facets)
+		cancel()
+
+		if err != nil {
+			if err == context.DeadlineExceeded {
+				g.errorHandler(w, r, "Search timed out", http.StatusInternalServerError)
+
+				return
+			}
+			meta := fctx.Unwrap(err)
+			g.log.Error("search error", "error", err, "search_query", meta["search_query"])
+			g.errorHandler(w, r, err.Error(), http.StatusInternalServerError)
+
+			return
+		}
+		if pageSize == config.MaxResultsShowAll &&
+			results.Total > config.MaxResultsShowAll {
+			g.errorHandler(w, r, "Too many results, use pagination", http.StatusBadRequest)
+		}
+		page.SetResults(results.Total)
+
+		tdata := components.ResultData{
+			TemplateData: components.TemplateData{
+				ExtraHeadHTML: g.cfg.Web.ExtraHeadHTML,
+				Source:        source,
+				Sources:       sources,
+				Assets:        g.assets,
+				Query:         qs,
+				SearchNav:     components.NewSearchNav(*r.URL).WithPagination(page),
+			},
+			Query:        qs,
+			FacetQueries: facets,
+			Results:      results,
+		}
+
+		w.Header().Add("Cache-Control", "max-age=300")
+		w.Header().Add("Vary", "Fetch")
+		var baseErr error
+		if r.Header.Get("Fetch") == "true" {
+			w.Header().Add("Content-Type", "text/html; charset=utf-8")
+			baseErr = components.Results(tdata).Render(w)
+		} else {
+			baseErr = components.ResultsPage(tdata).Render(w)
+		}
+		if baseErr != nil {
+			g.log.Error("template error", "template", source.Importer, "error", baseErr)
+			g.errorHandler(w, r, baseErr.Error(), http.StatusInternalServerError)
+		}
+	} else {
+		w.Header().Add("Cache-Control", "max-age=14400")
+		err = components.SearchPage(
+			components.TemplateData{
+				ExtraHeadHTML: g.cfg.Web.ExtraHeadHTML,
+				Sources:       sources,
+				Source:        source,
+				Assets:        g.assets,
+			},
+			components.ResultData{},
+		).Render(w)
+		if err != nil {
+			g.errorHandler(w, r, err.Error(), http.StatusInternalServerError)
+
+			return
+		}
+	}
+}
+
+func (g *GlobalHandler) CombinedSearch(w http.ResponseWriter, r *http.Request) {
+	g.Search(nil, w, r)
+}
+
+func (g *GlobalHandler) RootOpenSearch(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Add("Cache-Control", "max-age=604800")
+	w.Header().Set("Content-Type", "application/opensearchdescription+xml")
+	osd := &opensearch.Description{
+		ShortName:   "Searchix Combined",
+		LongName:    "Search nix options and packages with Searchix",
+		Description: "Search nix options and packages with Searchix",
+		SearchForm:  g.cfg.Web.BaseURL.JoinPath(),
+		Image: opensearch.Image{
+			Height:  32,
+			Width:   32,
+			Type:    "image/x-icon",
+			Content: g.cfg.Web.BaseURL.JoinPath("favicon.ico").String(),
+		},
+		URL: opensearch.URL{
+			Method: "get",
+			Type:   "text/html",
+			Template: g.cfg.Web.BaseURL.JoinPath().
+				AddRawQuery("query", "{searchTerms}"),
+		},
+	}
+	enc := xml.NewEncoder(w)
+	enc.Indent("", "    ")
+	err := enc.Encode(osd)
+	if err != nil {
+		// no errorHandler; HTML does not make sense here
+		http.Error(
+			w,
+			fmt.Sprintf("OpenSearch XML encoding error: %v", err),
+			http.StatusInternalServerError,
+		)
+	}
+}
+
+func (g *GlobalHandler) StaticFile(w http.ResponseWriter, r *http.Request) {
+	asset, found := g.assets.ByPath[r.URL.Path]
+	if !found {
+		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+
+		return
+	}
+	// optimisation for HTTP/3: first header sent as byte(38), not the string
+	// see https://datatracker.ietf.org/doc/html/rfc9204#appendix-A for values
+	w.Header().Add("Cache-Control", "max-age=604800")
+	w.Header().Add("ETag", asset.ETag)
+	http.ServeFileFS(w, r, frontend.Files, asset.Filename)
+}
+
+func (g *GlobalHandler) Asset(w http.ResponseWriter, r *http.Request) {
+	asset, found := g.assets.ByImmutablePath[r.URL.Path]
+	if !found {
+		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+
+		return
+	}
+	// optimisation for HTTP/3: first header sent as byte(41), not the string
+	// see https://datatracker.ietf.org/doc/html/rfc9204#appendix-A for values
+	w.Header().Add("Cache-Control", "public, max-age=31536000")
+	w.Header().Add("Cache-Control", "immutable")
+	http.ServeFileFS(w, r, frontend.Files, asset.Filename)
+}
+
+func (g *GlobalHandler) ManualPage(w http.ResponseWriter, r *http.Request) {
+	section := r.PathValue("section")
+	page := r.PathValue("page")
+
+	url, ok := g.mdb.Get(section, page)
+	if !ok {
+		http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+
+		return
+	}
+
+	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
+}
