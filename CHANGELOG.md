@@ -1,8 +1,26 @@
 # Changelog
 
-## [v0.2.7](https://codeberg.org/alanpearce/searchix/compare/v0.2.6...3348e3f8f5d151d8a81da8f2b9540c8dd0d1184e) (2025-10-16)
+## [v0.2.8](https://codeberg.org/alanpearce/searchix/compare/v0.2.7...4bb573fb6556d126900b6aea56fbf2b6d7332032) (2025-11-04)
 
 ### Features
+
+- re-enable immutable assets
+  ([179fdc3](https://codeberg.org/alanpearce/searchix/commit/179fdc3b417869d50a181cac813e1dbbf2893478))
+- add 'parents' facet to options
+  ([ab21d46](https://codeberg.org/alanpearce/searchix/commit/ab21d46e298bcf5caf5ef50a12127df89f8caa5f))
+- support faceted navigation of search results
+  ([82cfb98](https://codeberg.org/alanpearce/searchix/commit/82cfb98df7f9e38f295d3ea1d46b343914947307))
+
+### Fixes
+
+- assets not being rehashed on change in development
+  ([ee5cd9a](https://codeberg.org/alanpearce/searchix/commit/ee5cd9a58f2e38efacec9b91f7208ba0f81d28a0))
+- make treefmt's nixpkgs input follow project nixpkgs
+  ([a716284](https://codeberg.org/alanpearce/searchix/commit/a716284145943c7da204a9278c06772649b163a7))
+
+### [v0.2.7](https://codeberg.org/alanpearce/searchix/compare/v0.2.6...v0.2.7) (2025-10-17)
+
+#### Features
 
 - add debug logging for prune search
   ([3348e3f](https://codeberg.org/alanpearce/searchix/commit/3348e3f8f5d151d8a81da8f2b9540c8dd0d1184e))
@@ -15,7 +33,7 @@
 - add favicon
   ([43ad85a](https://codeberg.org/alanpearce/searchix/commit/43ad85ad7c45ea39eeca1721112ff109c1614694))
 
-### Fixes
+#### Fixes
 
 - save metadata after import
   ([fce18f9](https://codeberg.org/alanpearce/searchix/commit/fce18f928e4f085875ee714a8bb0549388d6e693))
