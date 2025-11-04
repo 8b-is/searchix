@@ -69,7 +69,7 @@ release: clean-workdir changelog update-nix-package-version
 run: dev
 
 dev:
-	watchexec --restart --exts go,toml,mod -- go run ./cmd/searchix-web --config config.toml serve --dev
+	watchexec --restart --stop-signal=SIGTERM --exts go,toml,mod -- go run ./cmd/searchix-web --config config.toml serve --dev
 
 ingest *flags:
 	go run ./cmd/searchix-web --config config.toml ingest --dev {{ flags }}
