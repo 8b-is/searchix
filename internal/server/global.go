@@ -14,7 +14,7 @@ import (
 	"alin.ovh/searchix/frontend"
 	"alin.ovh/searchix/internal/components"
 	"alin.ovh/searchix/internal/config"
-	search "alin.ovh/searchix/internal/index"
+	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/manpages"
 	"alin.ovh/searchix/internal/opensearch"
 	"alin.ovh/searchix/internal/pagination"
@@ -23,7 +23,7 @@ import (
 type GlobalHandler struct {
 	assets *frontend.AssetCollection
 	cfg    *config.Config
-	index  *search.ReadIndex
+	index  *index.ReadIndex
 	log    *log.Logger
 	mdb    *manpages.URLMap
 
@@ -63,7 +63,7 @@ func (g *GlobalHandler) Search(source config.Source, w http.ResponseWriter, r *h
 			return
 		}
 
-		pageSize := search.DefaultPageSize
+		pageSize := index.DefaultPageSize
 		pageNumber := 1
 		if pg := r.URL.Query().Get("page"); pg != "" {
 			pageNumber, err = strconv.Atoi(pg)
@@ -80,7 +80,13 @@ func (g *GlobalHandler) Search(source config.Source, w http.ResponseWriter, r *h
 		page := pagination.New(pageNumber, pageSize)
 
 		ctx, cancel := context.WithTimeout(ctx, g.cfg.Web.SearchTimeout.Duration)
-		results, err := g.index.Search(ctx, source, qs, page.From, page.Size, facets)
+		results, err := g.index.Search(ctx, index.SearchRequest{
+			Source:   source,
+			Keyword:  qs,
+			From:     page.From,
+			PageSize: page.Size,
+			Facets:   facets,
+		})
 		cancel()
 
 		if err != nil {

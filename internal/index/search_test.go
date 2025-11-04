@@ -64,11 +64,12 @@ func TestSearchOrder(t *testing.T) {
 	t.Run("git packages order", func(t *testing.T) {
 		result, err := read.Search(
 			ctx,
-			source,
-			"git",
-			0,
-			100,
-			nil,
+			index.SearchRequest{
+				Source:   source,
+				From:     0,
+				Keyword:  "git",
+				PageSize: 100,
+			},
 		)
 		if err != nil {
 			t.Fatal(err)
@@ -109,11 +110,12 @@ func TestSearchOrder(t *testing.T) {
 	t.Run("jujutsu packages order", func(t *testing.T) {
 		result, err := read.Search(
 			ctx,
-			source,
-			"jj",
-			0,
-			100,
-			nil,
+			index.SearchRequest{
+				Source:   source,
+				From:     0,
+				Keyword:  "jj",
+				PageSize: 100,
+			},
 		)
 		if err != nil {
 			t.Fatal(err)
