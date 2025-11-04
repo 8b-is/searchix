@@ -12,6 +12,7 @@ import (
 	"alin.ovh/x/log"
 
 	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/index/meta"
 	"alin.ovh/searchix/internal/nix"
 
 	"github.com/Southclaws/fault"
@@ -39,7 +40,7 @@ type ReadIndex struct {
 	config *config.Config
 	log    *log.Logger
 	exists bool
-	meta   *Meta
+	meta   *meta.Meta
 }
 
 type SearchRequest struct {

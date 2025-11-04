@@ -18,6 +18,7 @@ import (
 	"alin.ovh/searchix/internal/fetcher"
 	"alin.ovh/searchix/internal/file"
 	"alin.ovh/searchix/internal/index"
+	"alin.ovh/searchix/internal/index/meta"
 	"alin.ovh/searchix/internal/manpages"
 	"alin.ovh/searchix/internal/programs"
 )
@@ -238,7 +239,7 @@ func (imp *Importer) PruneSource(
 
 func (imp *Importer) createSourceFetcher(
 	parent context.Context,
-	meta *index.Meta,
+	meta *meta.Meta,
 	forceUpdate bool,
 ) func(config.Source) error {
 	return func(source config.Source) error {
@@ -321,7 +322,7 @@ func (imp *Importer) createSourceFetcher(
 
 func (imp *Importer) createSourceImporter(
 	parent context.Context,
-	meta *index.Meta,
+	meta *meta.Meta,
 ) func(config.Source) error {
 	return func(source config.Source) error {
 		logger := imp.options.Logger.With("name", source.Key)

@@ -9,7 +9,7 @@ import (
 
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/fetcher/http"
-	"alin.ovh/searchix/internal/index"
+	"alin.ovh/searchix/internal/index/meta"
 )
 
 type DownloadFetcher struct {
@@ -41,7 +41,7 @@ var files = map[string]string{
 
 func (i *DownloadFetcher) FetchIfNeeded(
 	ctx context.Context,
-	sourceMeta *index.SourceMeta,
+	sourceMeta *meta.SourceMeta,
 ) (*FetchedFiles, error) {
 	f := &FetchedFiles{}
 

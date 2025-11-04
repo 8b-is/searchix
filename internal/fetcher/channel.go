@@ -13,7 +13,7 @@ import (
 	"github.com/Southclaws/fault/fmsg"
 
 	"alin.ovh/searchix/internal/config"
-	"alin.ovh/searchix/internal/index"
+	"alin.ovh/searchix/internal/index/meta"
 )
 
 type ChannelFetcher struct {
@@ -39,7 +39,7 @@ func NewChannelFetcher(
 
 func (i *ChannelFetcher) FetchIfNeeded(
 	ctx context.Context,
-	sourceMeta *index.SourceMeta,
+	sourceMeta *meta.SourceMeta,
 ) (*FetchedFiles, error) {
 	target := i.Source.JoinPath("options.json")
 	args := []string{

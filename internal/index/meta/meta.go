@@ -1,4 +1,4 @@
-package index
+package meta
 
 import (
 	"encoding/json"
@@ -11,7 +11,10 @@ import (
 	"github.com/Southclaws/fault/fmsg"
 )
 
-const CurrentSchemaVersion = 9
+const (
+	CurrentSchemaVersion = 9
+	BaseName             = "meta.json"
+)
 
 type SourceMeta struct {
 	IndexedAt time.Time
@@ -36,50 +39,6 @@ type Meta struct {
 	data
 }
 
-func createMeta(root *file.Root, log *log.Logger) (*Meta, error) {
-	exists, err := root.Exists(metaBaseName)
-	if err != nil {
-		return nil, fault.Wrap(err, fmsg.With("could not check for existence of index metadata"))
-	}
-	if exists {
-		return nil, fault.New("index metadata already exists")
-	}
-
-	return &Meta{
-		root: root,
-		log:  log,
-		data: data{
-			SchemaVersion: CurrentSchemaVersion,
-			Sources:       make(map[string]*SourceMeta),
-		},
-	}, nil
-}
-
-func openMeta(root *file.Root, log *log.Logger) (*Meta, error) {
-	exists, err := root.Exists(metaBaseName)
-	if err != nil {
-		return nil, fault.Wrap(err, fmsg.With("could not check for existence of index metadata"))
-	}
-	if !exists {
-		return createMeta(root, log)
-	}
-
-	j, baseErr := root.ReadFile(metaBaseName)
-	if baseErr != nil {
-		return nil, fault.Wrap(baseErr, fmsg.With("could not open index metadata file"))
-	}
-	meta := Meta{
-		root: root,
-		log:  log,
-	}
-
-	if err := json.Unmarshal(j, &meta.data); err != nil {
-		return nil, fault.Wrap(err, fmsg.With("index metadata is corrupt, try replacing the index"))
-	}
-
-	return &meta, nil
-}
-
 func (i *Meta) IsSchemaOutdated() bool {
 	return i.SchemaVersion < CurrentSchemaVersion
 }
@@ -90,8 +49,8 @@ func (i *Meta) Save() error {
 	if err != nil {
 		return fault.Wrap(err, fmsg.With("could not prepare index metadata for saving"))
 	}
-	i.log.Debug("saving index metadata", "path", metaBaseName)
-	err = i.root.WriteFile(metaBaseName, j, 0o600)
+	i.log.Debug("saving index metadata", "path", BaseName)
+	err = i.root.WriteFile(BaseName, j, 0o600)
 	if err != nil {
 		return fault.Wrap(err, fmsg.With("could not save index metadata"))
 	}
@@ -132,4 +91,48 @@ func (i *Meta) LastUpdated() time.Time {
 	}
 
 	return last
+}
+
+func Create(root *file.Root, log *log.Logger) (*Meta, error) {
+	exists, err := root.Exists(BaseName)
+	if err != nil {
+		return nil, fault.Wrap(err, fmsg.With("could not check for existence of index metadata"))
+	}
+	if exists {
+		return nil, fault.New("index metadata already exists")
+	}
+
+	return &Meta{
+		root: root,
+		log:  log,
+		data: data{
+			SchemaVersion: CurrentSchemaVersion,
+			Sources:       make(map[string]*SourceMeta),
+		},
+	}, nil
+}
+
+func Open(root *file.Root, log *log.Logger) (*Meta, error) {
+	exists, err := root.Exists(BaseName)
+	if err != nil {
+		return nil, fault.Wrap(err, fmsg.With("could not check for existence of index metadata"))
+	}
+	if !exists {
+		return Create(root, log)
+	}
+
+	j, baseErr := root.ReadFile(BaseName)
+	if baseErr != nil {
+		return nil, fault.Wrap(baseErr, fmsg.With("could not open index metadata file"))
+	}
+	meta := Meta{
+		root: root,
+		log:  log,
+	}
+
+	if err := json.Unmarshal(j, &meta.data); err != nil {
+		return nil, fault.Wrap(err, fmsg.With("index metadata is corrupt, try replacing the index"))
+	}
+
+	return &meta, nil
 }

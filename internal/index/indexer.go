@@ -8,6 +8,7 @@ import (
 
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/file"
+	"alin.ovh/searchix/internal/index/meta"
 	"alin.ovh/searchix/internal/index/nixattr"
 	"alin.ovh/searchix/internal/nix"
 
@@ -45,7 +46,7 @@ type WriteIndex struct {
 	index     bleve.Index
 	log       *log.Logger
 	exists    bool
-	Meta      *Meta
+	Meta      *meta.Meta
 }
 
 type BatchError struct {
@@ -200,11 +201,10 @@ func createIndex(root *file.Root, kvconfig map[string]any) (bleve.Index, error) 
 
 const (
 	indexBaseName = "index.bleve"
-	metaBaseName  = "meta.json"
 )
 
 var expectedDataFiles = []string{
-	metaBaseName,
+	meta.BaseName,
 	indexBaseName,
 }
 
@@ -245,7 +245,7 @@ func OpenOrCreate(options *Options) (*ReadIndex, *WriteIndex, error) {
 	}
 
 	var idx bleve.Index
-	var meta *Meta
+	var m *meta.Meta
 	if !exists || options.Force {
 		if options.Force {
 			err = deleteIndex(root)
@@ -258,9 +258,9 @@ func OpenOrCreate(options *Options) (*ReadIndex, *WriteIndex, error) {
 			return nil, nil, err
 		}
 
-		meta, err = createMeta(root, options.Logger)
+		m, err = meta.Create(root, options.Logger)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, fault.Wrap(err, fmsg.With("could not create index metadata file"))
 		}
 
 	} else {
@@ -272,9 +272,9 @@ func OpenOrCreate(options *Options) (*ReadIndex, *WriteIndex, error) {
 			return nil, nil, fault.Wrap(baseErr, fmsg.Withf("could not open index at path %s", indexPath))
 		}
 
-		meta, err = openMeta(root, options.Logger)
+		m, err = meta.Open(root, options.Logger)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, fault.Wrap(err, fmsg.With("could not open index metadata file"))
 		}
 	}
 
@@ -291,14 +291,14 @@ func OpenOrCreate(options *Options) (*ReadIndex, *WriteIndex, error) {
 			log:    options.Logger,
 			exists: exists,
 			index:  idx,
-			meta:   meta,
+			meta:   m,
 		},
 		&WriteIndex{
 			exists:    exists,
 			index:     idx,
 			batchSize: options.BatchSize,
 			log:       options.Logger,
-			Meta:      meta,
+			Meta:      m,
 		},
 		nil
 }
@@ -308,7 +308,12 @@ func (i *WriteIndex) Exists() bool {
 }
 
 func (i *WriteIndex) SaveMeta() error {
-	return i.Meta.Save()
+	err := i.Meta.Save()
+	if err != nil {
+		return fault.Wrap(err)
+	}
+
+	return nil
 }
 
 func (i *WriteIndex) Import(

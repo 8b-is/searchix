@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"alin.ovh/searchix/internal/config"
-	"alin.ovh/searchix/internal/index"
+	"alin.ovh/searchix/internal/index/meta"
 )
 
 var Job struct {
@@ -27,7 +27,7 @@ func MarkImportFinished() {
 	Job.StartedAt = time.Time{}
 }
 
-func MarkLastRun(meta *index.Meta) {
+func MarkLastRun(meta *meta.Meta) {
 	meta.LastImport = Job.LastRun
 }
 

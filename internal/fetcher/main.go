@@ -11,7 +11,7 @@ import (
 
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/file"
-	"alin.ovh/searchix/internal/index"
+	"alin.ovh/searchix/internal/index/meta"
 )
 
 type Options struct {
@@ -26,7 +26,7 @@ type FetchedFiles struct {
 }
 
 type Fetcher interface {
-	FetchIfNeeded(context.Context, *index.SourceMeta) (*FetchedFiles, error)
+	FetchIfNeeded(context.Context, *meta.SourceMeta) (*FetchedFiles, error)
 }
 
 func New(

@@ -6,7 +6,7 @@ import (
 
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/fetcher/http"
-	"alin.ovh/searchix/internal/index"
+	"alin.ovh/searchix/internal/index/meta"
 
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
@@ -46,7 +46,7 @@ const (
 
 func (i *NixpkgsChannelFetcher) FetchIfNeeded(
 	ctx context.Context,
-	sourceMeta *index.SourceMeta,
+	sourceMeta *meta.SourceMeta,
 ) (f *FetchedFiles, err error) {
 	f = &FetchedFiles{}
 
