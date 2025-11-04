@@ -3,13 +3,14 @@
   --standard-border-radius: 0;
   --preformatted: var(--code);
   --min-width: 80rem;
-  --accent-error: #ffe0e0;
+  --accent-error: #54322c;
 }
 
 @media (prefers-color-scheme: light) {
   :root {
     --text: black;
     --text-light: #212121;
+    --accent-error: #ffe0e0;
   }
 }
 
