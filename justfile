@@ -29,7 +29,7 @@ test tests="./...":
 check-flake:
 	nix flake check
 
-ci: checkformat test
+ci: checkformat test build
 
 build:
 	nix build .#
