@@ -403,7 +403,7 @@ func NewMux(
 		}
 		go fw.Start(func(filename string) {
 			log.Debug(fmt.Sprintf("got filename %s", filename))
-			if match, _ := path.Match("static/*", filename); match {
+			if match, _ := path.Match("frontend/static/*", filename); match {
 				err := assets.Rehash()
 				if err != nil {
 					log.Error("failed to re-hash frontend assets", "error", err)
