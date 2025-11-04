@@ -216,7 +216,6 @@ dialog > h2 {
   display: flex;
   justify-content: space-between;
   border-bottom: 1px solid transparent;
-  overflow-wrap: break-word;
   padding: 0.25rem 0;
   margin-right: 0;
 }

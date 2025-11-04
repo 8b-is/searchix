@@ -3,6 +3,7 @@ package components
 import (
 	"maps"
 	"slices"
+	"strings"
 
 	"github.com/blevesearch/bleve/v2/search"
 
@@ -78,11 +79,11 @@ func Facets(r ResultData) g.Node {
 								A(
 									Href(r.SearchNav.RemoveFacet(facet.Field, term.Term)),
 									TitleAttr("remove"),
-									g.Text(t),
+									g.Text(breakable(t)),
 								),
 								A(
 									Href(r.SearchNav.AddFacet(facet.Field, term.Term)),
-									g.Text(t),
+									g.Text(breakable(t)),
 								),
 							),
 							Span(
@@ -100,6 +101,15 @@ func Facets(r ResultData) g.Node {
 				),
 			)
 		}),
+	)
+}
+
+const breakOpportunity = string(rune(0x200b))
+
+func breakable(s string) string {
+	return strings.Join(
+		strings.Split(s, "."),
+		"."+breakOpportunity,
 	)
 }
 
