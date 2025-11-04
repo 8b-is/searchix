@@ -86,6 +86,14 @@ func NewMux(
 	mux.Handle("/all/search", http.RedirectHandler("/", http.StatusFound))
 	mux.Handle("/all/opensearch.xml", http.RedirectHandler("/opensearch.xml", http.StatusFound))
 
+	for _, it := range []config.ImporterType{config.Options, config.Packages} {
+		singularPath := path.Join("/", it.Singular())
+		mux.HandleFunc(singularPath+"/", func(w http.ResponseWriter, r *http.Request) {
+			newPath := path.Join("/", it.String(), strings.TrimPrefix(r.URL.Path, singularPath))
+			http.Redirect(w, r, newPath, http.StatusFound)
+		})
+	}
+
 	for _, source := range cfg.Importer.Sources {
 		sh := handler.NewSourceHandler(source)
 		importerPath := path.Join("/", source.Importer.String(), source.Key)
