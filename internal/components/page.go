@@ -126,11 +126,11 @@ func Page(tdata TemplateData, children ...g.Node) g.Node {
 }
 
 func css(css *frontend.Asset) g.Node {
-	return Link(Href(css.URL), Rel("stylesheet"))
+	return Link(Href(css.ImmutablePath), Rel("stylesheet"))
 }
 
 func script(s *frontend.Asset) g.Node {
-	return Script(Src(s.URL), Defer())
+	return Script(Src(s.ImmutablePath), Defer())
 }
 
 func sourceNameAndType(source *config.Source) string {

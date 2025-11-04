@@ -358,14 +358,31 @@ func NewMux(
 	})
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		asset, found := assets.ByPath[r.URL.Path]
+		path := strings.TrimPrefix(r.URL.Path, "/static")
+		asset, found := assets.ByPath[path]
+		if !found {
+			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
+
+			return
+		}
+		// optimisation for HTTP/3: first header sent as byte(38), not the string
+		// see https://datatracker.ietf.org/doc/html/rfc9204#appendix-A for values
+		w.Header().Add("Cache-Control", "max-age=604800")
+		w.Header().Add("ETag", asset.ETag)
+		http.ServeFileFS(w, r, frontend.Files, asset.Filename)
+	})
+
+	mux.HandleFunc("/assets/", func(w http.ResponseWriter, r *http.Request) {
+		asset, found := assets.ByImmutablePath[r.URL.Path]
 		if !found {
 			http.Error(w, http.StatusText(http.StatusNotFound), http.StatusNotFound)
 
 			return
 		}
 		// optimisation for HTTP/3: first header sent as byte(41), not the string
-		w.Header().Add("Cache-Control", "public, max-age=86400")
+		// see https://datatracker.ietf.org/doc/html/rfc9204#appendix-A for values
+		w.Header().Add("Cache-Control", "public, max-age=31536000")
+		w.Header().Add("Cache-Control", "immutable")
 		http.ServeFileFS(w, r, frontend.Files, asset.Filename)
 	})
 

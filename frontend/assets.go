@@ -1,34 +1,39 @@
 package frontend
 
 import (
+	"encoding/hex"
 	"fmt"
 	"hash/fnv"
 	"io"
 	"io/fs"
+	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
 )
 
 type Asset struct {
-	StaticURL string
-	URL       string
-	ETag      string
-	Filename  string
+	ETag          string
+	Filename      string
+	ImmutablePath string
+	StaticURL     string
 }
 
 type AssetCollection struct {
-	Scripts     []*Asset
-	Stylesheets []*Asset
-	ByPath      map[string]*Asset
+	Scripts         []*Asset
+	Stylesheets     []*Asset
+	ByImmutablePath map[string]*Asset
+	ByPath          map[string]*Asset
 }
 
 func New() (*AssetCollection, error) {
 	a := &AssetCollection{
-		Scripts:     []*Asset{},
-		Stylesheets: []*Asset{},
-		ByPath:      make(map[string]*Asset),
+		Scripts:         []*Asset{},
+		Stylesheets:     []*Asset{},
+		ByImmutablePath: make(map[string]*Asset),
+		ByPath:          make(map[string]*Asset),
 	}
 
 	err := a.Rehash()
@@ -46,8 +51,8 @@ func newAsset(filename string) (*Asset, error) {
 	}
 	defer file.Close()
 
-	hash := fnv.New64a()
-	if _, err := io.Copy(hash, file); err != nil {
+	hasher := fnv.New64a()
+	if _, err := io.Copy(hasher, file); err != nil {
 		return nil, fault.Wrap(err, fmsg.Withf("could not hash file %s", filename))
 	}
 
@@ -56,17 +61,27 @@ func newAsset(filename string) (*Asset, error) {
 		return nil, fault.Wrap(err, fmsg.Withf("could not get relative path for %s", filename))
 	}
 
+	hash := hex.EncodeToString(hasher.Sum(nil))
+
 	return &Asset{
-		StaticURL: "/" + filename,
-		URL:       "/" + rel,
-		ETag:      fmt.Sprintf(`W/"%x"`, hash.Sum(nil)),
-		Filename:  filename,
+		ETag:          fmt.Sprintf(`W/"%s"`, hash),
+		Filename:      filename,
+		ImmutablePath: makeImmutablePath(rel, hash),
+		StaticURL:     "/" + rel,
 	}, nil
 }
 
+func makeImmutablePath(filename string, hash string) string {
+	ext := filepath.Ext(filename)
+
+	return path.Join("/", "assets", strings.Replace(filename, ext, "."+hash+ext, 1))
+}
+
 func (a *AssetCollection) Rehash() (err error) {
-	a.Scripts = []*Asset{}
-	a.Stylesheets = []*Asset{}
+	a.Scripts = nil
+	a.Stylesheets = nil
+	clear(a.ByImmutablePath)
+	clear(a.ByPath)
 
 	files, err := fs.Glob(Files, "static/**")
 	if err != nil {
@@ -84,7 +99,7 @@ func (a *AssetCollection) Rehash() (err error) {
 		case ".css":
 			a.Stylesheets = append(a.Stylesheets, asset)
 		}
-		a.ByPath[asset.URL] = asset
+		a.ByImmutablePath[asset.ImmutablePath] = asset
 		a.ByPath[asset.StaticURL] = asset
 	}
 
