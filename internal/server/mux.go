@@ -24,7 +24,7 @@ type HTTPError struct {
 	Code    int
 }
 
-var sources []*config.Source
+var sources []config.Source
 
 func applyDevModeOverrides(cfg *config.Config) {
 	if len(cfg.Web.ContentSecurityPolicy.ScriptSrc) == 0 {
@@ -36,8 +36,8 @@ func applyDevModeOverrides(cfg *config.Config) {
 	)
 }
 
-func sortSources(ss map[string]*config.Source) {
-	sources = slices.SortedFunc(maps.Values(ss), func(a, b *config.Source) int {
+func sortSources(ss map[string]config.Source) {
+	sources = slices.SortedFunc(maps.Values(ss), func(a, b config.Source) int {
 		return cmp.Or(
 			cmp.Compare(a.Order, b.Order),
 			strings.Compare(a.Key, b.Key),

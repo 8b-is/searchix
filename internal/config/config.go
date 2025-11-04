@@ -25,7 +25,7 @@ type URL struct {
 	*url.URL
 }
 
-func (u *URL) MarshalText() ([]byte, error) {
+func (u URL) MarshalText() ([]byte, error) {
 	return []byte(u.String()), nil
 }
 
@@ -52,7 +52,7 @@ type Duration struct {
 	time.Duration
 }
 
-func (d *Duration) MarshalText() ([]byte, error) {
+func (d Duration) MarshalText() ([]byte, error) {
 	return []byte(d.String()), nil
 }
 
@@ -80,7 +80,7 @@ type LocalTime struct {
 	toml.LocalTime
 }
 
-func (t *LocalTime) MarshalText() ([]byte, error) {
+func (t LocalTime) MarshalText() ([]byte, error) {
 	b, err := t.LocalTime.MarshalText()
 	if err != nil {
 		return nil, fault.Wrap(err, fmsg.With("could not marshal time value"))
@@ -145,7 +145,7 @@ func GetConfig(filename string, log *log.Logger) (*Config, error) {
 		config.Web.BaseURL.String(),
 	)
 
-	maps.DeleteFunc(config.Importer.Sources, func(_ string, v *Source) bool {
+	maps.DeleteFunc(config.Importer.Sources, func(_ string, v Source) bool {
 		return !v.Enable
 	})
 
@@ -153,7 +153,7 @@ func GetConfig(filename string, log *log.Logger) (*Config, error) {
 		if v.Key == "" {
 			v.Key = k
 		}
-		if err := defaults.Set(v); err != nil {
+		if err := defaults.Set(&v); err != nil {
 			return nil, fault.Wrap(err, fmsg.With("setting defaults failed"))
 		}
 	}

@@ -14,7 +14,7 @@ import (
 
 type SourceHandler struct {
 	global *GlobalHandler
-	source *config.Source
+	source config.Source
 	mux    *http.ServeMux
 }
 

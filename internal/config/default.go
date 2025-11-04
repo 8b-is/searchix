@@ -2,6 +2,7 @@ package config
 
 import (
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/pelletier/go-toml/v2"
@@ -22,7 +23,7 @@ const maxAge = (1 * 365 * 24 * time.Hour)
 
 var DefaultConfig = Config{
 	DataPath: "./data",
-	Web: &Web{
+	Web: Web{
 		ListenAddress: "localhost",
 		Port:          3000,
 		BaseURL:       mustURL("http://localhost:3000"),
@@ -50,12 +51,12 @@ var DefaultConfig = Config{
 		LogRequests:   true,
 		SearchTimeout: Duration{1 * time.Second},
 	},
-	Importer: &Importer{
+	Importer: Importer{
 		LowMemory: false,
 		BatchSize: 10_000,
 		Timeout:   Duration{30 * time.Minute},
 		UpdateAt:  mustLocalTime("03:00:00"),
-		Sources: map[string]*Source{
+		Sources: map[string]Source{
 			"nixos": {
 				Name:       "NixOS",
 				Order:      0,
@@ -170,10 +171,14 @@ var DefaultConfig = Config{
 }
 
 func GetDefaultConfig() string {
-	out, err := toml.Marshal(&DefaultConfig)
+	var out strings.Builder
+
+	enc := toml.NewEncoder(&out)
+
+	err := enc.Encode(DefaultConfig)
 	if err != nil {
 		panic("could not read default configuration")
 	}
 
-	return string(out)
+	return out.String()
 }

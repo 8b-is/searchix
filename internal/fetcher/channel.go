@@ -17,13 +17,13 @@ import (
 )
 
 type ChannelFetcher struct {
-	Source     *config.Source
+	Source     config.Source
 	SourceFile string
 	*Options
 }
 
 func NewChannelFetcher(
-	source *config.Source,
+	source config.Source,
 	options *Options,
 ) (*ChannelFetcher, error) {
 	switch source.Importer {

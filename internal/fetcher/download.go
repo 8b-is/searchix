@@ -13,13 +13,13 @@ import (
 )
 
 type DownloadFetcher struct {
-	Source     *config.Source
+	Source     config.Source
 	SourceFile string
 	*Options
 }
 
 func NewDownloadFetcher(
-	source *config.Source,
+	source config.Source,
 	options *Options,
 ) (*DownloadFetcher, error) {
 	switch source.Importer {

@@ -107,6 +107,6 @@ func (f *RepoType) UnmarshalText(text []byte) error {
 	return err
 }
 
-func (f *RepoType) MarshalText() ([]byte, error) {
+func (f RepoType) MarshalText() ([]byte, error) {
 	return []byte(f.String()), nil
 }

@@ -9,10 +9,11 @@ import (
 type ImporterType int
 
 const (
-	All ImporterType = iota - 1
-	UnknownType
-	Packages
+	Packages ImporterType = 1 << iota
 	Options
+
+	UnknownType = -1
+	All         = Packages | Options
 )
 
 func (i ImporterType) String() string {
@@ -26,6 +27,10 @@ func (i ImporterType) String() string {
 	}
 
 	return fmt.Sprintf("Type(%d)", i)
+}
+
+func (i ImporterType) Includes(m ImporterType) bool {
+	return i&m == m
 }
 
 func (i ImporterType) Singular() string {
@@ -59,6 +64,6 @@ func (i *ImporterType) UnmarshalText(text []byte) error {
 	return err
 }
 
-func (i *ImporterType) MarshalText() ([]byte, error) {
+func (i ImporterType) MarshalText() ([]byte, error) {
 	return []byte(i.String()), nil
 }

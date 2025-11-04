@@ -25,15 +25,15 @@ func Page(tdata TemplateData, children ...g.Node) g.Node {
 					Link(
 						Rel("search"),
 						Type("application/opensearchdescription+xml"),
-						TitleAttr("Searchix "+sourceNameAndType(nil)),
+						TitleAttr("Searchix "+tdata.Source.String()),
 						Href(joinPath("opensearch.xml")),
 					),
 				),
-				g.Map(tdata.Sources, func(source *config.Source) g.Node {
+				g.Map(tdata.Sources, func(source config.Source) g.Node {
 					return Link(
 						Rel("search"),
 						Type("application/opensearchdescription+xml"),
-						TitleAttr("Searchix "+sourceNameAndType(source)),
+						TitleAttr("Searchix "+source.String()),
 						Href(joinPath("/", source.Importer.String(), source.Key, "opensearch.xml")),
 					)
 				}),
@@ -45,18 +45,18 @@ func Page(tdata TemplateData, children ...g.Node) g.Node {
 						g.If(len(tdata.Sources) > 0,
 							A(
 								c.Classes{
-									"current": tdata.Source == nil,
+									"current": tdata.Source.Importer == config.All,
 								},
 								g.If(
-									tdata.Source == nil,
+									tdata.Source.Importer == config.All,
 									Href("/"),
 									Href(joinPathQuery("/", tdata.Query)),
 								),
 								g.Text("All"),
 							),
 						),
-						g.Map(tdata.Sources, func(source *config.Source) g.Node {
-							if tdata.Source != nil && tdata.Source.Name == source.Name {
+						g.Map(tdata.Sources, func(source config.Source) g.Node {
+							if tdata.Source.Importer != config.All && tdata.Source.Name == source.Name {
 								return A(
 									Class("current"),
 									Href(
@@ -131,21 +131,6 @@ func css(css *frontend.Asset) g.Node {
 
 func script(s *frontend.Asset) g.Node {
 	return Script(Src(s.ImmutablePath), Defer())
-}
-
-func sourceNameAndType(source *config.Source) string {
-	if source == nil {
-		return "Combined"
-	}
-
-	switch source.Importer {
-	case config.Options:
-		return source.Name + " " + source.Importer.String()
-	case config.Packages:
-		return source.Name
-	}
-
-	return ""
 }
 
 func joinPath(base string, parts ...string) string {

@@ -22,14 +22,12 @@ func Results(r ResultData) g.Node {
 	}
 
 	var content g.Node
-	if r.Source != nil {
-		switch r.Source.Importer {
-		case config.Options:
-			content = Options(r.Results)
-		case config.Packages:
-			content = Packages(r.Results)
-		}
-	} else {
+	switch r.Source.Importer {
+	case config.Options:
+		content = Options(r.Results)
+	case config.Packages:
+		content = Packages(r.Results)
+	case config.All:
 		content = Combined(r.Results)
 	}
 

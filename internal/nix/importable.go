@@ -16,7 +16,7 @@ func GetKey(i Importable) string {
 	return i.BleveType() + "/" + i.GetSource() + "/" + i.GetName()
 }
 
-func MakeKey(source *config.Source, id string) string {
+func MakeKey(source config.Source, id string) string {
 	return source.Importer.Singular() + "/" + source.Key + "/" + id
 }
 

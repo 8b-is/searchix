@@ -17,7 +17,7 @@ import (
 )
 
 type DB struct {
-	source *config.Source
+	source config.Source
 	logger *log.Logger
 	root   *file.Root
 	db     *sql.DB
@@ -29,7 +29,7 @@ type Options struct {
 	Root   *file.Root
 }
 
-func New(source *config.Source, options *Options) (*DB, error) {
+func New(source config.Source, options *Options) (*DB, error) {
 	db, err := sql.Open("sqlite", fmt.Sprintf(
 		"file:%s?mode=%s&_pragma=foreign_keys(1)&_pragma=mmap_size(%d)",
 		//nolint:forbidigo // external package

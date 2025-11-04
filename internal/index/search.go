@@ -133,7 +133,7 @@ func (index *ReadIndex) search(
 
 func (index *ReadIndex) Search(
 	ctx context.Context,
-	source *config.Source,
+	source config.Source,
 	keyword string,
 	from int,
 	pageSize int,
@@ -141,7 +141,7 @@ func (index *ReadIndex) Search(
 ) (*Result, error) {
 	query := bleve.NewBooleanQuery()
 
-	if source != nil {
+	if source.Importer != config.All {
 		query.AddMust(
 			setField(bleve.NewTermQuery(source.Key), "Source"),
 		)
@@ -249,11 +249,11 @@ func (index *ReadIndex) Search(
 		}
 	}
 
-	if source == nil || source.Importer == config.Packages {
+	if source.Importer.Includes(config.Packages) {
 		search.AddFacet("Package set", bleve.NewFacetRequest("PackageSet", 10))
 		search.AddFacet("Platform", bleve.NewFacetRequest("Platforms", 10))
 	}
-	if source == nil || source.Importer == config.Options {
+	if source.Importer.Includes(config.Options) {
 		search.AddFacet("Option set", bleve.NewFacetRequest("Parents", 10))
 	}
 
@@ -266,14 +266,14 @@ func (index *ReadIndex) Search(
 
 func (index *ReadIndex) ImportedBefore(
 	cutoff time.Time,
-	source *config.Source,
+	source config.Source,
 ) (*bleve.SearchResult, error) {
 	cutoffQuery := bleve.NewDateRangeQuery(time.UnixMilli(0), cutoff)
 	cutoffQuery.SetField("ImportedAt")
 
 	all := bleve.NewConjunctionQuery(cutoffQuery)
 
-	if source != nil {
+	if source.Importer != config.All {
 		sourceQuery := bleve.NewTermQuery(source.Key)
 		sourceQuery.SetField("Source")
 
@@ -292,8 +292,8 @@ func (index *ReadIndex) ImportedBefore(
 	return res, nil
 }
 
-func (index *ReadIndex) Count(source *config.Source) (uint64, error) {
-	if source == nil {
+func (index *ReadIndex) Count(source config.Source) (uint64, error) {
+	if source.Importer == config.All {
 		count, err := index.index.DocCount()
 		if err != nil {
 			return 0, fault.Wrap(err)
@@ -323,7 +323,7 @@ func (index *ReadIndex) Close() error {
 
 func (index *ReadIndex) GetDocument(
 	ctx context.Context,
-	source *config.Source,
+	source config.Source,
 	id string,
 ) (nix.Importable, error) {
 	key := nix.MakeKey(source, id)

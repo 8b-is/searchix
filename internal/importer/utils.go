@@ -46,7 +46,7 @@ func MakeChannelLink(repo config.Repository, subPath string) (*nix.Link, error) 
 	}, nil
 }
 
-func setRepoRevision(file io.ReadCloser, source *config.Source) error {
+func setRepoRevision(file io.ReadCloser, source config.Source) error {
 	if file != nil {
 		defer file.Close()
 		var str strings.Builder

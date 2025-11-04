@@ -30,7 +30,7 @@ type GlobalHandler struct {
 	errorHandler func(w http.ResponseWriter, r *http.Request, message string, statusCode int)
 }
 
-func (g *GlobalHandler) NewSourceHandler(source *config.Source) *SourceHandler {
+func (g *GlobalHandler) NewSourceHandler(source config.Source) *SourceHandler {
 	h := &SourceHandler{
 		global: g,
 		source: source,
@@ -44,7 +44,7 @@ func (g *GlobalHandler) NewSourceHandler(source *config.Source) *SourceHandler {
 	return h
 }
 
-func (g *GlobalHandler) Search(source *config.Source, w http.ResponseWriter, r *http.Request) {
+func (g *GlobalHandler) Search(source config.Source, w http.ResponseWriter, r *http.Request) {
 	facets := r.URL.Query()
 	facets.Del("query")
 	facets.Del("page")
@@ -148,7 +148,9 @@ func (g *GlobalHandler) Search(source *config.Source, w http.ResponseWriter, r *
 }
 
 func (g *GlobalHandler) CombinedSearch(w http.ResponseWriter, r *http.Request) {
-	g.Search(nil, w, r)
+	g.Search(config.Source{
+		Importer: config.All,
+	}, w, r)
 }
 
 func (g *GlobalHandler) RootOpenSearch(w http.ResponseWriter, _ *http.Request) {

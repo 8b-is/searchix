@@ -12,9 +12,9 @@ import (
 )
 
 type Config struct {
-	DataPath string    `comment:"Path to store index data."`
-	Web      *Web      `comment:"Settings for the web server"`
-	Importer *Importer `comment:"Settings for the import job"`
+	DataPath string   `comment:"Path to store index data."`
+	Web      Web      `comment:"Settings for the web server"`
+	Importer Importer `comment:"Settings for the import job"`
 }
 
 type Web struct {
@@ -31,7 +31,7 @@ type Web struct {
 }
 
 type Importer struct {
-	Sources   map[string]*Source
+	Sources   map[string]Source
 	LowMemory bool      `comment:"Use less memory at the expense of import performance"`
 	BatchSize int       `comment:"Number of items to process in each batch (affects memory usage)."`
 	Timeout   Duration  `comment:"Abort fetch and import process for all jobs if it takes longer than this value."`
@@ -67,12 +67,14 @@ type Manpages struct {
 	Path   string `comment:"Path to the manpage-urls.json file from repository root"`
 }
 
-func (source *Source) String() string {
+func (source Source) String() string {
 	switch source.Importer {
 	case Options:
 		return source.Name + " " + source.Importer.String()
 	case Packages:
 		return source.Name
+	case All:
+		return "All"
 	default:
 		return fmt.Sprintf("Source(%s)", source.Name)
 	}

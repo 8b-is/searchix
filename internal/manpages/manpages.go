@@ -40,7 +40,7 @@ func New(opts *Options) *URLMap {
 
 func (m *URLMap) Update(
 	ctx context.Context,
-	source *config.Source,
+	source config.Source,
 ) error {
 	if !source.Manpages.Enable {
 		return fault.New("manpages not enabled for this source")
@@ -109,7 +109,7 @@ func (m *URLMap) Get(section string, page string) (string, bool) {
 	return url, true
 }
 
-func makeManpageURL(source *config.Source) (string, error) {
+func makeManpageURL(source config.Source) (string, error) {
 	url, err := source.Repo.GetRawFileURL(source.Manpages.Path)
 	if err != nil {
 		return "", fault.Wrap(err, fmsg.With("failed to join manpage URL"))

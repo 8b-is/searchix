@@ -65,12 +65,12 @@ type OptionIngester struct {
 	log     *log.Logger
 	optJSON nixOptionJSON
 	infile  io.ReadCloser
-	source  *config.Source
+	source  config.Source
 }
 
 func NewOptionProcessor(
 	infile io.ReadCloser,
-	source *config.Source,
+	source config.Source,
 	log *log.Logger,
 ) (*OptionIngester, error) {
 	i := OptionIngester{

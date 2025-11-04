@@ -12,8 +12,8 @@ import (
 )
 
 type TemplateData struct {
-	Sources       []*config.Source
-	Source        *config.Source
+	Sources       []config.Source
+	Source        config.Source
 	Query         string
 	ExtraHeadHTML string
 	Code          int

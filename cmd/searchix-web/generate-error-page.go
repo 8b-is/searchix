@@ -20,8 +20,10 @@ func (*GenerateErrorPageOptions) Execute(_ []string) error {
 	}
 
 	err = components.ErrorTemplate(components.TemplateData{
-		Source:        nil,
-		Sources:       []*config.Source{},
+		Source: config.Source{
+			Importer: config.All,
+		},
+		Sources:       []config.Source{},
 		Query:         "",
 		ExtraHeadHTML: "",
 		Code:          0,

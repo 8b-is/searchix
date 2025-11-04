@@ -13,7 +13,7 @@ import (
 )
 
 type NixpkgsChannelFetcher struct {
-	Source *config.Source
+	Source config.Source
 	*Options
 }
 
@@ -24,7 +24,7 @@ func makeChannelURL(channel string, subPath string) (string, error) {
 }
 
 func NewNixpkgsChannelFetcher(
-	source *config.Source,
+	source config.Source,
 	options *Options,
 ) (*NixpkgsChannelFetcher, error) {
 	switch source.Importer {

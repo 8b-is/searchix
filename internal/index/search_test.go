@@ -47,8 +47,8 @@ func TestSearchOrder(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 
-	source := cfg.Importer.Sources["nixpkgs"]
-	if source == nil || !source.Enable {
+	source, exists := cfg.Importer.Sources["nixpkgs"]
+	if !exists || !source.Enable {
 		t.Fatal("expected source to exist and be enabled")
 	}
 

@@ -19,7 +19,7 @@ func SearchForm(tdata TemplateData, r ResultData, children ...g.Node) g.Node {
 			FieldSet(
 				Legend(
 					ID("legend"),
-					H2(g.Textf("%s search", sourceNameAndType(tdata.Source))),
+					H2(g.Textf("%s search", tdata.Source.String())),
 					A(
 						Class("help"),
 						Target("_blank"),
@@ -50,7 +50,7 @@ func SearchPage(tdata TemplateData, r ResultData, children ...g.Node) g.Node {
 		tdata,
 		P(
 			g.Text("Search Nix packages and options from "),
-			MapCommaList(tdata.Sources, func(source *config.Source) g.Node {
+			MapCommaList(tdata.Sources, func(source config.Source) g.Node {
 				return A(Href(source.Repo.String()), g.Text(source.Name))
 			}),
 		),

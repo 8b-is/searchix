@@ -49,7 +49,7 @@ type PackageIngester struct {
 	log      *log.Logger
 	pkg      packageJSON
 	infile   io.ReadCloser
-	source   *config.Source
+	source   config.Source
 	programs *programs.DB
 }
 
@@ -70,7 +70,7 @@ func makeAdhocPlatform(v any) string {
 
 func NewPackageProcessor(
 	infile io.ReadCloser,
-	source *config.Source,
+	source config.Source,
 	log *log.Logger,
 	programsDB *programs.DB,
 ) (*PackageIngester, error) {

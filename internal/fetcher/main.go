@@ -30,7 +30,7 @@ type Fetcher interface {
 }
 
 func New(
-	source *config.Source,
+	source config.Source,
 	opts *Options,
 ) (fetcher Fetcher, err error) {
 	target := source.JoinPath("")
@@ -61,7 +61,7 @@ func New(
 }
 
 func Open(
-	source *config.Source,
+	source config.Source,
 	opts *Options,
 ) (*FetchedFiles, error) {
 	root := opts.Root

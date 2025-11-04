@@ -181,7 +181,7 @@ func (imp *Importer) Prune(ctx context.Context) error {
 
 func (imp *Importer) PruneSource(
 	_ context.Context,
-	source *config.Source,
+	source config.Source,
 ) error {
 	read := imp.options.ReadIndex
 	write := imp.options.WriteIndex
@@ -240,8 +240,8 @@ func (imp *Importer) createSourceFetcher(
 	parent context.Context,
 	meta *index.Meta,
 	forceUpdate bool,
-) func(*config.Source) error {
-	return func(source *config.Source) error {
+) func(config.Source) error {
+	return func(source config.Source) error {
 		logger := imp.options.Logger.With("name", source.Key)
 		pdb, err := programs.New(source, &programs.Options{
 			Logger: logger,
@@ -322,8 +322,8 @@ func (imp *Importer) createSourceFetcher(
 func (imp *Importer) createSourceImporter(
 	parent context.Context,
 	meta *index.Meta,
-) func(*config.Source) error {
-	return func(source *config.Source) error {
+) func(config.Source) error {
+	return func(source config.Source) error {
 		logger := imp.options.Logger.With("name", source.Key)
 		pdb, err := programs.New(source, &programs.Options{
 			Logger: logger,
