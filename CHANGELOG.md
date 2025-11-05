@@ -1,8 +1,30 @@
 # Changelog
 
-## [v0.2.8](https://codeberg.org/alanpearce/searchix/compare/v0.2.7...4bb573fb6556d126900b6aea56fbf2b6d7332032) (2025-11-04)
+## [v0.3.0](https://codeberg.org/alanpearce/searchix/compare/v0.2.8...ff283282d42ec5f77e9ad8f2c5616e4315b0355e) (2025-11-05)
 
 ### Features
+
+- use plurals for document IDs and URLs
+  ([ff28328](https://codeberg.org/alanpearce/searchix/commit/ff283282d42ec5f77e9ad8f2c5616e4315b0355e))
+- force-recreate index when schema version updated
+  ([5f74928](https://codeberg.org/alanpearce/searchix/commit/5f74928b831c3a82cf343d397929a08374d3beeb))
+
+### Fixes
+
+- record meta existence at startup
+  ([35c0945](https://codeberg.org/alanpearce/searchix/commit/35c0945e328d09292281439a280b5fce5d172a31))
+- missing index step when new sources added to configuration
+  ([dedd43f](https://codeberg.org/alanpearce/searchix/commit/dedd43f7a653ccf3ccda11c9a6f34bbc227aa484))
+- make error text readable in in dark mode
+  ([bfa2851](https://codeberg.org/alanpearce/searchix/commit/bfa2851e2a6d1800569ea5c451242bdf7f96dcac))
+- enable wrapping of long option names in facets
+  ([7975430](https://codeberg.org/alanpearce/searchix/commit/7975430794939d3be24ed6f52856ac29555d5900))
+- 404 on detail pages
+  ([0f1f8e6](https://codeberg.org/alanpearce/searchix/commit/0f1f8e6b60a0aa8d615d1b4838abd71faf045c64))
+
+### [v0.2.8](https://codeberg.org/alanpearce/searchix/compare/v0.2.7...v0.2.8) (2025-11-04)
+
+#### Features
 
 - re-enable immutable assets
   ([179fdc3](https://codeberg.org/alanpearce/searchix/commit/179fdc3b417869d50a181cac813e1dbbf2893478))
@@ -11,7 +33,7 @@
 - support faceted navigation of search results
   ([82cfb98](https://codeberg.org/alanpearce/searchix/commit/82cfb98df7f9e38f295d3ea1d46b343914947307))
 
-### Fixes
+#### Fixes
 
 - assets not being rehashed on change in development
   ([ee5cd9a](https://codeberg.org/alanpearce/searchix/commit/ee5cd9a58f2e38efacec9b91f7208ba0f81d28a0))
