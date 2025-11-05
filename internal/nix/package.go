@@ -4,7 +4,7 @@ import "time"
 
 type Package struct {
 	Name            string
-	Attribute       string `storm:"id"`
+	Attribute       string
 	Source          string
 	Broken          bool
 	Definition      string
@@ -18,7 +18,7 @@ type Package struct {
 	PackageSet      string
 	Platforms       []string
 	Version         string
-	ImportedAt      time.Time `storm:"index"`
+	ImportedAt      time.Time
 }
 
 type License struct {

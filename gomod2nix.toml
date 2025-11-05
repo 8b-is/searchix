@@ -19,9 +19,6 @@ schema = 3
   [mod."github.com/andybalholm/brotli"]
     version = "v1.1.1"
     hash = "sha256-kCt+irK1gvz2lGQUeEolYa5+FbLsfWlJMCd5hm+RPgQ="
-  [mod."github.com/asdine/storm/v3"]
-    version = "v3.2.1"
-    hash = "sha256-BLpBFWFjLd5Xumx72cgSA2Zget+4UYMTW+z4bkkdIR0="
   [mod."github.com/bcicen/jstream"]
     version = "v1.0.1"
     hash = "sha256-mm+/BuIEYYj6XOHCCJLxVMKd1XcBXCiRCWA+aTvr1sE="

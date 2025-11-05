@@ -23,7 +23,7 @@ type Link struct {
 }
 
 type Option struct {
-	Name            string `storm:"id"`
+	Name            string
 	Source          string
 	Declarations    []Link
 	Default         *Docs `json:",omitempty"`
@@ -33,7 +33,7 @@ type Option struct {
 	Parents         string
 	RelatedPackages Markdown `json:",omitempty"`
 	Type            string
-	ImportedAt      time.Time `storm:"index"`
+	ImportedAt      time.Time
 }
 
 func (Option) BleveType() string {
