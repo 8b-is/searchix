@@ -133,8 +133,9 @@ func OpenOrCreate(root *file.Root, log *log.Logger) (*Meta, error) {
 		return nil, fault.Wrap(baseErr, fmsg.With("could not open index metadata file"))
 	}
 	meta := Meta{
-		root: root,
-		log:  log,
+		root:   root,
+		log:    log,
+		exists: exists,
 	}
 
 	if err := json.Unmarshal(j, &meta.data); err != nil {
