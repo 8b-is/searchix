@@ -45,7 +45,6 @@ type WriteIndex struct {
 	batchSize int
 	index     bleve.Index
 	log       *log.Logger
-	exists    bool
 	Meta      *meta.Meta
 }
 
@@ -245,9 +244,21 @@ func OpenOrCreate(options *Options) (*ReadIndex, *WriteIndex, error) {
 	}
 
 	var idx bleve.Index
-	var m *meta.Meta
-	if !exists || options.Force {
-		if options.Force {
+	m, err := meta.OpenOrCreate(root, options.Logger)
+	if err != nil {
+		return nil, nil, fault.Wrap(err, fmsg.With("could not open index metadata file"))
+	}
+
+	if !exists || options.Force || m.IsSchemaOutdated() {
+		if exists {
+			options.Logger.Warn(
+				"deleting existing index",
+				"force_flag",
+				options.Force,
+				"schema_outdated",
+				m.IsSchemaOutdated(),
+			)
+
 			err = deleteIndex(root)
 			if err != nil {
 				return nil, nil, err
@@ -258,11 +269,6 @@ func OpenOrCreate(options *Options) (*ReadIndex, *WriteIndex, error) {
 			return nil, nil, err
 		}
 
-		m, err = meta.Create(root, options.Logger)
-		if err != nil {
-			return nil, nil, fault.Wrap(err, fmsg.With("could not create index metadata file"))
-		}
-
 	} else {
 		var baseErr error
 		//nolint:forbidigo // external package
@@ -270,11 +276,6 @@ func OpenOrCreate(options *Options) (*ReadIndex, *WriteIndex, error) {
 		idx, baseErr = bleve.OpenUsing(indexPath, kvconfig)
 		if baseErr != nil {
 			return nil, nil, fault.Wrap(baseErr, fmsg.Withf("could not open index at path %s", indexPath))
-		}
-
-		m, err = meta.Open(root, options.Logger)
-		if err != nil {
-			return nil, nil, fault.Wrap(err, fmsg.With("could not open index metadata file"))
 		}
 	}
 
@@ -289,12 +290,10 @@ func OpenOrCreate(options *Options) (*ReadIndex, *WriteIndex, error) {
 	return &ReadIndex{
 			config: options.Config,
 			log:    options.Logger,
-			exists: exists,
 			index:  idx,
 			meta:   m,
 		},
 		&WriteIndex{
-			exists:    exists,
 			index:     idx,
 			batchSize: options.BatchSize,
 			log:       options.Logger,
@@ -304,7 +303,7 @@ func OpenOrCreate(options *Options) (*ReadIndex, *WriteIndex, error) {
 }
 
 func (i *WriteIndex) Exists() bool {
-	return i.exists
+	return i.Meta.Exists()
 }
 
 func (i *WriteIndex) SaveMeta() error {

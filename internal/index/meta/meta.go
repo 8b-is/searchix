@@ -34,13 +34,18 @@ type data struct {
 }
 
 type Meta struct {
-	root *file.Root
-	log  *log.Logger
+	root   *file.Root
+	log    *log.Logger
+	exists bool
 	data
 }
 
 func (i *Meta) IsSchemaOutdated() bool {
 	return i.SchemaVersion < CurrentSchemaVersion
+}
+
+func (i *Meta) Exists() bool {
+	return i.exists
 }
 
 func (i *Meta) Save() error {
@@ -54,6 +59,8 @@ func (i *Meta) Save() error {
 	if err != nil {
 		return fault.Wrap(err, fmsg.With("could not save index metadata"))
 	}
+
+	i.exists = true
 
 	return nil
 }
@@ -112,7 +119,7 @@ func Create(root *file.Root, log *log.Logger) (*Meta, error) {
 	}, nil
 }
 
-func Open(root *file.Root, log *log.Logger) (*Meta, error) {
+func OpenOrCreate(root *file.Root, log *log.Logger) (*Meta, error) {
 	exists, err := root.Exists(BaseName)
 	if err != nil {
 		return nil, fault.Wrap(err, fmsg.With("could not check for existence of index metadata"))

@@ -45,11 +45,6 @@ func (imp *Importer) StartUpdateTimer(
 			"indexing last ran more than 24 hours ago, scheduling immediate update",
 		)
 		nextRun = time.Now()
-	case imp.options.WriteIndex.Meta.IsSchemaOutdated():
-		imp.options.Logger.Info(
-			"indexing schema version is out of date, scheduling immediate update",
-		)
-		nextRun = time.Now()
 	default:
 		nextRun = nextUTCOccurrenceOfTime(imp.config.Importer.UpdateAt)
 	}

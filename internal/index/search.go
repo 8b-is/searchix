@@ -39,7 +39,6 @@ type ReadIndex struct {
 	index  bleve.Index
 	config *config.Config
 	log    *log.Logger
-	exists bool
 	meta   *meta.Meta
 }
 
@@ -52,7 +51,7 @@ type SearchRequest struct {
 }
 
 func (index *ReadIndex) Exists() bool {
-	return index.exists
+	return index.meta.Exists()
 }
 
 func (index *ReadIndex) LastUpdated() time.Time {
