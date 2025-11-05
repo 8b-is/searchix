@@ -27,8 +27,6 @@ func (h *SourceHandler) Search(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *SourceHandler) Detail(w http.ResponseWriter, r *http.Request) {
-	importerSingular := h.source.Importer.Singular()
-
 	doc, err := h.global.index.GetDocument(r.Context(), h.source, r.PathValue("id"))
 	if err != nil {
 		if ftag.Get(err) == ftag.NotFound {
@@ -77,7 +75,7 @@ func (h *SourceHandler) Detail(w http.ResponseWriter, r *http.Request) {
 		baseErr = components.DetailPage(tdata, doc).Render(w)
 	}
 	if baseErr != nil {
-		h.global.log.Error("template error", "template", importerSingular, "error", baseErr)
+		h.global.log.Error("template error", "template", h.source.Importer.Singular(), "error", baseErr)
 		h.global.errorHandler(w, r, baseErr.Error(), http.StatusInternalServerError)
 	}
 }
