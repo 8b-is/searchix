@@ -61,7 +61,7 @@ func (imp *Importer) Fetch(
 		return nil
 	}
 
-	imp.options.Logger.Debug("starting importer", "timeout", imp.config.Importer.Timeout.Duration)
+	imp.options.Logger.Debug("starting fetch", "timeout", imp.config.Importer.Timeout.Duration)
 	importCtx, cancelImport := context.WithTimeout(
 		ctx,
 		imp.config.Importer.Timeout.Duration,
@@ -152,7 +152,12 @@ func (imp *Importer) EnsureSourcesIndexed(
 				newSources,
 			)
 			if err != nil {
-				return fault.Wrap(err, fmsg.With("Failed to update index with new sources"))
+				return fault.Wrap(err, fmsg.With("Failed to fetch new sources"))
+			}
+
+			err = imp.Index(ctx, newSources)
+			if err != nil {
+				return fault.Wrap(err, fmsg.With("Failed to index new sources"))
 			}
 		}
 		if len(retiredSources) > 0 {
