@@ -7,17 +7,18 @@ import (
 )
 
 type Importable interface {
+	ImporterType() string
 	BleveType() string
 	GetName() string
 	GetSource() string
 }
 
 func GetKey(i Importable) string {
-	return i.BleveType() + "/" + i.GetSource() + "/" + i.GetName()
+	return i.ImporterType() + "/" + i.GetSource() + "/" + i.GetName()
 }
 
 func MakeKey(source config.Source, id string) string {
-	return source.Importer.Singular() + "/" + source.Key + "/" + id
+	return source.Importer.String() + "/" + source.Key + "/" + id
 }
 
 func init() {

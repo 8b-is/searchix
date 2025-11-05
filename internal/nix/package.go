@@ -1,6 +1,10 @@
 package nix
 
-import "time"
+import (
+	"time"
+
+	"alin.ovh/searchix/internal/config"
+)
 
 type Package struct {
 	Name            string
@@ -35,7 +39,11 @@ type Maintainer struct {
 }
 
 func (Package) BleveType() string {
-	return "package"
+	return config.Packages.Singular()
+}
+
+func (Package) ImporterType() string {
+	return config.Packages.String()
 }
 
 func (p Package) GetName() string {

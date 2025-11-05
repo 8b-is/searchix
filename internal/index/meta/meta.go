@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	CurrentSchemaVersion = 9
+	CurrentSchemaVersion = 10
 	BaseName             = "meta.json"
 )
 

@@ -7,6 +7,7 @@ import (
 	"github.com/Southclaws/fault"
 	"github.com/yuin/goldmark"
 
+	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/nixdocs"
 )
 
@@ -37,7 +38,11 @@ type Option struct {
 }
 
 func (Option) BleveType() string {
-	return "option"
+	return config.Options.Singular()
+}
+
+func (Option) ImporterType() string {
+	return config.Options.String()
 }
 
 func (p Option) GetName() string {
