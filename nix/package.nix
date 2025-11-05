@@ -46,10 +46,7 @@ buildGoApplication {
   ];
 
   postInstall = ''
-    install -d -m755 $out/lib/searchix/static
-    cp -r $src/frontend/static $out/lib/searchix
-    cp ${css} $out/lib/searchix/static/base.css
-    $out/bin/searchix-web generate-error-page > $out/lib/searchix/error.html
+    $out/bin/searchix-web generate-error-page --outdir $out/lib/searchix/
   '';
 
   modules = ../gomod2nix.toml;
