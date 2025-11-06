@@ -59,11 +59,11 @@ update-nix-package-version:
 
 release: clean-workdir changelog update-nix-package-version
 	#!/bin/sh
-	set -eu
+	set -euo pipefail
 	VERSION=$(convco version --bump --print-prefix)
 	git add CHANGELOG.md nix/package.nix nix/modules/default.nix
 	git commit -m "chore: release ${VERSION}"
-	convco changelog -c .tag.versionrc -m 1 -n -s $VERSION | \
+	convco changelog -c .tag.versionrc -m 1 -n -s | \
 		sed -e 1d -e "2s/^#* //" -e 's/^##//' | \
 		git tag "${VERSION}" -F -
 	git push origin main "${VERSION}"
