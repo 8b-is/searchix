@@ -79,8 +79,7 @@ func (opts *ServeOptions) Execute(_ []string) (err error) {
 	defer stop()
 
 	wg := &sync.WaitGroup{}
-	wg.Add(1)
-	go func() {
+	wg.Go(func() {
 		sCtx, cancel := context.WithCancel(ctx)
 		defer cancel()
 		defer wg.Done()
@@ -89,7 +88,7 @@ func (opts *ServeOptions) Execute(_ []string) (err error) {
 			// Error starting or closing listener:
 			logger.Fatal("error", "error", err)
 		}
-	}()
+	})
 
 	err = sdnotify.Ready()
 	if err != nil {
@@ -137,11 +136,9 @@ func (opts *ServeOptions) Execute(_ []string) (err error) {
 	}()
 	signal.Notify(reimport, syscall.SIGUSR1, syscall.SIGUSR2)
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		imp.StartUpdateTimer(ctx)
-	}()
+	})
 
 	if wdu, defined := os.LookupEnv("WATCHDOG_USEC"); defined {
 		wd, err := time.ParseDuration(wdu + "us")
@@ -150,16 +147,14 @@ func (opts *ServeOptions) Execute(_ []string) (err error) {
 		}
 		tickRate := time.Duration(math.Ceil(wd.Seconds()*0.75)) * time.Second
 
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			for range time.Tick(tickRate) {
 				err := sdnotify.Watchdog()
 				if err != nil {
 					logger.Warn("")
 				}
 			}
-		}()
+		})
 	}
 
 	<-ctx.Done()

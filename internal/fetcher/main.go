@@ -40,7 +40,7 @@ func New(
 	}
 
 	if !exists {
-		err = opts.Root.MkdirAll(target)
+		err = opts.Root.MkdirAll(target, 0o750)
 		if err != nil {
 			return nil, fault.Wrap(err, fmsg.With("failed to create directory"))
 		}

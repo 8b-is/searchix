@@ -6,7 +6,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
@@ -78,57 +77,6 @@ func (r *Root) CopyTo(source, target string) error {
 	err = dst.Sync()
 	if err != nil {
 		return fault.Wrap(err, fmsg.Withf("failed to sync target file %s", target))
-	}
-
-	return nil
-}
-
-func (r *Root) Chtimes(name string, atime time.Time, mtime time.Time) error {
-	err := os.Chtimes(r.JoinPath(name), atime, mtime)
-	if err != nil {
-		return fault.Wrap(err, fmsg.Withf("failed to change times of %s", name))
-	}
-
-	return nil
-}
-
-func (r *Root) MkdirAll(name string) error {
-	err := os.MkdirAll(r.JoinPath(name), 0o750)
-	if err != nil {
-		return fault.Wrap(err, fmsg.Withf("failed to create directory %s", name))
-	}
-
-	return nil
-}
-
-func (r *Root) ReadFile(name string) ([]byte, error) {
-	b, err := fs.ReadFile(r.FS(), name)
-	if err != nil {
-		return nil, fault.Wrap(err, fmsg.Withf("failed to read file %s", name))
-	}
-
-	return b, nil
-}
-
-func (r *Root) WriteFile(name string, data []byte, perm fs.FileMode) error {
-	f, err := r.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, perm)
-	if err != nil {
-		return fault.Wrap(err, fmsg.Withf("failed to write file %s", name))
-	}
-	defer f.Close()
-
-	_, err = f.Write(data)
-	if err != nil {
-		return fault.Wrap(err, fmsg.Withf("failed to write file %s", name))
-	}
-
-	return nil
-}
-
-func (r *Root) RemoveAll(name string) error {
-	err := os.RemoveAll(r.JoinPath(name))
-	if err != nil {
-		return fault.Wrap(err, fmsg.Withf("failed to remove path %s", r.JoinPath(name)))
 	}
 
 	return nil
