@@ -1,6 +1,18 @@
 # Changelog
 
-## [v0.4.0](https://codeberg.org/alanpearce/searchix/compare/v0.3.0...0d664b10b50db1871770826fd09171575a712595) (2025-11-06)
+## [v0.4.1](https://codeberg.org/alanpearce/searchix/compare/v0.4.0...f0cee06cdb2390b873a9fc37b77e5e912d0412ae) (2025-11-06)
+
+### Features
+
+- don't block startup for indexing
+  ([d8581c5](https://codeberg.org/alanpearce/searchix/commit/d8581c5d9b41485c6be7cdb61cdfca4ba323e593))
+
+### Fixes
+
+- negative waitgroup counter panic
+  ([7971216](https://codeberg.org/alanpearce/searchix/commit/7971216b5bd8d6df7f4a27379b16b783c5ce0132))
+
+## [v0.4.0](https://codeberg.org/alanpearce/searchix/compare/v0.3.0...v0.4.0) (2025-11-06)
 
 ### ⚠ BREAKING CHANGE
 
