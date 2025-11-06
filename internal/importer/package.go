@@ -120,10 +120,11 @@ func convertToLicense(in map[string]any) *nix.License {
 	return l
 }
 
-func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <-chan error) {
-	results := make(chan nix.Importable, 1)
-	errs := make(chan error)
-
+func (i *PackageIngester) Process(
+	ctx context.Context,
+	results chan<- nix.Importable,
+	errs chan<- error,
+) {
 	if i.programs != nil {
 		err := i.programs.Open(ctx)
 		if err != nil {
@@ -132,217 +133,213 @@ func (i *PackageIngester) Process(ctx context.Context) (<-chan nix.Importable, <
 		}
 	}
 
-	go func() {
-		defer i.infile.Close()
-		defer close(results)
-		defer close(errs)
+	defer i.infile.Close()
+	defer close(results)
+	defer close(errs)
 
-		if i.programs != nil {
-			defer i.programs.Close()
+	if i.programs != nil {
+		defer i.programs.Close()
+	}
+
+outer:
+	for mv := range i.dec.Stream() {
+		var err error
+		var programs []string
+		select {
+		case <-ctx.Done():
+			break outer
+		default:
 		}
+		if err := i.dec.Err(); err != nil {
+			errs <- fault.Wrap(err, fmsg.With("could not decode JSON"))
 
-	outer:
-		for mv := range i.dec.Stream() {
-			var err error
-			var programs []string
-			select {
-			case <-ctx.Done():
-				break outer
-			default:
-			}
-			if err := i.dec.Err(); err != nil {
-				errs <- fault.Wrap(err, fmsg.With("could not decode JSON"))
+			continue
+		}
+		if mv.ValueType != jstream.Object {
+			errs <- fault.Newf("unexpected object type %s", ValueTypeToString(mv.ValueType))
 
-				continue
-			}
-			if mv.ValueType != jstream.Object {
-				errs <- fault.Newf("unexpected object type %s", ValueTypeToString(mv.ValueType))
+			continue
+		}
+		kv := mv.Value.(jstream.KV)
+		x := kv.Value.(map[string]any)
 
-				continue
-			}
-			kv := mv.Value.(jstream.KV)
-			x := kv.Value.(map[string]any)
+		meta := x["meta"].(map[string]any)
 
-			meta := x["meta"].(map[string]any)
-
-			var licenses []nix.License
-			if meta["license"] != nil {
-				switch v := reflect.ValueOf(meta["license"]); v.Kind() {
-				case reflect.Map:
-					licenses = append(licenses, *convertToLicense(v.Interface().(map[string]any)))
-				case reflect.Array, reflect.Slice:
-					licenses = make([]nix.License, v.Len())
-					for i, v := range v.Interface().([]any) {
-						switch v := reflect.ValueOf(v); v.Kind() {
-						case reflect.String:
-							licenses[i] = makeAdhocLicense(v.String())
-						case reflect.Map:
-							licenses[i] = *convertToLicense(v.Interface().(map[string]any))
-						default:
-							errs <- fault.Newf(
-								"don't know how to handle sublicense of type %s: %v",
-								v.Kind().String(),
-								v,
-							)
-						}
-					}
-				case reflect.String:
-					licenses = append(licenses, makeAdhocLicense(v.String()))
-				default:
-					errs <- fault.Newf(
-						"don't know how to handle license of type %s: %v",
-						v.Kind().String(),
-						meta["license"],
-					)
-				}
-				delete(meta, "license")
-			}
-
-			if meta["platforms"] != nil {
-				plats := make([]any, len(meta["platforms"].([]any)))
-				i := 0
-				for _, plat := range meta["platforms"].([]any) {
-					switch v := reflect.ValueOf(plat); v.Kind() {
+		var licenses []nix.License
+		if meta["license"] != nil {
+			switch v := reflect.ValueOf(meta["license"]); v.Kind() {
+			case reflect.Map:
+				licenses = append(licenses, *convertToLicense(v.Interface().(map[string]any)))
+			case reflect.Array, reflect.Slice:
+				licenses = make([]nix.License, v.Len())
+				for i, v := range v.Interface().([]any) {
+					switch v := reflect.ValueOf(v); v.Kind() {
 					case reflect.String:
-						plats[i] = v.String()
+						licenses[i] = makeAdhocLicense(v.String())
 					case reflect.Map:
-						plats[i] = makeAdhocPlatform(v.Interface())
-					case reflect.Slice:
-						ps := make([]any, v.Len())
-						for j, item := range v.Slice(0, v.Len()).Interface().([]any) {
-							ps[j] = item.(string)
-						}
-						plats = append(plats, ps...)
+						licenses[i] = *convertToLicense(v.Interface().(map[string]any))
 					default:
 						errs <- fault.Newf(
-							"don't know how to convert platform type %s: %v",
+							"don't know how to handle sublicense of type %s: %v",
 							v.Kind().String(),
-							v.Interface(),
+							v,
 						)
 					}
-					i++
 				}
-				meta["platforms"] = plats
+			case reflect.String:
+				licenses = append(licenses, makeAdhocLicense(v.String()))
+			default:
+				errs <- fault.Newf(
+					"don't know how to handle license of type %s: %v",
+					v.Kind().String(),
+					meta["license"],
+				)
 			}
+			delete(meta, "license")
+		}
 
-			if meta["homepage"] == nil && meta["homePage"] != nil {
-				meta["homepage"] = meta["homePage"]
-			}
-			if meta["homepage"] != nil {
-				switch v := reflect.ValueOf(meta["homepage"]); v.Kind() {
+		if meta["platforms"] != nil {
+			plats := make([]any, len(meta["platforms"].([]any)))
+			i := 0
+			for _, plat := range meta["platforms"].([]any) {
+				switch v := reflect.ValueOf(plat); v.Kind() {
 				case reflect.String:
-					meta["homepage"] = []string{v.String()}
+					plats[i] = v.String()
+				case reflect.Map:
+					plats[i] = makeAdhocPlatform(v.Interface())
 				case reflect.Slice:
-				// already fine
+					ps := make([]any, v.Len())
+					for j, item := range v.Slice(0, v.Len()).Interface().([]any) {
+						ps[j] = item.(string)
+					}
+					plats = append(plats, ps...)
 				default:
 					errs <- fault.Newf(
-						"don't know how to interpret homepage type %s'",
+						"don't know how to convert platform type %s: %v",
 						v.Kind().String(),
+						v.Interface(),
 					)
 				}
+				i++
 			}
+			meta["platforms"] = plats
+		}
 
-			var maints []nix.Maintainer
-			if meta["maintainers"] != nil {
-				switch maint := reflect.ValueOf(meta["maintainers"]); maint.Kind() {
-				case reflect.String:
-					maints = []nix.Maintainer{{Name: maint.String(), Github: maint.String()}}
-				case reflect.Slice, reflect.Array:
-					maints = make([]nix.Maintainer, maint.Len())
-					for i, val := range maint.Slice(0, maint.Len()).Interface().([]any) {
-						switch v := reflect.ValueOf(val); v.Kind() {
-						case reflect.String:
-							maints[i] = nix.Maintainer{Name: v.String(), Github: v.String()}
-						case reflect.Map:
-							m := v.Interface().(map[string]any)
-							maints[i] = nix.Maintainer{}
-							if m["name"] != nil && m["name"].(string) != "" {
-								maints[i].Name = m["name"].(string)
-							}
-							if m["github"] != nil && m["github"].(string) != "" {
-								maints[i].Github = m["github"].(string)
-							}
-						default:
-							errs <- fault.Newf(
-								"don't know how to handle maintainer entry of type %s: %v",
-								v.Kind().String(),
-								v,
-							)
-						}
-					}
-				default:
-					errs <- fault.Newf(
-						"don't know how to interpret maintainers type %s'",
-						maint.Kind().String(),
-					)
-				}
-				meta["maintainers"] = maints
-			}
-
-			i.pkg = packageJSON{}
-			if err := i.ms.Decode(x); err != nil { // stores in i.pkg
-				errs <- fault.Wrap(err, fmsg.Withf("failed to decode package %#v", x))
-
-				continue
-			}
-
-			if i.source.Programs.Enable {
-				programs, err = i.programs.GetPackagePrograms(ctx, kv.Key)
-				if err != nil {
-					errs <- fault.Wrap(err, fmsg.Withf("failed to get programs for package %s", i.pkg.Name))
-				}
-			}
-
-			maintainers := make([]nix.Maintainer, len(i.pkg.Meta.Maintainers))
-			for i, m := range i.pkg.Meta.Maintainers {
-				maintainers[i] = nix.Maintainer{
-					Name:   m.Name,
-					Github: m.Github,
-				}
-			}
-
-			pkgSet, _, found := strings.Cut(kv.Key, ".")
-			if !found {
-				pkgSet = ""
-			}
-
-			var definition string
-			if i.pkg.Meta.Position != "" {
-				defURL, err := url.Parse(i.pkg.Meta.Position)
-				if err != nil {
-					errs <- fault.Wrap(err, fmsg.Withf("failed to parse source URL %s", definition))
-				}
-				if defURL.IsAbs() {
-					definition = i.pkg.Meta.Position
-				} else {
-					subpath, line, _ := strings.Cut(i.pkg.Meta.Position, ":")
-					definition, err = i.source.Repo.GetFileURL(subpath, line)
-					if err != nil {
-						errs <- fault.Wrap(err, fmsg.Withf("failed to make repo URL for package %s", i.pkg.Name))
-					}
-				}
-			}
-
-			results <- nix.Package{
-				Name:            i.pkg.Name,
-				Attribute:       strings.TrimPrefix(kv.Key, "nur.repos."),
-				Source:          i.source.Key,
-				PackageSet:      pkgSet,
-				Version:         i.pkg.Version,
-				Broken:          i.pkg.Meta.Broken,
-				Description:     i.pkg.Meta.Description,
-				LongDescription: nix.Markdown(i.pkg.Meta.LongDescription),
-				Homepages:       i.pkg.Meta.Homepages,
-				MainProgram:     i.pkg.Meta.MainProgram,
-				Platforms:       i.pkg.Meta.Platforms,
-				Licenses:        licenses,
-				Maintainers:     maintainers,
-				Definition:      definition,
-				Programs:        programs,
-				ImportedAt:      time.Now(),
+		if meta["homepage"] == nil && meta["homePage"] != nil {
+			meta["homepage"] = meta["homePage"]
+		}
+		if meta["homepage"] != nil {
+			switch v := reflect.ValueOf(meta["homepage"]); v.Kind() {
+			case reflect.String:
+				meta["homepage"] = []string{v.String()}
+			case reflect.Slice:
+			// already fine
+			default:
+				errs <- fault.Newf(
+					"don't know how to interpret homepage type %s'",
+					v.Kind().String(),
+				)
 			}
 		}
-	}()
 
-	return results, errs
+		var maints []nix.Maintainer
+		if meta["maintainers"] != nil {
+			switch maint := reflect.ValueOf(meta["maintainers"]); maint.Kind() {
+			case reflect.String:
+				maints = []nix.Maintainer{{Name: maint.String(), Github: maint.String()}}
+			case reflect.Slice, reflect.Array:
+				maints = make([]nix.Maintainer, maint.Len())
+				for i, val := range maint.Slice(0, maint.Len()).Interface().([]any) {
+					switch v := reflect.ValueOf(val); v.Kind() {
+					case reflect.String:
+						maints[i] = nix.Maintainer{Name: v.String(), Github: v.String()}
+					case reflect.Map:
+						m := v.Interface().(map[string]any)
+						maints[i] = nix.Maintainer{}
+						if m["name"] != nil && m["name"].(string) != "" {
+							maints[i].Name = m["name"].(string)
+						}
+						if m["github"] != nil && m["github"].(string) != "" {
+							maints[i].Github = m["github"].(string)
+						}
+					default:
+						errs <- fault.Newf(
+							"don't know how to handle maintainer entry of type %s: %v",
+							v.Kind().String(),
+							v,
+						)
+					}
+				}
+			default:
+				errs <- fault.Newf(
+					"don't know how to interpret maintainers type %s'",
+					maint.Kind().String(),
+				)
+			}
+			meta["maintainers"] = maints
+		}
+
+		i.pkg = packageJSON{}
+		if err := i.ms.Decode(x); err != nil { // stores in i.pkg
+			errs <- fault.Wrap(err, fmsg.Withf("failed to decode package %#v", x))
+
+			continue
+		}
+
+		if i.source.Programs.Enable {
+			programs, err = i.programs.GetPackagePrograms(ctx, kv.Key)
+			if err != nil {
+				errs <- fault.Wrap(err, fmsg.Withf("failed to get programs for package %s", i.pkg.Name))
+			}
+		}
+
+		maintainers := make([]nix.Maintainer, len(i.pkg.Meta.Maintainers))
+		for i, m := range i.pkg.Meta.Maintainers {
+			maintainers[i] = nix.Maintainer{
+				Name:   m.Name,
+				Github: m.Github,
+			}
+		}
+
+		pkgSet, _, found := strings.Cut(kv.Key, ".")
+		if !found {
+			pkgSet = ""
+		}
+
+		var definition string
+		if i.pkg.Meta.Position != "" {
+			defURL, err := url.Parse(i.pkg.Meta.Position)
+			if err != nil {
+				errs <- fault.Wrap(err, fmsg.Withf("failed to parse source URL %s", definition))
+			}
+			if defURL.IsAbs() {
+				definition = i.pkg.Meta.Position
+			} else {
+				subpath, line, _ := strings.Cut(i.pkg.Meta.Position, ":")
+				definition, err = i.source.Repo.GetFileURL(subpath, line)
+				if err != nil {
+					errs <- fault.Wrap(err, fmsg.Withf("failed to make repo URL for package %s", i.pkg.Name))
+				}
+			}
+		}
+
+		results <- nix.Package{
+			Name:            i.pkg.Name,
+			Attribute:       strings.TrimPrefix(kv.Key, "nur.repos."),
+			Source:          i.source.Key,
+			PackageSet:      pkgSet,
+			Version:         i.pkg.Version,
+			Broken:          i.pkg.Meta.Broken,
+			Description:     i.pkg.Meta.Description,
+			LongDescription: nix.Markdown(i.pkg.Meta.LongDescription),
+			Homepages:       i.pkg.Meta.Homepages,
+			MainProgram:     i.pkg.Meta.MainProgram,
+			Platforms:       i.pkg.Meta.Platforms,
+			Licenses:        licenses,
+			Maintainers:     maintainers,
+			Definition:      definition,
+			Programs:        programs,
+			ImportedAt:      time.Now(),
+		}
+	}
 }

@@ -9,29 +9,31 @@ import (
 )
 
 type Processor interface {
-	Process(context.Context) (<-chan nix.Importable, <-chan error)
+	Process(context.Context, chan<- nix.Importable, chan<- error)
 }
 
 func (imp *Importer) process(
 	ctx context.Context,
 	processor Processor,
-) (bool, error) {
+) (hadObjectErrors bool, criticalError error) {
 	wg := sync.WaitGroup{}
 
-	wg.Add(1)
-	objects, pErrs := processor.Process(ctx)
+	objects := make(chan nix.Importable, 1)
+	pErrs := make(chan error)
+	wg.Go(func() {
+		processor.Process(ctx, objects, pErrs)
+	})
 
-	wg.Add(1)
-	iErrs := imp.options.WriteIndex.Import(ctx, objects)
+	iErrs := make(chan error)
+	wg.Go(func() {
+		imp.options.WriteIndex.Import(ctx, objects, iErrs)
+	})
 
-	var hadObjectErrors bool
-	var criticalError error
 	go func() {
 		for {
 			select {
 			case err, running := <-iErrs:
 				if !running {
-					wg.Done()
 					iErrs = nil
 					imp.options.Logger.Debug("ingest completed")
 
@@ -47,7 +49,6 @@ func (imp *Importer) process(
 				imp.options.Logger.Warn("error ingesting object", "error", err)
 			case err, running := <-pErrs:
 				if !running {
-					wg.Done()
 					pErrs = nil
 
 					continue

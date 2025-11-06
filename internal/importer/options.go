@@ -98,95 +98,92 @@ func NewOptionProcessor(
 	return &i, nil
 }
 
-func (i *OptionIngester) Process(ctx context.Context) (<-chan nix.Importable, <-chan error) {
-	results := make(chan nix.Importable, 1)
-	errs := make(chan error)
+func (i *OptionIngester) Process(
+	ctx context.Context,
+	results chan<- nix.Importable,
+	errs chan<- error,
+) {
+	defer i.infile.Close()
+	defer close(results)
+	defer close(errs)
 
-	go func() {
-		defer i.infile.Close()
-		defer close(results)
-		defer close(errs)
+outer:
+	for mv := range i.dec.Stream() {
+		select {
+		case <-ctx.Done():
+			break outer
+		default:
+		}
+		if err := i.dec.Err(); err != nil {
+			errs <- fault.Wrap(err, fmsg.With("could not decode JSON"))
 
-	outer:
-		for mv := range i.dec.Stream() {
-			select {
-			case <-ctx.Done():
-				break outer
-			default:
-			}
-			if err := i.dec.Err(); err != nil {
-				errs <- fault.Wrap(err, fmsg.With("could not decode JSON"))
+			continue
+		}
+		if mv.ValueType != jstream.Object {
+			errs <- fault.Newf("unexpected object type %s", ValueTypeToString(mv.ValueType))
 
-				continue
-			}
-			if mv.ValueType != jstream.Object {
-				errs <- fault.Newf("unexpected object type %s", ValueTypeToString(mv.ValueType))
+			continue
+		}
+		kv := mv.Value.(jstream.KV)
+		x := kv.Value.(map[string]any)
 
-				continue
-			}
-			kv := mv.Value.(jstream.KV)
-			x := kv.Value.(map[string]any)
-
-			var decls []*nix.Link
-			for _, decl := range x["declarations"].([]any) {
-				switch decl := reflect.ValueOf(decl); decl.Kind() {
-				case reflect.String:
-					s := decl.String()
-					link, err := MakeChannelLink(i.source.Repo, s)
-					if err != nil {
-						errs <- fault.Wrap(err, fmsg.Withf("could not make a channel link for channel %s, revision %s and subpath %s",
-							i.source.Channel, i.source.Repo.Revision, s,
-						))
-
-						continue
-					}
-					decls = append(decls, link)
-				case reflect.Map:
-					v := decl.Interface().(map[string]any)
-					link := nix.Link{
-						Name: v["name"].(string),
-						URL:  v["url"].(string),
-					}
-					decls = append(decls, &link)
-				default:
-					errs <- fault.Newf("unexpected declaration type %s", decl.Kind().String())
+		var decls []*nix.Link
+		for _, decl := range x["declarations"].([]any) {
+			switch decl := reflect.ValueOf(decl); decl.Kind() {
+			case reflect.String:
+				s := decl.String()
+				link, err := MakeChannelLink(i.source.Repo, s)
+				if err != nil {
+					errs <- fault.Wrap(err, fmsg.Withf("could not make a channel link for channel %s, revision %s and subpath %s",
+						i.source.Channel, i.source.Repo.Revision, s,
+					))
 
 					continue
 				}
-			}
-			if len(decls) > 0 {
-				x["declarations"] = decls
-			}
-
-			i.optJSON = nixOptionJSON{}
-			err := i.ms.Decode(x) // stores in optJSON
-			if err != nil {
-				errs <- fault.Wrap(err, fmsg.Withf("failed to decode option %#v", x))
+				decls = append(decls, link)
+			case reflect.Map:
+				v := decl.Interface().(map[string]any)
+				link := nix.Link{
+					Name: v["name"].(string),
+					URL:  v["url"].(string),
+				}
+				decls = append(decls, &link)
+			default:
+				errs <- fault.Newf("unexpected declaration type %s", decl.Kind().String())
 
 				continue
 			}
-
-			decs := make([]nix.Link, len(i.optJSON.Declarations))
-			for i, d := range i.optJSON.Declarations {
-				decs[i] = nix.Link(d)
-			}
-
-			// log.Debug("sending option", "name", kv.Key)
-			results <- nix.Option{
-				Name:            kv.Key,
-				Source:          i.source.Key,
-				Declarations:    decs,
-				Default:         i.convertDocsValue(i.optJSON.Default),
-				Description:     nix.Markdown(i.optJSON.Description),
-				Example:         i.convertDocsValue(i.optJSON.Example),
-				RelatedPackages: nix.Markdown(i.optJSON.RelatedPackages),
-				Loc:             i.optJSON.Loc,
-				Parents:         strings.Join(i.optJSON.Loc[:len(i.optJSON.Loc)-1], "."),
-				Type:            i.optJSON.Type,
-				ImportedAt:      time.Now(),
-			}
 		}
-	}()
+		if len(decls) > 0 {
+			x["declarations"] = decls
+		}
 
-	return results, errs
+		i.optJSON = nixOptionJSON{}
+		err := i.ms.Decode(x) // stores in optJSON
+		if err != nil {
+			errs <- fault.Wrap(err, fmsg.Withf("failed to decode option %#v", x))
+
+			continue
+		}
+
+		decs := make([]nix.Link, len(i.optJSON.Declarations))
+		for i, d := range i.optJSON.Declarations {
+			decs[i] = nix.Link(d)
+		}
+
+		// log.Debug("sending option", "name", kv.Key)
+		results <- nix.Option{
+			Name:            kv.Key,
+			Source:          i.source.Key,
+			Declarations:    decs,
+			Default:         i.convertDocsValue(i.optJSON.Default),
+			Description:     nix.Markdown(i.optJSON.Description),
+			Example:         i.convertDocsValue(i.optJSON.Example),
+			RelatedPackages: nix.Markdown(i.optJSON.RelatedPackages),
+			Loc:             i.optJSON.Loc,
+			Parents:         strings.Join(i.optJSON.Loc[:len(i.optJSON.Loc)-1], "."),
+			Type:            i.optJSON.Type,
+			ImportedAt:      time.Now(),
+		}
+	}
 }

@@ -318,10 +318,11 @@ func (i *WriteIndex) SaveMeta() error {
 func (i *WriteIndex) Import(
 	ctx context.Context,
 	objects <-chan nix.Importable,
-) <-chan error {
+	errs chan<- error,
+) {
 	indexMapping := i.index.Mapping()
 
-	return i.WithBatchObjects(ctx, objects, func(batch *bleve.Batch, obj nix.Importable) error {
+	i.WithBatchObjects(ctx, objects, errs, func(batch *bleve.Batch, obj nix.Importable) error {
 		doc := document.NewDocument(nix.GetKey(obj))
 		if err := indexMapping.MapDocument(doc, obj); err != nil {
 			return fault.Wrap(err, fmsg.Withf("could not map document for object: %s", obj.GetName()))
@@ -369,49 +370,45 @@ func (i *WriteIndex) WithBatch(fn func(batch *bleve.Batch)) error {
 func (i *WriteIndex) WithBatchObjects(
 	ctx context.Context,
 	objects <-chan nix.Importable,
+	errs chan<- error,
 	processor func(batch *bleve.Batch, obj nix.Importable) error,
-) <-chan error {
+) {
 	var err error
-	errs := make(chan error)
 
-	go func() {
-		defer close(errs)
-		k := 0
-		batch := i.index.NewBatch()
+	defer close(errs)
+	k := 0
+	batch := i.index.NewBatch()
 
-	outer:
-		for obj := range objects {
-			select {
-			case <-ctx.Done():
-				i.log.Warn("batch process aborted")
+outer:
+	for obj := range objects {
+		select {
+		case <-ctx.Done():
+			i.log.Warn("batch process aborted")
 
-				break outer
-			default:
-			}
-
-			if err := processor(batch, obj); err != nil {
-				errs <- fault.Wrap(err, fmsg.With("could not process object"))
-
-				continue
-			}
-
-			if k++; k%i.batchSize == 0 {
-				err = i.Flush(batch)
-				if err != nil {
-					errs <- err
-
-					return
-				}
-			}
+			break outer
+		default:
 		}
 
-		err := i.Flush(batch)
-		if err != nil {
-			errs <- err
-		}
-	}()
+		if err := processor(batch, obj); err != nil {
+			errs <- fault.Wrap(err, fmsg.With("could not process object"))
 
-	return errs
+			continue
+		}
+
+		if k++; k%i.batchSize == 0 {
+			err = i.Flush(batch)
+			if err != nil {
+				errs <- err
+
+				return
+			}
+		}
+	}
+
+	err = i.Flush(batch)
+	if err != nil {
+		errs <- err
+	}
 }
 
 func (i *WriteIndex) Flush(batch *bleve.Batch) error {
