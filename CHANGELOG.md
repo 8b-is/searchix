@@ -1,6 +1,19 @@
 # Changelog
 
-## [v0.3.0](https://codeberg.org/alanpearce/searchix/compare/v0.2.8...ff283282d42ec5f77e9ad8f2c5616e4315b0355e) (2025-11-05)
+## [v0.4.0](https://codeberg.org/alanpearce/searchix/compare/v0.3.0...0d664b10b50db1871770826fd09171575a712595) (2025-11-06)
+
+### ⚠ BREAKING CHANGE
+
+- requires `--outdir` instead of writing to stdout
+
+### Fixes
+
+- use correct search name for combined search
+  ([0d664b1](https://codeberg.org/alanpearce/searchix/commit/0d664b10b50db1871770826fd09171575a712595))
+- make generate-error-page command output assets
+  ([d29ccd9](https://codeberg.org/alanpearce/searchix/commit/d29ccd9bebef309aea3dfddea1dfbd1f62ca38a5))
+
+## [v0.3.0](https://codeberg.org/alanpearce/searchix/compare/v0.2.8...v0.3.0) (2025-11-05)
 
 ### Features
 
