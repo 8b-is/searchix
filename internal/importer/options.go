@@ -104,8 +104,6 @@ func (i *OptionIngester) Process(
 	errs chan<- error,
 ) {
 	defer i.infile.Close()
-	defer close(results)
-	defer close(errs)
 
 outer:
 	for mv := range i.dec.Stream() {

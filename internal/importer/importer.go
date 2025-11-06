@@ -4,7 +4,9 @@ import (
 	"context"
 	"sync"
 
-	"alin.ovh/searchix/internal/index"
+	"github.com/Southclaws/fault"
+	"github.com/Southclaws/fault/fmsg"
+
 	"alin.ovh/searchix/internal/nix"
 )
 
@@ -19,47 +21,27 @@ func (imp *Importer) process(
 	wg := sync.WaitGroup{}
 
 	objects := make(chan nix.Importable, 1)
-	pErrs := make(chan error)
+	errs := make(chan error)
 	wg.Go(func() {
-		processor.Process(ctx, objects, pErrs)
+		processor.Process(ctx, objects, errs)
+		close(objects)
 	})
 
-	iErrs := make(chan error)
 	wg.Go(func() {
-		imp.options.WriteIndex.Import(ctx, objects, iErrs)
-	})
-
-	go func() {
-		for {
-			select {
-			case err, running := <-iErrs:
-				if !running {
-					iErrs = nil
-					imp.options.Logger.Debug("ingest completed")
-
-					continue
-				}
-				be, isBatchError := err.(*index.BatchError)
-				if isBatchError {
-					criticalError = be
-
-					break
-				}
-				hadObjectErrors = true
-				imp.options.Logger.Warn("error ingesting object", "error", err)
-			case err, running := <-pErrs:
-				if !running {
-					pErrs = nil
-
-					continue
-				}
-				hadObjectErrors = true
-				imp.options.Logger.Warn("error processing object", "error", err)
-			}
+		err := imp.options.WriteIndex.Import(ctx, objects, errs)
+		if err != nil {
+			criticalError = fault.Wrap(err, fmsg.With("error writing batch"))
 		}
-	}()
+		close(errs)
+	})
+
+	for err := range errs {
+		hadObjectErrors = true
+		imp.options.Logger.Warn("error processing object", "error", err)
+	}
 
 	wg.Wait()
+	imp.options.Logger.Debug("ingest completed")
 
 	return hadObjectErrors, criticalError
 }

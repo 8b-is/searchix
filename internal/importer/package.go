@@ -134,8 +134,6 @@ func (i *PackageIngester) Process(
 	}
 
 	defer i.infile.Close()
-	defer close(results)
-	defer close(errs)
 
 	if i.programs != nil {
 		defer i.programs.Close()

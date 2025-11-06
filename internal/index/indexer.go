@@ -319,10 +319,10 @@ func (i *WriteIndex) Import(
 	ctx context.Context,
 	objects <-chan nix.Importable,
 	errs chan<- error,
-) {
+) error {
 	indexMapping := i.index.Mapping()
 
-	i.WithBatchObjects(ctx, objects, errs, func(batch *bleve.Batch, obj nix.Importable) error {
+	return i.WithBatchObjects(ctx, objects, errs, func(batch *bleve.Batch, obj nix.Importable) error {
 		doc := document.NewDocument(nix.GetKey(obj))
 		if err := indexMapping.MapDocument(doc, obj); err != nil {
 			return fault.Wrap(err, fmsg.Withf("could not map document for object: %s", obj.GetName()))
@@ -372,20 +372,16 @@ func (i *WriteIndex) WithBatchObjects(
 	objects <-chan nix.Importable,
 	errs chan<- error,
 	processor func(batch *bleve.Batch, obj nix.Importable) error,
-) {
-	var err error
-
-	defer close(errs)
+) error {
 	k := 0
 	batch := i.index.NewBatch()
 
-outer:
 	for obj := range objects {
 		select {
 		case <-ctx.Done():
 			i.log.Warn("batch process aborted")
 
-			break outer
+			return ctx.Err()
 		default:
 		}
 
@@ -396,19 +392,19 @@ outer:
 		}
 
 		if k++; k%i.batchSize == 0 {
-			err = i.Flush(batch)
+			err := i.Flush(batch)
 			if err != nil {
-				errs <- err
-
-				return
+				return err
 			}
 		}
 	}
 
-	err = i.Flush(batch)
+	err := i.Flush(batch)
 	if err != nil {
-		errs <- err
+		return err
 	}
+
+	return nil
 }
 
 func (i *WriteIndex) Flush(batch *bleve.Batch) error {
