@@ -40,12 +40,22 @@ func (imp *Importer) StartUpdateTimer(
 ) {
 	var nextRun time.Time
 	switch {
+	case !imp.options.WriteIndex.Exists():
+		imp.options.Logger.Info(
+			"no index found, starting immediate update",
+		)
+		nextRun = time.Now()
 	case Job.LastRun.FinishedAt.Before(time.Now().Add(-24 * time.Hour)):
 		imp.options.Logger.Info(
 			"indexing last ran more than 24 hours ago, scheduling immediate update",
 		)
 		nextRun = time.Now()
 	default:
+		err := imp.EnsureSourcesIndexed(parentCtx, imp.options.ReadIndex)
+		if err != nil {
+			imp.options.Logger.Error("could not add new sources", "error", err)
+		}
+
 		nextRun = nextUTCOccurrenceOfTime(imp.config.Importer.UpdateAt)
 	}
 	SetNextRun(nextRun)

@@ -78,18 +78,6 @@ func (opts *ServeOptions) Execute(_ []string) (err error) {
 	ctx, stop := signal.NotifyContext(context.Background(), signals...)
 	defer stop()
 
-	if !write.Exists() {
-		err = imp.Index(ctx, nil)
-		if err != nil {
-			return fault.Wrap(err, fmsg.With("Failed to index data"))
-		}
-	}
-
-	err = imp.EnsureSourcesIndexed(ctx, read)
-	if err != nil {
-		return fault.Wrap(err, fmsg.With("Failed to ensure sources indexed"))
-	}
-
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
 	go func() {
