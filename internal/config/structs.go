@@ -74,7 +74,7 @@ func (source Source) String() string {
 	case Packages:
 		return source.Name
 	case All:
-		return "All"
+		return "Combined"
 	default:
 		return fmt.Sprintf("Source(%s)", source.Name)
 	}
