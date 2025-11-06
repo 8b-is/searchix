@@ -82,7 +82,6 @@ func (opts *ServeOptions) Execute(_ []string) (err error) {
 	wg.Go(func() {
 		sCtx, cancel := context.WithCancel(ctx)
 		defer cancel()
-		defer wg.Done()
 		err := s.Start(sCtx, globalOptions.Dev)
 		if err != nil && !errors.Is(err, context.Canceled) {
 			// Error starting or closing listener:
