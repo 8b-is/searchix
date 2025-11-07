@@ -17,11 +17,9 @@ const (
 )
 
 type SourceMeta struct {
-	IndexedAt time.Time
 	StoredAt  time.Time
 	UpdatedAt time.Time
 	Path      string
-	Rev       string
 }
 
 type data struct {

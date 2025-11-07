@@ -408,7 +408,6 @@ func (imp *Importer) createSourceImporter(
 			logger.Info("importer succeeded")
 		}
 
-		sourceMeta.Rev = source.Repo.Revision
 		meta.SetSourceMeta(source.Key, sourceMeta)
 
 		return nil
