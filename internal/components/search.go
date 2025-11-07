@@ -76,27 +76,30 @@ func SearchPage(tdata TemplateData, r ResultData, children ...g.Node) g.Node {
 					})
 				}),
 			),
-			P(
-				g.Text("Indexing last ran "),
-				Time(
-					DateTime(importer.Job.LastRun.FinishedAt.Format(time.RFC3339)),
-					Title(importer.Job.LastRun.FinishedAt.Format(time.DateTime)),
-					g.Text(
-						humanize.RelTime(
-							importer.Job.LastRun.FinishedAt,
-							time.Now(),
-							"ago",
-							"in the future",
+			g.If(!importer.Job.LastRun.FinishedAt.IsZero(),
+				P(
+					g.Text("Indexing last ran "),
+					Time(
+						DateTime(importer.Job.LastRun.FinishedAt.Format(time.RFC3339)),
+						Title(importer.Job.LastRun.FinishedAt.Format(time.DateTime)),
+						g.Text(
+							humanize.RelTime(
+								importer.Job.LastRun.FinishedAt,
+								time.Now(),
+								"ago",
+								"in the future",
+							),
 						),
 					),
+					g.Text(", will run again in "),
+					Time(
+						DateTime(importer.Job.NextRun.Format(time.RFC3339)),
+						Title(importer.Job.NextRun.Format(time.DateTime)),
+						g.Textf("%.0f hours", time.Until(importer.Job.NextRun).Hours()),
+					),
+					g.Text("."),
 				),
-				g.Text(", will run again in "),
-				Time(
-					DateTime(importer.Job.NextRun.Format(time.RFC3339)),
-					Title(importer.Job.NextRun.Format(time.DateTime)),
-					g.Textf("%.0f hours", time.Until(importer.Job.NextRun).Hours()),
-				),
-				g.Text("."),
+				P(Class("notice error"), g.Text("Index missing")),
 			),
 		),
 		script(tdata.Assets.ByPath["/search.js"]),
