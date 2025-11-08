@@ -13,9 +13,8 @@ import (
 )
 
 type DownloadFetcher struct {
-	Source     config.Source
-	SourceFile string
-	fetcher    *http.Fetcher
+	Source  config.Source
+	fetcher *http.Fetcher
 	*Options
 }
 
