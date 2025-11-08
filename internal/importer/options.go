@@ -10,6 +10,7 @@ import (
 	"alin.ovh/x/log"
 
 	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/nix"
 
 	"github.com/Southclaws/fault"
@@ -72,8 +73,8 @@ func NewOptionProcessor(
 	infile io.ReadCloser,
 	source config.Source,
 	log *log.Logger,
-) (*OptionIngester, error) {
-	i := OptionIngester{
+) *OptionIngester {
+	i := &OptionIngester{
 		dec:     jstream.NewDecoder(infile, source.JSONDepth).EmitKV(),
 		log:     log,
 		optJSON: nixOptionJSON{},
@@ -89,18 +90,16 @@ func NewOptionProcessor(
 		DecodeHook:  mapstructure.TextUnmarshallerHookFunc(),
 	})
 	if err != nil {
-		defer infile.Close()
-
-		return nil, fault.Wrap(err, fmsg.With("could not create mapstructure decoder"))
+		panic("could not create mapstructure decoder: " + err.Error())
 	}
 	i.ms = ms
 
-	return &i, nil
+	return i
 }
 
 func (i *OptionIngester) Process(
 	ctx context.Context,
-	results chan<- nix.Importable,
+	results chan<- index.Indexable,
 	errs chan<- error,
 ) {
 	defer i.infile.Close()

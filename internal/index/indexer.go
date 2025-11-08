@@ -10,7 +10,6 @@ import (
 	"alin.ovh/searchix/internal/file"
 	"alin.ovh/searchix/internal/index/meta"
 	"alin.ovh/searchix/internal/index/nixattr"
-	"alin.ovh/searchix/internal/nix"
 
 	"alin.ovh/x/log"
 	"github.com/Southclaws/fault"
@@ -50,6 +49,17 @@ type WriteIndex struct {
 
 type BatchError struct {
 	error
+}
+
+type Indexable interface {
+	ImporterType() string
+	BleveType() string
+	GetName() string
+	GetSource() string
+}
+
+func GetKey(i Indexable) string {
+	return i.ImporterType() + "/" + i.GetSource() + "/" + i.GetName()
 }
 
 var idAnalyzer analysis.Analyzer
@@ -317,13 +327,13 @@ func (i *WriteIndex) SaveMeta() error {
 
 func (i *WriteIndex) Import(
 	ctx context.Context,
-	objects <-chan nix.Importable,
+	objects <-chan Indexable,
 	errs chan<- error,
 ) error {
 	indexMapping := i.index.Mapping()
 
-	return i.WithBatchObjects(ctx, objects, errs, func(batch *bleve.Batch, obj nix.Importable) error {
-		doc := document.NewDocument(nix.GetKey(obj))
+	return i.WithBatchObjects(ctx, objects, errs, func(batch *bleve.Batch, obj Indexable) error {
+		doc := document.NewDocument(GetKey(obj))
 		if err := indexMapping.MapDocument(doc, obj); err != nil {
 			return fault.Wrap(err, fmsg.Withf("could not map document for object: %s", obj.GetName()))
 		}
@@ -369,9 +379,9 @@ func (i *WriteIndex) WithBatch(fn func(batch *bleve.Batch)) error {
 
 func (i *WriteIndex) WithBatchObjects(
 	ctx context.Context,
-	objects <-chan nix.Importable,
+	objects <-chan Indexable,
 	errs chan<- error,
-	processor func(batch *bleve.Batch, obj nix.Importable) error,
+	processor func(batch *bleve.Batch, obj Indexable) error,
 ) error {
 	k := 0
 	batch := i.index.NewBatch()

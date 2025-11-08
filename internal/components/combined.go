@@ -9,7 +9,7 @@ import (
 	. "alin.ovh/gomponents/html"
 )
 
-func CombinedData(data nix.Importable) g.Node {
+func CombinedData(data index.Indexable) g.Node {
 	switch data := data.(type) {
 	case nix.Option:
 		return firstSentence(data.Description)

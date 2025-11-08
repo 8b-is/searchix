@@ -1,12 +1,13 @@
 package components
 
 import (
+	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/nix"
 
 	g "alin.ovh/gomponents"
 )
 
-func Detail(thing nix.Importable) g.Node {
+func Detail(thing index.Indexable) g.Node {
 	switch t := thing.(type) {
 	case nix.Option:
 		return OptionDetail(t)
@@ -17,6 +18,6 @@ func Detail(thing nix.Importable) g.Node {
 	}
 }
 
-func DetailPage(tdata TemplateData, thing nix.Importable) g.Node {
+func DetailPage(tdata TemplateData, thing index.Indexable) g.Node {
 	return Page(tdata, Detail(thing))
 }

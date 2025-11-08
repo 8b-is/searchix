@@ -27,7 +27,7 @@ const DefaultPageSize = 100
 
 type DocumentMatch struct {
 	*search.DocumentMatch
-	Data nix.Importable
+	Data Indexable
 }
 
 type Result struct {
@@ -329,7 +329,7 @@ func (index *ReadIndex) GetDocument(
 	ctx context.Context,
 	source config.Source,
 	id string,
-) (nix.Importable, error) {
+) (Indexable, error) {
 	key := nix.MakeKey(source, id)
 	query := bleve.NewDocIDQuery([]string{key})
 	search := bleve.NewSearchRequest(query)

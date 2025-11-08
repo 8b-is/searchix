@@ -12,6 +12,7 @@ import (
 	"alin.ovh/x/log"
 
 	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/nix"
 	"alin.ovh/searchix/internal/programs"
 
@@ -73,7 +74,7 @@ func NewPackageProcessor(
 	source config.Source,
 	log *log.Logger,
 	programsDB *programs.DB,
-) (*PackageIngester, error) {
+) *PackageIngester {
 	i := &PackageIngester{
 		dec:      jstream.NewDecoder(infile, source.JSONDepth).EmitKV(),
 		log:      log,
@@ -90,13 +91,11 @@ func NewPackageProcessor(
 		DecodeHook: mapstructure.TextUnmarshallerHookFunc(),
 	})
 	if err != nil {
-		defer infile.Close()
-
-		return nil, fault.Wrap(err, fmsg.With("could not create mapstructure decoder"))
+		panic("could not create mapstructure decoder: " + err.Error())
 	}
 	i.ms = ms
 
-	return i, nil
+	return i
 }
 
 func convertToLicense(in map[string]any) *nix.License {
@@ -122,7 +121,7 @@ func convertToLicense(in map[string]any) *nix.License {
 
 func (i *PackageIngester) Process(
 	ctx context.Context,
-	results chan<- nix.Importable,
+	results chan<- index.Indexable,
 	errs chan<- error,
 ) {
 	if i.programs != nil {
