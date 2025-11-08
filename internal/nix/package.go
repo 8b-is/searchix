@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/nixdocs"
 )
 
 type Package struct {
@@ -15,7 +16,7 @@ type Package struct {
 	Description     string
 	Homepages       []string
 	Licenses        []License
-	LongDescription Markdown
+	LongDescription nixdocs.Markdown
 	MainProgram     string
 	Programs        []string
 	Maintainers     []Maintainer

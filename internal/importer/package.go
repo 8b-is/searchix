@@ -14,6 +14,7 @@ import (
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/nix"
+	"alin.ovh/searchix/internal/nixdocs"
 	"alin.ovh/searchix/internal/programs"
 
 	"github.com/Southclaws/fault"
@@ -334,7 +335,7 @@ outer:
 			Version:         version,
 			Broken:          broken,
 			Description:     description,
-			LongDescription: nix.Markdown(longDescription),
+			LongDescription: nixdocs.Markdown(longDescription),
 			Homepages:       homepages,
 			MainProgram:     mainProgram,
 			Platforms:       platforms,

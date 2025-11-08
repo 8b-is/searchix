@@ -1,6 +1,9 @@
 package nixdocs
 
 import (
+	"io"
+
+	"github.com/Southclaws/fault"
 	fences "github.com/stefanfritsch/goldmark-fences"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
@@ -14,8 +17,10 @@ import (
 	"alin.ovh/searchix/internal/nixdocs/variable"
 )
 
-func WithNixDocsExtensions() goldmark.Option {
-	return goldmark.WithExtensions(
+type Markdown string
+
+var md = goldmark.New(
+	goldmark.WithExtensions(
 		extension.NewLinkify(),
 		&fences.Extender{},
 		optlink.New(),
@@ -25,5 +30,10 @@ func WithNixDocsExtensions() goldmark.Option {
 		variable.New(),
 		filepath.New(),
 		manpage.New(),
-	)
+	),
+)
+
+// implements gomponent.Node
+func (text Markdown) Render(w io.Writer) error {
+	return fault.Wrap(md.Convert([]byte(text), w))
 }

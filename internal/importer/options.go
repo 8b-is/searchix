@@ -12,6 +12,7 @@ import (
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/nix"
+	"alin.ovh/searchix/internal/nixdocs"
 
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
@@ -40,7 +41,7 @@ func (i *OptionIngester) convertDocsValue(docMap map[string]any) *nix.Docs {
 		}
 	case "literalMD":
 		return &nix.Docs{
-			Markdown: nix.Markdown(text),
+			Markdown: nixdocs.Markdown(text),
 		}
 	default:
 		i.log.Warn("got unexpected docs type", "type", docType, "text", text)
@@ -170,9 +171,9 @@ outer:
 			Source:          i.source.Key,
 			Declarations:    decls,
 			Default:         defaultDocs,
-			Description:     nix.Markdown(description),
+			Description:     nixdocs.Markdown(description),
 			Example:         exampleDocs,
-			RelatedPackages: nix.Markdown(relatedPackages),
+			RelatedPackages: nixdocs.Markdown(relatedPackages),
 			Loc:             loc,
 			Parents:         parents,
 			Type:            optType,

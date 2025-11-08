@@ -1,21 +1,15 @@
 package nix
 
 import (
-	"io"
 	"time"
-
-	"github.com/Southclaws/fault"
-	"github.com/yuin/goldmark"
 
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/nixdocs"
 )
 
-type Markdown string
-
 type Docs struct {
-	Plain    string   `json:",omitempty"`
-	Markdown Markdown `json:",omitempty"`
+	Plain    string           `json:",omitempty"`
+	Markdown nixdocs.Markdown `json:",omitempty"`
 }
 
 type Link struct {
@@ -28,11 +22,11 @@ type Option struct {
 	Source          string
 	Declarations    []Link
 	Default         *Docs `json:",omitempty"`
-	Description     Markdown
+	Description     nixdocs.Markdown
 	Example         *Docs `json:",omitempty"`
 	Loc             []string
 	Parents         string
-	RelatedPackages Markdown `json:",omitempty"`
+	RelatedPackages nixdocs.Markdown `json:",omitempty"`
 	Type            string
 	ImportedAt      time.Time
 }
@@ -51,13 +45,4 @@ func (p Option) GetName() string {
 
 func (p Option) GetSource() string {
 	return p.Source
-}
-
-var md = goldmark.New(
-	nixdocs.WithNixDocsExtensions(),
-)
-
-// implements gomponent.Node
-func (text Markdown) Render(w io.Writer) error {
-	return fault.Wrap(md.Convert([]byte(text), w))
 }
