@@ -1,13 +1,27 @@
 # Changelog
 
-## [v0.4.1](https://codeberg.org/alanpearce/searchix/compare/v0.4.0...f0cee06cdb2390b873a9fc37b77e5e912d0412ae) (2025-11-06)
+## [v0.4.2](https://codeberg.org/alanpearce/searchix/compare/v0.4.1...13c673dab5bd4e3a23c89304635034137fdbc78f) (2025-11-08)
 
 ### Features
+
+- improve results/facets display on narrow screens
+  ([3a04aef](https://codeberg.org/alanpearce/searchix/commit/3a04aefd4233216ef4c56dbc5befcc5b102f5201))
+- add header to facets panel
+  ([8acfcb9](https://codeberg.org/alanpearce/searchix/commit/8acfcb9f668152007376c851be9caf93fe455096))
+
+### Fixes
+
+- don't show last index time if it never finished
+  ([48c28a8](https://codeberg.org/alanpearce/searchix/commit/48c28a808535eb62d7bce4ddf3275fcd3b8e3191))
+
+### [v0.4.1](https://codeberg.org/alanpearce/searchix/compare/v0.4.0...v0.4.1) (2025-11-06)
+
+#### Features
 
 - don't block startup for indexing
   ([d8581c5](https://codeberg.org/alanpearce/searchix/commit/d8581c5d9b41485c6be7cdb61cdfca4ba323e593))
 
-### Fixes
+#### Fixes
 
 - negative waitgroup counter panic
   ([7971216](https://codeberg.org/alanpearce/searchix/commit/7971216b5bd8d6df7f4a27379b16b783c5ce0132))
