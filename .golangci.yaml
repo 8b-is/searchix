@@ -37,6 +37,9 @@ linters:
         - G115
     paralleltest:
       ignore-missing: true
+    staticcheck:
+      dot-import-whitelist:
+        - alin.ovh/gomponents/html
     wrapcheck:
       ignore-sigs:
         - .Errorf(
@@ -59,10 +62,6 @@ linters:
           - revive
         path: internal/components
         text: dot-imports
-      - linters:
-          - staticcheck
-        path: internal/components
-        text: dot imports
     paths:
       - third_party$
       - builtin$
