@@ -33,10 +33,11 @@ func NewDownloadFetcher(
 	}
 }
 
-var files = map[string]string{
-	"revision": "revision",
-	"options":  "options.json",
-	"packages": "packages.json",
+const revisionFileName = "revision"
+
+var files = map[config.ImporterType]string{
+	config.Options:  "options.json",
+	config.Packages: "packages.json",
 }
 
 func (i *DownloadFetcher) FetchIfNeeded(
@@ -45,13 +46,9 @@ func (i *DownloadFetcher) FetchIfNeeded(
 ) (*FetchedFiles, error) {
 	f := &FetchedFiles{}
 
-	filesToFetch := make([]string, 2)
-	filesToFetch[0] = files["revision"]
-	switch i.Source.Importer {
-	case config.Packages:
-		filesToFetch[1] = files["packages"]
-	case config.Options:
-		filesToFetch[1] = files["options"]
+	filesToFetch := []string{
+		revisionFileName,
+		files[i.Source.Importer],
 	}
 
 	fetcher := http.NewFetcher(&http.Options{
@@ -73,8 +70,6 @@ func (i *DownloadFetcher) FetchIfNeeded(
 			)
 		}
 
-		i.Logger.Debug("preparing to fetch URL", "url", fetchURL, "target", target)
-
 		body, err := fetcher.FetchFileIfNeeded(ctx, target, fetchURL)
 		if err != nil {
 			i.Logger.Warn("failed to fetch file", "url", fetchURL, "error", err)
@@ -89,11 +84,11 @@ func (i *DownloadFetcher) FetchIfNeeded(
 		sourceMeta.UpdatedAt = stat.ModTime()
 
 		switch basename {
-		case files["revision"]:
+		case revisionFileName:
 			f.Revision = body
-		case files["options"]:
+		case files[config.Options]:
 			f.Options = body
-		case files["packages"]:
+		case files[config.Packages]:
 			f.Packages = body
 		default:
 			return f, fault.Newf("unknown filename %s", basename)
