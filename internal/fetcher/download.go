@@ -15,6 +15,7 @@ import (
 type DownloadFetcher struct {
 	Source     config.Source
 	SourceFile string
+	fetcher    *http.Fetcher
 	*Options
 }
 
@@ -27,6 +28,10 @@ func NewDownloadFetcher(
 		return &DownloadFetcher{
 			Source:  source,
 			Options: options,
+			fetcher: http.NewFetcher(&http.Options{
+				Logger: options.Logger.Named("http"),
+				Root:   options.Root,
+			}),
 		}, nil
 	default:
 		return nil, fault.Newf("unsupported importer type %s", source.Importer)
@@ -51,11 +56,6 @@ func (i *DownloadFetcher) FetchIfNeeded(
 		files[i.Source.Importer],
 	}
 
-	fetcher := http.NewFetcher(&http.Options{
-		Logger: i.Logger.Named("http"),
-		Root:   i.Root,
-	})
-
 	for _, basename := range filesToFetch {
 		target := i.Source.JoinPath(basename)
 		fetchURL, baseErr := url.JoinPath(i.Source.URL, basename)
@@ -70,7 +70,7 @@ func (i *DownloadFetcher) FetchIfNeeded(
 			)
 		}
 
-		body, err := fetcher.FetchFileIfNeeded(ctx, target, fetchURL)
+		body, err := i.fetcher.FetchFileIfNeeded(ctx, target, fetchURL)
 		if err != nil {
 			i.Logger.Warn("failed to fetch file", "url", fetchURL, "error", err)
 
