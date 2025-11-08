@@ -16,57 +16,44 @@ import (
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
 	"github.com/bcicen/jstream"
-	"github.com/mitchellh/mapstructure"
 )
 
-type nixDocJSON struct {
-	Type string `mapstructure:"_type"`
-	Text string
-}
-
-type linkJSON struct {
-	Name string
-	URL  string `json:"url"`
-}
-
-type nixOptionJSON struct {
-	Declarations    []linkJSON
-	Default         *nixDocJSON
-	Description     string
-	Example         *nixDocJSON
-	Loc             []string
-	ReadOnly        bool
-	RelatedPackages string
-	Type            string
-}
-
-func (i *OptionIngester) convertDocsValue(nj *nixDocJSON) *nix.Docs {
-	if nj == nil {
+func (i *OptionIngester) convertDocsValue(docMap map[string]any) *nix.Docs {
+	if docMap == nil {
 		return nil
 	}
-	switch nj.Type {
+
+	var docType string
+	if t, ok := docMap["_type"].(string); ok {
+		docType = t
+	}
+
+	var text string
+	if t, ok := docMap["text"].(string); ok {
+		text = t
+	}
+
+	switch docType {
 	case "", "literalExpression":
 		return &nix.Docs{
-			Plain: nj.Text,
+			Plain: text,
 		}
 	case "literalMD":
 		return &nix.Docs{
-			Markdown: nix.Markdown(nj.Text),
+			Markdown: nix.Markdown(text),
 		}
 	default:
-		i.log.Warn("got unexpected docs type", "type", nj.Type, "text", nj.Text)
+		i.log.Warn("got unexpected docs type", "type", docType, "text", text)
 
 		return nil
 	}
 }
 
 type OptionIngester struct {
-	dec     *jstream.Decoder
-	ms      *mapstructure.Decoder
-	log     *log.Logger
-	optJSON nixOptionJSON
-	infile  io.ReadCloser
-	source  config.Source
+	dec    *jstream.Decoder
+	log    *log.Logger
+	infile io.ReadCloser
+	source config.Source
 }
 
 func NewOptionProcessor(
@@ -74,27 +61,12 @@ func NewOptionProcessor(
 	source config.Source,
 	log *log.Logger,
 ) *OptionIngester {
-	i := &OptionIngester{
-		dec:     jstream.NewDecoder(infile, source.JSONDepth).EmitKV(),
-		log:     log,
-		optJSON: nixOptionJSON{},
-		infile:  infile,
-		source:  source,
+	return &OptionIngester{
+		dec:    jstream.NewDecoder(infile, source.JSONDepth).EmitKV(),
+		log:    log,
+		infile: infile,
+		source: source,
 	}
-
-	ms, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-		ErrorUnused: true,
-		ZeroFields:  true,
-		Result:      &i.optJSON,
-		Squash:      true,
-		DecodeHook:  mapstructure.TextUnmarshallerHookFunc(),
-	})
-	if err != nil {
-		panic("could not create mapstructure decoder: " + err.Error())
-	}
-	i.ms = ms
-
-	return i
 }
 
 func (i *OptionIngester) Process(
@@ -124,11 +96,11 @@ outer:
 		kv := mv.Value.(jstream.KV)
 		x := kv.Value.(map[string]any)
 
-		var decls []*nix.Link
+		var decls []nix.Link
 		for _, decl := range x["declarations"].([]any) {
-			switch decl := reflect.ValueOf(decl); decl.Kind() {
-			case reflect.String:
-				s := decl.String()
+			switch decl := decl.(type) {
+			case string:
+				s := decl
 				link, err := MakeChannelLink(i.source.Repo, s)
 				if err != nil {
 					errs <- fault.Wrap(err, fmsg.Withf("could not make a channel link for channel %s, revision %s and subpath %s",
@@ -137,49 +109,73 @@ outer:
 
 					continue
 				}
-				decls = append(decls, link)
-			case reflect.Map:
-				v := decl.Interface().(map[string]any)
+				decls = append(decls, *link)
+			case map[string]any:
+				v := decl
 				link := nix.Link{
 					Name: v["name"].(string),
 					URL:  v["url"].(string),
 				}
-				decls = append(decls, &link)
+				decls = append(decls, link)
 			default:
-				errs <- fault.Newf("unexpected declaration type %s", decl.Kind().String())
+				errs <- fault.Newf("unexpected declaration type %s", reflect.TypeOf(decl).String())
 
 				continue
 			}
 		}
-		if len(decls) > 0 {
-			x["declarations"] = decls
+		var description string
+		if v, ok := x["description"].(string); ok {
+			description = v
 		}
 
-		i.optJSON = nixOptionJSON{}
-		err := i.ms.Decode(x) // stores in optJSON
-		if err != nil {
-			errs <- fault.Wrap(err, fmsg.Withf("failed to decode option %#v", x))
-
-			continue
+		var optType string
+		if v, ok := x["type"].(string); ok {
+			optType = v
 		}
 
-		decs := make([]nix.Link, len(i.optJSON.Declarations))
-		for i, d := range i.optJSON.Declarations {
-			decs[i] = nix.Link(d)
+		var relatedPackages string
+		if v, ok := x["relatedPackages"].(string); ok {
+			relatedPackages = v
+		}
+
+		var loc []string
+		if v, ok := x["loc"].([]any); ok {
+			loc = make([]string, len(v))
+			for i, item := range v {
+				if s, ok := item.(string); ok {
+					loc[i] = s
+				}
+			}
+		}
+
+		var defaultDocs *nix.Docs
+		if v, ok := x["default"].(map[string]any); ok {
+			defaultDocs = i.convertDocsValue(v)
+		}
+
+		var exampleDocs *nix.Docs
+		if v, ok := x["example"].(map[string]any); ok {
+			exampleDocs = i.convertDocsValue(v)
+		}
+
+		// Calculate parents
+		var parents string
+		if len(loc) > 1 {
+			parents = strings.Join(loc[:len(loc)-1], ".")
 		}
 
 		// log.Debug("sending option", "name", kv.Key)
 		results <- nix.Option{
 			Name:            kv.Key,
 			Source:          i.source.Key,
-			Declarations:    decs,
-			Default:         i.convertDocsValue(i.optJSON.Default),
-			Description:     nix.Markdown(i.optJSON.Description),
-			Example:         i.convertDocsValue(i.optJSON.Example),
-			RelatedPackages: nix.Markdown(i.optJSON.RelatedPackages),
-			Loc:             i.optJSON.Loc,
-			Parents:         strings.Join(i.optJSON.Loc[:len(i.optJSON.Loc)-1], "."),
-			Type:            i.optJSON.Type,
+			Declarations:    decls,
+			Default:         defaultDocs,
+			Description:     nix.Markdown(description),
+			Example:         exampleDocs,
+			RelatedPackages: nix.Markdown(relatedPackages),
+			Loc:             loc,
+			Parents:         parents,
+			Type:            optType,
 			ImportedAt:      time.Now(),
 		}
 	}

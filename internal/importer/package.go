@@ -19,36 +19,11 @@ import (
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
 	"github.com/bcicen/jstream"
-	"github.com/mitchellh/mapstructure"
 )
-
-type packageJSON struct {
-	Name    string `mapstructure:"pname"`
-	Meta    metaJSON
-	Version string
-}
-
-type metaJSON struct {
-	Broken          bool
-	Description     string
-	LongDescription string
-	Homepages       []string `mapstructure:"homepage"`
-	MainProgram     string
-	Maintainers     []maintainerJSON
-	Platforms       []string
-	Position        string
-}
-
-type maintainerJSON struct {
-	Github string
-	Name   string
-}
 
 type PackageIngester struct {
 	dec      *jstream.Decoder
-	ms       *mapstructure.Decoder
 	log      *log.Logger
-	pkg      packageJSON
 	infile   io.ReadCloser
 	source   config.Source
 	programs *programs.DB
@@ -75,27 +50,13 @@ func NewPackageProcessor(
 	log *log.Logger,
 	programsDB *programs.DB,
 ) *PackageIngester {
-	i := &PackageIngester{
+	return &PackageIngester{
 		dec:      jstream.NewDecoder(infile, source.JSONDepth).EmitKV(),
 		log:      log,
-		pkg:      packageJSON{},
 		infile:   infile,
 		source:   source,
 		programs: programsDB,
 	}
-
-	ms, err := mapstructure.NewDecoder(&mapstructure.DecoderConfig{
-		ZeroFields: true,
-		Result:     &i.pkg,
-		Squash:     true,
-		DecodeHook: mapstructure.TextUnmarshallerHookFunc(),
-	})
-	if err != nil {
-		panic("could not create mapstructure decoder: " + err.Error())
-	}
-	i.ms = ms
-
-	return i
 }
 
 func convertToLicense(in map[string]any) *nix.License {
@@ -276,25 +237,70 @@ outer:
 			meta["maintainers"] = maints
 		}
 
-		i.pkg = packageJSON{}
-		if err := i.ms.Decode(x); err != nil { // stores in i.pkg
-			errs <- fault.Wrap(err, fmsg.Withf("failed to decode package %#v", x))
+		// Extract package name
+		var pkgName string
+		if pname, ok := x["pname"].(string); ok {
+			pkgName = pname
+		}
 
-			continue
+		// Extract version
+		var version string
+		if v, ok := x["version"].(string); ok {
+			version = v
+		}
+
+		// Extract meta fields
+		var broken bool
+		if v, ok := meta["broken"].(bool); ok {
+			broken = v
+		}
+
+		var description string
+		if v, ok := meta["description"].(string); ok {
+			description = v
+		}
+
+		var longDescription string
+		if v, ok := meta["longDescription"].(string); ok {
+			longDescription = v
+		}
+
+		var homepages []string
+		if v, ok := meta["homepage"].([]string); ok {
+			homepages = v
+		} else if v, ok := meta["homepage"].([]any); ok {
+			homepages = make([]string, len(v))
+			for i, h := range v {
+				if s, ok := h.(string); ok {
+					homepages[i] = s
+				}
+			}
+		}
+
+		var mainProgram string
+		if v, ok := meta["mainProgram"].(string); ok {
+			mainProgram = v
+		}
+
+		var platforms []string
+		if v, ok := meta["platforms"].([]any); ok {
+			platforms = make([]string, len(v))
+			for i, p := range v {
+				if s, ok := p.(string); ok {
+					platforms[i] = s
+				}
+			}
+		}
+
+		var position string
+		if v, ok := meta["position"].(string); ok {
+			position = v
 		}
 
 		if i.source.Programs.Enable {
 			programs, err = i.programs.GetPackagePrograms(ctx, kv.Key)
 			if err != nil {
-				errs <- fault.Wrap(err, fmsg.Withf("failed to get programs for package %s", i.pkg.Name))
-			}
-		}
-
-		maintainers := make([]nix.Maintainer, len(i.pkg.Meta.Maintainers))
-		for i, m := range i.pkg.Meta.Maintainers {
-			maintainers[i] = nix.Maintainer{
-				Name:   m.Name,
-				Github: m.Github,
+				errs <- fault.Wrap(err, fmsg.Withf("failed to get programs for package %s", pkgName))
 			}
 		}
 
@@ -304,36 +310,36 @@ outer:
 		}
 
 		var definition string
-		if i.pkg.Meta.Position != "" {
-			defURL, err := url.Parse(i.pkg.Meta.Position)
+		if position != "" {
+			defURL, err := url.Parse(position)
 			if err != nil {
 				errs <- fault.Wrap(err, fmsg.Withf("failed to parse source URL %s", definition))
 			}
 			if defURL.IsAbs() {
-				definition = i.pkg.Meta.Position
+				definition = position
 			} else {
-				subpath, line, _ := strings.Cut(i.pkg.Meta.Position, ":")
+				subpath, line, _ := strings.Cut(position, ":")
 				definition, err = i.source.Repo.GetFileURL(subpath, line)
 				if err != nil {
-					errs <- fault.Wrap(err, fmsg.Withf("failed to make repo URL for package %s", i.pkg.Name))
+					errs <- fault.Wrap(err, fmsg.Withf("failed to make repo URL for package %s", pkgName))
 				}
 			}
 		}
 
 		results <- nix.Package{
-			Name:            i.pkg.Name,
+			Name:            pkgName,
 			Attribute:       strings.TrimPrefix(kv.Key, "nur.repos."),
 			Source:          i.source.Key,
 			PackageSet:      pkgSet,
-			Version:         i.pkg.Version,
-			Broken:          i.pkg.Meta.Broken,
-			Description:     i.pkg.Meta.Description,
-			LongDescription: nix.Markdown(i.pkg.Meta.LongDescription),
-			Homepages:       i.pkg.Meta.Homepages,
-			MainProgram:     i.pkg.Meta.MainProgram,
-			Platforms:       i.pkg.Meta.Platforms,
+			Version:         version,
+			Broken:          broken,
+			Description:     description,
+			LongDescription: nix.Markdown(longDescription),
+			Homepages:       homepages,
+			MainProgram:     mainProgram,
+			Platforms:       platforms,
 			Licenses:        licenses,
-			Maintainers:     maintainers,
+			Maintainers:     maints,
 			Definition:      definition,
 			Programs:        programs,
 			ImportedAt:      time.Now(),
