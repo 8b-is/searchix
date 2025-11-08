@@ -61,11 +61,14 @@ func Results(r ResultData) g.Node {
 func Facets(r ResultData) g.Node {
 	return Nav(
 		Class("facets"),
+		Summary(
+			H3(g.Text("Filters")),
+		),
 		g.Map(slices.Sorted(maps.Keys(r.Results.Facets)), func(name string) g.Node {
 			facet := r.Results.Facets[name]
 
 			return Div(Class("facet"),
-				H3(g.Text(name)),
+				H4(g.Text(name)),
 				Ul(
 					g.Map(facet.Terms.Terms(), func(term *search.TermFacet) g.Node {
 						t := term.Term

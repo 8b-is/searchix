@@ -201,9 +201,14 @@ dialog > h2 {
 }
 
 .facets h3 {
-  margin-top: 0 !important;
+  margin-top: 0;
+  padding: 0.25em 0 0.5em;
+}
+
+.facets h4 {
+  margin: 0;
   font-size: 1rem;
-  padding: 0.25rem 0;
+  padding: 0.25em 0 0;
 }
 
 .facets ul {
