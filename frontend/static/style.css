@@ -71,7 +71,7 @@ form {
 }
 
 form > search {
-  grid-column: 1 / 3;
+  grid-column: 1 / span 2;
 }
 
 fieldset {
@@ -311,9 +311,31 @@ body > footer > p {
     padding: 0.2rem;
   }
 
+  tr,
+  .term {
+    height: 2rem;
+  }
+
   .description,
   .score {
     display: none;
+  }
+
+  form {
+    grid-template-columns: 1fr;
+    column-gap: 0;
+  }
+
+  form > search {
+    grid-column: 1;
+  }
+
+  .facets {
+    grid-area: 3;
+  }
+
+  #results > table {
+    grid-area: 2;
   }
 
   dialog {
