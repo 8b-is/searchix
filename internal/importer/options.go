@@ -79,6 +79,9 @@ func (i *OptionIngester) Process(
 		defer i.infile.Close()
 
 		for mv := range i.dec.Stream() {
+			if ctx.Err() != nil {
+				break
+			}
 			if err := i.dec.Err(); err != nil {
 				i.errs = append(i.errs, fault.Wrap(err, fmsg.With("could not decode JSON")))
 
@@ -102,9 +105,10 @@ func (i *OptionIngester) Process(
 					s := decl
 					link, err := MakeChannelLink(i.source.Repo, s)
 					if err != nil {
-						i.errs = append(i.errs, fault.Wrap(err, fmsg.Withf("could not make a channel link for channel %s, revision %s and subpath %s",
-							i.source.Channel, i.source.Repo.Revision, s,
-						)))
+						i.errs = append(i.errs,
+							fault.Wrap(err, fmsg.Withf("could not make a channel link for channel %s, revision %s and subpath %s",
+								i.source.Channel, i.source.Repo.Revision, s,
+							)))
 
 						continue
 					}
@@ -183,11 +187,15 @@ func (i *OptionIngester) Process(
 }
 
 func (i *OptionIngester) Err() error {
-	if len(i.errs) == 0 {
+	errs := i.errs
+	if len(errs) == 0 {
 		return nil
 	}
-	if len(i.errs) == 1 {
+	if len(errs) == 1 {
 		return i.errs[0]
 	}
-	return fault.Newf("encountered %d errors during processing", len(i.errs))
+
+	i.errs = []error{}
+
+	return fault.Newf("encountered %d errors during processing", len(errs))
 }

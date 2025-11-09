@@ -2,9 +2,7 @@ package index
 
 import (
 	"bytes"
-	"context"
 	"encoding/gob"
-	"iter"
 	"math"
 
 	"alin.ovh/searchix/internal/config"
@@ -326,52 +324,36 @@ func (i *WriteIndex) SaveMeta() error {
 	return nil
 }
 
-func (i *WriteIndex) Import(
-	ctx context.Context,
-	objects iter.Seq[Indexable],
-) error {
-	indexMapping := i.index.Mapping()
-
-	return i.WithBatchObjects(ctx, objects, func(batch *bleve.Batch, obj Indexable) {
-		doc := document.NewDocument(GetKey(obj))
-		if err := indexMapping.MapDocument(doc, obj); err != nil {
-			i.log.Warn("could not map document for object", "name", obj.GetName())
-
-			return
-		}
-
-		var data bytes.Buffer
-		enc := gob.NewEncoder(&data)
-		if err := enc.Encode(&obj); err != nil {
-			i.log.Error("could not store object in search index", "name", obj.GetName())
-
-			return
-		}
-		field := document.NewTextFieldWithIndexingOptions("_data", nil, data.Bytes(), index.StoreField)
-		doc.AddField(field)
-		idField := document.NewTextFieldCustom(
-			"_id", nil, []byte(doc.ID()),
-			index.IndexField|index.StoreField|index.IncludeTermVectors,
-			idAnalyzer,
+func (i *WriteIndex) MapDocument(obj Indexable) (*document.Document, error) {
+	doc := document.NewDocument(GetKey(obj))
+	if err := i.index.Mapping().MapDocument(doc, obj); err != nil {
+		return nil, fault.Wrap(
+			err,
+			fmsg.Withf("could not map document for object %s", obj.GetName()),
 		)
-		doc.AddField(idField)
+	}
 
-		// log.Debug("adding object to index", "name", opt.Name)
-		if err := batch.IndexAdvanced(doc); err != nil {
-			i.log.Error("could not index object", "name", obj.GetName())
-		}
-	})
+	var data bytes.Buffer
+	enc := gob.NewEncoder(&data)
+	if err := enc.Encode(&obj); err != nil {
+		return nil, fault.Wrap(err, fmsg.Withf("could not encode object %s", obj.GetName()))
+	}
+	field := document.NewTextFieldWithIndexingOptions("_data", nil, data.Bytes(), index.StoreField)
+	doc.AddField(field)
+	idField := document.NewTextFieldCustom(
+		"_id", nil, []byte(doc.ID()),
+		index.IndexField|index.StoreField|index.IncludeTermVectors,
+		idAnalyzer,
+	)
+	doc.AddField(idField)
+
+	return doc, nil
 }
 
-func (i *WriteIndex) GetBatchSize() int {
-	return i.batchSize
-}
-
-func (i *WriteIndex) WithBatch(fn func(batch *bleve.Batch)) error {
-	batch := i.index.NewBatch()
+func withBatch(batch *Batcher, fn func(batch *Batcher)) error {
 	fn(batch)
 
-	err := i.Flush(batch)
+	err := batch.Flush()
 	if err != nil {
 		return fault.Wrap(err, fmsg.With("could not flush batch"))
 	}
@@ -379,60 +361,15 @@ func (i *WriteIndex) WithBatch(fn func(batch *bleve.Batch)) error {
 	return nil
 }
 
-func (i *WriteIndex) WithBatchObjects(
-	ctx context.Context,
-	objects iter.Seq[Indexable],
-	processor func(batch *bleve.Batch, obj Indexable),
-) error {
-	k := 0
-	batch := i.index.NewBatch()
+func (i *WriteIndex) WithBatch(fn func(batch *Batcher)) error {
+	batch := i.NewBatcher()
+	batch.max = math.MaxInt
 
-	for obj := range objects {
-		select {
-		case <-ctx.Done():
-			i.log.Warn("batch process aborted")
-
-			return ctx.Err()
-		default:
-		}
-
-		processor(batch, obj)
-
-		if k++; k%i.batchSize == 0 {
-			err := i.Flush(batch)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	err := i.Flush(batch)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return withBatch(batch, fn)
 }
 
-func (i *WriteIndex) Flush(batch *bleve.Batch) error {
-	size := batch.Size()
-	if size == 0 {
-		return &BatchError{
-			fault.New("no documents to flush"),
-		}
-	}
-	i.log.Debug("flushing batch", "size", size)
-
-	err := i.index.Batch(batch)
-	if err != nil {
-		return &BatchError{
-			fault.Wrap(err, fmsg.Withf("could not flush batch")),
-		}
-	}
-
-	batch.Reset()
-
-	return nil
+func (i *WriteIndex) WithAutoBatch(fn func(batch *Batcher)) error {
+	return withBatch(i.NewBatcher(), fn)
 }
 
 func (i *WriteIndex) Close() (err error) {
@@ -459,18 +396,11 @@ func (i *WriteIndex) DeleteBySource(source string) error {
 		return fault.Wrap(err, fmsg.Withf("failed to query documents of retired index %s", source))
 	}
 
-	batch := i.index.NewBatch()
-	var k int
+	batch := i.NewBatcher()
 	for _, hit := range results.Hits {
 		batch.Delete(hit.ID)
-		if k++; k%i.batchSize == 0 {
-			err := i.Flush(batch)
-			if err != nil {
-				return err
-			}
-		}
 	}
-	err = i.Flush(batch)
+	err = batch.Flush()
 	if err != nil {
 		return fault.Wrap(err)
 	}

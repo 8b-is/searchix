@@ -13,7 +13,6 @@ import (
 	"alin.ovh/x/log"
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
-	"github.com/blevesearch/bleve/v2"
 
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/fetcher"
@@ -226,7 +225,7 @@ func (imp *Importer) PruneSource(
 		return fault.Newf("too many entities to prune: %d/%d (threshold: 90%%)", res.Total, maxCount)
 	}
 
-	err = write.WithBatch(func(batch *bleve.Batch) {
+	err = write.WithBatch(func(batch *index.Batcher) {
 		for _, dm := range res.Hits {
 			batch.Delete(dm.ID)
 		}
@@ -398,18 +397,42 @@ func (imp *Importer) createSourceImporter(
 			)
 		}
 
-		objects := processor.Process(ctx)
-
-		err = imp.options.WriteIndex.Import(ctx, objects)
-		if err != nil {
-			return fault.Wrap(err, fmsg.With("error writing batch"))
-		}
-
 		hadWarnings := false
-		if err := processor.Err(); err != nil {
-			hadWarnings = true
-			imp.options.Logger.Warn("error processing objects", "error", err)
+		write := imp.options.WriteIndex
+		err = write.WithAutoBatch(func(batch *index.Batcher) {
+			for object := range processor.Process(ctx) {
+				select {
+				case <-ctx.Done():
+					imp.options.Logger.Warn("context canceled")
+
+					return
+				default:
+					if err := processor.Err(); err != nil {
+						hadWarnings = true
+
+						imp.options.Logger.Warn("error processing object", "error", err)
+					}
+				}
+
+				doc, err := write.MapDocument(object)
+				if err != nil {
+					imp.options.Logger.Warn("error mapping document", "error", err)
+
+					return
+				}
+
+				err = batch.IndexAdvanced(doc)
+				if err != nil {
+					imp.options.Logger.Warn("error indexing document", "error", err)
+
+					return
+				}
+			}
+		})
+		if err != nil {
+			return fault.Wrap(err, fmsg.With("error writing index"))
 		}
+
 		imp.options.Logger.Debug("ingest completed")
 
 		sourceMeta.StoredAt = time.Now()

@@ -359,12 +359,15 @@ func (i *PackageIngester) Process(
 }
 
 func (i *PackageIngester) Err() error {
-	if len(i.errs) == 0 {
+	errs := i.errs
+	if len(errs) == 0 {
 		return nil
 	}
-	if len(i.errs) == 1 {
+	if len(errs) == 1 {
 		return i.errs[0]
 	}
 
-	return fault.Newf("encountered %d errors during processing", len(i.errs))
+	i.errs = []error{}
+
+	return fault.Newf("encountered %d errors during processing", len(errs))
 }
