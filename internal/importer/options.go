@@ -3,6 +3,7 @@ package importer
 import (
 	"context"
 	"io"
+	"iter"
 	"reflect"
 	"strings"
 	"time"
@@ -55,6 +56,7 @@ type OptionIngester struct {
 	log    *log.Logger
 	infile io.ReadCloser
 	source config.Source
+	errs   []error
 }
 
 func NewOptionProcessor(
@@ -72,112 +74,120 @@ func NewOptionProcessor(
 
 func (i *OptionIngester) Process(
 	ctx context.Context,
-	results chan<- index.Indexable,
-	errs chan<- error,
-) {
-	defer i.infile.Close()
+) iter.Seq[index.Indexable] {
+	return func(yield func(index.Indexable) bool) {
+		defer i.infile.Close()
 
-outer:
-	for mv := range i.dec.Stream() {
-		select {
-		case <-ctx.Done():
-			break outer
-		default:
-		}
-		if err := i.dec.Err(); err != nil {
-			errs <- fault.Wrap(err, fmsg.With("could not decode JSON"))
-
-			continue
-		}
-		if mv.ValueType != jstream.Object {
-			errs <- fault.Newf("unexpected object type %s", ValueTypeToString(mv.ValueType))
-
-			continue
-		}
-		kv := mv.Value.(jstream.KV)
-		x := kv.Value.(map[string]any)
-
-		var decls []nix.Link
-		for _, decl := range x["declarations"].([]any) {
-			switch decl := decl.(type) {
-			case string:
-				s := decl
-				link, err := MakeChannelLink(i.source.Repo, s)
-				if err != nil {
-					errs <- fault.Wrap(err, fmsg.Withf("could not make a channel link for channel %s, revision %s and subpath %s",
-						i.source.Channel, i.source.Repo.Revision, s,
-					))
-
-					continue
-				}
-				decls = append(decls, *link)
-			case map[string]any:
-				v := decl
-				link := nix.Link{
-					Name: v["name"].(string),
-					URL:  v["url"].(string),
-				}
-				decls = append(decls, link)
-			default:
-				errs <- fault.Newf("unexpected declaration type %s", reflect.TypeOf(decl).String())
+		for mv := range i.dec.Stream() {
+			if err := i.dec.Err(); err != nil {
+				i.errs = append(i.errs, fault.Wrap(err, fmsg.With("could not decode JSON")))
 
 				continue
 			}
-		}
-		var description string
-		if v, ok := x["description"].(string); ok {
-			description = v
-		}
+			if mv.ValueType != jstream.Object {
+				i.errs = append(
+					i.errs,
+					fault.Newf("unexpected object type %s", ValueTypeToString(mv.ValueType)),
+				)
 
-		var optType string
-		if v, ok := x["type"].(string); ok {
-			optType = v
-		}
+				continue
+			}
+			kv := mv.Value.(jstream.KV)
+			x := kv.Value.(map[string]any)
 
-		var relatedPackages string
-		if v, ok := x["relatedPackages"].(string); ok {
-			relatedPackages = v
-		}
+			var decls []nix.Link
+			for _, decl := range x["declarations"].([]any) {
+				switch decl := decl.(type) {
+				case string:
+					s := decl
+					link, err := MakeChannelLink(i.source.Repo, s)
+					if err != nil {
+						i.errs = append(i.errs, fault.Wrap(err, fmsg.Withf("could not make a channel link for channel %s, revision %s and subpath %s",
+							i.source.Channel, i.source.Repo.Revision, s,
+						)))
 
-		var loc []string
-		if v, ok := x["loc"].([]any); ok {
-			loc = make([]string, len(v))
-			for i, item := range v {
-				if s, ok := item.(string); ok {
-					loc[i] = s
+						continue
+					}
+					decls = append(decls, *link)
+				case map[string]any:
+					v := decl
+					link := nix.Link{
+						Name: v["name"].(string),
+						URL:  v["url"].(string),
+					}
+					decls = append(decls, link)
+				default:
+					i.errs = append(i.errs, fault.Newf("unexpected declaration type %s", reflect.TypeOf(decl).String()))
+
+					continue
 				}
 			}
-		}
+			var description string
+			if v, ok := x["description"].(string); ok {
+				description = v
+			}
 
-		var defaultDocs *nix.Docs
-		if v, ok := x["default"].(map[string]any); ok {
-			defaultDocs = i.convertDocsValue(v)
-		}
+			var optType string
+			if v, ok := x["type"].(string); ok {
+				optType = v
+			}
 
-		var exampleDocs *nix.Docs
-		if v, ok := x["example"].(map[string]any); ok {
-			exampleDocs = i.convertDocsValue(v)
-		}
+			var relatedPackages string
+			if v, ok := x["relatedPackages"].(string); ok {
+				relatedPackages = v
+			}
 
-		// Calculate parents
-		var parents string
-		if len(loc) > 1 {
-			parents = strings.Join(loc[:len(loc)-1], ".")
-		}
+			var loc []string
+			if v, ok := x["loc"].([]any); ok {
+				loc = make([]string, len(v))
+				for i, item := range v {
+					if s, ok := item.(string); ok {
+						loc[i] = s
+					}
+				}
+			}
 
-		// log.Debug("sending option", "name", kv.Key)
-		results <- nix.Option{
-			Name:            kv.Key,
-			Source:          i.source.Key,
-			Declarations:    decls,
-			Default:         defaultDocs,
-			Description:     nixdocs.Markdown(description),
-			Example:         exampleDocs,
-			RelatedPackages: nixdocs.Markdown(relatedPackages),
-			Loc:             loc,
-			Parents:         parents,
-			Type:            optType,
-			ImportedAt:      time.Now(),
+			var defaultDocs *nix.Docs
+			if v, ok := x["default"].(map[string]any); ok {
+				defaultDocs = i.convertDocsValue(v)
+			}
+
+			var exampleDocs *nix.Docs
+			if v, ok := x["example"].(map[string]any); ok {
+				exampleDocs = i.convertDocsValue(v)
+			}
+
+			var parents string
+			if len(loc) > 1 {
+				parents = strings.Join(loc[:len(loc)-1], ".")
+			}
+
+			// log.Debug("sending option", "name", kv.Key)
+			if !yield(nix.Option{
+				Name:            kv.Key,
+				Source:          i.source.Key,
+				Declarations:    decls,
+				Default:         defaultDocs,
+				Description:     nixdocs.Markdown(description),
+				Example:         exampleDocs,
+				RelatedPackages: nixdocs.Markdown(relatedPackages),
+				Loc:             loc,
+				Parents:         parents,
+				Type:            optType,
+				ImportedAt:      time.Now(),
+			}) {
+				return
+			}
 		}
 	}
+}
+
+func (i *OptionIngester) Err() error {
+	if len(i.errs) == 0 {
+		return nil
+	}
+	if len(i.errs) == 1 {
+		return i.errs[0]
+	}
+	return fault.Newf("encountered %d errors during processing", len(i.errs))
 }

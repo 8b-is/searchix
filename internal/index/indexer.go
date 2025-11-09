@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
+	"iter"
 	"math"
 
 	"alin.ovh/searchix/internal/config"
@@ -327,21 +328,24 @@ func (i *WriteIndex) SaveMeta() error {
 
 func (i *WriteIndex) Import(
 	ctx context.Context,
-	objects <-chan Indexable,
-	errs chan<- error,
+	objects iter.Seq[Indexable],
 ) error {
 	indexMapping := i.index.Mapping()
 
-	return i.WithBatchObjects(ctx, objects, errs, func(batch *bleve.Batch, obj Indexable) error {
+	return i.WithBatchObjects(ctx, objects, func(batch *bleve.Batch, obj Indexable) {
 		doc := document.NewDocument(GetKey(obj))
 		if err := indexMapping.MapDocument(doc, obj); err != nil {
-			return fault.Wrap(err, fmsg.Withf("could not map document for object: %s", obj.GetName()))
+			i.log.Warn("could not map document for object", "name", obj.GetName())
+
+			return
 		}
 
 		var data bytes.Buffer
 		enc := gob.NewEncoder(&data)
 		if err := enc.Encode(&obj); err != nil {
-			return fault.Wrap(err, fmsg.With("could not store object in search index"))
+			i.log.Error("could not store object in search index", "name", obj.GetName())
+
+			return
 		}
 		field := document.NewTextFieldWithIndexingOptions("_data", nil, data.Bytes(), index.StoreField)
 		doc.AddField(field)
@@ -354,10 +358,8 @@ func (i *WriteIndex) Import(
 
 		// log.Debug("adding object to index", "name", opt.Name)
 		if err := batch.IndexAdvanced(doc); err != nil {
-			return fault.Wrap(err, fmsg.Withf("could not index object %s", obj.GetName()))
+			i.log.Error("could not index object", "name", obj.GetName())
 		}
-
-		return nil
 	})
 }
 
@@ -379,9 +381,8 @@ func (i *WriteIndex) WithBatch(fn func(batch *bleve.Batch)) error {
 
 func (i *WriteIndex) WithBatchObjects(
 	ctx context.Context,
-	objects <-chan Indexable,
-	errs chan<- error,
-	processor func(batch *bleve.Batch, obj Indexable) error,
+	objects iter.Seq[Indexable],
+	processor func(batch *bleve.Batch, obj Indexable),
 ) error {
 	k := 0
 	batch := i.index.NewBatch()
@@ -395,11 +396,7 @@ func (i *WriteIndex) WithBatchObjects(
 		default:
 		}
 
-		if err := processor(batch, obj); err != nil {
-			errs <- fault.Wrap(err, fmsg.With("could not process object"))
-
-			continue
-		}
+		processor(batch, obj)
 
 		if k++; k%i.batchSize == 0 {
 			err := i.Flush(batch)

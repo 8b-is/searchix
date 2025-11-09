@@ -3,11 +3,11 @@ package importer
 import (
 	"context"
 	"errors"
+	"iter"
 	"maps"
 	"os/exec"
 	"slices"
 	"strings"
-	"sync"
 	"time"
 
 	"alin.ovh/x/log"
@@ -25,7 +25,8 @@ import (
 )
 
 type Processor interface {
-	Process(context.Context, chan<- index.Indexable, chan<- error)
+	Process(context.Context) iter.Seq[index.Indexable]
+	Err() error
 }
 
 type Options struct {
@@ -397,33 +398,19 @@ func (imp *Importer) createSourceImporter(
 			)
 		}
 
-		var (
-			hadWarnings   bool
-			criticalError error
-		)
-		wg := sync.WaitGroup{}
-		objects := make(chan index.Indexable, 1)
-		errs := make(chan error)
-		wg.Go(func() {
-			processor.Process(ctx, objects, errs)
-			close(objects)
-		})
-		wg.Go(func() {
-			err := imp.options.WriteIndex.Import(ctx, objects, errs)
-			if err != nil {
-				criticalError = fault.Wrap(err, fmsg.With("error writing batch"))
-			}
-			close(errs)
-		})
-		for err := range errs {
+		objects := processor.Process(ctx)
+
+		err = imp.options.WriteIndex.Import(ctx, objects)
+		if err != nil {
+			return fault.Wrap(err, fmsg.With("error writing batch"))
+		}
+
+		hadWarnings := false
+		if err := processor.Err(); err != nil {
 			hadWarnings = true
-			imp.options.Logger.Warn("error processing object", "error", err)
+			imp.options.Logger.Warn("error processing objects", "error", err)
 		}
-		wg.Wait()
 		imp.options.Logger.Debug("ingest completed")
-		if criticalError != nil {
-			return fault.Wrap(err, fmsg.Withf("failed to process source"))
-		}
 
 		sourceMeta.StoredAt = time.Now()
 
