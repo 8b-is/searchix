@@ -56,7 +56,7 @@ func (f *Filter) Filter(input analysis.TokenStream) analysis.TokenStream {
 		runes := bytes.Runes(token.Term)
 
 		p := NewParser(runeCount, nextPosition, token.Start)
-		for i := 0; i < runeCount; i++ {
+		for i := range runeCount {
 			if i+1 >= runeCount {
 				p.Push(runes[i], nil)
 			} else {

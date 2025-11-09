@@ -51,7 +51,6 @@
         pkgs = import nixpkgs {
           inherit system;
           overlays = [
-            (import ./nix/overlays)
             gomod2nix.overlays.default
           ];
         };

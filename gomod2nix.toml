@@ -40,6 +40,9 @@ schema = 3
   [mod."github.com/blevesearch/go-porterstemmer"]
     version = "v1.0.3"
     hash = "sha256-hUjo6g1ehUD1awBmta0ji/xoooD2qG7O22HIeSQiRFo="
+  [mod."github.com/blevesearch/goleveldb"]
+    version = "v1.0.1"
+    hash = "sha256-Oq6bQO7QqiqWY8UzyzT6Gv6ygph3GLvH4/CJ6YfZKoQ="
   [mod."github.com/blevesearch/gtreap"]
     version = "v0.1.1"
     hash = "sha256-B4p/5RnECRfV4yOiSQDLMHb23uI7lsQDePhNK+zjbF4="
@@ -55,6 +58,9 @@ schema = 3
   [mod."github.com/blevesearch/snowballstem"]
     version = "v0.9.0"
     hash = "sha256-NQsXrhXcYXn4jQcvwjwLc96SGMRcqVlrR6hYKWGk7/s="
+  [mod."github.com/blevesearch/stempel"]
+    version = "v0.2.0"
+    hash = "sha256-qoPjIRj4EHmPfjLHD0rj+/kQbWiLFsFvDDgMkPWd2Fc="
   [mod."github.com/blevesearch/upsidedown_store_api"]
     version = "v1.0.2"
     hash = "sha256-P69Mnh6YR5RI73bD6L7BYDxkVmaqPMNUrjbfSJoKWuo="
@@ -79,6 +85,12 @@ schema = 3
   [mod."github.com/blevesearch/zapx/v16"]
     version = "v16.2.4"
     hash = "sha256-Jo5k7DflV/ghszOWJTCOGVyyLMvlvSYyxRrmSIFjyEE="
+  [mod."github.com/couchbase/ghistogram"]
+    version = "v0.1.0"
+    hash = "sha256-QYtMvJdKgzkjNr/bnkoDAW5TH0bFLhQcazZRFMtl0BY="
+  [mod."github.com/couchbase/moss"]
+    version = "v0.2.0"
+    hash = "sha256-k2HmM6PmyN4OINiCJ1EotRQasEAu/Bp3RDwH4BBVMo4="
   [mod."github.com/creasty/defaults"]
     version = "v1.8.0"
     hash = "sha256-I1LE1cfOhMS5JxB7+fWTKieefw2Gge1UhIZh+A6pa6s="
@@ -106,6 +118,9 @@ schema = 3
   [mod."github.com/google/uuid"]
     version = "v1.6.0"
     hash = "sha256-VWl9sqUzdOuhW0KzQlv0gwwUQClYkmZwSydHG2sALYw="
+  [mod."github.com/inconshreveable/mousetrap"]
+    version = "v1.1.0"
+    hash = "sha256-XWlYH0c8IcxAwQTnIi6WYqq44nOKUylSWxWO/vi+8pE="
   [mod."github.com/jessevdk/go-flags"]
     version = "v1.6.1"
     hash = "sha256-Q5WFTgRxYio0+ay3sbQeBPKeJAFvOdiDVkaTVn3hoTA="
@@ -139,6 +154,12 @@ schema = 3
   [mod."github.com/remyoudompheng/bigfft"]
     version = "v0.0.0-20230129092748-24d4a6f8daec"
     hash = "sha256-vYmpyCE37eBYP/navhaLV4oX4/nu0Z/StAocLIFqrmM="
+  [mod."github.com/spf13/cobra"]
+    version = "v1.8.1"
+    hash = "sha256-yDF6yAHycV1IZOrt3/hofR+QINe+B2yqkcIaVov3Ky8="
+  [mod."github.com/spf13/pflag"]
+    version = "v1.0.6"
+    hash = "sha256-NjrK0FZPIfO/p2xtL1J7fOBQNTZAPZOC6Cb4aMMvhxI="
   [mod."github.com/stefanfritsch/goldmark-fences"]
     version = "v1.0.0"
     hash = "sha256-Ei+FLtzyHEqz/ZUwHqtQMKHawglcHqcdXmIa8PLvqtc="

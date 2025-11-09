@@ -79,3 +79,6 @@ ingest *flags:
 fetch: (ingest "--fetch")
 
 replace: (ingest "--replace")
+
+bleve cmd="help" *args:
+	go tool bleve {{ cmd }} data/index.bleve {{ args }}
