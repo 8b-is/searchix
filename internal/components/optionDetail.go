@@ -65,7 +65,3 @@ func OptionDetail(option nix.Option) g.Node {
 		),
 	})
 }
-
-func OptionDetailPage(tdata TemplateData, option nix.Option) g.Node {
-	return Page(tdata, OptionDetail(option))
-}

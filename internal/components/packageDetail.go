@@ -126,7 +126,3 @@ func PackageDetail(pkg nix.Package) g.Node {
 		),
 	})
 }
-
-func PackageDetailPage(tdata TemplateData, pkg nix.Package) g.Node {
-	return Page(tdata, PackageDetail(pkg))
-}
