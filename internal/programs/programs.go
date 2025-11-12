@@ -3,14 +3,16 @@ package programs
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
+	"net/url"
 	"os/exec"
 	"strings"
 
 	"alin.ovh/x/log"
 	"github.com/Southclaws/fault"
 	"github.com/Southclaws/fault/fmsg"
-	_ "modernc.org/sqlite" //nolint:revive // sqlite driver needed for database/sql
+	"modernc.org/sqlite"
 
 	"alin.ovh/searchix/internal/config"
 	"alin.ovh/searchix/internal/file"
@@ -30,26 +32,11 @@ type Options struct {
 }
 
 func New(source config.Source, options *Options) (*DB, error) {
-	db, err := sql.Open("sqlite", fmt.Sprintf(
-		"file:%s?mode=%s&_pragma=foreign_keys(1)&_pragma=mmap_size(%d)",
-		//nolint:forbidigo // external package
-		options.Root.JoinPath(
-			source.JoinPath("programs.db"),
-		),
-		"rwc",
-		16*1024*1024,
-	))
-	if err != nil {
-		return nil, fault.Wrap(err, fmsg.With("failed to open sqlite database"))
-	}
-	options.Logger.Debug("opened sqlite database")
-
 	return &DB{
 		source: source,
 
 		logger: options.Logger,
 		root:   options.Root,
-		db:     db,
 	}, nil
 }
 
@@ -72,12 +59,27 @@ func (p *DB) Instantiate(ctx context.Context) error {
 	outPath := strings.Trim(strings.TrimSpace(string(out)), "\"")
 	p.logger.Debug("got output path", "outputPath", outPath)
 
+	p.db, err = p.openDB("rwc")
+	if err != nil {
+		return fault.Wrap(err, fmsg.With("failed to open sqlite database"))
+	}
+
 	_, err = p.db.ExecContext(ctx, "DROP TABLE IF EXISTS programs")
 	if err != nil {
 		return fault.Wrap(err, fmsg.With("failed to drop programs table"))
 	}
 
-	_, err = p.db.ExecContext(ctx, "ATTACH DATABASE ? AS input", outPath)
+	_, err = p.db.ExecContext(
+		ctx,
+		"ATTACH DATABASE ? AS input",
+		(&url.URL{
+			Scheme: "file",
+			Path:   outPath,
+			RawQuery: url.Values{
+				"immutable": {"1"},
+			}.Encode(),
+		}).String(),
+	)
 	if err != nil {
 		return fault.Wrap(err, fmsg.With("failed to attach nix-store programs database"))
 	}
@@ -107,9 +109,34 @@ GROUP BY name, package
 	return nil
 }
 
+func (p *DB) openDB(mode string) (*sql.DB, error) {
+	u := fmt.Sprintf(
+		"file:%s?mode=%s&_pragma=foreign_keys(1)&_pragma=mmap_size(%d)",
+		//nolint: forbidigo // external package
+		p.root.JoinPath(p.source.JoinPath("programs.db")),
+		mode,
+		16*1024*1024,
+	)
+
+	db, err := sql.Open("sqlite", u)
+	if err != nil {
+		var sqliteErr *sqlite.Error
+		if errors.As(err, &sqliteErr) {
+			return nil, fault.New(
+				sqlite.ErrorCodeString[sqliteErr.Code()],
+			)
+		}
+
+		return nil, fault.Wrap(err, fmsg.With("failed to open sqlite database"))
+	}
+
+	return db, nil
+}
+
 func (p *DB) Open(ctx context.Context) (err error) {
-	if p.db == nil {
-		return fault.New("database not open")
+	p.db, err = p.openDB("rw")
+	if err != nil {
+		return fault.Wrap(err)
 	}
 
 	p.stmt, err = p.db.PrepareContext(ctx, `

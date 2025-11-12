@@ -89,18 +89,6 @@ func (i *PackageIngester) Process(
 	return func(yield func(index.Indexable) bool) {
 		defer i.infile.Close()
 
-		if i.programs != nil {
-			err := i.programs.Open(ctx)
-			if err != nil {
-				i.errs = append(i.errs, fault.Wrap(err, fmsg.With("could not open programs database")))
-				i.programs = nil
-			}
-		}
-
-		if i.programs != nil {
-			defer i.programs.Close()
-		}
-
 		for mv := range i.dec.Stream() {
 			if ctx.Err() != nil {
 				break

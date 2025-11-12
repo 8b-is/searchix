@@ -254,13 +254,6 @@ func (imp *Importer) createSourceFetcher(
 ) func(config.Source) error {
 	return func(source config.Source) error {
 		logger := imp.options.Logger.With("name", source.Key)
-		pdb, err := programs.New(source, &programs.Options{
-			Logger: logger,
-			Root:   imp.options.Root,
-		})
-		if err != nil {
-			return fault.Wrap(err, fmsg.With("error creating program database"))
-		}
 
 		sourceMeta := meta.GetSourceMeta(source.Key)
 		previousUpdate := sourceMeta.UpdatedAt
@@ -313,6 +306,13 @@ func (imp *Importer) createSourceFetcher(
 		)
 
 		if source.Programs.Enable {
+			pdb, err := programs.New(source, &programs.Options{
+				Logger: logger,
+				Root:   imp.options.Root,
+			})
+			if err != nil {
+				return fault.Wrap(err, fmsg.With("error creating program database"))
+			}
 			err = pdb.Instantiate(ctx)
 			if err != nil {
 				logger.Warn("programs database instantiation failed", "error", err)
@@ -335,15 +335,8 @@ func (imp *Importer) createSourceImporter(
 	meta *meta.Meta,
 ) func(config.Source) error {
 	return func(source config.Source) error {
+		var pdb *programs.DB
 		logger := imp.options.Logger.With("name", source.Key)
-		pdb, err := programs.New(source, &programs.Options{
-			Logger: logger,
-			Root:   imp.options.Root,
-		})
-		if err != nil {
-			return fault.Wrap(err, fmsg.With("error creating program database"))
-		}
-
 		sourceMeta := meta.GetSourceMeta(source.Key)
 
 		fopts := &fetcher.Options{
@@ -360,10 +353,20 @@ func (imp *Importer) createSourceImporter(
 		}
 
 		if source.Programs.Enable {
-			err = pdb.Instantiate(ctx)
+			pdb, err = programs.New(source, &programs.Options{
+				Logger: logger,
+				Root:   imp.options.Root,
+			})
 			if err != nil {
-				logger.Warn("programs database instantiation failed", "error", err)
+				return fault.Wrap(err, fmsg.With("error creating program database"))
 			}
+
+			err = pdb.Open(ctx)
+			if err != nil {
+				return fault.Wrap(err, fmsg.With("error opening program database"))
+			}
+
+			defer pdb.Close()
 		}
 
 		if files.Revision != nil {
