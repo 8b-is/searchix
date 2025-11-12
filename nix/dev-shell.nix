@@ -17,7 +17,6 @@ mkShell {
       sd
       watchexec
       brotli
-      bleve
       gomod2nix
     ]
     ++ pre-commit-check.enabledPackages;
