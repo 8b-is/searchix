@@ -14,7 +14,6 @@ func Packages(result *index.Result) g.Node {
 		THead(
 			Tr(
 				Th(Scope("col"), g.Text("Attribute")),
-				Th(Scope("col"), g.Text("Name")),
 				Th(Scope("col"), Class("description"), g.Text("Description")),
 				g.If(config.DevMode,
 					Th(Scope("col"), Class("score"), g.Text("Score")),
@@ -38,9 +37,6 @@ func emptyPackageRow(hit index.DocumentMatch) g.Node {
 		Td(
 			openDialogLink(hit.ID),
 		),
-		Td(
-			g.Text(hit.ID),
-		),
 		Td(Class("description"),
 			g.Text("No description available"),
 		),
@@ -56,9 +52,6 @@ func packageRow(hit index.DocumentMatch, p nix.Package) g.Node {
 	return Tr(
 		Td(
 			openDialogLink(p.Attribute),
-		),
-		Td(
-			g.Text(p.Name),
 		),
 		Td(Class("description"),
 			g.Text(p.Description),

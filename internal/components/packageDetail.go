@@ -28,6 +28,12 @@ func PackageDetail(pkg nix.Package) g.Node {
 			P(g.Text(pkg.Description)),
 		),
 		Dl(
+			g.If(pkg.Name != "",
+				g.Group([]g.Node{
+					Dt(g.Text("Name")),
+					Dd(g.Text(pkg.Name)),
+				}),
+			),
 			g.If(pkg.MainProgram != "",
 				g.Group([]g.Node{
 					Dt(g.Text("Main Program")),
