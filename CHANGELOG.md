@@ -1,15 +1,24 @@
 # Changelog
 
-## [v0.4.2](https://codeberg.org/alanpearce/searchix/compare/v0.4.1...13c673dab5bd4e3a23c89304635034137fdbc78f) (2025-11-08)
+## [v0.4.3](https://codeberg.org/alanpearce/searchix/compare/v0.4.2...bf67263fd74134bbe39d6de3f693b89937646bdc) (2025-11-12)
 
 ### Features
+
+- improve error logging of programs database
+  ([bf67263](https://codeberg.org/alanpearce/searchix/commit/bf67263fd74134bbe39d6de3f693b89937646bdc))
+- remove package name from results table
+  ([8ec4832](https://codeberg.org/alanpearce/searchix/commit/8ec4832bfece859ba62a4092e074b535601aab18))
+
+### [v0.4.2](https://codeberg.org/alanpearce/searchix/compare/v0.4.1...v0.4.2) (2025-11-08)
+
+#### Features
 
 - improve results/facets display on narrow screens
   ([3a04aef](https://codeberg.org/alanpearce/searchix/commit/3a04aefd4233216ef4c56dbc5befcc5b102f5201))
 - add header to facets panel
   ([8acfcb9](https://codeberg.org/alanpearce/searchix/commit/8acfcb9f668152007376c851be9caf93fe455096))
 
-### Fixes
+#### Fixes
 
 - don't show last index time if it never finished
   ([48c28a8](https://codeberg.org/alanpearce/searchix/commit/48c28a808535eb62d7bce4ddf3275fcd3b8e3191))
