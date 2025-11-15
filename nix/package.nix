@@ -12,6 +12,7 @@
   ),
   buildGoApplication ? pkgs.buildGoApplication,
   css,
+  lib,
 }:
 let
   version = "0.4.3";
@@ -52,4 +53,11 @@ buildGoApplication {
   modules = ../gomod2nix.toml;
 
   doCheck = false;
+
+  meta = with lib; {
+    description = "Search tool for options and packages in the NixOS ecosystem";
+    mainProgram = "searchix-web";
+    license = licenses.mit;
+    platforms = platforms.all;
+  };
 }

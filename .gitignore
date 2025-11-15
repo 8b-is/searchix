@@ -24,3 +24,4 @@ go.work
 /frontend/error.html
 /data/
 /config.toml
+/.direnv/
