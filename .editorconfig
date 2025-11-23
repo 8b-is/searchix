@@ -17,7 +17,3 @@ indent_size = 2
 [*.md]
 indent_size = 4
 trim_trailing_whitespace = false
-
-[*.el]
-# checker complains when spaces are used for alignment otherwise
-indent_size = 1
