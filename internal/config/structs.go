@@ -86,7 +86,7 @@ func (source *Source) SetDefaults() {
 	}
 }
 
-func (source *Source) JoinPath(name string) string {
+func (source *Source) JoinFilePath(name string) string {
 	//nolint:forbidigo // is not absolute
 	return filepath.Join("sources", source.Key, name)
 }

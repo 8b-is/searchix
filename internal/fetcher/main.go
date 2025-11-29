@@ -33,7 +33,7 @@ func New(
 	source config.Source,
 	opts *Options,
 ) (fetcher Fetcher, err error) {
-	target := source.JoinPath("")
+	target := source.JoinFilePath("")
 	exists, err := opts.Root.Exists(target)
 	if err != nil {
 		return nil, fault.Wrap(err, fmsg.With("failed to check if directory exists"))
@@ -68,7 +68,7 @@ func Open(
 
 	f := &FetchedFiles{}
 
-	rev, err := openIfExists(root, source.JoinPath("revision"))
+	rev, err := openIfExists(root, source.JoinFilePath("revision"))
 	if err != nil {
 		opts.Logger.Warn("failed to open revision file", "error", err)
 	}
@@ -78,9 +78,9 @@ func Open(
 
 	switch source.Importer {
 	case config.Options:
-		f.Options, err = root.Open(source.JoinPath("options.json"))
+		f.Options, err = root.Open(source.JoinFilePath("options.json"))
 	case config.Packages:
-		f.Packages, err = root.Open(source.JoinPath("packages.json"))
+		f.Packages, err = root.Open(source.JoinFilePath("packages.json"))
 	default:
 		err = fault.Newf("unsupported importer type %s", source.Importer.String())
 	}

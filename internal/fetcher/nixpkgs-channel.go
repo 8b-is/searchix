@@ -66,7 +66,7 @@ func (i *NixpkgsChannelFetcher) FetchIfNeeded(
 
 	var fetchURL string
 	for urlname, filename := range filesToFetch {
-		target := i.Source.JoinPath(filename)
+		target := i.Source.JoinFilePath(filename)
 		fetchURL, err = makeChannelURL(i.Source.Channel, urlname)
 		if err != nil {
 			return

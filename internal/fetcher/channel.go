@@ -41,7 +41,7 @@ func (i *ChannelFetcher) FetchIfNeeded(
 	ctx context.Context,
 	sourceMeta *meta.SourceMeta,
 ) (*FetchedFiles, error) {
-	target := i.Source.JoinPath("options.json")
+	target := i.Source.JoinFilePath("options.json")
 	args := []string{
 		"--no-build-output",
 		"--timeout",

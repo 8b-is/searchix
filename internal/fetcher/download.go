@@ -56,7 +56,7 @@ func (i *DownloadFetcher) FetchIfNeeded(
 	}
 
 	for _, basename := range filesToFetch {
-		target := i.Source.JoinPath(basename)
+		target := i.Source.JoinFilePath(basename)
 		fetchURL, baseErr := url.JoinPath(i.Source.URL, basename)
 		if baseErr != nil {
 			return nil, fault.Wrap(

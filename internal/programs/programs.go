@@ -113,7 +113,7 @@ func (p *DB) openDB(mode string) (*sql.DB, error) {
 	u := fmt.Sprintf(
 		"file:%s?mode=%s&_pragma=foreign_keys(1)&_pragma=mmap_size(%d)",
 		//nolint: forbidigo // external package
-		p.root.JoinPath(p.source.JoinPath("programs.db")),
+		p.root.JoinPath(p.source.JoinFilePath("programs.db")),
 		mode,
 		16*1024*1024,
 	)
