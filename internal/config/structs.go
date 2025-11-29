@@ -5,6 +5,7 @@ package config
 
 import (
 	"fmt"
+	"net/url"
 	"path/filepath"
 	"strings"
 
@@ -89,4 +90,15 @@ func (source *Source) SetDefaults() {
 func (source *Source) JoinFilePath(name string) string {
 	//nolint:forbidigo // is not absolute
 	return filepath.Join("sources", source.Key, name)
+}
+
+func (source *Source) LocalURL() *url.URL {
+	p, err := url.JoinPath("/", source.Importer.String(), source.Key, "/")
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return &url.URL{
+		Path: p,
+	}
 }

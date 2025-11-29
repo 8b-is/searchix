@@ -95,10 +95,7 @@ func NewMux(
 	}
 
 	for _, source := range cfg.Importer.Sources {
-		sh := handler.NewSourceHandler(source)
-		importerPath := path.Join("/", source.Importer.String(), source.Key)
-
-		mux.Handle(importerPath+"/", http.StripPrefix(importerPath, sh))
+		mux.Handle(source.LocalURL().String(), handler.NewSourceHandler(source))
 	}
 
 	top := http.NewServeMux()
