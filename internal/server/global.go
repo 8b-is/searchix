@@ -37,9 +37,12 @@ func (g *GlobalHandler) NewSourceHandler(source config.Source) *SourceHandler {
 		mux:    http.NewServeMux(),
 	}
 
-	h.mux.HandleFunc(source.LocalURL().JoinPath("/search").String(), h.Search)
-	h.mux.HandleFunc(source.LocalURL().JoinPath("/{id}").String(), h.Detail)
-	h.mux.HandleFunc(source.LocalURL().JoinPath("/opensearch.xml").String(), h.OpenSearchXML)
+	g.log.Debug("adding handler", "uri", source.LocalURL().JoinPath("{id}").String())
+
+	// JoinPath would escape braces, breaking parameters
+	h.mux.HandleFunc(source.LocalURL().Path+"/search", h.Search)
+	h.mux.HandleFunc(source.LocalURL().Path+"/{id}", h.Detail)
+	h.mux.HandleFunc(source.LocalURL().Path+"/opensearch.xml", h.OpenSearchXML)
 
 	return h
 }
