@@ -1,8 +1,26 @@
 # Changelog
 
-## [v0.4.3](https://codeberg.org/alanpearce/searchix/compare/v0.4.2...bf67263fd74134bbe39d6de3f693b89937646bdc) (2025-11-12)
+## [v0.4.4](https://codeberg.org/alanpearce/searchix/compare/v0.4.3...6001753d2948ac6dddc4f2f7ba8911fcb45fde7d) (2025-12-04)
 
 ### Features
+
+- add apple-touch-icon
+  ([6001753](https://codeberg.org/alanpearce/searchix/commit/6001753d2948ac6dddc4f2f7ba8911fcb45fde7d))
+
+### Fixes
+
+- error opening details pages
+  ([4cb44e8](https://codeberg.org/alanpearce/searchix/commit/4cb44e8d904d3cd97570babd0dd05fb57355d5e7))
+- error opening details pages
+  ([4b263dc](https://codeberg.org/alanpearce/searchix/commit/4b263dcbddee9a657ab10c5ae47e677c6bf67fcc))
+- changing facets reverted to combined search
+  ([560b635](https://codeberg.org/alanpearce/searchix/commit/560b6350141050cd4b9aa5717acf5c241996a978))
+- Add meta info for package to fix nix run usage
+  ([29badc6](https://codeberg.org/alanpearce/searchix/commit/29badc67e9722ac382d86382deabff0180280080))
+
+### [v0.4.3](https://codeberg.org/alanpearce/searchix/compare/v0.4.2...v0.4.3) (2025-11-12)
+
+#### Features
 
 - improve error logging of programs database
   ([bf67263](https://codeberg.org/alanpearce/searchix/commit/bf67263fd74134bbe39d6de3f693b89937646bdc))
