@@ -1,6 +1,7 @@
 package nixdocs
 
 import (
+	"bytes"
 	"io"
 
 	"github.com/Southclaws/fault"
@@ -36,4 +37,17 @@ var md = goldmark.New(
 // implements gomponent.Node
 func (text Markdown) Render(w io.Writer) error {
 	return fault.Wrap(md.Convert([]byte(text), w))
+}
+
+// implements io.WriterTo
+func (text Markdown) WriteTo(w io.Writer) (int64, error) {
+	var buf bytes.Buffer
+	err := md.Convert([]byte(text), &buf)
+	if err != nil {
+		return 0, fault.Wrap(err)
+	}
+
+	n, err := w.Write(buf.Bytes())
+
+	return int64(n), fault.Wrap(err)
 }
