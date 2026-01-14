@@ -18,7 +18,10 @@ func Page(tdata TemplateData, children ...g.Node) g.Node {
 			Head(
 				Meta(Charset("utf-8")),
 				Meta(Name("viewport"), Content("width=device-width, initial-scale=1")),
-				TitleEl(g.Text("Searchix"), g.If(config.DevMode, g.Text(" (Dev)"))),
+				TitleEl(
+					g.Raw(tdata.Title),
+					g.Text("Searchix"), g.If(config.DevMode, g.Text(" (Dev)")),
+				),
 				g.Map(tdata.Assets.Stylesheets, css),
 				g.Raw(tdata.ExtraHeadHTML),
 				g.If(len(tdata.Sources) > 0,

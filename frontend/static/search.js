@@ -5,6 +5,8 @@ const dialog = document.getElementById("dialog");
 const results = document.getElementById("results");
 let pagination = document.getElementById("pagination");
 let facets = document.querySelector(".facets");
+let titleParts = document.title.split(/ [\p{Dash}] /u)
+let siteTitle = titleParts.slice(0, -1).join(" ‐ ");
 
 const resultsRange = new Range();
 resultsRange.setStart(results, 0);
@@ -17,6 +19,7 @@ detailsRange.setEndAfter(dialog.lastElementChild);
 let urlLocation = new URL(location);
 let state = history.state || {
   url: urlLocation.toString(),
+  title: document.title,
   input: urlLocation.searchParams.get("query"),
   results: resultsRange.cloneContents().innerHTML || null,
 };
@@ -76,6 +79,23 @@ function addUpdateSearchListeners(parent) {
 }
 
 /**
+ *
+ * @param {string|null} title
+ * @param {boolean} updateState
+ */
+function updateTitle(title, updateState) {
+  if (title) {
+    title = title.replaceAll("&hyphen;", "\u2010")
+    document.title = title + " " + siteTitle
+    if (updateState) {
+      state.title = title
+    }
+  } else {
+    document.title = state.title
+  }
+}
+
+/**
  * @param {string} html
  */
 function renderResults(html) {
@@ -110,6 +130,7 @@ async function getResults(url) {
         fetch: "true",
       },
     });
+    updateTitle(res.headers.get("title"), true)
 
     // render errors sent as HTML as well as OK responses
     if (res.headers.get("content-type").startsWith("text/html")) {
@@ -188,6 +209,7 @@ function renderDetails(html) {
 
 dialog.addEventListener("close", function (event) {
   detailsRange.deleteContents();
+  updateTitle(state.title, false)
 });
 
 dialog.querySelector("button").addEventListener("click", function () {
@@ -206,6 +228,7 @@ async function getDetail(url) {
         fetch: "true",
       },
     });
+    updateTitle(res.headers.get("title"));
 
     // render errors sent as HTML as well as OK responses
     if (res.headers.get("content-type").startsWith("text/html")) {
@@ -232,11 +255,13 @@ function handleDialogOpen(ev) {
 addEventListener("popstate", function (ev) {
   if (ev.state != null) {
     url = new URL(ev.state.url);
+    document.title = ev.state.title || siteTitle;
     if (ev.state.results !== null) {
       queryInput.value = ev.state.input;
       renderResults(ev.state.results);
     }
   } else {
+    document.title = siteTitle;
     resultsRange.deleteContents();
     search.reset();
   }

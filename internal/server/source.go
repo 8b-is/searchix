@@ -9,6 +9,7 @@ import (
 
 	"alin.ovh/searchix/internal/components"
 	"alin.ovh/searchix/internal/config"
+	"alin.ovh/searchix/internal/index"
 	"alin.ovh/searchix/internal/opensearch"
 )
 
@@ -16,6 +17,17 @@ type SourceHandler struct {
 	global *GlobalHandler
 	source config.Source
 	mux    *http.ServeMux
+}
+
+func (h *SourceHandler) getTitle(doc index.Indexable) string {
+	title := ""
+	if doc != nil {
+		title = doc.GetName() + " &hyphen; "
+	}
+
+	title += h.source.Name + " &hyphen; "
+
+	return title
 }
 
 func (h *SourceHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -66,10 +78,12 @@ func (h *SourceHandler) Detail(w http.ResponseWriter, r *http.Request) {
 		Source:        h.source,
 		Sources:       sources,
 		Assets:        h.global.assets,
+		Title:         h.getTitle(doc),
 	}
 	var baseErr error
 	if r.Header.Get("Fetch") == "true" {
 		w.Header().Add("Content-Type", "text/html; charset=utf-8")
+		w.Header().Add("Title", h.getTitle(doc))
 		baseErr = components.Detail(doc).Render(w)
 	} else {
 		baseErr = components.DetailPage(tdata, doc).Render(w)

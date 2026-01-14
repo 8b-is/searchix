@@ -18,6 +18,7 @@ type TemplateData struct {
 	ExtraHeadHTML string
 	Code          int
 	Message       string
+	Title         string
 	Assets        *frontend.AssetCollection
 	SearchNav     SearchNav
 }

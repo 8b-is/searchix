@@ -30,6 +30,17 @@ type GlobalHandler struct {
 	errorHandler func(w http.ResponseWriter, r *http.Request, message string, statusCode int)
 }
 
+func (g *GlobalHandler) getTitle(source config.Source, query string) (title string) {
+	if query != "" {
+		title = query + " &hyphen; "
+	}
+	if source.Importer != config.All {
+		title += source.Name + " &hyphen; "
+	}
+
+	return
+}
+
 func (g *GlobalHandler) NewSourceHandler(source config.Source) *SourceHandler {
 	h := &SourceHandler{
 		global: g,
@@ -115,6 +126,7 @@ func (g *GlobalHandler) Search(source config.Source, w http.ResponseWriter, r *h
 				Sources:       sources,
 				Assets:        g.assets,
 				Query:         qs,
+				Title:         g.getTitle(source, qs),
 				SearchNav:     components.NewSearchNav(*r.URL).WithPagination(page),
 			},
 			Query:        qs,
@@ -127,6 +139,7 @@ func (g *GlobalHandler) Search(source config.Source, w http.ResponseWriter, r *h
 		var baseErr error
 		if r.Header.Get("Fetch") == "true" {
 			w.Header().Add("Content-Type", "text/html; charset=utf-8")
+			w.Header().Add("Title", g.getTitle(source, qs))
 			baseErr = components.Results(tdata).Render(w)
 		} else {
 			baseErr = components.ResultsPage(tdata).Render(w)
@@ -142,6 +155,7 @@ func (g *GlobalHandler) Search(source config.Source, w http.ResponseWriter, r *h
 				ExtraHeadHTML: g.cfg.Web.ExtraHeadHTML,
 				Sources:       sources,
 				Source:        source,
+				Title:         g.getTitle(source, ""),
 				Assets:        g.assets,
 			},
 			components.ResultData{},
