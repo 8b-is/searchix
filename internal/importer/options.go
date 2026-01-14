@@ -105,10 +105,18 @@ func (i *OptionIngester) Process(
 					s := decl
 					link, err := MakeChannelLink(i.source.Repo, s)
 					if err != nil {
-						i.errs = append(i.errs,
-							fault.Wrap(err, fmsg.Withf("could not make a channel link for channel %s, revision %s and subpath %s",
-								i.source.Channel, i.source.Repo.Revision, s,
-							)))
+						i.errs = append(
+							i.errs,
+							fault.Wrap(
+								err,
+								fmsg.Withf(
+									"could not make a channel link for channel %s, revision %s and subpath %s",
+									i.source.Channel,
+									i.source.Repo.Revision,
+									s,
+								),
+							),
+						)
 
 						continue
 					}
@@ -121,7 +129,10 @@ func (i *OptionIngester) Process(
 					}
 					decls = append(decls, link)
 				default:
-					i.errs = append(i.errs, fault.Newf("unexpected declaration type %s", reflect.TypeOf(decl).String()))
+					i.errs = append(
+						i.errs,
+						fault.Newf("unexpected declaration type %s", reflect.TypeOf(decl).String()),
+					)
 
 					continue
 				}

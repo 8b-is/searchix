@@ -317,7 +317,10 @@ func (i *PackageIngester) Process(
 					subpath, line, _ := strings.Cut(position, ":")
 					definition, err = i.source.Repo.GetFileURL(subpath, line)
 					if err != nil {
-						i.errs = append(i.errs, fault.Wrap(err, fmsg.Withf("failed to make repo URL for package %s", pkgName)))
+						i.errs = append(
+							i.errs,
+							fault.Wrap(err, fmsg.Withf("failed to make repo URL for package %s", pkgName)),
+						)
 					}
 				}
 			}
