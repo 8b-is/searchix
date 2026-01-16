@@ -253,6 +253,9 @@ function handleDialogOpen(ev) {
 }
 
 addEventListener("popstate", function (ev) {
+  if (dialog.open) {
+    dialog.close();
+  }
   if (ev.state != null) {
     url = new URL(ev.state.url);
     document.title = ev.state.title || siteTitle;
