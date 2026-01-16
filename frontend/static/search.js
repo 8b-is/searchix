@@ -5,8 +5,8 @@ const dialog = document.getElementById("dialog");
 const results = document.getElementById("results");
 let pagination = document.getElementById("pagination");
 let facets = document.querySelector(".facets");
-let titleParts = document.title.split(/ [\p{Dash}] /u)
-let siteTitle = titleParts.slice(0, -1).join(" ‐ ");
+let titleParts = document.title.split(/ [\p{Dash}] /u);
+let siteTitle = titleParts.slice(titleParts.length > 1 ? 1 : 0).join(" ‐ ");
 
 const resultsRange = new Range();
 resultsRange.setStart(results, 0);
@@ -85,13 +85,13 @@ function addUpdateSearchListeners(parent) {
  */
 function updateTitle(title, updateState) {
   if (title) {
-    title = title.replaceAll("&hyphen;", "\u2010")
-    document.title = title + " " + siteTitle
+    title = title.replaceAll("&hyphen;", "\u2010");
+    document.title = title + " " + siteTitle;
     if (updateState) {
-      state.title = title
+      state.title = title;
     }
   } else {
-    document.title = state.title
+    document.title = state.title;
   }
 }
 
@@ -130,7 +130,7 @@ async function getResults(url) {
         fetch: "true",
       },
     });
-    updateTitle(res.headers.get("title"), true)
+    updateTitle(res.headers.get("title"), true);
 
     // render errors sent as HTML as well as OK responses
     if (res.headers.get("content-type").startsWith("text/html")) {
@@ -209,7 +209,7 @@ function renderDetails(html) {
 
 dialog.addEventListener("close", function (event) {
   detailsRange.deleteContents();
-  updateTitle(state.title, false)
+  updateTitle(state.title, false);
 });
 
 dialog.querySelector("button").addEventListener("click", function () {
