@@ -99,7 +99,7 @@ func Page(tdata TemplateData, children ...g.Node) g.Node {
 								g.Text("Searchix "),
 								A(
 									Href(
-										"https://codeberg.org/alanpearce/searchix/src/tag/v"+config.Version+"/CHANGELOG.md",
+										"https://codeberg.org/alinnow/searchix/src/tag/v"+config.Version+"/CHANGELOG.md",
 									),
 									TitleAttr("View changelog"),
 									g.Textf("v%s", config.Version),
@@ -109,18 +109,18 @@ func Page(tdata TemplateData, children ...g.Node) g.Node {
 						),
 					),
 					P(
-						A(Href("https://codeberg.org/alanpearce/searchix"), g.Text("Source code")),
+						A(Href("https://codeberg.org/alinnow/searchix"), g.Text("Source code")),
 						g.Text(" "),
 						A(Href("https://status.searchix.ovh"), g.Text("Status page")),
 						g.Text(" "),
 						A(
-							Href("https://codeberg.org/alanpearce/searchix/issues"),
+							Href("https://codeberg.org/alinnow/searchix/issues"),
 							g.Text("Report issues"),
 						),
 					),
 					P(
 						g.Text("Made by "),
-						A(Href("https://alanpearce.eu"), g.Text("Alan Pearce")),
+						A(Href("https://alanpearce.eu"), g.Text("Alin (Alan Pearce)")),
 					),
 				),
 			),

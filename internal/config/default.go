@@ -153,7 +153,7 @@ var DefaultConfig = Config{
 				Enable:   false,
 				Importer: Packages,
 				Fetcher:  Download,
-				URL:      "https://alanpearce.github.io/nix-options/nur",
+				URL:      "https://alinnow.github.io/nix-options/nur",
 				Timeout:  Duration{5 * time.Minute},
 				Repo: Repository{
 					Type:  GitHub,

@@ -120,7 +120,7 @@ func SearchPage(tdata TemplateData, r ResultData, children ...g.Node) g.Node {
 				Class("notice"),
 				g.Text("Everything should work fine without JavaScript. If that is not the case, "),
 				A(
-					Href("https://codeberg.org/alanpearce/searchix/issues"),
+					Href("https://codeberg.org/alinnow/searchix/issues"),
 					g.Text("report an issue"),
 				),
 			),

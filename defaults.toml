@@ -284,7 +284,7 @@ Importer = 'packages'
 # (Fetcher=channel) Local name for channel, (Fetcher=channel-nixpkgs) Remote name of channel.
 Channel = ''
 # (Fetcher=channel) Remote URL for channel, (Fetcher=download) Path containing files named 'revision' and 'options.json'.
-URL = 'https://alanpearce.github.io/nix-options/nur'
+URL = 'https://alinnow.github.io/nix-options/nur'
 # (Fetcher=channel) Nix attribute name (i.e. nix-build -A) that builds an {options,packages}.json
 Attribute = ''
 # (Fetcher=channel) Sub-path of imported channel which contains the attribute above, e.g. release.nix

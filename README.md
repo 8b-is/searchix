@@ -1,6 +1,6 @@
 # Searchix
 
-[![Build Status](https://ci.alanpearce.eu/badge/searchix.svg)](https://ci.alanpearce.eu/jobs/searchix)
+[![Build Status](https://ci.alin.ovh/badge/searchix.svg)](https://ci.alin.ovh/jobs/searchix)
 [![Service Status](https://img.shields.io/endpoint?url=https%3A%2F%2Fstatus.searchix.ovh%2Fshield-badges%2Fstatus.json&style=flat)](https://status.searchix.ovh)
 
 A search tool to find options and packages in the NixOS ecosystem. Aims to be like [search.nixos.org](https://search.nixos.org/) with more sources:
@@ -27,7 +27,7 @@ You can also [run it yourself](./docs/running.md), if you're feeling bold. It's 
 
 Expect breakage. Search results are not expected to match the quality of [search.nixos.org](https://search.nixos.org/), the priority is more on having multiple sources in one location.
 
-Feel free to report bugs at [codeberg](https://codeberg.org/alanpearce/searchix/issues).
+Feel free to report bugs at [codeberg](https://codeberg.org/alinnow/searchix/issues).
 
 ## Motivation
 

@@ -5,13 +5,13 @@
 - 2GiB disk space
 - ~100MiB RAM (requires setting `Importer.LowMemory = true`)
 
-This [repository](https://git.alin.ovh/searchix) (or its [codeberg mirror](https://codeberg.org/alanpearce/searchix)) is importable as a flake containing a NixOS module.
+This [repository](https://git.alin.ovh/searchix) (or its [codeberg mirror](https://codeberg.org/alinnow/searchix)) is importable as a flake containing a NixOS module.
 
 ```nix
 {
   inputs.searchix.url = "git+https://git.alin.ovh/searchix";
   # or
-  inputs.searchix.url = "git+https://codeberg.org/alanpearce/searchix";
+  inputs.searchix.url = "git+https://codeberg.org/alinnow/searchix";
 
   outputs = { self, nixpkgs, searchix }: {
     nixosConfigurations.<hostname> = nixpkgs.lib.nixosSystem {
