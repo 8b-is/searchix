@@ -19,16 +19,17 @@ type Config struct {
 }
 
 type Web struct {
-	ContentSecurityPolicy CSP               `comment:"Content-Security-Policy header to send with requests. Should only need changing if ExtraHeadHTML is used."`
-	ListenAddress         string            `comment:"Which address or hostname to listen on. IPv6 addresses need square brackets."`
-	Port                  int               `comment:"Port number to listen on."`
-	BaseURL               URL               `comment:"Absolute URL to this instance, useful if behind a reverse proxy"`
-	SentryDSN             string            `comment:"If set, will send server errors to Sentry"`
-	Environment           string            `comment:"Affects logging parameters. One of 'development' or 'production'"`
-	ExtraHeadHTML         string            `comment:"Content to add to HTML <head>. Can be used to override styling, add scripts, etc."`
-	Headers               map[string]string `comment:"Extra headers to send with HTTP requests"`
-	LogRequests           bool              `comment:"Whether to log incoming HTTP requests"`
-	SearchTimeout         Duration          `comment:"Timeout for search requests"`
+	ContentSecurityPolicy   CSP               `comment:"Content-Security-Policy header to send with requests. Should only need changing if ExtraHeadHTML is used."`
+	GracefulShutdownTimeout Duration          `comment:"How long to wait for connections to finish before shutting down."`
+	ListenAddress           string            `comment:"Which address or hostname to listen on. IPv6 addresses need square brackets."`
+	Port                    int               `comment:"Port number to listen on."`
+	BaseURL                 URL               `comment:"Absolute URL to this instance, useful if behind a reverse proxy"`
+	SentryDSN               string            `comment:"If set, will send server errors to Sentry"`
+	Environment             string            `comment:"Affects logging parameters. One of 'development' or 'production'"`
+	ExtraHeadHTML           string            `comment:"Content to add to HTML <head>. Can be used to override styling, add scripts, etc."`
+	Headers                 map[string]string `comment:"Extra headers to send with HTTP requests"`
+	LogRequests             bool              `comment:"Whether to log incoming HTTP requests"`
+	SearchTimeout           Duration          `comment:"Timeout for search requests"`
 }
 
 type Importer struct {

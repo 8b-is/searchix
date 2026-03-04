@@ -3,6 +3,8 @@ DataPath = './data'
 
 # Settings for the web server
 [Web]
+# How long to wait for connections to finish before shutting down.
+GracefulShutdownTimeout = '5s'
 # Which address or hostname to listen on. IPv6 addresses need square brackets.
 ListenAddress = 'localhost'
 # Port number to listen on.

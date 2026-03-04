@@ -7,6 +7,7 @@ import (
 	"path"
 	"slices"
 	"strings"
+	"time"
 
 	"alin.ovh/searchix/frontend"
 	"alin.ovh/searchix/internal/config"
@@ -34,6 +35,7 @@ func applyDevModeOverrides(cfg *config.Config) {
 		cfg.Web.ContentSecurityPolicy.ScriptSrc,
 		"'unsafe-inline'",
 	)
+	cfg.Web.GracefulShutdownTimeout.Duration = 200 * time.Millisecond
 }
 
 func sortSources(ss map[string]config.Source) {

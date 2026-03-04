@@ -38,6 +38,7 @@ var DefaultConfig = Config{
 			FormAction: []string{self},
 			ConnectSrc: []string{self},
 		},
+		GracefulShutdownTimeout: Duration{5 * time.Second},
 		Headers: map[string]string{
 			"strict-transport-security": "max-age=" + strconv.FormatFloat(
 				maxAge.Seconds(),

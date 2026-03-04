@@ -18,8 +18,6 @@ import (
 	"golang.org/x/net/http2/h2c"
 )
 
-var shutdownTimeout = 10 * time.Second
-
 type Server struct {
 	cfg      *config.Config
 	log      *log.Logger
@@ -92,13 +90,13 @@ func (s *Server) Stop() chan struct{} {
 	s.log.Debug("stop called")
 
 	idleConnsClosed := make(chan struct{})
-	if s.cfg.Web.Environment == "development" {
-		shutdownTimeout = 1 * time.Millisecond
-	}
 
 	go func() {
 		s.log.Debug("shutting down server")
-		ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+		ctx, cancel := context.WithTimeout(
+			context.Background(),
+			s.cfg.Web.GracefulShutdownTimeout.Duration,
+		)
 		err := s.server.Shutdown(ctx)
 		cancel()
 		s.log.Debug("server shut down")
