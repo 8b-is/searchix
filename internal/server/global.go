@@ -119,6 +119,11 @@ func (g *GlobalHandler) Search(source config.Source, w http.ResponseWriter, r *h
 		}
 		page.SetResults(results.Total)
 
+		searchDesc := fmt.Sprintf("Search results for %s", qs)
+		if source.Importer != config.All {
+			searchDesc += " in " + source.Name
+		}
+
 		tdata := components.ResultData{
 			TemplateData: components.TemplateData{
 				ExtraHeadHTML: g.cfg.Web.ExtraHeadHTML,
@@ -127,6 +132,8 @@ func (g *GlobalHandler) Search(source config.Source, w http.ResponseWriter, r *h
 				Assets:        g.assets,
 				Query:         qs,
 				Title:         g.getTitle(source, qs),
+				Description:   searchDesc,
+				BaseURL:       g.cfg.Web.BaseURL,
 				SearchNav:     components.NewSearchNav(*r.URL).WithPagination(page),
 			},
 			Query:        qs,
@@ -156,6 +163,8 @@ func (g *GlobalHandler) Search(source config.Source, w http.ResponseWriter, r *h
 				Sources:       sources,
 				Source:        source,
 				Title:         g.getTitle(source, ""),
+				Description:   "Search Nix packages and options",
+				BaseURL:       g.cfg.Web.BaseURL,
 				Assets:        g.assets,
 			},
 			components.ResultData{},

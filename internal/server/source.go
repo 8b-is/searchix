@@ -79,6 +79,8 @@ func (h *SourceHandler) Detail(w http.ResponseWriter, r *http.Request) {
 		Sources:       sources,
 		Assets:        h.global.assets,
 		Title:         h.getTitle(doc),
+		Description:   components.MetaDescription(doc),
+		BaseURL:       h.global.cfg.Web.BaseURL,
 	}
 	var baseErr error
 	if r.Header.Get("Fetch") == "true" {

@@ -2,6 +2,7 @@ package components
 
 import (
 	"net/url"
+	"strings"
 
 	"alin.ovh/searchix/frontend"
 	"alin.ovh/searchix/internal/config"
@@ -18,6 +19,23 @@ func Page(tdata TemplateData, children ...g.Node) g.Node {
 			Head(
 				Meta(Charset("utf-8")),
 				Meta(Name("viewport"), Content("width=device-width, initial-scale=1")),
+				g.If(tdata.Description != "",
+					g.Group([]g.Node{
+						Meta(Name("description"), Content(tdata.Description)),
+						Meta(g.Attr("property", "og:description"), Content(tdata.Description)),
+					}),
+				),
+				Meta(g.Attr("property", "og:type"), Content("website")),
+				Meta(g.Attr("property", "og:site_name"), Content("Searchix")),
+				Meta(g.Attr("property", "og:title"), Content(ogTitle(tdata.Title))),
+				g.If(tdata.BaseURL.URL != nil,
+					g.Group([]g.Node{
+						Meta(
+							g.Attr("property", "og:image"),
+							Content(tdata.BaseURL.JoinPath("apple-touch-icon.png").String()),
+						),
+					}),
+				),
 				TitleEl(
 					g.Raw(tdata.Title),
 					g.Text("Searchix"), g.If(config.DevMode, g.Text(" (Dev)")),
@@ -126,6 +144,13 @@ func Page(tdata TemplateData, children ...g.Node) g.Node {
 			),
 		),
 	)
+}
+
+func ogTitle(title string) string {
+	t := strings.ReplaceAll(title, " &hyphen; ", " - ")
+	t += "Searchix"
+
+	return t
 }
 
 func css(css *frontend.Asset) g.Node {

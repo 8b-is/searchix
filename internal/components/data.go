@@ -19,6 +19,8 @@ type TemplateData struct {
 	Code          int
 	Message       string
 	Title         string
+	Description   string
+	BaseURL       config.URL
 	Assets        *frontend.AssetCollection
 	SearchNav     SearchNav
 }
