@@ -28,14 +28,14 @@ func Page(tdata TemplateData, children ...g.Node) g.Node {
 				Meta(g.Attr("property", "og:type"), Content("website")),
 				Meta(g.Attr("property", "og:site_name"), Content("Searchix")),
 				Meta(g.Attr("property", "og:title"), Content(ogTitle(tdata.Title))),
-				g.If(tdata.BaseURL.URL != nil,
-					g.Group([]g.Node{
+				g.Iff(tdata.BaseURL.URL != nil, func() g.Node {
+					return g.Group([]g.Node{
 						Meta(
 							g.Attr("property", "og:image"),
 							Content(tdata.BaseURL.JoinPath("apple-touch-icon.png").String()),
 						),
-					}),
-				),
+					})
+				}),
 				TitleEl(
 					g.Raw(tdata.Title),
 					g.Text("Searchix"), g.If(config.DevMode, g.Text(" (Dev)")),
