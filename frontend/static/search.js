@@ -16,13 +16,41 @@ const detailsRange = new Range();
 detailsRange.setStartAfter(dialog.firstElementChild);
 detailsRange.setEndAfter(dialog.lastElementChild);
 
-let urlLocation = new URL(location);
-let state = history.state || {
-  url: urlLocation.toString(),
-  title: document.title,
-  input: urlLocation.searchParams.get("query"),
-  results: resultsRange.cloneContents().innerHTML || null,
+let closedByPopstate = false;
+
+const pageHistory = {
+  state: null,
+
+  init() {
+    const url = new URL(location);
+    this.state = history.state || {
+      url: url.toString(),
+      title: document.title,
+      input: url.searchParams.get("query"),
+      results: resultsRange.cloneContents().innerHTML || null,
+    };
+  },
+
+  push(url) {
+    history.pushState(this.state, null, url);
+  },
+
+  replace(url) {
+    history.replaceState(this.state, null, url);
+  },
+
+  pushDetail(url) {
+    history.pushState({ detail: true, searchState: this.state }, null, url);
+  },
+
+  restore(historyState) {
+    if (historyState != null) {
+      this.state = historyState.searchState || historyState;
+    }
+  },
 };
+
+pageHistory.init();
 
 let escapePolicy = null;
 if (window.trustedTypes && trustedTypes.createPolicy) {
@@ -88,10 +116,10 @@ function updateTitle(title, updateState) {
     title = title.replaceAll("&hyphen;", "\u2010");
     document.title = title + " " + siteTitle;
     if (updateState) {
-      state.title = title;
+      pageHistory.state.title = title;
     }
   } else {
-    document.title = state.title;
+    document.title = pageHistory.state.title;
   }
 }
 
@@ -123,8 +151,8 @@ function renderResults(html) {
  */
 async function getResults(url) {
   try {
-    state.url = url.toJSON();
-    history.pushState(state, null, url);
+    pageHistory.state.url = url.toJSON();
+    pageHistory.push(url);
     const res = await fetch(url, {
       headers: {
         fetch: "true",
@@ -134,9 +162,9 @@ async function getResults(url) {
 
     // render errors sent as HTML as well as OK responses
     if (res.headers.get("content-type").startsWith("text/html")) {
-      state.results = await res.text();
-      history.replaceState(state, null, url);
-      renderResults(state.results);
+      pageHistory.state.results = await res.text();
+      pageHistory.replace(url);
+      renderResults(pageHistory.state.results);
     } else {
       throw new Error(`${res.status} ${res.statusText}: ${await res.text()}`);
     }
@@ -165,7 +193,7 @@ search.addEventListener("submit", function (ev) {
   const url = new URL(this.action);
   const formData = new FormData(this);
   url.search = new URLSearchParams(formData).toString();
-  state.input = formData.get("query");
+  pageHistory.state.input = formData.get("query");
   getResults(url);
   ev.preventDefault();
 });
@@ -182,10 +210,10 @@ if (results !== null) {
 
 document.querySelector("a.current").addEventListener("click", function (ev) {
   search.reset();
-  state.input = null;
+  pageHistory.state.input = null;
   resultsRange.deleteContents();
-  state.results = "";
-  history.pushState(state, null, ev.target.href);
+  pageHistory.state.results = "";
+  pageHistory.push(ev.target.href);
   ev.preventDefault();
   nav.querySelectorAll("a:not(.current)").forEach(function (node) {
     const u = new URL(node.href);
@@ -207,12 +235,21 @@ function renderDetails(html) {
   dialog.showModal();
 }
 
-dialog.addEventListener("close", function (event) {
+dialog.addEventListener("close", function () {
   detailsRange.deleteContents();
-  updateTitle(state.title, false);
+  if (closedByPopstate) {
+    closedByPopstate = false;
+  } else if (history.state?.detail) {
+    pageHistory.restore(history.state);
+    pageHistory.push(pageHistory.state.url);
+  }
+  updateTitle(pageHistory.state.title, false);
 });
 
-dialog.querySelector("button").addEventListener("click", function () {
+const dialogCloseEl =
+  dialog.querySelector("button") || dialog.querySelector("a.button");
+dialogCloseEl.addEventListener("click", function (ev) {
+  ev.preventDefault();
   dialog.close();
 });
 
@@ -222,7 +259,6 @@ dialog.querySelector("button").addEventListener("click", function () {
  */
 async function getDetail(url) {
   try {
-    state.url = url.toJSON();
     const res = await fetch(url, {
       headers: {
         fetch: "true",
@@ -247,21 +283,32 @@ async function getDetail(url) {
  */
 function handleDialogOpen(ev) {
   if (!(ev.ctrlKey || ev.metaKey || ev.shiftKey || ev.altKey)) {
+    pageHistory.pushDetail(ev.target.href);
     getDetail(new URL(ev.target.href));
     ev.preventDefault();
   }
 }
 
+if (dialog.open) {
+  dialog.removeAttribute("open");
+  dialog.showModal();
+}
+
 addEventListener("popstate", function (ev) {
   if (dialog.open) {
+    closedByPopstate = true;
     dialog.close();
   }
-  if (ev.state != null) {
-    url = new URL(ev.state.url);
-    document.title = ev.state.title || siteTitle;
-    if (ev.state.results !== null) {
-      queryInput.value = ev.state.input;
-      renderResults(ev.state.results);
+  if (ev.state?.detail) {
+    const detailUrl = new URL(location.href);
+    detailUrl.searchParams.delete("query");
+    getDetail(detailUrl);
+  } else if (ev.state != null) {
+    pageHistory.restore(ev.state);
+    document.title = pageHistory.state.title || siteTitle;
+    if (pageHistory.state.results !== null) {
+      queryInput.value = pageHistory.state.input;
+      renderResults(pageHistory.state.results);
     }
   } else {
     document.title = siteTitle;
