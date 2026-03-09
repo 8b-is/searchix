@@ -34,7 +34,7 @@ func SearchForm(tdata TemplateData, r ResultData, children ...g.Node) g.Node {
 					Name("query"),
 					Type("search"),
 					Value(r.Query),
-					AutoFocus(),
+					g.If(tdata.DetailContent == nil, AutoFocus()),
 					g.Attr("spellcheck", "false"),
 					g.Attr("autocapitalize", "none"),
 				),
@@ -113,7 +113,12 @@ func SearchPage(tdata TemplateData, r ResultData, children ...g.Node) g.Node {
 		),
 		Dialog(
 			ID("dialog"),
-			Button(AutoFocus(), g.Text("Close")),
+			g.If(tdata.DetailContent != nil, g.Attr("open")),
+			g.If(tdata.DetailContent != nil,
+				A(Class("button"), Href(tdata.SearchURL), AutoFocus(), g.Text("Close")),
+				Button(AutoFocus(), g.Text("Close")),
+			),
+			g.If(tdata.DetailContent != nil, tdata.DetailContent),
 		),
 		NoScript(
 			P(

@@ -73,21 +73,26 @@ func (h *SourceHandler) Detail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tdata := components.TemplateData{
-		ExtraHeadHTML: h.global.cfg.Web.ExtraHeadHTML,
-		Source:        h.source,
-		Sources:       sources,
-		Assets:        h.global.assets,
-		Title:         h.getTitle(doc),
-		Description:   components.MetaDescription(doc),
-		BaseURL:       h.global.cfg.Web.BaseURL,
-	}
 	var baseErr error
 	if r.Header.Get("Fetch") == "true" {
 		w.Header().Add("Content-Type", "text/html; charset=utf-8")
 		w.Header().Add("Title", h.getTitle(doc))
 		baseErr = components.Detail(doc).Render(w)
+	} else if searchResult, _, searchErr := h.global.ExecuteSearch(h.source, r); searchErr == nil && searchResult != nil {
+		searchResult.Title = h.getTitle(doc)
+		searchResult.DetailContent = components.Detail(doc)
+		searchResult.SearchURL = searchResult.SearchNav.URL.String()
+		baseErr = components.ResultsPage(*searchResult).Render(w)
 	} else {
+		tdata := components.TemplateData{
+			ExtraHeadHTML: h.global.cfg.Web.ExtraHeadHTML,
+			Source:        h.source,
+			Sources:       sources,
+			Assets:        h.global.assets,
+			Title:         h.getTitle(doc),
+			Description:   components.MetaDescription(doc),
+			BaseURL:       h.global.cfg.Web.BaseURL,
+		}
 		baseErr = components.DetailPage(tdata, doc).Render(w)
 	}
 	if baseErr != nil {

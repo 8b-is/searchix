@@ -20,7 +20,7 @@ func CombinedData(data index.Indexable) g.Node {
 	return g.Text("No description Available")
 }
 
-func Combined(result *index.Result) g.Node {
+func Combined(result *index.Result, qs string) g.Node {
 	return Table(
 		THead(
 			Tr(
@@ -35,7 +35,7 @@ func Combined(result *index.Result) g.Node {
 			g.MapIter(result.Hits, func(hit index.DocumentMatch) g.Node {
 				return Tr(
 					Td(
-						openCombinedDialogLink(hit.ID),
+						openCombinedDialogLink(hit.ID, qs),
 					),
 					Td(Class("description"),
 						CombinedData(hit.Data),

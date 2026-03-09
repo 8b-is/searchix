@@ -56,100 +56,115 @@ func (g *GlobalHandler) NewSourceHandler(source config.Source) *SourceHandler {
 	return h
 }
 
-func (g *GlobalHandler) Search(source config.Source, w http.ResponseWriter, r *http.Request) {
+func (g *GlobalHandler) ExecuteSearch(
+	source config.Source,
+	r *http.Request,
+) (*components.ResultData, int, error) {
 	facets := r.URL.Query()
 	facets.Del("query")
 	facets.Del("page")
 
-	var err error
-	if r.URL.Query().Has("query") || len(facets) > 0 {
-		qs := r.URL.Query().Get("query")
-		ctx := r.Context()
-		if qs != "" {
-			ctx = fctx.WithMeta(ctx, "search_query", qs)
+	if !r.URL.Query().Has("query") && len(facets) == 0 {
+		return nil, 0, nil
+	}
+
+	qs := r.URL.Query().Get("query")
+	ctx := r.Context()
+	if qs != "" {
+		ctx = fctx.WithMeta(ctx, "search_query", qs)
+	}
+
+	if len(qs) < 2 && len(facets) == 0 {
+		return nil, http.StatusBadRequest, fmt.Errorf("query too short")
+	}
+
+	pageSize := index.DefaultPageSize
+	pageNumber := 1
+	if pg := r.URL.Query().Get("page"); pg != "" {
+		var err error
+		pageNumber, err = strconv.Atoi(pg)
+		if err != nil || pageNumber > math.MaxInt {
+			return nil, http.StatusBadRequest, fmt.Errorf("bad query string")
 		}
-
-		if len(qs) < 2 && len(facets) == 0 {
-			g.errorHandler(w, r, "Query too short", http.StatusBadRequest)
-
-			return
+		if pageNumber == 0 {
+			pageNumber = 1
+			pageSize = config.MaxResultsShowAll
 		}
+	}
+	page := pagination.New(pageNumber, pageSize)
 
-		pageSize := index.DefaultPageSize
-		pageNumber := 1
-		if pg := r.URL.Query().Get("page"); pg != "" {
-			pageNumber, err = strconv.Atoi(pg)
-			if err != nil || pageNumber > math.MaxInt {
-				g.errorHandler(w, r, "Bad query string", http.StatusBadRequest)
+	ctx, cancel := context.WithTimeout(ctx, g.cfg.Web.SearchTimeout.Duration)
+	results, err := g.index.Search(ctx, index.SearchRequest{
+		Source:   source,
+		Keyword:  qs,
+		From:     page.From,
+		PageSize: page.Size,
+		Facets:   facets,
+	})
+	cancel()
 
-				return
-			}
-			if pageNumber == 0 {
-				pageNumber = 1
-				pageSize = config.MaxResultsShowAll
-			}
+	if err != nil {
+		if err == context.DeadlineExceeded {
+			return nil, http.StatusInternalServerError, fmt.Errorf("Search timed out")
 		}
-		page := pagination.New(pageNumber, pageSize)
+		meta := fctx.Unwrap(err)
+		g.log.Error("search error", "error", err, "search_query", meta["search_query"])
 
-		ctx, cancel := context.WithTimeout(ctx, g.cfg.Web.SearchTimeout.Duration)
-		results, err := g.index.Search(ctx, index.SearchRequest{
-			Source:   source,
-			Keyword:  qs,
-			From:     page.From,
-			PageSize: page.Size,
-			Facets:   facets,
-		})
-		cancel()
+		return nil, http.StatusInternalServerError, fmt.Errorf("search error: %v", err)
+	}
+	if pageSize == config.MaxResultsShowAll &&
+		results.Total > config.MaxResultsShowAll {
+		return nil, http.StatusBadRequest, fmt.Errorf("too many results, use pagination")
+	}
+	page.SetResults(results.Total)
 
-		if err != nil {
-			if err == context.DeadlineExceeded {
-				g.errorHandler(w, r, "Search timed out", http.StatusInternalServerError)
+	searchDesc := fmt.Sprintf("%d results for %s", results.Total, qs)
+	if source.Importer != config.All {
+		searchDesc += " in " + source.Name
+	}
 
-				return
-			}
-			meta := fctx.Unwrap(err)
-			g.log.Error("search error", "error", err, "search_query", meta["search_query"])
-			g.errorHandler(w, r, err.Error(), http.StatusInternalServerError)
+	searchURL := *source.LocalURL()
+	searchURL.Path += "search"
+	searchURL.RawQuery = r.URL.Query().Encode()
 
-			return
-		}
-		if pageSize == config.MaxResultsShowAll &&
-			results.Total > config.MaxResultsShowAll {
-			g.errorHandler(w, r, "Too many results, use pagination", http.StatusBadRequest)
-		}
-		page.SetResults(results.Total)
+	tdata := &components.ResultData{
+		TemplateData: components.TemplateData{
+			ExtraHeadHTML: g.cfg.Web.ExtraHeadHTML,
+			Source:        source,
+			Sources:       sources,
+			Assets:        g.assets,
+			Query:         qs,
+			Title:         g.getTitle(source, qs),
+			Description:   searchDesc,
+			BaseURL:       g.cfg.Web.BaseURL,
+			SearchNav:     components.NewSearchNav(searchURL).WithPagination(page),
+		},
+		Query:        qs,
+		FacetQueries: facets,
+		Results:      results,
+	}
 
-		searchDesc := fmt.Sprintf("%d results for %s", results.Total, qs)
-		if source.Importer != config.All {
-			searchDesc += " in " + source.Name
-		}
+	return tdata, 0, nil
+}
 
-		tdata := components.ResultData{
-			TemplateData: components.TemplateData{
-				ExtraHeadHTML: g.cfg.Web.ExtraHeadHTML,
-				Source:        source,
-				Sources:       sources,
-				Assets:        g.assets,
-				Query:         qs,
-				Title:         g.getTitle(source, qs),
-				Description:   searchDesc,
-				BaseURL:       g.cfg.Web.BaseURL,
-				SearchNav:     components.NewSearchNav(*r.URL).WithPagination(page),
-			},
-			Query:        qs,
-			FacetQueries: facets,
-			Results:      results,
-		}
+func (g *GlobalHandler) Search(source config.Source, w http.ResponseWriter, r *http.Request) {
+	tdata, statusCode, err := g.ExecuteSearch(source, r)
+	if err != nil {
+		g.errorHandler(w, r, err.Error(), statusCode)
 
+		return
+	}
+
+	if tdata != nil {
 		w.Header().Add("Cache-Control", "max-age=300")
 		w.Header().Add("Vary", "Fetch")
 		var baseErr error
 		if r.Header.Get("Fetch") == "true" {
 			w.Header().Add("Content-Type", "text/html; charset=utf-8")
-			w.Header().Add("Title", g.getTitle(source, qs))
-			baseErr = components.Results(tdata).Render(w)
+			w.Header().Add("Title", g.getTitle(source, tdata.Query))
+			baseErr = components.Results(*tdata).Render(w)
 		} else {
-			baseErr = components.ResultsPage(tdata).Render(w)
+			baseErr = components.ResultsPage(*tdata).Render(w)
 		}
 		if baseErr != nil {
 			g.log.Error("template error", "template", source.Importer, "error", baseErr)

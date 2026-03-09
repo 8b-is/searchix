@@ -9,7 +9,7 @@ import (
 	. "alin.ovh/gomponents/html"
 )
 
-func Options(result *index.Result) g.Node {
+func Options(result *index.Result, qs string) g.Node {
 	return Table(
 		THead(
 			Tr(
@@ -23,7 +23,7 @@ func Options(result *index.Result) g.Node {
 		TBody(
 			g.MapIter(result.Hits, func(hit index.DocumentMatch) g.Node {
 				if m, ok := hit.Data.(nix.Option); ok {
-					return optionRow(hit, m)
+					return optionRow(hit, m, qs)
 				}
 
 				return emptyOptionRow(hit)
@@ -49,10 +49,10 @@ func emptyOptionRow(hit index.DocumentMatch) g.Node {
 	)
 }
 
-func optionRow(hit index.DocumentMatch, o nix.Option) g.Node {
+func optionRow(hit index.DocumentMatch, o nix.Option, qs string) g.Node {
 	return Tr(
 		Td(
-			openDialogLink(o.Name),
+			openDialogLink(o.Name, qs),
 		),
 		Td(Class("description"),
 			firstSentence(o.Description),

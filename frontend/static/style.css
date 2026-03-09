@@ -171,9 +171,30 @@ h3 {
 dialog {
   max-width: unset;
   width: min(var(--min-width), 90%);
+  border: none;
+  outline: var(--border-width) solid var(--border);
 }
 
-dialog > button {
+dialog[open]:not(:modal) {
+  position: fixed;
+  inset: 0;
+  max-height: 85vh;
+  margin: auto;
+  z-index: 1000;
+  overflow: auto;
+}
+
+dialog[open]:not(:modal)::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--bg);
+  opacity: 0.8;
+}
+
+dialog > button,
+dialog > a.button {
   float: right;
 }
 
@@ -343,9 +364,11 @@ body > footer > p {
     padding: 1rem 1ch;
   }
 
-  dialog > button {
+  dialog > button,
+  dialog > a.button {
     float: none;
     display: block;
+    width: fit-content;
     margin-left: auto;
   }
 

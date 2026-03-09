@@ -22,14 +22,15 @@ func Results(r ResultData) g.Node {
 		return Span(Role("status"), g.Text("Nothing found"))
 	}
 
+	qs := r.SearchNav.URL.RawQuery
 	var content g.Node
 	switch r.Source.Importer {
 	case config.Options:
-		content = Options(r.Results)
+		content = Options(r.Results, qs)
 	case config.Packages:
-		content = Packages(r.Results)
+		content = Packages(r.Results, qs)
 	case config.All:
-		content = Combined(r.Results)
+		content = Combined(r.Results, qs)
 	}
 
 	return g.Group([]g.Node{
@@ -124,10 +125,20 @@ func ResultsPage(r ResultData) g.Node {
 	return SearchPage(r.TemplateData, r, Results(r))
 }
 
-func openDialogLink(attr string) g.Node {
-	return A(Class("open-dialog"), Href(attr), g.Text(attr))
+func openDialogLink(attr string, qs string) g.Node {
+	href := attr
+	if qs != "" {
+		href += "?" + qs
+	}
+
+	return A(Class("open-dialog"), Href(href), g.Text(attr))
 }
 
-func openCombinedDialogLink(attr string) g.Node {
-	return A(Class("open-dialog"), Href("/"+attr), g.Text(attr))
+func openCombinedDialogLink(attr string, qs string) g.Node {
+	href := "/" + attr
+	if qs != "" {
+		href += "?" + qs
+	}
+
+	return A(Class("open-dialog"), Href(href), g.Text(attr))
 }

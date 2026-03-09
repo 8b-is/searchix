@@ -9,7 +9,7 @@ import (
 	. "alin.ovh/gomponents/html"
 )
 
-func Packages(result *index.Result) g.Node {
+func Packages(result *index.Result, qs string) g.Node {
 	return Table(
 		THead(
 			Tr(
@@ -23,19 +23,19 @@ func Packages(result *index.Result) g.Node {
 		TBody(
 			g.MapIter(result.Hits, func(hit index.DocumentMatch) g.Node {
 				if m, ok := hit.Data.(nix.Package); ok {
-					return packageRow(hit, m)
+					return packageRow(hit, m, qs)
 				}
 
-				return emptyPackageRow(hit)
+				return emptyPackageRow(hit, qs)
 			}),
 		),
 	)
 }
 
-func emptyPackageRow(hit index.DocumentMatch) g.Node {
+func emptyPackageRow(hit index.DocumentMatch, qs string) g.Node {
 	return Tr(
 		Td(
-			openDialogLink(hit.ID),
+			openDialogLink(hit.ID, qs),
 		),
 		Td(Class("description"),
 			g.Text("No description available"),
@@ -48,10 +48,10 @@ func emptyPackageRow(hit index.DocumentMatch) g.Node {
 	)
 }
 
-func packageRow(hit index.DocumentMatch, p nix.Package) g.Node {
+func packageRow(hit index.DocumentMatch, p nix.Package, qs string) g.Node {
 	return Tr(
 		Td(
-			openDialogLink(p.Attribute),
+			openDialogLink(p.Attribute, qs),
 		),
 		Td(Class("description"),
 			g.Text(p.Description),

@@ -5,6 +5,8 @@ import (
 	"slices"
 	"strconv"
 
+	g "alin.ovh/gomponents"
+
 	"alin.ovh/searchix/frontend"
 	"alin.ovh/searchix/internal/config"
 	search "alin.ovh/searchix/internal/index"
@@ -23,6 +25,8 @@ type TemplateData struct {
 	BaseURL       config.URL
 	Assets        *frontend.AssetCollection
 	SearchNav     SearchNav
+	DetailContent g.Node
+	SearchURL     string
 }
 
 type ResultData struct {
