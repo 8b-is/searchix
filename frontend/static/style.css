@@ -46,14 +46,14 @@ header > nav a {
 }
 
 nav > h1 > a {
-  margin-left: unset;
-  padding-left: unset;
+  margin: 0;
+  padding: 1ex 0;
   border: 1px transparent;
   text-decoration: none;
 }
 
 body > header h1 {
-  margin: unset;
+  margin: 0 1em 0 0;
   font-size: 1.15rem;
 }
 
