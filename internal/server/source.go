@@ -34,6 +34,26 @@ func (h *SourceHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.mux.ServeHTTP(w, r)
 }
 
+func (h *SourceHandler) searchSource(r *http.Request) config.Source {
+	if r.URL.Query().Has("scoped") {
+		return h.source
+	}
+
+	return config.Source{Importer: config.All}
+}
+
+func (h *SourceHandler) closeURL(r *http.Request) string {
+	q := r.URL.Query()
+	scoped := q.Has("scoped")
+	q.Del("scoped")
+
+	if scoped {
+		return "/" + h.source.Importer.String() + "/" + h.source.Key + "/search?" + q.Encode()
+	}
+
+	return "/?" + q.Encode()
+}
+
 func (h *SourceHandler) Search(w http.ResponseWriter, r *http.Request) {
 	h.global.Search(h.source, w, r)
 }
@@ -78,11 +98,12 @@ func (h *SourceHandler) Detail(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "text/html; charset=utf-8")
 		w.Header().Add("Title", h.getTitle(doc))
 		baseErr = components.Detail(doc).Render(w)
-	} else if searchResult, _, searchErr := h.global.ExecuteSearch(h.source, r); searchErr == nil && searchResult != nil {
+	} else if searchResult, _, searchErr := h.global.ExecuteSearch(h.searchSource(r), r); searchErr == nil &&
+		searchResult != nil {
 		searchResult.Title = h.getTitle(doc)
 		searchResult.Description = components.MetaDescription(doc)
 		searchResult.DetailContent = components.Detail(doc)
-		searchResult.SearchURL = searchResult.SearchNav.URL.String()
+		searchResult.SearchURL = h.closeURL(r)
 		baseErr = components.ResultsPage(*searchResult).Render(w)
 	} else {
 		tdata := components.TemplateData{

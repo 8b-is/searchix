@@ -63,6 +63,7 @@ func (g *GlobalHandler) ExecuteSearch(
 	facets := r.URL.Query()
 	facets.Del("query")
 	facets.Del("page")
+	facets.Del("scoped")
 
 	if !r.URL.Query().Has("query") && len(facets) == 0 {
 		return nil, 0, nil
@@ -125,7 +126,9 @@ func (g *GlobalHandler) ExecuteSearch(
 
 	searchURL := *source.LocalURL()
 	searchURL.Path += "search"
-	searchURL.RawQuery = r.URL.Query().Encode()
+	searchQuery := r.URL.Query()
+	searchQuery.Del("scoped")
+	searchURL.RawQuery = searchQuery.Encode()
 
 	tdata := &components.ResultData{
 		TemplateData: components.TemplateData{

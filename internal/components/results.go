@@ -23,6 +23,13 @@ func Results(r ResultData) g.Node {
 	}
 
 	qs := r.SearchNav.URL.RawQuery
+	if r.Source.Importer != config.All {
+		if qs != "" {
+			qs += "&scoped"
+		} else {
+			qs = "scoped"
+		}
+	}
 	var content g.Node
 	switch r.Source.Importer {
 	case config.Options:

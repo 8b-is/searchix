@@ -239,8 +239,10 @@ dialog.addEventListener("close", function () {
   detailsRange.deleteContents();
   if (closedByPopstate) {
     closedByPopstate = false;
-  } else if (history.state?.detail) {
-    pageHistory.restore(history.state);
+  } else {
+    if (history.state?.detail) {
+      pageHistory.restore(history.state);
+    }
     pageHistory.push(pageHistory.state.url);
   }
   updateTitle(pageHistory.state.title, false);
@@ -291,6 +293,13 @@ function handleDialogOpen(ev) {
 
 if (dialog.open) {
   dialog.removeAttribute("open");
+
+  // If the dialog was open via js or via ssr
+  const closeLink = dialog.querySelector("a.button");
+  if (closeLink) {
+    pageHistory.state.url = closeLink.href;
+  }
+
   dialog.showModal();
 }
 
