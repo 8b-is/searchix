@@ -119,7 +119,7 @@ func (g *GlobalHandler) Search(source config.Source, w http.ResponseWriter, r *h
 		}
 		page.SetResults(results.Total)
 
-		searchDesc := fmt.Sprintf("Search results for %s", qs)
+		searchDesc := fmt.Sprintf("%d results for %s", results.Total, qs)
 		if source.Importer != config.All {
 			searchDesc += " in " + source.Name
 		}
