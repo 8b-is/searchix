@@ -80,6 +80,7 @@ func (h *SourceHandler) Detail(w http.ResponseWriter, r *http.Request) {
 		baseErr = components.Detail(doc).Render(w)
 	} else if searchResult, _, searchErr := h.global.ExecuteSearch(h.source, r); searchErr == nil && searchResult != nil {
 		searchResult.Title = h.getTitle(doc)
+		searchResult.Description = components.MetaDescription(doc)
 		searchResult.DetailContent = components.Detail(doc)
 		searchResult.SearchURL = searchResult.SearchNav.URL.String()
 		baseErr = components.ResultsPage(*searchResult).Render(w)
