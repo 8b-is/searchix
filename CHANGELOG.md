@@ -1,13 +1,39 @@
 # Changelog
 
-## [v0.4.4](https://codeberg.org/alinnow/searchix/compare/v0.4.3...6001753d2948ac6dddc4f2f7ba8911fcb45fde7d) (2025-12-04)
+## [v0.4.5](https://codeberg.org/alinnow/searchix/compare/v0.4.4...f2716d530792eaaf86e8b78de9baac9c945c35e0) (2026-03-11)
 
 ### Features
+
+- Show search result number
+  ([f2716d5](https://codeberg.org/alinnow/searchix/commit/f2716d530792eaaf86e8b78de9baac9c945c35e0))
+- Add basic page meta description
+  ([c3fa5a4](https://codeberg.org/alinnow/searchix/commit/c3fa5a442ee81a4c2252736c4d4ef461c6b3af93))
+- make server graceful shutdown timeout configurable
+  ([078020e](https://codeberg.org/alinnow/searchix/commit/078020ea68fd850a3d1dcfcdfbcb2ba61312161b))
+- add page information to title
+  ([9728e17](https://codeberg.org/alinnow/searchix/commit/9728e17d1b90757b74e9a15e41578b0db758b8c9))
+
+### Fixes
+
+- oddly-sized site title link hover background
+  ([0227aae](https://codeberg.org/alinnow/searchix/commit/0227aaeb21d3640bd2b2a3b438a9bf38bbd54c20))
+- Eval only in correct condition
+  ([6cdd9ce](https://codeberg.org/alinnow/searchix/commit/6cdd9ced64d6f9d4189ecb2c30d028d3cc108054))
+- **js:** close details dialog when using browser back action
+  ([86f1002](https://codeberg.org/alinnow/searchix/commit/86f100286dbd86a2168bf6cda5d557042364b9dd))
+- **js:** keep site title when adding page title
+  ([911a857](https://codeberg.org/alinnow/searchix/commit/911a85738b3afef528d548a6b554c2f7d6ecb17e))
+- panic on markdown output
+  ([45a73d3](https://codeberg.org/alinnow/searchix/commit/45a73d31ca17a17cebf1d2c933c6d1b88c8d9ef4))
+
+### [v0.4.4](https://codeberg.org/alinnow/searchix/compare/v0.4.3...v0.4.4) (2025-12-05)
+
+#### Features
 
 - add apple-touch-icon
   ([6001753](https://codeberg.org/alinnow/searchix/commit/6001753d2948ac6dddc4f2f7ba8911fcb45fde7d))
 
-### Fixes
+#### Fixes
 
 - error opening details pages
   ([4cb44e8](https://codeberg.org/alinnow/searchix/commit/4cb44e8d904d3cd97570babd0dd05fb57355d5e7))
