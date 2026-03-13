@@ -27,6 +27,7 @@ type TemplateData struct {
 	SearchNav     SearchNav
 	DetailContent g.Node
 	SearchURL     string
+	SearchTitle   string
 }
 
 type ResultData struct {

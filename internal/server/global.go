@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"alin.ovh/x/log"
@@ -54,6 +55,17 @@ func (g *GlobalHandler) NewSourceHandler(source config.Source) *SourceHandler {
 	h.mux.HandleFunc(source.LocalURL().Path+"opensearch.xml", h.OpenSearchXML)
 
 	return h
+}
+
+func searchURL(source config.Source) *url.URL {
+	if source.Importer == config.All {
+		return &url.URL{Path: "/"}
+	}
+
+	searchURL := *source.LocalURL()
+	searchURL.Path += "search"
+
+	return &searchURL
 }
 
 func (g *GlobalHandler) ExecuteSearch(
@@ -124,8 +136,7 @@ func (g *GlobalHandler) ExecuteSearch(
 		searchDesc += " in " + source.Name
 	}
 
-	searchURL := *source.LocalURL()
-	searchURL.Path += "search"
+	searchURL := searchURL(source)
 	searchQuery := r.URL.Query()
 	searchQuery.Del("scoped")
 	searchURL.RawQuery = searchQuery.Encode()
@@ -140,7 +151,7 @@ func (g *GlobalHandler) ExecuteSearch(
 			Title:         g.getTitle(source, qs),
 			Description:   searchDesc,
 			BaseURL:       g.cfg.Web.BaseURL,
-			SearchNav:     components.NewSearchNav(searchURL).WithPagination(page),
+			SearchNav:     components.NewSearchNav(*searchURL).WithPagination(page),
 		},
 		Query:        qs,
 		FacetQueries: facets,

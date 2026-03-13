@@ -6,7 +6,7 @@ const results = document.getElementById("results");
 let pagination = document.getElementById("pagination");
 let facets = document.querySelector(".facets");
 let titleParts = document.title.split(/ [\p{Dash}] /u);
-let siteTitle = titleParts.slice(titleParts.length > 1 ? 1 : 0).join(" ‐ ");
+let siteTitle = titleParts.at(-1);
 
 const resultsRange = new Range();
 resultsRange.setStart(results, 0);
@@ -22,11 +22,19 @@ const pageHistory = {
   state: null,
 
   init() {
-    const url = new URL(location);
-    this.state = history.state || {
-      url: url.toString(),
-      title: document.title,
-      input: url.searchParams.get("query"),
+    this.state = history.state?.searchState || history.state || this.snapshot();
+    if (history.state == null) {
+      this.replace(location.href);
+    }
+  },
+
+  snapshot(url = location.href, title = document.title) {
+    const stateURL = new URL(url, location.href);
+
+    return {
+      url: stateURL.toString(),
+      title,
+      input: stateURL.searchParams.get("query"),
       results: resultsRange.cloneContents().innerHTML || null,
     };
   },
@@ -111,16 +119,27 @@ function addUpdateSearchListeners(parent) {
  * @param {string|null} title
  * @param {boolean} updateState
  */
+function setDocumentTitle(title) {
+  if (!title) {
+    document.title = siteTitle;
+  } else if (title.endsWith(siteTitle)) {
+    document.title = title;
+  } else {
+    document.title = `${title} ${siteTitle}`;
+  }
+}
+
 function updateTitle(title, updateState) {
   if (title) {
     title = title.replaceAll("&hyphen;", "\u2010");
-    document.title = title + " " + siteTitle;
     if (updateState) {
       pageHistory.state.title = title;
     }
   } else {
-    document.title = pageHistory.state.title;
+    title = pageHistory.state.title;
   }
+
+  setDocumentTitle(title);
 }
 
 /**
@@ -297,7 +316,15 @@ if (dialog.open) {
   // If the dialog was open via js or via ssr
   const closeLink = dialog.querySelector("a.button");
   if (closeLink) {
-    pageHistory.state.url = closeLink.href;
+    pageHistory.state = pageHistory.snapshot(
+      closeLink.href,
+      dialog.dataset.searchTitle || pageHistory.state.title,
+    );
+    history.replaceState(
+      { detail: true, searchState: pageHistory.state },
+      null,
+      location.href,
+    );
   }
 
   dialog.showModal();
@@ -314,13 +341,13 @@ addEventListener("popstate", function (ev) {
     getDetail(detailUrl);
   } else if (ev.state != null) {
     pageHistory.restore(ev.state);
-    document.title = pageHistory.state.title || siteTitle;
+    setDocumentTitle(pageHistory.state.title);
     if (pageHistory.state.results !== null) {
       queryInput.value = pageHistory.state.input;
       renderResults(pageHistory.state.results);
     }
   } else {
-    document.title = siteTitle;
+    setDocumentTitle("");
     resultsRange.deleteContents();
     search.reset();
   }
