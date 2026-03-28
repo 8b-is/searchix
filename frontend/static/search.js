@@ -88,6 +88,7 @@ function openSiblingDialog(ev) {
 function addOpenDialogListeners(results) {
   results.querySelectorAll("a.open-dialog").forEach(function (element) {
     element.addEventListener("click", handleDialogOpen);
+    element.addEventListener("auxclick", handleDialogNewTab);
   });
   results.querySelectorAll("a.open-sibling-dialog").forEach(function (element) {
     element.addEventListener("click", openSiblingDialog);
@@ -235,9 +236,7 @@ document.querySelector("a.current").addEventListener("click", function (ev) {
   pageHistory.push(ev.target.href);
   ev.preventDefault();
   nav.querySelectorAll("a:not(.current)").forEach(function (node) {
-    const u = new URL(node.href);
-    u.search = "";
-    node.href = u.toString();
+    node.href = detailURL(node.href).toString();
   });
   queryInput.value = "";
 });
@@ -299,11 +298,30 @@ async function getDetail(url) {
   }
 }
 
+function detailURL(href) {
+  const url = new URL(href);
+  url.search = "";
+  return url;
+}
+
+/**
+ * @param {MouseEvent} ev
+ */
+function handleDialogNewTab(ev) {
+  if (ev.button === 1) {
+    ev.preventDefault();
+    window.open(detailURL(ev.target.href), "_blank");
+  }
+}
+
 /**
  * @param {MouseEvent} ev
  */
 function handleDialogOpen(ev) {
-  if (!(ev.ctrlKey || ev.metaKey || ev.shiftKey || ev.altKey)) {
+  if (ev.ctrlKey || ev.metaKey) {
+    ev.preventDefault();
+    window.open(detailURL(ev.target.href), "_blank");
+  } else if (!(ev.shiftKey || ev.altKey)) {
     pageHistory.pushDetail(ev.target.href);
     getDetail(new URL(ev.target.href));
     ev.preventDefault();
