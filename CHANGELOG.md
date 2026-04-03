@@ -1,8 +1,29 @@
 # Changelog
 
-## [v0.4.5](https://codeberg.org/alinnow/searchix/compare/v0.4.4...f2716d530792eaaf86e8b78de9baac9c945c35e0) (2026-03-11)
+## [v0.4.6](https://codeberg.org/alinnow/searchix/compare/v0.4.5...76ddc166b2e4739e197b84f8072716a8359df13f) (2026-03-28)
 
 ### Features
+
+- Special handler for middle/ctrl click
+  ([76ddc16](https://codeberg.org/alinnow/searchix/commit/76ddc166b2e4739e197b84f8072716a8359df13f))
+- Handle returning to scoped importer search page
+  ([342121c](https://codeberg.org/alinnow/searchix/commit/342121cc03e7ecb8ce68fd445dbf4a60fddf7a52))
+- utilize history API on JS side
+  ([2035cc0](https://codeberg.org/alinnow/searchix/commit/2035cc06b5f500914bde478dba50d53b8597efd5))
+- Port modals to no-js variant
+  ([70340c7](https://codeberg.org/alinnow/searchix/commit/70340c792a3c956bb73337a51970cc16dfff391d))
+
+### Fixes
+
+- Combined pagination fix, construct page titles correctly, history set
+  incorrectly in certain cases
+  ([6b98722](https://codeberg.org/alinnow/searchix/commit/6b98722a6098b85d3f913a95e3bf7b0cee29eb7b))
+- Show package/option description properly on query detail pages
+  ([18eab01](https://codeberg.org/alinnow/searchix/commit/18eab011a18b9fd42d797635d47bec93fbf212b8))
+
+### [v0.4.5](https://codeberg.org/alinnow/searchix/compare/v0.4.4...v0.4.5) (2026-03-12)
+
+#### Features
 
 - Show search result number
   ([f2716d5](https://codeberg.org/alinnow/searchix/commit/f2716d530792eaaf86e8b78de9baac9c945c35e0))
@@ -13,7 +34,7 @@
 - add page information to title
   ([9728e17](https://codeberg.org/alinnow/searchix/commit/9728e17d1b90757b74e9a15e41578b0db758b8c9))
 
-### Fixes
+#### Fixes
 
 - oddly-sized site title link hover background
   ([0227aae](https://codeberg.org/alinnow/searchix/commit/0227aaeb21d3640bd2b2a3b438a9bf38bbd54c20))
