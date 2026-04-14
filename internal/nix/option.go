@@ -26,7 +26,7 @@ type Option struct {
 	Example         *Docs `json:",omitempty"`
 	Loc             []string
 	OptionSet       string
-	Parents         string
+	Parents         []string
 	RelatedPackages nixdocs.Markdown `json:",omitempty"`
 	Type            string
 	ImportedAt      time.Time

@@ -172,14 +172,17 @@ func (i *OptionIngester) Process(
 				exampleDocs = i.convertDocsValue(v)
 			}
 
-			var parents string
-			if len(loc) > 1 {
-				parents = strings.Join(loc[:len(loc)-1], ".")
-			}
-
 			var optionSet string
+			var parents []string
 			if len(loc) >= 1 {
+				// Top-level parent -> optionSet
 				optionSet = loc[0]
+
+				for i := 1; i < len(loc); i++ {
+					parents = append(parents,
+						strings.Join(loc[:i], "."),
+					)
+				}
 			}
 
 			// log.Debug("sending option", "name", kv.Key)
