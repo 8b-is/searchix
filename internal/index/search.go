@@ -258,7 +258,8 @@ func (index *ReadIndex) Search(
 		search.AddFacet("Platform", bleve.NewFacetRequest("Platforms", 10))
 	}
 	if opts.Source.Importer.Includes(config.Options) {
-		search.AddFacet("Option set", bleve.NewFacetRequest("Parents", 10))
+		search.AddFacet("Option set", bleve.NewFacetRequest("OptionSet", 10))
+		search.AddFacet("Parent options", bleve.NewFacetRequest("Parents", 10))
 	}
 
 	if opts.From != 0 {

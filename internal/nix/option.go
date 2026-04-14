@@ -25,6 +25,7 @@ type Option struct {
 	Description     nixdocs.Markdown
 	Example         *Docs `json:",omitempty"`
 	Loc             []string
+	OptionSet       string
 	Parents         string
 	RelatedPackages nixdocs.Markdown `json:",omitempty"`
 	Type            string

@@ -177,6 +177,11 @@ func (i *OptionIngester) Process(
 				parents = strings.Join(loc[:len(loc)-1], ".")
 			}
 
+			var optionSet string
+			if len(loc) >= 1 {
+				optionSet = loc[0]
+			}
+
 			// log.Debug("sending option", "name", kv.Key)
 			if !yield(nix.Option{
 				Name:            kv.Key,
@@ -188,6 +193,7 @@ func (i *OptionIngester) Process(
 				RelatedPackages: nixdocs.Markdown(relatedPackages),
 				Loc:             loc,
 				Parents:         parents,
+				OptionSet:       optionSet,
 				Type:            optType,
 				ImportedAt:      time.Now(),
 			}) {
