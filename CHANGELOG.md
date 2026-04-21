@@ -1,8 +1,23 @@
 # Changelog
 
-## [v0.4.6](https://codeberg.org/alinnow/searchix/compare/v0.4.5...76ddc166b2e4739e197b84f8072716a8359df13f) (2026-03-28)
+## [v0.4.7](https://codeberg.org/alinnow/searchix/compare/v0.4.6...2cbdec18e3bbd9ed7768c1ac6528b28efc7a9a82) (2026-04-21)
 
 ### Features
+
+- enumerate all hierarchical paths for option's parents facet
+  ([49fda41](https://codeberg.org/alinnow/searchix/commit/49fda418f21c8bb8fd19095890ed2d04c8a57030))
+- show top-level option set as a separate facet
+  ([bc8f40e](https://codeberg.org/alinnow/searchix/commit/bc8f40ec805cbc9771efe0992bbb666d46793f0e))
+
+### Fixes
+
+- Prevent double dialog open (Closes #21)
+  ([2cbdec1](https://codeberg.org/alinnow/searchix/commit/2cbdec18e3bbd9ed7768c1ac6528b28efc7a9a82)),
+  closes [#21](https://codeberg.org/alinnow/searchix/issues/21)
+
+### [v0.4.6](https://codeberg.org/alinnow/searchix/compare/v0.4.5...v0.4.6) (2026-04-03)
+
+#### Features
 
 - Special handler for middle/ctrl click
   ([76ddc16](https://codeberg.org/alinnow/searchix/commit/76ddc166b2e4739e197b84f8072716a8359df13f))
@@ -13,7 +28,7 @@
 - Port modals to no-js variant
   ([70340c7](https://codeberg.org/alinnow/searchix/commit/70340c792a3c956bb73337a51970cc16dfff391d))
 
-### Fixes
+#### Fixes
 
 - Combined pagination fix, construct page titles correctly, history set
   incorrectly in certain cases
