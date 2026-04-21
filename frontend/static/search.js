@@ -322,9 +322,13 @@ function handleDialogOpen(ev) {
     ev.preventDefault();
     window.open(detailURL(ev.target.href), "_blank");
   } else if (!(ev.shiftKey || ev.altKey)) {
-    pageHistory.pushDetail(ev.target.href);
-    getDetail(new URL(ev.target.href));
     ev.preventDefault();
+    if (dialog.open || handleDialogOpen.pending) return;
+    handleDialogOpen.pending = true;
+    pageHistory.pushDetail(ev.target.href);
+    getDetail(new URL(ev.target.href)).finally(() => {
+      handleDialogOpen.pending = false;
+    });
   }
 }
 
