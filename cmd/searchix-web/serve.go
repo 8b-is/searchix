@@ -146,14 +146,14 @@ func (opts *ServeOptions) Execute(_ []string) (err error) {
 		}
 		tickRate := time.Duration(math.Ceil(wd.Seconds()*0.75)) * time.Second
 
-		wg.Go(func() {
+		go func() {
 			for range time.Tick(tickRate) {
 				err := sdnotify.Watchdog()
 				if err != nil {
 					logger.Warn("")
 				}
 			}
-		})
+		}()
 	}
 
 	<-ctx.Done()
