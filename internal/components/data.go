@@ -83,10 +83,10 @@ func (u SearchNav) HasFacet(field string, term string) bool {
 	return slices.Contains(u.URL.Query()[field], term)
 }
 
-func (u SearchNav) AddFacet(field string, term string) string {
+func (u SearchNav) SetFacet(field string, term string) string {
 	nu := u.URL
 	q := nu.Query()
-	q.Add(field, term)
+	q.Set(term, field)
 	nu.RawQuery = q.Encode()
 
 	return nu.String()

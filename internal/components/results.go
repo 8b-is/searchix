@@ -93,7 +93,7 @@ func Facets(r ResultData) g.Node {
 									g.Text(breakable(t)),
 								),
 								A(
-									Href(r.SearchNav.AddFacet(facet.Field, term.Term)),
+									Href(r.SearchNav.SetFacet(facet.Field, term.Term)),
 									g.Text(breakable(t)),
 								),
 							),
@@ -105,7 +105,7 @@ func Facets(r ResultData) g.Node {
 					}),
 					g.If(facet.Missing > 0,
 						Li(Class("term"),
-							A(Href(r.SearchNav.AddFacet(facet.Field, "")), g.Text("None")),
+							A(Href(r.SearchNav.SetFacet(facet.Field, "")), g.Text("None")),
 							Span(Class("count"), g.Textf("%d", facet.Missing)),
 						),
 					),
