@@ -86,7 +86,7 @@ func (u SearchNav) HasFacet(field string, term string) bool {
 func (u SearchNav) SetFacet(field string, term string) string {
 	nu := u.URL
 	q := nu.Query()
-	q.Set(term, field)
+	q.Set(field, term)
 	nu.RawQuery = q.Encode()
 
 	return nu.String()
