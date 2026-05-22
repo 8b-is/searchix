@@ -1,15 +1,29 @@
 # Changelog
 
-## [v0.4.7](https://codeberg.org/alinnow/searchix/compare/v0.4.6...2cbdec18e3bbd9ed7768c1ac6528b28efc7a9a82) (2026-04-21)
+## [v0.4.8](https://codeberg.org/alinnow/searchix/compare/v0.4.7...11270d590a23ae056e86008da921dced41720ec7) (2026-05-22)
 
 ### Features
+
+- replace facets in search instead of appending
+  ([d75b024](https://codeberg.org/alinnow/searchix/commit/d75b024a5d31468fcd01bd6405704823cd26a1de))
+
+### Fixes
+
+- mismatched facet link key/values
+  ([0ec6aee](https://codeberg.org/alinnow/searchix/commit/0ec6aee28f363c1818bc78d24d9ef811aa2d2661))
+- graceful shutdown timeouts when running under systemd
+  ([87e504f](https://codeberg.org/alinnow/searchix/commit/87e504f30268113ad2507594acc4779714a59501))
+
+### [v0.4.7](https://codeberg.org/alinnow/searchix/compare/v0.4.6...v0.4.7) (2026-04-21)
+
+#### Features
 
 - enumerate all hierarchical paths for option's parents facet
   ([49fda41](https://codeberg.org/alinnow/searchix/commit/49fda418f21c8bb8fd19095890ed2d04c8a57030))
 - show top-level option set as a separate facet
   ([bc8f40e](https://codeberg.org/alinnow/searchix/commit/bc8f40ec805cbc9771efe0992bbb666d46793f0e))
 
-### Fixes
+#### Fixes
 
 - Prevent double dialog open (Closes #21)
   ([2cbdec1](https://codeberg.org/alinnow/searchix/commit/2cbdec18e3bbd9ed7768c1ac6528b28efc7a9a82)),
