@@ -8,7 +8,7 @@ self:
 }:
 
 let
-  inherit (builtins) fromTOML readFile;
+  inherit (builtins) readFile;
   cfg = config.services.searchix;
 
   package = self.packages.${pkgs.stdenv.hostPlatform.system}.default;
