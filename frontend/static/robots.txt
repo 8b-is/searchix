@@ -1,0 +1,4 @@
+User-Agent: *
+Disallow: /man/
+Disallow: /*?*page=0
+Crawl-Delay: 2
