@@ -1,5 +1,5 @@
 {
-  description = "A basic gomod2nix flake";
+  description = "Search tool for options and packages in the NixOS ecosystem";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
