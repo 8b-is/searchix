@@ -129,6 +129,12 @@ func Term(children ...g.Node) g.Node {
 }
 
 func ResultsPage(r ResultData) g.Node {
+	r.CanonicalURL = r.SearchNav.WithoutFacets()
+
+	return SearchPage(r.TemplateData, r, Results(r))
+}
+
+func DetailResultsPage(r ResultData) g.Node {
 	return SearchPage(r.TemplateData, r, Results(r))
 }
 

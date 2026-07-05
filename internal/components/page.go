@@ -58,6 +58,12 @@ func Page(tdata TemplateData, children ...g.Node) g.Node {
 						Href(joinPath("/", source.Importer.String(), source.Key, "opensearch.xml")),
 					)
 				}),
+				g.Iff(tdata.CanonicalURL != "", func() g.Node {
+					return Link(
+						Rel("canonical"),
+						Href(tdata.CanonicalURL),
+					)
+				}),
 			),
 			Body(
 				Header(

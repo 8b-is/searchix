@@ -18,6 +18,7 @@ type TemplateData struct {
 	Source        config.Source
 	Query         string
 	ExtraHeadHTML string
+	CanonicalURL  string
 	Code          int
 	Message       string
 	Title         string
@@ -98,6 +99,23 @@ func (u SearchNav) RemoveFacet(field string, term string) string {
 	q[field] = slices.DeleteFunc(q[field], func(v string) bool {
 		return v == term
 	})
+	nu.RawQuery = q.Encode()
+
+	return nu.String()
+}
+
+func (u SearchNav) WithoutFacets() string {
+	nu := u.URL
+	originalQuery := nu.Query()
+	q := url.Values{}
+	for _, field := range []string{"query", "page"} {
+		if originalQuery.Has(field) {
+			q.Set(field, originalQuery.Get(field))
+		}
+	}
+	if q.Has("page") && q.Get("page") == "1" {
+		q.Del("page")
+	}
 	nu.RawQuery = q.Encode()
 
 	return nu.String()

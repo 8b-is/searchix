@@ -102,11 +102,12 @@ func (h *SourceHandler) Detail(w http.ResponseWriter, r *http.Request) {
 		searchResult != nil {
 		searchTitle := searchResult.Title
 		searchResult.Title = h.getTitle(doc)
+		searchResult.CanonicalURL = "/" + index.GetKey(doc)
 		searchResult.Description = components.MetaDescription(doc)
 		searchResult.DetailContent = components.Detail(doc)
 		searchResult.SearchURL = h.closeURL(r)
 		searchResult.SearchTitle = searchTitle
-		baseErr = components.ResultsPage(*searchResult).Render(w)
+		baseErr = components.DetailResultsPage(*searchResult).Render(w)
 	} else {
 		tdata := components.TemplateData{
 			ExtraHeadHTML: h.global.cfg.Web.ExtraHeadHTML,
