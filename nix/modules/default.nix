@@ -237,7 +237,7 @@ in
       description = ''
         Configuration for searchix.
 
-        See https://git.alin.ovh/searchix/blob/v0.4.8/defaults.toml
+        See https://git.alin.ovh/searchix/blob/v0.4.9/defaults.toml
       '';
     };
   };

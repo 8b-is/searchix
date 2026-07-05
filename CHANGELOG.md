@@ -1,13 +1,22 @@
 # Changelog
 
-## [v0.4.8](https://codeberg.org/alinnow/searchix/compare/v0.4.7...11270d590a23ae056e86008da921dced41720ec7) (2026-05-22)
+## [v0.4.9](https://codeberg.org/alinnow/searchix/compare/v0.4.8...5febc847935ea032eec67ab2a1304730815237a8) (2026-07-05)
 
 ### Features
+
+- add canonical links to results and details pages
+  ([5febc84](https://codeberg.org/alinnow/searchix/commit/5febc847935ea032eec67ab2a1304730815237a8))
+- add crawling suggestions for robots
+  ([7cce3dd](https://codeberg.org/alinnow/searchix/commit/7cce3ddf9bd31ae1abd2a023b5fd494deb7e1e29))
+
+### [v0.4.8](https://codeberg.org/alinnow/searchix/compare/v0.4.7...v0.4.8) (2026-05-22)
+
+#### Features
 
 - replace facets in search instead of appending
   ([d75b024](https://codeberg.org/alinnow/searchix/commit/d75b024a5d31468fcd01bd6405704823cd26a1de))
 
-### Fixes
+#### Fixes
 
 - mismatched facet link key/values
   ([0ec6aee](https://codeberg.org/alinnow/searchix/commit/0ec6aee28f363c1818bc78d24d9ef811aa2d2661))
