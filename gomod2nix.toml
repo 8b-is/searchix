@@ -2,8 +2,8 @@ schema = 3
 
 [mod]
   [mod."alin.ovh/gomponents"]
-    version = "v1.6.0"
-    hash = "sha256-vJLon9M6x/akEnQu+vK0RuzVyy/9vOnWGzp5DSS6brU="
+    version = "v1.8.1"
+    hash = "sha256-TGBSPir9PF7GBayiM7D1HtqbTFLNKQG3ZewSVh7NKvU="
   [mod."alin.ovh/x"]
     version = "v1.0.0"
     hash = "sha256-9VbqLrFz3dy34Uo62JnDQyVp50wpsoq/pJrbAvbiuM0="

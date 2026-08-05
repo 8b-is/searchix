@@ -16,6 +16,7 @@ func Score(h index.DocumentMatch) g.Node {
 			g.Text(strconv.FormatFloat(h.Score, 'f', 2, 64)),
 		),
 		Dialog(
+			ClosedBy("any"),
 			Button(AutoFocus(), g.Text("Close")),
 			Pre(g.Text(h.Expl.String())),
 		),

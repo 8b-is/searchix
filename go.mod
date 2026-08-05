@@ -3,7 +3,7 @@ module alin.ovh/searchix
 go 1.25
 
 require (
-	alin.ovh/gomponents v1.6.0
+	alin.ovh/gomponents v1.8.1
 	alin.ovh/x v1.0.0
 	github.com/Southclaws/fault v0.8.2
 	github.com/andybalholm/brotli v1.1.1

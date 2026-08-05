@@ -113,6 +113,7 @@ func SearchPage(tdata TemplateData, r ResultData, children ...g.Node) g.Node {
 		),
 		Dialog(
 			ID("dialog"),
+			ClosedBy("any"),
 			g.If(tdata.DetailContent != nil, g.Attr("open")),
 			g.If(tdata.SearchTitle != "", g.Attr("data-search-title", tdata.SearchTitle)),
 			g.If(tdata.DetailContent != nil,
