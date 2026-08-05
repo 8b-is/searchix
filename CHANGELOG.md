@@ -1,8 +1,22 @@
 # Changelog
 
-## [v0.4.9](https://codeberg.org/alinnow/searchix/compare/v0.4.8...5febc847935ea032eec67ab2a1304730815237a8) (2026-07-05)
+## [v0.4.10](https://codeberg.org/alinnow/searchix/compare/v0.4.9...8a01ebe77267505266bcb7290b6571f89585a5ef) (2026-08-05)
 
 ### Features
+
+- add hints for crawlers to ignore facets
+  ([f6c7de0](https://codeberg.org/alinnow/searchix/commit/f6c7de02d364605dbf5297938d3b6660a8a4afbf))
+
+### Fixes
+
+- instruct browsers to dismiss dialogs on outside clicks
+  ([8a01ebe](https://codeberg.org/alinnow/searchix/commit/8a01ebe77267505266bcb7290b6571f89585a5ef))
+- **dev:** send correctly-formatted CSP script-src value
+  ([b5fad88](https://codeberg.org/alinnow/searchix/commit/b5fad88db937335a867ef9fda677339f4aa1bba3))
+
+### [v0.4.9](https://codeberg.org/alinnow/searchix/compare/v0.4.8...v0.4.9) (2026-07-05)
+
+#### Features
 
 - add canonical links to results and details pages
   ([5febc84](https://codeberg.org/alinnow/searchix/commit/5febc847935ea032eec67ab2a1304730815237a8))

@@ -15,7 +15,7 @@
   lib,
 }:
 let
-  version = "0.4.9";
+  version = "0.4.10";
 in
 buildGoApplication {
   pname = "searchix";
