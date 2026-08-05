@@ -142,7 +142,7 @@ func GetConfig(filename string, log *log.Logger) (*Config, error) {
 
 	config.Web.ContentSecurityPolicy.ScriptSrc = append(
 		config.Web.ContentSecurityPolicy.ScriptSrc,
-		config.Web.BaseURL.String(),
+		"'self'",
 	)
 
 	maps.DeleteFunc(config.Importer.Sources, func(_ string, v Source) bool {
