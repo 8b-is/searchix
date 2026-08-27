@@ -8,7 +8,6 @@ import (
 	"alin.ovh/searchix/internal/config"
 
 	g "alin.ovh/gomponents"
-	c "alin.ovh/gomponents/components"
 	. "alin.ovh/gomponents/html"
 )
 
@@ -71,9 +70,10 @@ func Page(tdata TemplateData, children ...g.Node) g.Node {
 						H1(A(Href("/"), g.Text("Searchix"))),
 						g.If(len(tdata.Sources) > 0,
 							A(
-								c.Classes{
-									"current": tdata.Source.Importer == config.All,
-								},
+								g.If(
+									tdata.Source.Importer == config.All,
+									Aria("current", "page"),
+								),
 								g.If(
 									tdata.Source.Importer == config.All,
 									Href("/"),
@@ -85,7 +85,7 @@ func Page(tdata TemplateData, children ...g.Node) g.Node {
 						g.Map(tdata.Sources, func(source config.Source) g.Node {
 							if tdata.Source.Importer != config.All && tdata.Source.Name == source.Name {
 								return A(
-									Class("current"),
+									Aria("current", "page"),
 									Href(
 										joinPath(
 											"/",
