@@ -53,6 +53,7 @@ func SearchPage(tdata TemplateData, r ResultData, children ...g.Node) g.Node {
 			MapCommaList(tdata.Sources, func(source config.Source) g.Node {
 				return A(Href(source.Repo.String()), g.Text(source.Name))
 			}),
+			g.Text("."),
 		),
 		g.If(!importer.Job.StartedAt.IsZero(),
 			P(Class("notice"),
