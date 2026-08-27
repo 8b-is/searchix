@@ -18,6 +18,11 @@ type Config struct {
 	Importer Importer `comment:"Settings for the import job"`
 }
 
+type Link struct {
+	Name string `comment:"Human-readable name of link."`
+	URL  URL    `comment:"URL target."`
+}
+
 type Web struct {
 	ContentSecurityPolicy   CSP               `comment:"Content-Security-Policy header to send with requests. Should only need changing if ExtraHeadHTML is used."`
 	GracefulShutdownTimeout Duration          `comment:"How long to wait for connections to finish before shutting down."`
@@ -30,6 +35,7 @@ type Web struct {
 	Headers                 map[string]string `comment:"Extra headers to send with HTTP requests"`
 	LogRequests             bool              `comment:"Whether to log incoming HTTP requests"`
 	SearchTimeout           Duration          `comment:"Timeout for search requests"`
+	OtherInstance           *Link             `comment:"Link to another instance (e.g. stable <-> unstable)."`
 }
 
 type Importer struct {

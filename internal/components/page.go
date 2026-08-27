@@ -113,6 +113,13 @@ func Page(tdata TemplateData, children ...g.Node) g.Node {
 								g.Text(source.Name),
 							)
 						}),
+						g.Iff(tdata.OtherInstance != nil, func() g.Node {
+							return A(
+								Class("other-instance"),
+								Href(tdata.OtherInstance.URL.String()),
+								g.Textf("⇄ %s", tdata.OtherInstance.Name),
+							)
+						}),
 					),
 				),
 				Main(children...),

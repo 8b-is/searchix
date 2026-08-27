@@ -24,6 +24,7 @@ type TemplateData struct {
 	Title         string
 	Description   string
 	BaseURL       config.URL
+	OtherInstance *config.Link
 	Assets        *frontend.AssetCollection
 	SearchNav     SearchNav
 	DetailContent g.Node

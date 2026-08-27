@@ -26,6 +26,7 @@ func createErrorHandler(
 			Code:          code,
 			Message:       message,
 			BaseURL:       config.Web.BaseURL,
+			OtherInstance: config.Web.OtherInstance,
 			Assets:        assets,
 		}
 		w.Header().Set("Cache-Control", "no-store")

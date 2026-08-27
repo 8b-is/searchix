@@ -117,6 +117,7 @@ func (h *SourceHandler) Detail(w http.ResponseWriter, r *http.Request) {
 			Title:         h.getTitle(doc),
 			Description:   components.MetaDescription(doc),
 			BaseURL:       h.global.cfg.Web.BaseURL,
+			OtherInstance: h.global.cfg.Web.OtherInstance,
 		}
 		baseErr = components.DetailPage(tdata, doc).Render(w)
 	}

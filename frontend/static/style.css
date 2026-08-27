@@ -45,6 +45,18 @@ header > nav a {
   text-wrap: nowrap;
 }
 
+header > nav a.other-instance {
+  padding: unset;
+  border: unset;
+  margin-left: auto;
+  margin-bottom: unset;
+  font-size: 1rem;
+
+  &:hover {
+    background: unset;
+  }
+}
+
 nav > h1 > a {
   margin: 0;
   padding: 1ex 0;
