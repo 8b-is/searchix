@@ -199,7 +199,7 @@ queryInput.addEventListener("input", function (ev) {
   for (const el of nav.children) {
     if (el.nodeName === "A") {
       const url = new URL(el.href);
-      if (ev.target.value && !el.classList.contains("current")) {
+      if (ev.target.value && !el.hasAttribute("aria-current")) {
         url.searchParams.set("query", ev.target.value);
       } else {
         url.searchParams.delete("query");
@@ -228,18 +228,20 @@ if (results !== null) {
   }
 }
 
-document.querySelector("a.current").addEventListener("click", function (ev) {
-  search.reset();
-  pageHistory.state.input = null;
-  resultsRange.deleteContents();
-  pageHistory.state.results = "";
-  pageHistory.push(ev.target.href);
-  ev.preventDefault();
-  nav.querySelectorAll("a:not(.current)").forEach(function (node) {
-    node.href = detailURL(node.href).toString();
+document
+  .querySelector('a[aria-current="page"]')
+  .addEventListener("click", function (ev) {
+    search.reset();
+    pageHistory.state.input = null;
+    resultsRange.deleteContents();
+    pageHistory.state.results = "";
+    pageHistory.push(ev.target.href);
+    ev.preventDefault();
+    nav.querySelectorAll("a:not([aria-current])").forEach(function (node) {
+      node.href = detailURL(node.href).toString();
+    });
+    queryInput.value = "";
   });
-  queryInput.value = "";
-});
 
 /**
  *
