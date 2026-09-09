@@ -3,7 +3,6 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
     pre-commit-hooks = {
       url = "github:cachix/pre-commit-hooks.nix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -12,7 +11,6 @@
       url = "github:nix-community/gomod2nix";
       inputs = {
         nixpkgs.follows = "nixpkgs";
-        flake-utils.follows = "flake-utils";
       };
     };
     treefmt-nix = {
@@ -29,33 +27,36 @@
     {
       self,
       nixpkgs,
-      flake-utils,
       gomod2nix,
       pre-commit-hooks,
       treefmt-nix,
       simple-css,
     }:
-    {
-      nixosModules = {
-        web = import ./nix/modules self;
-      };
-      overlays = {
-        default = _: prev: {
-          searchix = self.packages.${prev.system}.default;
-        };
-      };
-    }
-    // (flake-utils.lib.eachDefaultSystem (
-      system:
-      let
-        pkgs = import nixpkgs {
-          inherit system;
-          overlays = [
-            gomod2nix.overlays.default
-          ];
-        };
+    let
+      supportedSystems = [
+        "aarch64-darwin"
+        "aarch64-linux"
+        "x86_64-linux"
+      ];
 
-        treefmtEval = treefmt-nix.lib.evalModule pkgs {
+      forEachSupportedSystem =
+        f:
+        nixpkgs.lib.genAttrs supportedSystems (
+          system:
+          f {
+            inherit system;
+            pkgs = import nixpkgs {
+              inherit system;
+              overlays = [
+                gomod2nix.overlays.default
+              ];
+            };
+          }
+        );
+
+      treefmtEvalFor =
+        pkgs:
+        treefmt-nix.lib.evalModule pkgs {
           projectRootFile = "flake.nix";
           programs = {
             nixfmt.enable = true;
@@ -68,34 +69,59 @@
             taplo.excludes = [ "gomod2nix.toml" ];
           };
         };
-      in
-      rec {
-        packages.css = pkgs.concatText "simple.css" [ "${simple-css}/simple.css" ];
-        packages.default = pkgs.callPackage ./nix/package.nix {
-          inherit (gomod2nix.legacyPackages.${system}) buildGoApplication;
-          css = "${simple-css}/simple.css";
+    in
+    {
+      nixosModules = {
+        web = import ./nix/modules self;
+      };
+      overlays = {
+        default = _: prev: {
+          searchix = self.packages.${prev.system}.default;
         };
-        formatter = treefmtEval.config.build.wrapper;
-        devShells.default = pkgs.callPackage ./nix/dev-shell.nix {
-          pre-commit-check = {
-            inherit (self.checks.${system}.pre-commit-check)
-              shellHook
-              enabledPackages
-              ;
+      };
+
+      packages = forEachSupportedSystem (
+        { pkgs, system }:
+        {
+          css = pkgs.concatText "simple.css" [ "${simple-css}/simple.css" ];
+          default = pkgs.callPackage ./nix/package.nix {
+            inherit (gomod2nix.legacyPackages.${system}) buildGoApplication;
+            css = "${simple-css}/simple.css";
           };
-          inherit (gomod2nix.legacyPackages.${system}) mkGoEnv gomod2nix;
-        };
-        checks = {
+        }
+      );
+
+      formatter = forEachSupportedSystem ({ pkgs, ... }: (treefmtEvalFor pkgs).config.build.wrapper);
+
+      devShells = forEachSupportedSystem (
+        { pkgs, system }:
+        {
+          default = pkgs.callPackage ./nix/dev-shell.nix {
+            pre-commit-check = {
+              inherit (self.checks.${system}.pre-commit-check)
+                shellHook
+                enabledPackages
+                ;
+            };
+            inherit (gomod2nix.legacyPackages.${system}) mkGoEnv gomod2nix;
+          };
+        }
+      );
+
+      checks = forEachSupportedSystem (
+        { pkgs, system, ... }:
+        {
           pre-commit-check = pre-commit-hooks.lib.${system}.run (
             import ./nix/pre-commit-checks.nix {
-              inherit pkgs treefmtEval;
+              inherit pkgs;
+              treefmtEval = treefmtEvalFor pkgs;
             }
           );
           buildVersion = pkgs.testers.testVersion {
-            package = packages.default;
+            package = self.packages.${system}.default;
             command = "searchix-web version";
           };
-        };
-      }
-    ));
+        }
+      );
+    };
 }
