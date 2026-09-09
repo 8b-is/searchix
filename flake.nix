@@ -59,9 +59,15 @@
         treefmt-nix.lib.evalModule pkgs {
           projectRootFile = "flake.nix";
           programs = {
-            nixfmt.enable = true;
+            nixfmt = {
+              enable = true;
+              package = pkgs.nixfmt;
+            };
             taplo.enable = true;
-            prettier.enable = true;
+            prettier = {
+              enable = true;
+              package = pkgs.prettier;
+            };
             sqlfluff.enable = true;
             sqlfluff.dialect = "sqlite";
           };

@@ -79,10 +79,10 @@
     "nixpkgs": {
       "locked": {
         "type": "tarball",
-        "lastModified": 1762361079,
-        "narHash": "sha256-zLW6emJP4izIg3kAybyzTSzWM8Q9W87Tq7d4XxHv4ZY=",
-        "rev": "ffcdcf99d65c61956d882df249a9be53e5902ea5",
-        "url": "https://releases.nixos.org/nixpkgs/nixpkgs-25.11pre889916.ffcdcf99d65c/nixexprs.tar.xz"
+        "lastModified": 1788922888,
+        "narHash": "sha256-qXRBUGgSW4MbbHyD8gkzI2BbcdlRjpowa4vpwdPA5uc=",
+        "rev": "a391f95d4557d685fd8e5dc0d4b1f9271aa2f342",
+        "url": "https://releases.nixos.org/nixpkgs/nixpkgs-26.11pre1070276.a391f95d4557/nixexprs.tar.zst"
       },
       "original": {
         "type": "tarball",
@@ -91,11 +91,11 @@
     },
     "pre-commit-hooks": {
       "inputs": {
-        "flake-compat": "flake-compat",
-        "gitignore": "gitignore",
         "nixpkgs": [
           "nixpkgs"
-        ]
+        ],
+        "flake-compat": "flake-compat",
+        "gitignore": "gitignore"
       },
       "locked": {
         "type": "github",
@@ -113,11 +113,11 @@
     },
     "root": {
       "inputs": {
-        "simple-css": "simple-css",
+        "pre-commit-hooks": "pre-commit-hooks",
         "nixpkgs": "nixpkgs",
-        "treefmt-nix": "treefmt-nix",
         "gomod2nix": "gomod2nix",
-        "pre-commit-hooks": "pre-commit-hooks"
+        "simple-css": "simple-css",
+        "treefmt-nix": "treefmt-nix"
       }
     },
     "simple-css": {
