@@ -32,6 +32,7 @@
     };
     prettier = {
       enable = true;
+      package = pkgs.prettier;
       types_or = [
         "plain-text"
         "yaml"
