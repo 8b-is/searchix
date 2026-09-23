@@ -42,8 +42,7 @@ buildGoApplication {
   '';
   tags = [ "embed" ];
   ldflags = [
-    "-X"
-    "alin.ovh/searchix/internal/config.Version=${version}"
+    "-X=alin.ovh/searchix/internal/config.Version=${version}"
   ];
 
   postInstall = ''
@@ -54,10 +53,10 @@ buildGoApplication {
 
   doCheck = false;
 
-  meta = with lib; {
+  meta = {
     description = "Search tool for options and packages in the NixOS ecosystem";
     mainProgram = "searchix-web";
-    license = licenses.mit;
-    platforms = platforms.all;
+    license = lib.licenses.mit;
+    platforms = lib.platforms.all;
   };
 }
