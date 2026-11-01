@@ -68,6 +68,42 @@ if (window.trustedTypes && trustedTypes.createPolicy) {
 }
 
 /**
+ * @param {HTMLDialogElement} dialogEl
+ * @param {MouseEvent} ev
+ */
+function isOutsideDialog(dialogEl, ev) {
+  if (ev.target !== dialogEl) {
+    return false;
+  }
+  const rect = dialogEl.getBoundingClientRect();
+  return (
+    ev.clientX < rect.left ||
+    ev.clientX > rect.right ||
+    ev.clientY < rect.top ||
+    ev.clientY > rect.bottom
+  );
+}
+
+/**
+ * @param {HTMLDialogElement} dialogEl
+ */
+function addBackdropCloseListener(dialogEl) {
+  if ("closedBy" in HTMLDialogElement.prototype) {
+    return;
+  }
+  let pointerDownOutside = false;
+  dialogEl.addEventListener("pointerdown", function (ev) {
+    pointerDownOutside = isOutsideDialog(dialogEl, ev);
+  });
+  dialogEl.addEventListener("click", function (ev) {
+    if (pointerDownOutside && isOutsideDialog(dialogEl, ev)) {
+      dialogEl.close();
+    }
+    pointerDownOutside = false;
+  });
+}
+
+/**
  *
  * @param {MouseEvent} ev
  */
@@ -92,6 +128,9 @@ function addOpenDialogListeners(results) {
   });
   results.querySelectorAll("a.open-sibling-dialog").forEach(function (element) {
     element.addEventListener("click", openSiblingDialog);
+    if (element.nextElementSibling instanceof HTMLDialogElement) {
+      addBackdropCloseListener(element.nextElementSibling);
+    }
   });
 }
 
@@ -274,6 +313,7 @@ dialogCloseEl.addEventListener("click", function (ev) {
   ev.preventDefault();
   dialog.close();
 });
+addBackdropCloseListener(dialog);
 
 /**
  *
