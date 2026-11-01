@@ -6,7 +6,6 @@ import (
 	"encoding/gob"
 	"iter"
 	"net/url"
-	"strings"
 	"time"
 
 	"alin.ovh/x/log"
@@ -159,77 +158,79 @@ func (index *ReadIndex) Search(
 	}
 
 	if opts.Keyword != "" {
-		if strings.ContainsAny(opts.Keyword, "+-=&|<>!(){}[]^\"~*?:\\/") {
-			query.AddMust(bleve.NewQueryStringQuery(opts.Keyword))
-		} else {
-			// match the user's query in any field ...
-			query.AddMust(bleve.NewDisjunctionQuery(
-				setBoost(bleve.NewTermQuery(opts.Keyword), 50),
-				setBoost(bleve.NewPrefixQuery(opts.Keyword), 25),
-				setBoost(bleve.NewMatchPhraseQuery(opts.Keyword), 25),
-				bleve.NewMatchQuery(opts.Keyword),
-			))
+		keywordQuery, positiveTerms := ParseKeywordQuery(opts.Keyword)
+		query.AddMust(keywordQuery)
+
+		if len(positiveTerms) == 0 {
+			positiveTerms = []string{opts.Keyword}
 		}
 
-		idQuery := bleve.NewMatchQuery(opts.Keyword)
-		idQuery.SetField("_id")
-		idQuery.SetBoost(8)
-		query.AddShould(idQuery)
+		for _, term := range positiveTerms {
+			idQuery := bleve.NewMatchQuery(term)
+			idQuery.SetField("_id")
+			idQuery.SetBoost(8)
+			query.AddShould(idQuery)
 
-		mainProgramQuery := bleve.NewMatchQuery(opts.Keyword)
-		mainProgramQuery.SetField("MainProgram")
-		mainProgramQuery.SetBoost(10)
-		query.AddShould(mainProgramQuery)
+			mainProgramQuery := bleve.NewMatchQuery(term)
+			mainProgramQuery.SetField("MainProgram")
+			mainProgramQuery.SetBoost(10)
+			query.AddShould(mainProgramQuery)
 
-		mainProgramLiteralQuery := bleve.NewTermQuery(opts.Keyword)
-		mainProgramLiteralQuery.SetField("MainProgram")
-		mainProgramLiteralQuery.SetBoost(50)
-		query.AddShould(mainProgramLiteralQuery)
+			mainProgramLiteralQuery := bleve.NewTermQuery(term)
+			mainProgramLiteralQuery.SetField("MainProgram")
+			mainProgramLiteralQuery.SetBoost(50)
+			query.AddShould(mainProgramLiteralQuery)
 
-		programsQuery := bleve.NewMatchQuery(opts.Keyword)
-		programsQuery.SetField("Programs")
-		programsQuery.SetBoost(2)
-		query.AddShould(programsQuery)
+			programsQuery := bleve.NewMatchQuery(term)
+			programsQuery.SetField("Programs")
+			programsQuery.SetBoost(2)
+			query.AddShould(programsQuery)
 
-		programsLiteralQuery := bleve.NewTermQuery(opts.Keyword)
-		programsLiteralQuery.SetField("Programs")
-		programsLiteralQuery.SetBoost(100)
-		query.AddShould(programsLiteralQuery)
+			programsLiteralQuery := bleve.NewTermQuery(term)
+			programsLiteralQuery.SetField("Programs")
+			programsLiteralQuery.SetBoost(100)
+			query.AddShould(programsLiteralQuery)
 
-		attrQuery := bleve.NewMatchQuery(opts.Keyword)
-		attrQuery.SetField("Attribute")
-		attrQuery.SetBoost(2)
-		query.AddShould(attrQuery)
+			attrQuery := bleve.NewMatchQuery(term)
+			attrQuery.SetField("Attribute")
+			attrQuery.SetBoost(2)
+			query.AddShould(attrQuery)
 
-		attrPrefixQuery := bleve.NewPrefixQuery(opts.Keyword)
-		attrPrefixQuery.SetField("Attribute")
-		attrPrefixQuery.SetBoost(10)
-		query.AddShould(attrPrefixQuery)
+			attrPrefixQuery := bleve.NewPrefixQuery(term)
+			attrPrefixQuery.SetField("Attribute")
+			attrPrefixQuery.SetBoost(10)
+			query.AddShould(attrPrefixQuery)
 
-		attrTermQuery := bleve.NewTermQuery(opts.Keyword)
-		attrTermQuery.SetField("Attribute")
-		attrTermQuery.SetBoost(600)
-		query.AddShould(attrTermQuery)
+			attrTermQuery := bleve.NewTermQuery(term)
+			attrTermQuery.SetField("Attribute")
+			attrTermQuery.SetBoost(600)
+			query.AddShould(attrTermQuery)
 
-		nameQuery := bleve.NewMatchQuery(opts.Keyword)
-		nameQuery.SetField("Name")
-		nameQuery.SetBoost(2)
-		query.AddShould(nameQuery)
+			nameQuery := bleve.NewMatchQuery(term)
+			nameQuery.SetField("Name")
+			nameQuery.SetBoost(2)
+			query.AddShould(nameQuery)
 
-		nameNGramQuery := bleve.NewMatchQuery(opts.Keyword)
-		nameNGramQuery.SetField("NameNGram")
-		nameNGramQuery.SetBoost(2)
-		query.AddShould(nameNGramQuery)
+			nameNGramQuery := bleve.NewMatchQuery(term)
+			nameNGramQuery.SetField("NameNGram")
+			nameNGramQuery.SetBoost(2)
+			query.AddShould(nameNGramQuery)
 
-		namePrefixQuery := bleve.NewPrefixQuery(opts.Keyword)
-		namePrefixQuery.SetField("Name")
-		namePrefixQuery.SetBoost(10)
-		query.AddShould(namePrefixQuery)
+			namePrefixQuery := bleve.NewPrefixQuery(term)
+			namePrefixQuery.SetField("Name")
+			namePrefixQuery.SetBoost(10)
+			query.AddShould(namePrefixQuery)
 
-		nameTermQuery := bleve.NewTermQuery(opts.Keyword)
-		nameTermQuery.SetField("Name")
-		nameTermQuery.SetBoost(100)
-		query.AddShould(nameTermQuery)
+			nameTermQuery := bleve.NewTermQuery(term)
+			nameTermQuery.SetField("Name")
+			nameTermQuery.SetBoost(100)
+			query.AddShould(nameTermQuery)
+
+			versionTermQuery := bleve.NewTermQuery(term)
+			versionTermQuery.SetField("Version")
+			versionTermQuery.SetBoost(20)
+			query.AddShould(versionTermQuery)
+		}
 	}
 
 	search := bleve.NewSearchRequest(query)
