@@ -42,8 +42,8 @@ func (n *Node) Dump(source []byte, level int) {
 var KindManPage = ast.NewNodeKind("ManPage")
 
 // manPagePattern matches a manpage reference with section number in parentheses
-// e.g., "nix.conf(5)", "git(1)", etc.
-var manPagePattern = regexp.MustCompile(`^([^()]+)\(([1-9])\)$`)
+// e.g., "nix.conf(5)", "git(1)", "pthread_create(3p)", etc.
+var manPagePattern = regexp.MustCompile(`^([^()]+)\(([1-9][a-zA-Z0-9]*)\)$`)
 
 // Parser is a Goldmark inline parser for parsing manpage nodes.
 //

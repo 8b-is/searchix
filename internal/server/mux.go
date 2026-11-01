@@ -84,6 +84,7 @@ func NewMux(
 	mux.HandleFunc("/", handler.StaticFile)
 	mux.HandleFunc("/assets/", handler.Asset)
 	mux.HandleFunc("/man/{section}/{page}", handler.ManualPage)
+	mux.HandleFunc("/man/{page}", handler.ManualPage)
 
 	mux.Handle("/all/search", http.RedirectHandler("/", http.StatusFound))
 	mux.Handle("/all/opensearch.xml", http.RedirectHandler("/opensearch.xml", http.StatusFound))

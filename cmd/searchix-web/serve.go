@@ -54,6 +54,9 @@ func (opts *ServeOptions) Execute(_ []string) (err error) {
 		Logger: logger.Named("manpages"),
 		Root:   root,
 	})
+	if err := mdb.Open(); err != nil {
+		logger.Warn("failed to open manpages URL map", "error", err)
+	}
 
 	s, err := web.New(cfg, logger, &server.Options{
 		ReadIndex:      read,
