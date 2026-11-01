@@ -1,6 +1,8 @@
 package components
 
 import (
+	"net/url"
+
 	"alin.ovh/searchix/internal/nix"
 
 	g "alin.ovh/gomponents"
@@ -32,6 +34,16 @@ func PackageDetail(pkg nix.Package) g.Node {
 				g.Group([]g.Node{
 					Dt(g.Text("Name")),
 					Dd(g.Text(pkg.Name)),
+				}),
+			),
+			g.If(pkg.Attribute != "",
+				g.Group([]g.Node{
+					Dt(g.Text("Try")),
+					Dd(
+						Code(g.Text("nix-shell -p "+pkg.Attribute)),
+						Br(),
+						Code(g.Text("nix run nixpkgs#"+pkg.Attribute)),
+					),
 				}),
 			),
 			g.If(pkg.MainProgram != "",
@@ -67,7 +79,24 @@ func PackageDetail(pkg nix.Package) g.Node {
 			g.If(pkg.Version != "",
 				g.Group([]g.Node{
 					Dt(g.Text("Version")),
-					Dd(g.Text(pkg.Version)),
+					Dd(
+						g.Text(pkg.Version),
+						g.If(pkg.Attribute != "",
+							g.Group([]g.Node{
+								g.Text(" ("),
+								A(
+									Href("https://lazamar.co.uk/nix-versions/?channel=nixpkgs-unstable&package="+url.QueryEscape(pkg.Attribute)),
+									g.Text("Version History"),
+								),
+								g.Text(" · "),
+								A(
+									Href("https://www.nixhub.io/packages/"+url.PathEscape(pkg.Attribute)),
+									g.Text("NixHub"),
+								),
+								g.Text(")"),
+							}),
+						),
+					),
 				}),
 			),
 			g.If(len(pkg.Licenses) > 0,

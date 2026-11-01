@@ -19,6 +19,22 @@ func init() {
 	}
 
 	//nolint:forbidigo // own source code
+	dir := wd
+	for {
+		candidate := filepath.Join(dir, "frontend")
+		if info, statErr := os.Stat(candidate); statErr == nil && info.IsDir() {
+			wd = dir
+
+			break
+		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			break
+		}
+		dir = parent
+	}
+
+	//nolint:forbidigo // own source code
 	root, err := file.OpenRoot(filepath.Join(wd, "frontend"))
 	if err != nil {
 		panic(err)
