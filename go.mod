@@ -1,6 +1,6 @@
 module alin.ovh/searchix
 
-go 1.25
+go 1.25.0
 
 require (
 	alin.ovh/gomponents v1.8.1
@@ -23,8 +23,8 @@ require (
 	github.com/stoewer/go-strcase v1.3.0
 	github.com/yuin/goldmark v1.7.12
 	go.uber.org/zap v1.27.0
-	golang.org/x/net v0.41.0
-	golang.org/x/term v0.34.0
+	golang.org/x/net v0.55.0
+	golang.org/x/term v0.43.0
 	modernc.org/sqlite v1.38.0
 )
 
@@ -71,8 +71,8 @@ require (
 	go.etcd.io/bbolt v1.4.2 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/exp v0.0.0-20250606033433-dcc06ee1d476 // indirect
-	golang.org/x/sys v0.35.0 // indirect
-	golang.org/x/text v0.26.0 // indirect
+	golang.org/x/sys v0.45.0 // indirect
+	golang.org/x/text v0.37.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 	modernc.org/libc v1.65.10 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
